@@ -1,1 +1,3120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080808">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Oumelia">
+<meta name="description" content="Oumelia — Mariage halal pour musulmans pratiquants sunnites">
+<link rel="manifest" id="pwa-manifest">
+<link rel="apple-touch-icon" id="apple-icon">
+<title>Oumelia — Mariage Halal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* ══ VARIABLES ══ */
+:root{
+  --black:#06070a;--dark:#0d0f14;--card:#13161d;--card2:#191d26;
+  --border:#242836;--border2:#2e3447;
+  --gold:#C9A84C;--gold-light:#E8C96A;--gold-shine:#F5E09A;--gold-dim:#8B6914;
+  --gold-soft:rgba(201,168,76,.12);
+  --white:#F0EBE0;--white2:#A8A098;--muted:#6b7280;
+  --red:#e05252;--red-soft:rgba(224,82,82,.12);
+  --green:#2ecc71;--green-soft:rgba(46,204,113,.12);
+  --blue:#4a9eff;--blue-soft:rgba(74,158,255,.12);
+  --radius:14px;--radius-sm:8px;
+  --shadow:0 8px 32px rgba(0,0,0,.5);
+  --shadow-gold:0 4px 24px rgba(201,168,76,.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{height:100%;overflow:hidden;}
+body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;height:100%;overflow:hidden;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
 
+/* ══ ANIMATIONS ══ */
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInScale{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 0 10px rgba(201,168,76,0)}}
+@keyframes glow{0%,100%{opacity:.75}50%{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.gold-text{background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-shine),var(--gold),var(--gold-dim));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s linear infinite;}
+
+/* ══ SCREENS ══ */
+.screen{display:none;position:fixed;inset:0;width:100%;height:100%;overflow-y:auto;background:var(--black);z-index:1;-webkit-overflow-scrolling:touch;}
+.screen.active{display:block;animation:fadeIn .3s ease;}
+
+/* ══ LANDING ══ */
+#screen-landing{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 24px;background:radial-gradient(ellipse at 50% -10%,#1c1400 0%,#0d0e12 50%,var(--black) 100%);position:relative;overflow:hidden;min-height:100%;}
+#screen-landing::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M48 46v-6h-2v6h-6v2h6v6h2v-6h6v-2h-6zm0-40V0h-2v6h-6v2h6v6h2V8h6V6h-6zM8 46v-6H6v6H0v2h6v6h2v-6h6v-2H8zM8 6V0H6v6H0v2h6v6h2V8h6V6H8z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;}
+.landing-bismillah{font-size:1.9rem;color:var(--gold);margin-bottom:20px;text-shadow:0 0 30px rgba(201,168,76,.4);position:relative;z-index:1;}
+.landing-logo-name{font-family:'Cinzel Decorative',serif;font-size:clamp(1.8rem,7vw,2.6rem);letter-spacing:8px;margin-top:16px;margin-bottom:8px;position:relative;z-index:1;}
+.landing-tagline{font-family:'Playfair Display',serif;font-style:italic;color:var(--white2);font-size:.95rem;margin-bottom:0;position:relative;z-index:1;}
+.landing-divider{width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto 34px;position:relative;z-index:1;}
+.landing-btns{display:flex;flex-direction:column;gap:11px;width:100%;max-width:280px;position:relative;z-index:1;}
+.pwa-banner{display:none;background:var(--gold-soft);border:1px solid rgba(201,168,76,.2);border-radius:var(--radius-sm);padding:10px 16px;margin-top:14px;font-size:.78rem;color:var(--gold);cursor:pointer;max-width:280px;width:100%;text-align:center;position:relative;z-index:1;}
+
+/* ══ LOGO ══ */
+.logo-mark{position:relative;display:inline-block;z-index:1;}
+.logo-circle-outer{width:86px;height:86px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f5e8a0,#C9A84C 45%,#7a5810 100%);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 40px rgba(201,168,76,.4),0 0 80px rgba(201,168,76,.15),inset 0 1px 0 rgba(255,255,255,.2);animation:glow 3s ease-in-out infinite;}
+.logo-circle-inner{width:24px;height:24px;border-radius:50%;background:var(--black);position:absolute;right:16px;top:13px;}
+.logo-star{position:absolute;top:50%;left:50%;transform:translate(-62%,-54%);}
+
+/* ══ BUTTONS ══ */
+.btn{padding:13px 22px;border-radius:var(--radius-sm);font-size:.93rem;font-weight:600;cursor:pointer;border:none;transition:all .2s ease;font-family:'Cairo',sans-serif;letter-spacing:.3px;}
+.btn:active{transform:scale(.98);}
+.btn-gold{background:linear-gradient(135deg,#a07020,var(--gold),var(--gold-light));color:#1a0e00;font-weight:700;box-shadow:var(--shadow-gold);letter-spacing:.4px;}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 8px 32px rgba(201,168,76,.4);}
+.btn-outline{background:transparent;border:1.5px solid rgba(201,168,76,.45);color:var(--gold);}
+.btn-outline:hover{background:var(--gold-soft);border-color:var(--gold);}
+.btn-ghost{background:transparent;color:var(--muted);font-size:.84rem;}
+.btn-ghost:hover{color:var(--white);}
+.btn-sm{padding:8px 15px;font-size:.81rem;border-radius:6px;}
+.btn-danger{background:var(--red-soft);color:var(--red);border:1px solid rgba(224,82,82,.3);}
+.btn-danger:hover{background:var(--red);color:#fff;}
+.btn-success{background:var(--green-soft);color:var(--green);border:1px solid rgba(46,204,113,.3);}
+.btn-success:hover{background:var(--green);color:#fff;}
+
+/* ══ AUTH ══ */
+.auth-wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;background:radial-gradient(ellipse at 50% -10%,#1c1400 0%,var(--black) 65%);}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:26px 22px;width:100%;max-width:380px;box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.03);animation:fadeInScale .3s ease;}
+.auth-logo{text-align:center;margin-bottom:18px;}
+.auth-logo-sm{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f5e8a0,#C9A84C 45%,#7a5810 100%);display:inline-flex;align-items:center;justify-content:center;position:relative;margin-bottom:9px;box-shadow:0 0 24px rgba(201,168,76,.35);}
+.auth-logo-inner{width:13px;height:13px;border-radius:50%;background:var(--card);position:absolute;right:7px;top:6px;}
+.auth-logo-star{position:absolute;top:50%;left:50%;transform:translate(-62%,-55%);}
+.auth-logo-name{font-family:'Cinzel Decorative',serif;font-size:1.25rem;letter-spacing:4px;display:block;}
+.auth-title{font-family:'Playfair Display',serif;font-size:1.1rem;text-align:center;margin-bottom:18px;color:var(--gold);}
+.form-group{margin-bottom:13px;}
+.form-group label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--dark);border:1.5px solid var(--border);color:var(--white);padding:11px 13px;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:.91rem;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1);}
+.form-group select option{background:var(--dark);}
+.form-group textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.gender-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px;}
+.gender-btn{padding:15px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--dark);color:var(--white2);cursor:pointer;transition:all .2s;text-align:center;font-family:'Cairo',sans-serif;font-size:.86rem;}
+.gender-btn .g-icon{font-size:1.7rem;display:block;margin-bottom:6px;}
+.gender-btn.selected{border-color:var(--gold);background:var(--gold-soft);color:var(--gold);box-shadow:0 0 0 1px rgba(201,168,76,.3);}
+.auth-link{text-align:center;margin-top:12px;color:var(--muted);font-size:.81rem;}
+.auth-link a{color:var(--gold);cursor:pointer;}
+.audio-record-area{background:var(--dark);border:1.5px dashed rgba(201,168,76,.25);border-radius:var(--radius);padding:22px;text-align:center;margin-bottom:13px;}
+.record-btn{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;cursor:pointer;font-size:1.55rem;margin:0 auto 11px;display:flex;align-items:center;justify-content:center;animation:pulse 2s infinite;box-shadow:var(--shadow-gold);}
+.record-btn.recording{background:var(--red);animation:none;}
+.error-box{background:var(--red-soft);border:1px solid rgba(224,82,82,.25);border-radius:var(--radius-sm);padding:9px 13px;font-size:.81rem;color:var(--red);margin-bottom:11px;text-align:center;}
+.success-box{background:var(--green-soft);border:1px solid rgba(46,204,113,.25);border-radius:var(--radius-sm);padding:9px 13px;font-size:.81rem;color:var(--green);margin-bottom:11px;text-align:center;}
+
+/* ══ APP SHELL ══ */
+.app-shell{display:flex;flex-direction:column;height:100%;}
+.app-header{background:rgba(13,15,20,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:11px 17px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.app-header .logo-hdr{font-family:'Cinzel Decorative',serif;font-size:.88rem;letter-spacing:3px;}
+.app-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(13,15,20,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.nav-item{padding:10px 4px 8px;text-align:center;cursor:pointer;transition:color .2s;color:var(--muted);font-size:.59rem;letter-spacing:.2px;position:relative;}
+.nav-item .nav-icon{font-size:1.2rem;display:block;margin-bottom:3px;}
+.nav-item.active{color:var(--gold);}
+.notif-badge{position:absolute;top:6px;right:calc(50% - 20px);background:var(--red);color:#fff;border-radius:50%;width:15px;height:15px;font-size:.54rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+
+/* ══ PAYWALL ══ */
+.paywall-banner{background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.18);border-radius:var(--radius);margin:14px;padding:20px 16px;text-align:center;}
+.paywall-banner h3{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:7px;font-size:1rem;}
+.paywall-banner p{color:var(--white2);font-size:.84rem;margin-bottom:14px;line-height:1.6;}
+.price-tag{display:inline-block;background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#1a0e00;font-size:1.35rem;font-weight:800;padding:6px 20px;border-radius:6px;margin-bottom:13px;letter-spacing:.5px;}
+
+/* ══ EXPLORER ══ */
+.view-toggle{display:flex;gap:8px;padding:13px 16px 9px;}
+.toggle-btn{flex:1;padding:9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted);cursor:pointer;transition:all .2s;font-family:'Cairo',sans-serif;font-size:.83rem;}
+.toggle-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);}
+.search-bar{padding:0 16px 9px;}
+.search-input-wrap{position:relative;}
+.search-input-wrap input{width:100%;background:var(--card);border:1.5px solid var(--border);color:var(--white);padding:10px 13px 10px 40px;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:.89rem;transition:border-color .2s;}
+.search-input-wrap input:focus{outline:none;border-color:var(--gold);}
+.search-input-wrap::before{content:'🔍';position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.83rem;pointer-events:none;}
+.filter-chips{display:flex;gap:7px;overflow-x:auto;padding:0 16px 11px;scrollbar-width:none;}
+.filter-chips::-webkit-scrollbar{display:none;}
+.chip{white-space:nowrap;padding:6px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:.74rem;cursor:pointer;transition:all .2s;}
+.chip.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);}
+
+/* ══ PROFILE CARDS ══ */
+.profiles-list{padding:0 16px;display:flex;flex-direction:column;gap:9px;}
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;display:flex;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.profile-card:active{transform:scale(.99);}
+.profile-card.boosted{border-color:rgba(201,168,76,.35);box-shadow:0 0 0 1px rgba(201,168,76,.12),0 4px 20px rgba(201,168,76,.08);}
+.profile-avatar-box{width:78px;min-height:78px;background:linear-gradient(135deg,#0a1208,#142010);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.profile-info{padding:12px 12px 10px;flex:1;}
+.profile-name{font-family:'Playfair Display',serif;font-size:.97rem;font-weight:600;margin-bottom:4px;color:var(--white);}
+.profile-meta{color:var(--muted);font-size:.73rem;margin-bottom:6px;line-height:1.4;}
+.profile-tags{display:flex;flex-wrap:wrap;gap:4px;}
+.tag{padding:2px 8px;border-radius:9px;font-size:.63rem;border:1px solid var(--border2);color:var(--muted);background:var(--card2);}
+.tag.gold{border-color:rgba(201,168,76,.25);color:var(--gold);background:var(--gold-soft);}
+.boost-badge{position:absolute;top:6px;right:6px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#1a0e00;font-size:.56rem;font-weight:800;padding:2px 6px;border-radius:4px;}
+
+/* ══ SWIPE ══ */
+.swipe-container{padding:13px 16px;display:flex;flex-direction:column;align-items:center;}
+.swipe-card{width:100%;max-width:340px;background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;transition:transform .3s,opacity .3s;box-shadow:var(--shadow);}
+.swipe-card-avatar{height:225px;background:linear-gradient(135deg,#0a1208,#142010);display:flex;align-items:center;justify-content:center;position:relative;}
+.boosted-ribbon{position:absolute;top:11px;left:11px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#1a0e00;font-size:.66rem;font-weight:800;padding:3px 9px;border-radius:4px;}
+.swipe-card-body{padding:15px 15px 11px;}
+.swipe-card-name{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:4px;}
+.swipe-actions{display:flex;justify-content:center;gap:15px;padding:11px 0 0;}
+.swipe-btn{width:50px;height:50px;border-radius:50%;border:2px solid;background:var(--card2);cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.swipe-btn.pass{border-color:var(--border2);color:var(--muted);}
+.swipe-btn.like{border-color:rgba(201,168,76,.35);color:var(--gold);}
+.swipe-btn.ask{border-color:rgba(46,204,113,.35);color:var(--green);}
+.swipe-btn:active{transform:scale(.9);}
+
+/* ══ PROFILE PAGE ══ */
+.profile-page{padding:16px;}
+.profile-page-avatar{width:94px;height:94px;border-radius:50%;background:linear-gradient(135deg,#0a1208,#142010);display:flex;align-items:center;justify-content:center;margin:0 auto 13px;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 0 4px rgba(201,168,76,.07);}
+.profile-page-name{font-family:'Playfair Display',serif;font-size:1.4rem;text-align:center;margin-bottom:4px;}
+.profile-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:9px;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.profile-section h4{color:var(--gold);font-size:.66rem;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:9px;opacity:.75;}
+.profile-detail-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem;gap:10px;}
+.profile-detail-row:last-child{border-bottom:none;}
+.profile-detail-row span:first-child{color:var(--muted);font-size:.8rem;flex-shrink:0;}
+.demand-counter{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 15px;margin:13px 16px;display:flex;align-items:center;justify-content:space-between;}
+.demand-dots{display:flex;gap:6px;}
+.demand-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px rgba(201,168,76,.35);}
+.demand-dot.used{background:var(--border2);box-shadow:none;}
+
+/* ══ MY PROFILE ══ */
+.my-profile-header{background:linear-gradient(135deg,#110d00,#0d0f14);padding:26px 16px 18px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.my-profile-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:.7rem;font-weight:600;margin-top:9px;}
+.status-badge.active{background:var(--green-soft);color:var(--green);border:1px solid rgba(46,204,113,.25);}
+.status-badge.inactive{background:var(--red-soft);color:var(--red);border:1px solid rgba(224,82,82,.25);}
+.status-badge.pending{background:var(--gold-soft);color:var(--gold);border:1px solid rgba(201,168,76,.25);}
+.status-badge.paused{background:var(--blue-soft);color:var(--blue);border:1px solid rgba(74,158,255,.25);}
+
+/* ══ NOTIFS ══ */
+.notif-list{padding:13px 16px;display:flex;flex-direction:column;gap:7px;}
+.notif-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 13px;display:flex;gap:11px;align-items:flex-start;transition:all .2s;}
+.notif-item.unread{border-color:rgba(201,168,76,.2);background:linear-gradient(135deg,rgba(201,168,76,.04),var(--card));}
+.notif-item.clickable{cursor:pointer;}
+.notif-item.clickable:active{transform:scale(.99);}
+.notif-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+.notif-text{font-size:.83rem;line-height:1.55;color:var(--white);}
+.notif-text strong{color:var(--gold-light);}
+.notif-time{color:var(--muted);font-size:.7rem;margin-top:3px;}
+
+/* ══ MESSAGES ══ */
+.conversations-list{padding:13px 16px;display:flex;flex-direction:column;gap:7px;}
+.convo-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 13px;display:flex;gap:11px;cursor:pointer;transition:all .2s;align-items:center;}
+.convo-item:active{transform:scale(.99);}
+.convo-avatar{width:39px;height:39px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.convo-info{flex:1;min-width:0;}
+.convo-name{font-size:.87rem;font-weight:600;margin-bottom:2px;color:var(--white);}
+.convo-preview{font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.convo-time{font-size:.67rem;color:var(--muted);flex-shrink:0;}
+.convo-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 128px);}
+.chat-messages{flex:1;overflow-y:auto;padding:13px 15px;display:flex;flex-direction:column;gap:7px;}
+.msg{max-width:78%;padding:9px 13px;border-radius:11px;font-size:.85rem;line-height:1.55;white-space:pre-line;}
+.msg.mine{align-self:flex-end;background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.1));border:1px solid rgba(201,168,76,.18);color:var(--white);}
+.msg.theirs{align-self:flex-start;background:var(--card2);border:1px solid var(--border);color:var(--white);}
+.chat-input-bar{background:var(--dark);border-top:1px solid var(--border);padding:9px 13px;display:flex;gap:7px;}
+.chat-input-bar input{flex:1;background:var(--card);border:1.5px solid var(--border);color:var(--white);padding:9px 13px;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:.89rem;}
+.chat-input-bar input:focus{outline:none;border-color:var(--gold);}
+.chat-send{background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;color:#1a0e00;padding:9px 13px;border-radius:var(--radius-sm);cursor:pointer;font-size:.95rem;font-weight:700;}
+
+/* ══ BOOST ══ */
+.boost-promo{background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.18);border-radius:var(--radius);padding:20px 16px;margin-bottom:13px;text-align:center;}
+.boost-promo h4{color:var(--gold);margin-bottom:7px;font-size:.97rem;}
+.boost-promo p{color:var(--white2);font-size:.81rem;margin-bottom:11px;line-height:1.6;}
+
+/* ══ MODALS ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.84);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:999;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 18px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;animation:fadeInScale .25s ease;position:relative;box-shadow:var(--shadow);}
+.modal h3{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:13px;font-size:1.02rem;}
+.modal-close{position:absolute;top:12px;right:12px;background:var(--card2);border:1px solid var(--border);border-radius:50%;color:var(--muted);font-size:1.05rem;cursor:pointer;width:27px;height:27px;display:flex;align-items:center;justify-content:center;}
+.modal-footer{display:flex;gap:9px;margin-top:14px;justify-content:flex-end;}
+.wali-msg-template{background:var(--green-soft);border:1px solid rgba(46,204,113,.18);border-radius:var(--radius-sm);padding:11px 13px;font-size:.81rem;line-height:1.7;color:var(--white);margin-bottom:11px;white-space:pre-wrap;}
+.danger-zone{background:var(--red-soft);border:1px solid rgba(224,82,82,.18);border-radius:var(--radius);padding:13px;margin-top:9px;}
+.danger-zone h4{color:var(--red);font-size:.74rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:9px;}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:rgba(19,22,29,.97);border:1px solid rgba(201,168,76,.25);color:var(--white);padding:9px 18px;border-radius:20px;font-size:.82rem;z-index:9999;display:none;white-space:nowrap;animation:fadeIn .25s ease;box-shadow:var(--shadow);}
+
+/* ══ FAV BTN ══ */
+.fav-btn{background:var(--card2);border:1.5px solid var(--border2);color:var(--muted);border-radius:var(--radius-sm);padding:9px 13px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.82rem;display:flex;align-items:center;gap:5px;transition:all .2s;}
+.fav-btn:hover{border-color:rgba(201,168,76,.25);color:var(--gold);}
+.fav-btn.active{background:var(--gold-soft);border-color:rgba(201,168,76,.35);color:var(--gold);}
+
+/* ══ UTILS ══ */
+.gold-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.25),transparent);margin:15px 0;}
+.page-header{padding:12px 15px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border);background:rgba(13,15,20,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;}
+.page-header h2{font-family:'Playfair Display',serif;font-size:1.02rem;color:var(--white);}
+.back-btn{background:var(--card2);border:1px solid var(--border);border-radius:50%;color:var(--gold);font-size:.95rem;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+
+/* ══ ADMIN ══ */
+.admin-shell{display:flex;flex-direction:column;height:100%;}
+.admin-topbar{background:rgba(13,15,20,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.18);padding:11px 17px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.admin-topbar .atitle{font-family:'Cinzel Decorative',serif;font-size:.86rem;letter-spacing:2px;}
+.admin-tabs{display:flex;background:var(--dark);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.admin-tabs::-webkit-scrollbar{display:none;}
+.admin-tab{flex-shrink:0;padding:10px 13px;cursor:pointer;font-size:.69rem;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.admin-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.admin-content{overflow-y:auto;flex:1;padding-bottom:20px;-webkit-overflow-scrolling:touch;}
+.admin-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:13px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:15px 13px;text-align:center;}
+.stat-card .stat-num{font-size:1.8rem;font-weight:800;line-height:1;}
+.stat-card .stat-label{font-size:.68rem;color:var(--muted);margin-top:5px;}
+.admin-user-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 11px;margin-bottom:7px;display:flex;align-items:center;gap:9px;transition:border-color .2s;}
+.admin-user-row:hover{border-color:rgba(201,168,76,.18);}
+.admin-user-avatar{width:35px;height:35px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.admin-user-info{flex:1;min-width:0;}
+.admin-user-name{font-size:.84rem;font-weight:600;margin-bottom:2px;color:var(--white);}
+.admin-user-sub{font-size:.66rem;color:var(--muted);line-height:1.5;}
+.admin-actions{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0;}
+.btn-tiny{padding:4px 8px;font-size:.66rem;border-radius:5px;cursor:pointer;border:none;font-family:'Cairo',sans-serif;font-weight:600;white-space:nowrap;transition:all .15s;}
+.btn-tiny:active{transform:scale(.94);}
+.btn-tiny.approve{background:var(--green-soft);color:var(--green);border:1px solid rgba(46,204,113,.25);}
+.btn-tiny.reject{background:var(--red-soft);color:var(--red);border:1px solid rgba(224,82,82,.25);}
+.btn-tiny.msg{background:var(--gold-soft);color:var(--gold);border:1px solid rgba(201,168,76,.25);}
+.btn-tiny.deact{background:var(--card2);color:var(--muted);border:1px solid var(--border);}
+.btn-tiny.react{background:var(--blue-soft);color:var(--blue);border:1px solid rgba(74,158,255,.25);}
+.btn-tiny.free{background:var(--gold-soft);color:var(--gold-light);border:1px solid rgba(201,168,76,.25);}
+.btn-tiny.audio{background:rgba(108,52,131,.15);color:#c39bd3;border:1px solid rgba(108,52,131,.3);}
+.match-notif{background:linear-gradient(135deg,rgba(46,204,113,.05),rgba(46,204,113,.02));border:1px solid rgba(46,204,113,.18);border-radius:var(--radius);padding:13px;margin-bottom:9px;}
+.match-notif .match-title{color:var(--green);font-size:.68rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:9px;opacity:.75;}
+.match-profiles{display:flex;align-items:center;gap:9px;}
+.match-mini-profile{text-align:center;padding:9px 7px;border-radius:var(--radius-sm);border:1px solid var(--border);flex:1;background:var(--card2);}
+.match-mini-profile .mini-name{font-size:.76rem;margin-top:5px;color:var(--white);}
+.match-mini-profile .mini-hint{font-size:.6rem;color:var(--gold);margin-top:2px;opacity:.75;}
+.match-heart{font-size:1.2rem;color:var(--green);flex-shrink:0;}
+.audio-item{background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:7px;display:flex;align-items:center;gap:9px;}
+.audio-play{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border:none;cursor:pointer;font-size:.85rem;flex-shrink:0;color:#1a0e00;display:flex;align-items:center;justify-content:center;}
+.section-title{font-size:.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);margin-bottom:11px;opacity:.75;display:flex;align-items:center;gap:7px;}
+.sc{background:var(--gold);color:#1a0e00;border-radius:10px;padding:1px 7px;font-size:.63rem;font-weight:700;}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:9px;font-size:.63rem;font-weight:600;}
+.badge-active{background:var(--green-soft);color:var(--green);border:1px solid rgba(46,204,113,.25);}
+.badge-pending{background:var(--gold-soft);color:var(--gold);border:1px solid rgba(201,168,76,.25);}
+.badge-inactive{background:var(--red-soft);color:var(--red);border:1px solid rgba(224,82,82,.25);}
+.badge-paused{background:var(--blue-soft);color:var(--blue);border:1px solid rgba(74,158,255,.25);}
+.wali-response-item{background:linear-gradient(135deg,rgba(46,204,113,.05),rgba(46,204,113,.02));border:1px solid rgba(46,204,113,.18);border-radius:var(--radius);padding:12px;margin-bottom:9px;}
+.wali-response-item .wr-title{color:var(--green);font-size:.68rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;opacity:.75;}
+.wali-response-item .wr-msg{font-size:.82rem;line-height:1.65;background:rgba(255,255,255,.04);border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.05);padding:9px 11px;margin:7px 0;color:var(--white);}
+
+/* ══ FILTER PANEL ══ */
+.filter-panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:500;display:none;align-items:flex-end;justify-content:center;}
+.filter-panel-overlay.open{display:flex;}
+.filter-panel{background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:19px;animation:slideUp .3s ease;box-shadow:0 -8px 40px rgba(0,0,0,.5);}
+.filter-panel-handle{width:34px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 17px;}
+.filter-panel h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:.97rem;margin-bottom:13px;}
+.filter-section{margin-bottom:15px;}
+.filter-section-title{font-size:.66rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px;font-weight:600;}
+.filter-options{display:flex;flex-wrap:wrap;gap:6px;}
+.filter-opt{padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--dark);color:var(--white2);font-family:'Cairo',sans-serif;font-size:.77rem;cursor:pointer;transition:all .2s;}
+.filter-opt.selected{border-color:var(--gold);background:var(--gold-soft);color:var(--gold);}
+.filter-bar{padding:0 16px 9px;display:flex;align-items:center;gap:9px;}
+.filter-trigger-btn{display:flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--border);color:var(--white2);padding:8px 14px;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.filter-trigger-btn.has-filters{border-color:rgba(201,168,76,.35);color:var(--gold);background:var(--gold-soft);}
+.filter-count-badge{background:var(--gold);color:#1a0e00;border-radius:50%;width:16px;height:16px;font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.active-filters-row{display:flex;gap:5px;overflow-x:auto;flex:1;scrollbar-width:none;}
+.active-filters-row::-webkit-scrollbar{display:none;}
+.active-filter-tag{white-space:nowrap;padding:4px 9px;border-radius:13px;background:var(--gold-soft);border:1px solid rgba(201,168,76,.22);color:var(--gold);font-size:.68rem;display:flex;align-items:center;gap:4px;}
+.active-filter-tag button{background:none;border:none;color:var(--gold);cursor:pointer;font-size:.85rem;line-height:1;padding:0;opacity:.65;}
+
+/* ══ ONLINE STATUS ══ */
+.exchange-badge{position:absolute;top:3px;left:3px;background:linear-gradient(135deg,#0a5028,var(--green));color:#fff;font-size:.53rem;font-weight:700;padding:2px 5px;border-radius:8px;white-space:nowrap;}
+.exchange-section{background:linear-gradient(135deg,rgba(46,204,113,.06),rgba(46,204,113,.02));border:1px solid rgba(46,204,113,.18);border-radius:var(--radius);padding:13px;margin:0 16px 13px;}
+.exchange-section h4{color:var(--green);font-size:.68rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;opacity:.75;}
+.exchange-profile-row{display:flex;align-items:center;gap:11px;padding:7px 0;border-bottom:1px solid rgba(46,204,113,.08);}
+.exchange-profile-row:last-child{border-bottom:none;}
+
+/* ══ STRIPE MODAL ══ */
+.stripe-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;}
+.stripe-modal-overlay.open{display:flex;}
+.stripe-modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;width:100%;max-width:370px;animation:fadeInScale .25s ease;box-shadow:var(--shadow);}
+.stripe-modal h3{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:5px;font-size:1rem;}
+.stripe-product-info{background:var(--gold-soft);border:1px solid rgba(201,168,76,.18);border-radius:var(--radius-sm);padding:11px 13px;margin:12px 0;display:flex;justify-content:space-between;align-items:center;}
+.stripe-product-info .sp-name{font-size:.84rem;color:var(--white2);}
+.stripe-product-info .sp-price{font-size:1.15rem;font-weight:800;color:var(--gold);}
+#stripe-card-element{background:var(--dark);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin:12px 0;}
+#stripe-error-msg{color:var(--red);font-size:.78rem;margin-bottom:7px;display:none;text-align:center;background:var(--red-soft);border-radius:6px;padding:7px;}
+#stripe-pay-btn{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,#a07020,var(--gold),var(--gold-light));color:#1a0e00;font-family:'Cairo',sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;}
+#stripe-pay-btn:disabled{opacity:.6;cursor:not-allowed;}
+.stripe-secure{display:flex;align-items:center;justify-content:center;gap:5px;color:var(--muted);font-size:.68rem;margin-top:9px;}
+.stripe-spinner{width:14px;height:14px;border:2px solid rgba(26,14,0,.3);border-top-color:#1a0e00;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.15);border-radius:2px;}
+/* ══ PROGRESS BAR ══ */
+.progress-bar-wrap{margin-bottom:20px;}
+.progress-steps{display:flex;justify-content:space-between;margin-bottom:8px;}
+.progress-step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;position:relative;}
+.progress-step:not(:last-child)::after{content:'';position:absolute;top:12px;left:60%;width:80%;height:2px;background:var(--border);}
+.progress-step.done:not(:last-child)::after{background:var(--gold);}
+.progress-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--dark);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--muted);transition:all .3s;z-index:1;}
+.progress-step.active .progress-dot{border-color:var(--gold);background:var(--gold-soft);color:var(--gold);}
+.progress-step.done .progress-dot{border-color:var(--gold);background:var(--gold);color:#1a0e00;}
+.progress-label{font-size:.6rem;color:var(--muted);text-align:center;}
+.progress-step.active .progress-label{color:var(--gold);}
+.progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:2px;transition:width .4s ease;}
+
+/* ══ PASSWORD STRENGTH ══ */
+.pwd-strength{margin-top:6px;}
+.pwd-strength-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:4px;}
+.pwd-strength-fill{height:100%;border-radius:2px;transition:all .3s;}
+.pwd-strength-label{font-size:.68rem;color:var(--muted);}
+
+/* ══ PROFILE COMPLETION ══ */
+.completion-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
+.completion-bar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:8px 0;}
+.completion-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:3px;transition:width .5s ease;}
+
+/* ══ VERIFIED BADGE ══ */
+.verified-badge{display:inline-flex;align-items:center;gap:3px;background:var(--green-soft);border:1px solid rgba(46,204,113,.3);color:var(--green);padding:2px 8px;border-radius:10px;font-size:.62rem;font-weight:600;}
+
+/* ══ COMPATIBLE TAG ══ */
+.compatible-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:3px 9px;border-radius:10px;font-size:.68rem;}
+
+/* ══ SORT BAR ══ */
+.sort-bar{display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:none;}
+.sort-bar::-webkit-scrollbar{display:none;}
+.sort-chip{white-space:nowrap;padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:.74rem;cursor:pointer;transition:all .2s;}
+.sort-chip.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);}
+
+/* ══ REGION TAG ══ */
+.region-tag{display:inline-flex;align-items:center;gap:3px;color:var(--muted);font-size:.72rem;}
+
+/* ══ FAQ ══ */
+.faq-item{border-bottom:1px solid var(--border);padding:14px 0;}
+.faq-item:last-child{border-bottom:none;}
+.faq-q{font-size:.88rem;font-weight:600;color:var(--white);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.faq-a{font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none;}
+.faq-a.open{display:block;animation:fadeIn .2s ease;}
+
+/* ══ REPORT MODAL ══ */
+.report-reason{padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--dark);color:var(--white);margin-bottom:7px;cursor:pointer;font-size:.85rem;transition:all .2s;display:flex;align-items:center;gap:9px;}
+.report-reason:hover,.report-reason.selected{border-color:var(--red);background:var(--red-soft);color:var(--red);}
+
+/* ══ LEGAL PAGES ══ */
+.legal-content{padding:20px 16px;font-size:.84rem;line-height:1.8;color:var(--white2);}
+.legal-content h3{color:var(--gold);font-family:'Playfair Display',serif;margin:20px 0 8px;font-size:.95rem;}
+.legal-content p{margin-bottom:10px;}
+.legal-content ul{padding-left:18px;margin-bottom:10px;}
+.legal-content ul li{margin-bottom:5px;}
+
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- ══ LANDING ══ -->
+<div id="screen-landing" class="screen active">
+  <div class="landing-bismillah">بسم الله الرحمن الرحيم</div>
+  <!-- LOGO inspiré de la photo : cercle doré + lune (cercle noir décalé) + étoile blanche -->
+  <div class="logo-mark">
+    <div class="logo-circle-outer">
+      <div class="logo-circle-inner"></div>
+      <div class="logo-star">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 1L12.5 9.5L21 11L12.5 12.5L11 21L9.5 12.5L1 11L9.5 9.5Z" fill="white" opacity="0.95"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <h1 class="landing-logo-name gold-text">OUMELIA</h1>
+  <p class="landing-tagline">✦ Trouver sa moitié dans la voie d'Allah ✦</p>
+  <div class="landing-divider"></div>
+  <div class="landing-btns">
+    <button class="btn btn-gold" onclick="showScreen('screen-register')">Créer mon profil</button>
+    <button class="btn btn-outline" onclick="showScreen('screen-login')">Se connecter</button>
+  </div>
+  <div class="pwa-banner" id="pwa-install-btn" onclick="installPWA()">📲 Installer Oumelia sur mon téléphone</div>
+  <p style="color:var(--muted);font-size:.7rem;margin-top:28px;max-width:280px;line-height:1.7;text-align:center">
+    Plateforme réservée aux musulmans pratiquants sunnites cherchant une union halal.
+  </p>
+</div>
+
+<!-- ══ LOGIN ══ -->
+<div id="screen-login" class="screen">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-sm">
+          <div class="auth-logo-inner"></div>
+          <div class="auth-logo-star">
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none"><path d="M11 1L12.5 9.5L21 11L12.5 12.5L11 21L9.5 12.5L1 11L9.5 9.5Z" fill="white" opacity="0.95"/></svg>
+          </div>
+        </div>
+        <span class="auth-logo-name gold-text">OUMELIA</span>
+      </div>
+      <div class="auth-title">Connexion</div>
+      <div id="login-error" class="error-box hidden"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="votre@email.com"></div>
+      <div class="form-group"><label>Mot de passe</label><input type="password" id="login-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="doLogin()">Se connecter</button>
+      <div class="auth-link"><a onclick="showScreen('screen-forgot')">Mot de passe oublié ?</a></div>
+      <div class="auth-link">Pas encore inscrit ? <a onclick="showScreen('screen-register')">Créer un compte</a></div>
+      <div class="auth-link"><a onclick="showScreen('screen-landing')">← Retour</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MOT DE PASSE OUBLIÉ ══ -->
+<div id="screen-forgot" class="screen">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-sm">
+          <div class="auth-logo-inner"></div>
+          <div class="auth-logo-star"><svg width="14" height="14" viewBox="0 0 22 22" fill="none"><path d="M11 1L12.5 9.5L21 11L12.5 12.5L11 21L9.5 12.5L1 11L9.5 9.5Z" fill="white" opacity="0.95"/></svg></div>
+        </div>
+        <span class="auth-logo-name gold-text">OUMELIA</span>
+      </div>
+      <div class="auth-title">Mot de passe oublié</div>
+      <div id="forgot-success" class="success-box hidden">✅ Un email de réinitialisation a été envoyé à votre adresse.</div>
+      <div id="forgot-error" class="error-box hidden">Entrez votre adresse email.</div>
+      <p style="color:var(--muted);font-size:.84rem;margin-bottom:16px;line-height:1.6">Entrez l'adresse email utilisée lors de votre inscription. Vous recevrez un lien pour créer un nouveau mot de passe.</p>
+      <div class="form-group"><label>Adresse email</label><input type="email" id="forgot-email" placeholder="votre@email.com"></div>
+      <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="doForgotPwd()">Envoyer le lien</button>
+      <div class="auth-link"><a onclick="showScreen('screen-login')">← Retour à la connexion</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REGISTER ══ -->
+<div id="screen-register" class="screen">
+  <div class="auth-wrap" style="padding:30px 20px">
+    <div class="auth-card">
+      <div class="auth-logo"><span class="auth-logo-name gold-text">OUMELIA</span></div>
+
+      <!-- Barre de progression -->
+      <div class="progress-bar-wrap">
+        <div class="progress-steps">
+          <div class="progress-step active" id="pstep-1">
+            <div class="progress-dot">1</div>
+            <span class="progress-label">Profil</span>
+          </div>
+          <div class="progress-step" id="pstep-2">
+            <div class="progress-dot">2</div>
+            <span class="progress-label">Pratique</span>
+          </div>
+          <div class="progress-step" id="pstep-3">
+            <div class="progress-dot">3</div>
+            <span class="progress-label">Compte</span>
+          </div>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" id="reg-progress-fill" style="width:33%"></div></div>
+      </div>
+
+      <!-- Étape 1 : Profil -->
+      <div id="reg-step-1">
+        <div class="auth-title" style="margin-bottom:14px">Je suis :</div>
+        <div class="gender-choice">
+          <button class="gender-btn" id="gb-femme" onclick="selectGender('femme')"><span class="g-icon">🌸</span>Sœur</button>
+          <button class="gender-btn" id="gb-homme" onclick="selectGender('homme')"><span class="g-icon">🕌</span>Frère</button>
+        </div>
+        <div class="form-group">
+          <label>Prénom</label>
+          <input type="text" id="reg-prenom" placeholder="Votre prénom" oninput="validateRegField(this,'prenom')">
+          <div class="field-error" id="err-prenom" style="color:var(--red);font-size:.72rem;margin-top:4px;display:none"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Âge</label>
+            <input type="number" id="reg-age" placeholder="25" min="18" max="70" oninput="validateRegField(this,'age')">
+            <div class="field-error" id="err-age" style="color:var(--red);font-size:.72rem;margin-top:4px;display:none"></div>
+          </div>
+          <div class="form-group"><label>Ville</label><input type="text" id="reg-ville" placeholder="Paris"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Origine</label>
+            <select id="reg-origine"><option value="">Choisir</option><option>Algérienne</option><option>Marocaine</option><option>Tunisienne</option><option>Française</option><option>Sénégalaise</option><option>Malienne</option><option>Turque</option><option>Égyptienne</option><option>Syrienne</option><option>Pakistanaise</option><option>Autre</option></select>
+          </div>
+          <div class="form-group"><label>Situation</label>
+            <select id="reg-situation"><option>Célibataire</option><option>Veuf(ve)</option><option>Divorcé(e)</option><option>Converti(e)</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>A des enfants</label><select id="reg-enfants"><option value="non">Non</option><option value="oui">Oui</option></select></div>
+          <div class="form-group"><label>Veut des enfants</label><select id="reg-veut-enfants"><option>Oui</option><option>Non</option><option>Inchallah</option></select></div>
+        </div>
+        <div class="form-group"><label>Présentation</label><textarea id="reg-bio" placeholder="Parlez de vous dans le respect de la pudeur islamique..." rows="3"></textarea></div>
+        <div class="form-group"><label>Ce que je recherche</label><textarea id="reg-recherche" placeholder="Décrivez ce que vous attendez de votre futur(e) époux(se)..." rows="3"></textarea></div>
+        <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="regStep2()">Continuer → Pratique religieuse</button>
+        <div class="auth-link"><a onclick="showScreen('screen-landing')">← Retour</a></div>
+      </div>
+
+      <!-- Étape 2 : Pratique religieuse -->
+      <div id="reg-step-2" class="hidden">
+        <div class="auth-title" style="margin-bottom:14px">Pratique religieuse</div>
+        <div class="form-row">
+          <div class="form-group"><label>Niveau</label><select id="reg-pratique"><option>Débutant(e)</option><option>Pratiquant(e)</option><option>Très pratiquant(e)</option><option>Salafi/Sunnah</option></select></div>
+          <div class="form-group"><label>Prière</label><select id="reg-priere"><option>5 prières</option><option>4 prières</option><option>3 prières</option><option>En progression</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" id="field-voile"><label>Voile</label><select id="reg-voile"><option>Hijab</option><option>Niqab</option><option>Jilbab</option><option>Sans voile</option><option>En progression</option></select></div>
+          <div class="form-group" id="field-barbe"><label>Barbe</label><select id="reg-barbe"><option>Oui (sunnah)</option><option>Non</option><option>En progression</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Coran</label><select id="reg-coran"><option>Quotidiennement</option><option>Régulièrement</option><option>Parfois</option><option>En apprentissage</option></select></div>
+          <div class="form-group"><label>Madhhab</label><select id="reg-madhhab"><option>Hanafite</option><option>Malékite</option><option>Chaféite</option><option>Hanbalite</option><option>Peu importe</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Alimentation</label><select id="reg-halal"><option>Oui strict</option><option>Oui globalement</option><option>En progression</option></select></div>
+          <div class="form-group"><label>Fumeur(se)</label><select id="reg-fumeur"><option>Non</option><option>Oui</option><option>J'arrête</option></select></div>
+        </div>
+        <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="regStep3()">Continuer → Créer le compte</button>
+        <div class="auth-link"><a onclick="backToStep1()">← Étape précédente</a></div>
+      </div>
+
+      <!-- Étape 3 : Compte -->
+      <div id="reg-step-3" class="hidden">
+        <div class="auth-title" style="margin-bottom:14px">Créer votre compte</div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="votre@email.com" oninput="validateRegField(this,'email')">
+          <div class="field-error" id="err-email" style="color:var(--red);font-size:.72rem;margin-top:4px;display:none"></div>
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="reg-pwd" placeholder="Minimum 8 caractères" oninput="checkPwdStrength(this.value)">
+          <div class="pwd-strength" id="pwd-strength-wrap" style="display:none">
+            <div class="pwd-strength-bar"><div class="pwd-strength-fill" id="pwd-strength-fill"></div></div>
+            <span class="pwd-strength-label" id="pwd-strength-label"></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="reg-pwd2" placeholder="Répétez votre mot de passe" oninput="checkPwdMatch()">
+          <div class="field-error" id="err-pwd2" style="color:var(--red);font-size:.72rem;margin-top:4px;display:none"></div>
+        </div>
+        <div id="audio-attestation" class="hidden">
+          <div class="gold-divider"></div>
+          <p style="color:var(--gold);font-size:.84rem;margin-bottom:10px;text-align:center">✦ Attestation audio obligatoire</p>
+          <p style="color:var(--muted);font-size:.78rem;margin-bottom:14px;line-height:1.6;text-align:center">Enregistrez vocalement votre attestation. L'administratrice vérifiera l'audio avant validation.</p>
+          <div class="audio-record-area">
+            <button class="record-btn" id="rec-btn" onclick="toggleRecord()">🎙️</button>
+            <p id="rec-status" style="color:var(--muted);font-size:.82rem">Appuyez pour enregistrer :<br><em style="color:var(--gold)">"Je prends Allah comme témoin que je suis bien une femme"</em></p>
+            <p id="rec-done" class="hidden" style="color:var(--green);font-size:.84rem;margin-top:8px">✓ Enregistrement sauvegardé</p>
+          </div>
+        </div>
+        <!-- CGU -->
+        <div style="background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin:12px 0">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.82rem;color:var(--white2)">
+            <input type="checkbox" id="reg-cgu" style="margin-top:3px;accent-color:var(--gold)">
+            <span>J'accepte les <a onclick="showLegal('cgu')" style="color:var(--gold);cursor:pointer">Conditions d'utilisation</a> et la <a onclick="showLegal('privacy')" style="color:var(--gold);cursor:pointer">Politique de confidentialité</a> d'Oumelia.</span>
+          </label>
+        </div>
+        <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="doRegister()">✦ Créer mon profil</button>
+        <div class="auth-link"><a onclick="backToStep2()">← Étape précédente</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP UTILISATEUR ══ -->
+<div id="screen-app" class="screen">
+  <div class="app-shell">
+    <div class="app-header">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);display:flex;align-items:center;justify-content:center;position:relative;">
+          <div style="width:9px;height:9px;border-radius:50%;background:var(--dark);position:absolute;right:5px;top:4px;"></div>
+          <svg width="9" height="9" viewBox="0 0 22 22" fill="none" style="position:absolute;left:7px;top:9px"><path d="M11 1L12.5 9.5L21 11L12.5 12.5L11 21L9.5 12.5L1 11L9.5 9.5Z" fill="white" opacity="0.9"/></svg>
+        </div>
+        <span class="logo-hdr gold-text">OUMELIA</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:.78rem;color:var(--muted)" id="header-user-name"></span>
+        <button class="btn btn-outline btn-sm" onclick="doLogout()">Déconnexion</button>
+      </div>
+    </div>
+    <div class="app-content" id="app-content"></div>
+    <nav class="bottom-nav">
+      <div class="nav-item active" id="nav-explorer" onclick="navTo('explorer')"><span class="nav-icon">🔍</span>Explorer</div>
+      <div class="nav-item" id="nav-messages" onclick="navTo('messages')"><span class="nav-icon">💬</span>Messages</div>
+      <div class="nav-item" id="nav-notifs" onclick="navTo('notifs')">
+        <span class="nav-icon" style="position:relative">🔔<span class="notif-badge" id="notif-badge">3</span></span>Alertes
+      </div>
+      <div class="nav-item" id="nav-profil" onclick="navTo('profil')"><span class="nav-icon">👤</span>Mon profil</div>
+      <div class="nav-item" id="nav-boost" onclick="navTo('boost')"><span class="nav-icon">⚡</span>Boost</div>
+    </nav>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div id="screen-admin" class="screen">
+  <div class="admin-shell">
+    <div class="admin-topbar">
+      <div>
+        <div class="atitle gold-text">OUMELIA ADMIN</div>
+        <div style="font-size:.68rem;color:var(--muted)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2140454c484f614e544c444d48400f424e4c">[email&#160;protected]</a></div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="doLogout()">Déconnexion</button>
+    </div>
+    <div class="admin-tabs">
+      <div class="admin-tab active" id="atab-dashboard" onclick="adminTab('dashboard')">📊 Dashboard</div>
+      <div class="admin-tab" id="atab-pending" onclick="adminTab('pending')">⏳ Attente <span id="pending-badge" style="background:var(--red);color:#fff;border-radius:8px;padding:1px 5px;font-size:.6rem"></span></div>
+      <div class="admin-tab" id="atab-users" onclick="adminTab('users')">👥 Membres</div>
+      <div class="admin-tab" id="atab-matches" onclick="adminTab('matches')">💚 Matches</div>
+      <div class="admin-tab" id="atab-wali" onclick="adminTab('wali')">🌸 Wali <span id="wali-badge" style="background:var(--green);color:#fff;border-radius:8px;padding:1px 5px;font-size:.6rem"></span></div>
+      <div class="admin-tab" id="atab-msgs" onclick="adminTab('msgs')">✉️ Messages</div>
+    </div>
+    <div id="admin-content" class="admin-content"></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-paywall">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-paywall')">×</button>
+    <h3>✦ Activez votre profil</h3>
+    <p style="color:var(--muted);font-size:.86rem;line-height:1.7;margin-bottom:16px">Pour accéder aux profils et recevoir les demandes de mise en relation, activez votre profil.</p>
+    <div style="text-align:center;margin-bottom:18px"><div class="price-tag">5,99 €</div><p style="color:var(--muted);font-size:.78rem">Paiement unique</p></div>
+    <button class="btn btn-gold" style="width:100%" onclick="activateProfile()">Activer mon profil — 5,99 €</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-demande">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-demande')">×</button>
+    <h3>💌 Demande de mise en relation</h3>
+    <p style="color:var(--muted);font-size:.84rem;margin-bottom:12px">Envoyer une demande à <strong id="demande-prenom" style="color:var(--gold)"></strong>.</p>
+    <div class="demand-counter" style="margin:0 0 14px"><span style="font-size:.8rem;color:var(--muted)">Demandes restantes :</span><div class="demand-dots" id="modal-dots"></div></div>
+    <div class="form-group"><label>Message (optionnel)</label><textarea id="demande-msg" placeholder="Assalamu Alaykum..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-demande')">Annuler</button>
+      <button class="btn btn-gold btn-sm" onclick="sendDemande()">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-plus-demandes">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-plus-demandes')">×</button>
+    <h3>💌 Demandes épuisées</h3>
+    <p style="color:var(--muted);font-size:.86rem;line-height:1.7;margin-bottom:14px">Vous avez utilisé vos 3 demandes acceptées. Obtenez 3 nouvelles demandes.</p>
+    <div style="text-align:center;margin-bottom:18px"><div class="price-tag">2,99 €</div><p style="color:var(--muted);font-size:.78rem">3 nouvelles demandes</p></div>
+    <button class="btn btn-gold" style="width:100%" onclick="buyDemandes()">Obtenir 3 demandes — 2,99 €</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-admin-msg">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-admin-msg')">×</button>
+    <h3>✉️ Message à <span id="admin-msg-target"></span></h3>
+    <div class="form-group" style="margin-top:8px"><label>Message</label><textarea id="admin-msg-content" style="min-height:110px" placeholder="Écrivez votre message..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-admin-msg')">Annuler</button>
+      <button class="btn btn-gold btn-sm" onclick="sendAdminMsg()">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-admin-reject">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-admin-reject')">×</button>
+    <h3>✗ Refus — <span id="reject-target"></span></h3>
+    <div class="form-group" style="margin-top:8px"><label>Raison (envoyée à l'utilisateur)</label><textarea id="reject-reason" style="min-height:90px" placeholder="Expliquez pourquoi le profil n'est pas accepté..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-admin-reject')">Annuler</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmReject()">Refuser et notifier</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-audio">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-audio')">×</button>
+    <h3>🎙️ Vérification audio — <span id="audio-target-name"></span></h3>
+    <p style="color:var(--muted);font-size:.84rem;margin-bottom:14px">Phrase : <em style="color:var(--gold)">"Je prends Allah comme témoin que je suis bien une femme"</em></p>
+    <div class="audio-item">
+      <button class="audio-play" onclick="showToast('🔊 Lecture en cours...','gold')">▶</button>
+      <div><div style="font-size:.84rem">Attestation_audio.mp3</div><div style="font-size:.7rem;color:var(--muted)">Enregistrée lors de l'inscription</div></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <button class="btn btn-success" style="flex:1" onclick="audioValidate()">✓ Valider</button>
+      <button class="btn btn-danger" style="flex:1" onclick="audioRejectFn()">✗ Refuser</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-pause">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-pause')">×</button>
+    <h3>⏸ Mettre en pause mon profil</h3>
+    <p style="color:var(--muted);font-size:.86rem;line-height:1.6;margin-bottom:16px">Votre profil ne sera plus visible par les autres membres. Vous pouvez le réactiver à tout moment depuis votre profil.</p>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-pause')">Annuler</button>
+      <button class="btn" style="background:var(--blue);color:#fff;font-size:.85rem" onclick="pauseProfile()">⏸ Mettre en pause</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-delete')">×</button>
+    <h3 style="color:var(--red)">⚠️ Supprimer mon compte</h3>
+    <p style="color:var(--muted);font-size:.86rem;line-height:1.6;margin-bottom:12px">Cette action est <strong style="color:var(--red)">irréversible</strong>. Toutes vos données seront définitivement supprimées : profil, messages, demandes, favoris.</p>
+    <div class="form-group"><label>Confirmez en tapant "SUPPRIMER"</label><input type="text" id="delete-confirm-input" placeholder="SUPPRIMER"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-delete')">Annuler</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteAccount()">Supprimer définitivement</button>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER PANEL -->
+<div class="filter-panel-overlay" id="filter-panel-overlay" onclick="closeFilterPanel(event)">
+  <div class="filter-panel" id="filter-panel">
+    <div class="filter-panel-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3>🔍 Filtrer les profils</h3>
+      <button onclick="closeFilterPanel()" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer">×</button>
+    </div>
+    <div id="filter-panel-content"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <button class="btn btn-outline btn-sm" style="flex:1" onclick="resetFilters()">Réinitialiser</button>
+      <button class="btn btn-gold btn-sm" style="flex:1" onclick="applyFilters()">Appliquer les filtres</button>
+    </div>
+  </div>
+</div>
+
+<!-- STRIPE PAYMENT MODAL -->
+<div class="stripe-modal-overlay" id="stripe-modal-overlay">
+  <div class="stripe-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <h3>💳 Paiement sécurisé</h3>
+      <button onclick="closeStripeModal()" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer">×</button>
+    </div>
+    <p style="color:var(--muted);font-size:.8rem">Paiement traité par Stripe — vos données bancaires sont sécurisées</p>
+    <div class="stripe-product-info">
+      <span class="sp-name" id="stripe-product-name"></span>
+      <span class="sp-price" id="stripe-product-price"></span>
+    </div>
+    <div id="stripe-card-element"></div>
+    <div id="stripe-error-msg"></div>
+    <button id="stripe-pay-btn" onclick="confirmStripePayment()">
+      <span class="stripe-spinner" id="stripe-spinner"></span>
+      <span id="stripe-pay-label">🔒 Payer maintenant</span>
+    </button>
+    <div class="stripe-secure">
+      <svg width="12" height="14" viewBox="0 0 24 28" fill="none"><path d="M12 1L3 5v8c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5L12 1z" fill="#27AE60"/></svg>
+      Paiement 100% sécurisé par Stripe
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LEGAL -->
+<div class="modal-overlay" id="modal-legal">
+  <div class="modal" style="max-height:80vh">
+    <button class="modal-close" onclick="closeModal('modal-legal')">×</button>
+    <h3 id="legal-title">Conditions d'utilisation</h3>
+    <div id="legal-body" class="legal-content"></div>
+  </div>
+</div>
+
+<!-- MODAL SIGNALEMENT -->
+<div class="modal-overlay" id="modal-report">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-report')">×</button>
+    <h3>🚨 Signaler ce profil</h3>
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:14px">Pourquoi signalez-vous ce profil ?</p>
+    <div id="report-reasons">
+      <div class="report-reason" onclick="selectReport(this,'Faux profil')">🎭 Faux profil / Usurpation d'identité</div>
+      <div class="report-reason" onclick="selectReport(this,'Comportement inapproprié')">⚠️ Comportement inapproprié</div>
+      <div class="report-reason" onclick="selectReport(this,'Contenu offensant')">🚫 Contenu offensant ou irrespectueux</div>
+      <div class="report-reason" onclick="selectReport(this,'Harcèlement')">😰 Harcèlement ou menaces</div>
+      <div class="report-reason" onclick="selectReport(this,'Autre')">📝 Autre raison</div>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label>Précisions (optionnel)</label>
+      <textarea id="report-details" placeholder="Décrivez la situation..." rows="3"></textarea>
+    </div>
+    <button class="btn btn-danger btn-sm" style="width:100%;margin-top:4px" onclick="submitReport()">Envoyer le signalement</button>
+  </div>
+</div>
+
+<!-- MODAL FAQ -->
+<div class="modal-overlay" id="modal-faq">
+  <div class="modal" style="max-height:85vh">
+    <button class="modal-close" onclick="closeModal('modal-faq')">×</button>
+    <h3>❓ Questions fréquentes</h3>
+    <div id="faq-list" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-stripe-confirm">
+  <div class="modal" style="max-width:360px">
+    <button class="modal-close" onclick="stripeCancel()">×</button>
+    <div style="text-align:center;margin-bottom:20px">
+      <!-- Logo Stripe -->
+      <svg width="80" height="34" viewBox="0 0 80 34" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:12px">
+        <rect width="80" height="34" rx="6" fill="#635BFF"/>
+        <path d="M32.4 13.4c0-1.3 1-1.8 2.7-1.8 2.4 0 5.5.7 7.9 2V8.2c-2.6-1-5.3-1.5-7.9-1.5-6.4 0-10.7 3.4-10.7 9 0 8.8 12 7.4 12 11.2 0 1.5-1.3 2-3.1 2-2.7 0-6.2-.8-9-2.5v5.5c3.1 1.3 6.2 1.8 9 1.8 6.6 0 11.1-3.3 11.1-9.1-.1-9.4-12.1-7.8-12-11.2z" fill="white"/>
+      </svg>
+      <h3 style="font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:8px">Paiement Stripe</h3>
+      <p style="color:var(--muted);font-size:.84rem;margin-bottom:16px">Vous allez être redirigé vers la page de paiement sécurisée Stripe pour :</p>
+      <div style="background:rgba(201,168,76,.1);border:1px solid var(--gold-dim);border-radius:8px;padding:12px;margin-bottom:16px">
+        <div style="font-size:1rem;font-weight:600;color:var(--white)" id="stripe-product-label"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:.76rem;margin-bottom:20px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#27AE60"/></svg>
+        Paiement 100% sécurisé par Stripe
+      </div>
+      <p style="color:var(--muted);font-size:.74rem;margin-bottom:16px">Une fois le paiement effectué sur Stripe, revenez sur cette page et cliquez <strong style="color:var(--green)">"Confirmer"</strong>.</p>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline btn-sm" style="flex:1" onclick="stripeCancel()">Annuler</button>
+      <button class="btn btn-gold btn-sm" style="flex:1" onclick="stripeConfirm()">✓ Confirmer le paiement</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════ SUPABASE ══════════
+const SUPABASE_URL  = 'https://nmcvyukbyfnhtufbgqqp.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tY3Z5dWtieWZuaHR1ZmJncXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODc2NTUsImV4cCI6MjA4OTc2MzY1NX0.JaJuiWxxAXcGK38FT7DlOHve5pi2UDI1PZ5K1JR1qj4';
+let sb = null;
+
+function getSB(){
+  if(!sb){
+    if(typeof supabase === 'undefined') return null;
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  }
+  return sb;
+}
+
+// Créer les tables si elles n'existent pas (via RPC SQL)
+async function initDB(){
+  const client = getSB();
+  if(!client) return; // Supabase pas encore chargé — pas grave, on continue sans
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    if(session){
+      await loadUserProfile(session.user);
+    }
+    client.auth.onAuthStateChange(async (event, session) => {
+      if(event === 'SIGNED_IN' && session){
+        await loadUserProfile(session.user);
+      }
+      if(event === 'SIGNED_OUT'){
+        state.user = null;
+        state.isAdmin = false;
+        showScreen('screen-landing');
+      }
+    });
+  } catch(e){ /* Supabase init silencieux */ }
+}
+
+async function loadUserProfile(authUser){
+  const client = getSB();
+  if(!client) return;
+  const { data: profile } = await client
+    .from('profils')
+    .select('*')
+    .eq('user_id', authUser.id)
+    .single();
+
+  if(profile){
+    state.user = {
+      id: profile.id,
+      supabaseId: authUser.id,
+      prenom: profile.prenom,
+      gender: profile.gender,
+      email: authUser.email,
+      age: profile.age,
+      ville: profile.ville,
+      origine: profile.origine,
+      pratique: profile.pratique,
+      voile: profile.voile,
+      barbe: profile.barbe,
+      madhhab: profile.madhhab,
+      bio: profile.bio,
+      status: profile.status,
+    };
+    state.profileActive = profile.status === 'active';
+    state.profilePaused = profile.status === 'paused';
+    // Mettre à jour le statut en ligne
+    await getSB().from('profils').update({ last_seen: new Date().toISOString(), is_online: true }).eq('user_id', authUser.id);
+  }
+}
+
+// ══════════ SVG AVATARS ══════════
+function svgFemme(size=54){
+  return`<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="fg${size}" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#C9A84C"/>
+      <stop offset="100%" style="stop-color:#F5E09A"/>
+    </linearGradient></defs>
+    <g transform="translate(50,50)">
+      <ellipse rx="9" ry="22" fill="url(#fg${size})" opacity="0.9"/>
+      <ellipse rx="9" ry="22" fill="url(#fg${size})" opacity="0.9" transform="rotate(45)"/>
+      <ellipse rx="9" ry="22" fill="url(#fg${size})" opacity="0.9" transform="rotate(90)"/>
+      <ellipse rx="9" ry="22" fill="url(#fg${size})" opacity="0.9" transform="rotate(135)"/>
+      <ellipse rx="5.5" ry="15" fill="url(#fg${size})" opacity="0.5" transform="rotate(22.5)"/>
+      <ellipse rx="5.5" ry="15" fill="url(#fg${size})" opacity="0.5" transform="rotate(67.5)"/>
+      <ellipse rx="5.5" ry="15" fill="url(#fg${size})" opacity="0.5" transform="rotate(112.5)"/>
+      <ellipse rx="5.5" ry="15" fill="url(#fg${size})" opacity="0.5" transform="rotate(157.5)"/>
+      <circle r="10" fill="#C9A84C"/>
+      <circle r="5.5" fill="#F5E09A"/>
+      <circle r="2.5" fill="#8B6914"/>
+    </g>
+  </svg>`;
+}
+
+// Mosquée SVG pour les hommes
+function svgHomme(size=54){
+  const s=size;
+  return`<svg width="${s}" height="${s}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="mq${s}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#C9A84C"/>
+        <stop offset="60%" style="stop-color:#8B6914"/>
+        <stop offset="100%" style="stop-color:#5a4200"/>
+      </linearGradient>
+      <linearGradient id="mqw${s}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#e8d898"/>
+        <stop offset="100%" style="stop-color:#c8a84c"/>
+      </linearGradient>
+      <linearGradient id="sky${s}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#0a0a0f"/>
+        <stop offset="100%" style="stop-color:#161620"/>
+      </linearGradient>
+    </defs>
+    <!-- Ciel nocturne -->
+    <rect width="100" height="100" fill="url(#sky${s})" rx="6"/>
+    <!-- Étoiles -->
+    <circle cx="15" cy="12" r="1" fill="#F5E09A" opacity="0.8"/>
+    <circle cx="80" cy="8" r="1.2" fill="#F5E09A" opacity="0.9"/>
+    <circle cx="55" cy="5" r="0.8" fill="#F5E09A" opacity="0.7"/>
+    <circle cx="30" cy="20" r="0.7" fill="#F5E09A" opacity="0.6"/>
+    <circle cx="90" cy="22" r="1" fill="#F5E09A" opacity="0.7"/>
+    <!-- Croissant lune -->
+    <circle cx="72" cy="14" r="7" fill="#C9A84C" opacity="0.9"/>
+    <circle cx="76" cy="11" r="5.5" fill="#0d0d18"/>
+    <!-- Minarets gauche -->
+    <rect x="6" y="38" width="9" height="42" fill="url(#mq${s})" rx="1"/>
+    <path d="M6 38 Q10.5 30 15 38Z" fill="url(#mq${s})"/>
+    <rect x="8" y="26" width="5" height="12" fill="url(#mqw${s})" rx="1"/>
+    <!-- Minaret haut gauche -->
+    <rect x="9" y="22" width="3" height="5" fill="#C9A84C"/>
+    <circle cx="10.5" cy="21" r="2" fill="#C9A84C"/>
+    <!-- Minarets droite -->
+    <rect x="85" y="38" width="9" height="42" fill="url(#mq${s})" rx="1"/>
+    <path d="M85 38 Q89.5 30 94 38Z" fill="url(#mq${s})"/>
+    <rect x="87" y="26" width="5" height="12" fill="url(#mqw${s})" rx="1"/>
+    <rect x="88" y="22" width="3" height="5" fill="#C9A84C"/>
+    <circle cx="89.5" cy="21" r="2" fill="#C9A84C"/>
+    <!-- Dôme principal -->
+    <ellipse cx="50" cy="36" rx="24" ry="22" fill="url(#mq${s})"/>
+    <ellipse cx="50" cy="36" rx="20" ry="18" fill="url(#mqw${s})"/>
+    <!-- Tige dôme -->
+    <rect x="48.5" y="14" width="3" height="8" fill="#C9A84C"/>
+    <path d="M47 14 Q50 8 53 14Z" fill="#C9A84C"/>
+    <circle cx="50" cy="8" r="2.5" fill="#F5E09A"/>
+    <!-- Façade principale -->
+    <rect x="20" y="57" width="60" height="23" fill="url(#mq${s})" rx="1"/>
+    <!-- Porte principale arche -->
+    <path d="M42 80 L42 65 Q50 58 58 65 L58 80Z" fill="#0d0d18"/>
+    <path d="M43 80 L43 65.5 Q50 59.5 57 65.5 L57 80Z" fill="#1a1200"/>
+    <!-- Fenêtres -->
+    <path d="M24 70 L24 63 Q27.5 59.5 31 63 L31 70Z" fill="#0d0d18"/>
+    <path d="M69 70 L69 63 Q72.5 59.5 76 63 L76 70Z" fill="#0d0d18"/>
+    <!-- Sol -->
+    <rect x="0" y="80" width="100" height="20" fill="#1a1000"/>
+    <rect x="0" y="78" width="100" height="3" fill="#C9A84C" opacity="0.5"/>
+    <!-- Reflets dôme -->
+    <ellipse cx="44" cy="30" rx="6" ry="4" fill="white" opacity="0.08" transform="rotate(-20 44 30)"/>
+  </svg>`;
+}
+
+// ══════════ CONSTANTES ══════════
+const ADMIN_EMAIL = 'admin@oumelia.com';
+const ADMIN_PWD   = 'Admin123';
+// Accepte aussi admin@gmail.com / admin@oumelia.com
+const ADMIN_EMAILS = ['admin@oumelia.com','admin@gmail.com','Admin@gmail.com','Admin@oumelia.com'];
+
+// ══════════ DONNÉES ══════════
+const allProfiles = [
+  {id:1,prenom:'Yasmine', gender:'femme',age:26,ville:'Paris',     origine:'Algérienne', pratique:'Très pratiquant(e)',voile:'Hijab',  barbe:null,            situation:'Célibataire',boosted:true, bio:'Alhamdulillah, je cherche mon moitié dans la sunnah.',madhhab:'Malékite',  coran:'Quotidiennement',halal:'Oui strict',    enfants:'non',veut_enfants:'Inchallah',status:'active', paid:true},
+  {id:2,prenom:'Khadija', gender:'femme',age:31,ville:'Marseille', origine:'Marocaine',  pratique:'Salafi/Sunnah',    voile:'Niqab',  barbe:null,            situation:'Divorcée',   boosted:false,bio:'Mère cherchant à se remarier en Islam.',             madhhab:'Hanbalite', coran:'Quotidiennement',halal:'Oui strict',    enfants:'oui',veut_enfants:'Inchallah',status:'active', paid:true},
+  {id:3,prenom:'Maryam',  gender:'femme',age:24,ville:'Toulouse',  origine:'Française',  pratique:'Pratiquant(e)',    voile:'Jilbab', barbe:null,            situation:'Convertie',  boosted:false,bio:'Convertie depuis 5 ans alhamdulillah.',               madhhab:'Peu importe',coran:'En apprentissage',halal:'Oui strict',  enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
+  {id:4,prenom:'Fatima',  gender:'femme',age:28,ville:'Lyon',      origine:'Sénégalaise',pratique:'Pratiquant(e)',    voile:'Hijab',  barbe:null,            situation:'Célibataire',boosted:false,bio:'Femme sérieuse cherchant un frère pratiquant.',       madhhab:'Malékite',  coran:'Régulièrement',  halal:'Oui globalement',enfants:'non',veut_enfants:'Oui',      status:'pending',paid:false,audioAttested:true},
+  {id:5,prenom:'Ibrahim', gender:'homme',age:30,ville:'Lyon',      origine:'Sénégalais', pratique:'Très pratiquant(e)',voile:null,    barbe:'Oui (sunnah)',  situation:'Célibataire',boosted:false,bio:'Frère sérieux cherchant une épouse pratiquante.',    madhhab:'Malékite',  coran:'Régulièrement',  halal:'Oui strict',    enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
+  {id:6,prenom:'Youssef', gender:'homme',age:28,ville:'Bordeaux',  origine:'Tunisien',   pratique:'Pratiquant(e)',    voile:null,    barbe:'Oui (sunnah)',  situation:'Célibataire',boosted:false,bio:'Ingénieur, pratiquant, sérieux dans sa démarche.',    madhhab:'Hanafite',  coran:'Régulièrement',  halal:'Oui globalement',enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
+  {id:7,prenom:'Moussa',  gender:'homme',age:35,ville:'Lille',     origine:'Malien',     pratique:'Très pratiquant(e)',voile:null,    barbe:'Oui (sunnah)',  situation:'Veuf',       boosted:true, bio:'Veuf cherchant une épouse pieuse pour refonder une famille.',madhhab:'Malékite',coran:'Quotidiennement',halal:'Oui strict', enfants:'oui',veut_enfants:'Inchallah',status:'active', paid:true},
+  {id:8,prenom:'Omar',    gender:'homme',age:33,ville:'Nantes',    origine:'Marocain',   pratique:'Salafi/Sunnah',    voile:null,    barbe:'Oui (sunnah)',  situation:'Célibataire',boosted:false,bio:'Je cherche une sœur salafi pour construire un foyer islamique.',madhhab:'Hanbalite',coran:'Quotidiennement',halal:'Oui strict',enfants:'non',veut_enfants:'Oui',status:'pending',paid:false},
+  {id:9,prenom:'Bilal',   gender:'homme',age:27,ville:'Strasbourg',origine:'Algérien',   pratique:'Pratiquant(e)',    voile:null,    barbe:'En progression',situation:'Célibataire',boosted:false,bio:'Frère en progression dans son deen.',               madhhab:'Malékite',  coran:'Parfois',        halal:'Oui globalement',enfants:'non',veut_enfants:'Oui',      status:'inactive',paid:true},
+];
+
+const adminConvos = {};
+
+const matchesData = [
+  {id:'m1', femmeId:1, hommeId:5, date:'20/03/2026', waliSent:true,  waliResponse:null, hommeNotified:true},
+  {id:'m2', femmeId:3, hommeId:6, date:'22/03/2026', waliSent:false, waliResponse:null, hommeNotified:false},
+];
+
+const waliResponses = [
+  {matchId:'m1', femmeId:1, prenom:'Yasmine', response:"Assalamu Alaykum wa rahmatullahi wa barakatuh,\n\nJe vous remercie. Oui alhamdulillah, j'ai un Wali — mon père sera présent. Je vous transmets ses coordonnées dès confirmation.\n\nBarak Allahu fikoum.\nYasmine", time:"Il y a 1h", read:false}
+];
+
+// ══════════ PRÉSENCE EN LIGNE ══════════
+// online = en ligne maintenant, recent = vu récemment (<30min), offline = hors ligne
+const onlineStatus = {
+  1:'online', 2:'recent', 3:'offline', 4:'offline',
+  5:'online', 6:'recent', 7:'online', 8:'offline', 9:'offline'
+};
+// Simule le temps (en prod : horodatage réel)
+const lastSeenText = {
+  1:'En ligne', 2:'Il y a 18 min', 3:'Il y a 3h', 4:'Il y a 2j',
+  5:'En ligne', 6:'Il y a 22 min', 7:'En ligne', 8:'Hier', 9:'Il y a 5j'
+};
+
+function onlineDot(profileId, size=10){
+  const st=onlineStatus[profileId]||'offline';
+  const color=st==='online'?'#39ff7a':st==='recent'?'#1aad4c':'#e67e22';
+  const shadow=st==='online'?`0 0 6px #39ff7a`:'none';
+  return `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;background:${color};box-shadow:${shadow};border:1.5px solid var(--card);flex-shrink:0"></span>`;
+}
+
+// ══════════ ÉCHANGES EN COURS ══════════
+// Paires de profils en échange mutuel accepté
+const exchangesList = [
+  {femmeId:1, hommeId:5},  // Yasmine ↔ Ibrahim
+];
+
+function isInExchange(id1, id2){
+  return exchangesList.some(e=>(e.femmeId===id1&&e.hommeId===id2)||(e.femmeId===id2&&e.hommeId===id1));
+}
+
+function getExchangePartners(userId){
+  const partners=[];
+  exchangesList.forEach(e=>{
+    if(e.femmeId===userId) partners.push(allProfiles.find(p=>p.id===e.hommeId));
+    if(e.hommeId===userId) partners.push(allProfiles.find(p=>p.id===e.femmeId));
+  });
+  return partners.filter(Boolean);
+}
+const state = {
+  user:null, isAdmin:false,
+  profileActive:false, demandesLeft:3,
+  gender:null, viewMode:'liste',
+  currentNav:'explorer', swipeIndex:0,
+  audioRecorded:false, recording:false,
+  activeAdminTab:'dashboard',
+  searchQuery:'',
+  // Nouveau système de filtres multi-critères
+  filters:{
+    situation:[],    // Célibataire, Veuf(ve), Divorcé(e), Converti(e)
+    pratique:[],     // Pratiquant(e), Très pratiquant(e), Salafi/Sunnah
+    voile:[],        // Pour filtrer les femmes : Hijab, Niqab, Jilbab (visible pour homme cherchant femme)
+    barbe:[],        // Pour filtrer les hommes : Oui (sunnah), En progression (visible pour femme cherchant homme)
+    origine:[],      // Algérienne, Marocaine, etc.
+    ageMin: null,
+    ageMax: null,
+    online: false,   // Seulement en ligne
+    enfants: '',     // a des enfants : oui/non
+    veut_enfants: '' // veut des enfants : oui/non
+  },
+  favorites:[], // ids des profils en favoris
+  profilePaused:false,
+};
+
+// Demandes envoyées (id profil → statut)
+const demandesEnvoyees = {};
+
+// ══════════ UTILS ══════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el){
+    el.classList.add('active');
+    el.scrollTop=0;
+  }
+}
+
+let toastTimer;
+function showToast(msg,type='gold'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.borderColor=type==='red'?'var(--red)':type==='green'?'var(--green)':'var(--gold)';
+  t.style.display='block';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.style.display='none',3200);
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+// ══════════ AUTH ══════════
+function selectGender(g){
+  state.gender=g;
+  document.getElementById('gb-femme').classList.toggle('selected',g==='femme');
+  document.getElementById('gb-homme').classList.toggle('selected',g==='homme');
+  document.getElementById('field-voile').style.display=g==='femme'?'':'none';
+  document.getElementById('field-barbe').style.display=g==='homme'?'':'none';
+}
+
+// ══════════ VALIDATION INSCRIPTION ══════════
+function validateRegField(input, type){
+  const err = document.getElementById('err-'+type);
+  if(!err) return;
+  let msg = '';
+  if(type==='prenom' && input.value.trim().length < 2) msg = 'Prénom trop court';
+  if(type==='age'){ const v=parseInt(input.value); if(v<18) msg='Minimum 18 ans'; if(v>70) msg='Âge invalide'; }
+  if(type==='email' && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) msg='Email invalide';
+  err.textContent=msg; err.style.display=msg?'block':'none';
+  input.style.borderColor=msg?'var(--red)':'';
+}
+
+function checkPwdStrength(pwd){
+  const wrap=document.getElementById('pwd-strength-wrap');
+  const fill=document.getElementById('pwd-strength-fill');
+  const label=document.getElementById('pwd-strength-label');
+  if(!wrap) return;
+  wrap.style.display=pwd.length>0?'block':'none';
+  let score=0;
+  if(pwd.length>=8) score++;
+  if(/[A-Z]/.test(pwd)) score++;
+  if(/[0-9]/.test(pwd)) score++;
+  if(/[^A-Za-z0-9]/.test(pwd)) score++;
+  const levels=[{w:'25%',c:'var(--red)',t:'Trop faible'},{w:'50%',c:'#f39c12',t:'Moyen'},{w:'75%',c:'#f1c40f',t:'Bien'},{w:'100%',c:'var(--green)',t:'Excellent'}];
+  const l=levels[Math.max(0,score-1)];
+  fill.style.width=l.w; fill.style.background=l.c;
+  label.textContent=l.t; label.style.color=l.c;
+}
+
+function checkPwdMatch(){
+  const pwd=document.getElementById('reg-pwd')?.value;
+  const pwd2=document.getElementById('reg-pwd2');
+  const err=document.getElementById('err-pwd2');
+  if(!pwd2||!err) return;
+  if(pwd2.value && pwd2.value!==pwd){ err.textContent='Les mots de passe ne correspondent pas'; err.style.display='block'; pwd2.style.borderColor='var(--red)'; }
+  else { err.style.display='none'; pwd2.style.borderColor=pwd2.value?'var(--green)':''; }
+}
+
+function updateProgressBar(step){
+  const pcts={1:33,2:66,3:100};
+  const fill=document.getElementById('reg-progress-fill');
+  if(fill) fill.style.width=pcts[step]+'%';
+  [1,2,3].forEach(i=>{
+    const el=document.getElementById('pstep-'+i);
+    if(!el) return;
+    el.classList.remove('active','done');
+    if(i<step) el.classList.add('done');
+    if(i===step) el.classList.add('active');
+  });
+}
+
+function regStep2(){
+  if(!state.gender) return showToast('⚠ Choisissez votre genre','red');
+  if(!document.getElementById('reg-prenom').value.trim()) return showToast('⚠ Entrez votre prénom','red');
+  const age=parseInt(document.getElementById('reg-age').value);
+  if(!age||age<18) return showToast('⚠ Âge invalide (minimum 18 ans)','red');
+  document.getElementById('reg-step-1').classList.add('hidden');
+  document.getElementById('reg-step-2').classList.remove('hidden');
+  updateProgressBar(2);
+  if(state.gender==='femme'){ document.getElementById('field-voile').style.display=''; document.getElementById('field-barbe').style.display='none'; }
+  else { document.getElementById('field-voile').style.display='none'; document.getElementById('field-barbe').style.display=''; }
+  scrollToTop();
+}
+
+function regStep3(){
+  document.getElementById('reg-step-2').classList.add('hidden');
+  document.getElementById('reg-step-3').classList.remove('hidden');
+  if(state.gender==='femme') document.getElementById('audio-attestation').classList.remove('hidden');
+  updateProgressBar(3);
+  scrollToTop();
+}
+
+function backToStep1(){
+  document.getElementById('reg-step-2').classList.add('hidden');
+  document.getElementById('reg-step-1').classList.remove('hidden');
+  updateProgressBar(1);
+}
+
+function backToStep2(){
+  document.getElementById('reg-step-3').classList.add('hidden');
+  document.getElementById('reg-step-2').classList.remove('hidden');
+  updateProgressBar(2);
+}
+
+// ══════════ TRIS EXPLORER ══════════
+let currentSort='boost';
+function setSortMode(mode){
+  currentSort=mode;
+  document.querySelectorAll('.sort-chip').forEach(c=>c.classList.remove('active'));
+  const el=document.getElementById('sort-'+mode);
+  if(el) el.classList.add('active');
+  renderTab('explorer');
+}
+
+// ══════════ COMPATIBILITÉ ══════════
+function getCompatibilityScore(profile){
+  const u=state.user; if(!u) return 0;
+  let score=0;
+  if(profile.pratique===u.pratique) score+=30;
+  if(profile.madhhab===u.madhhab||profile.madhhab==='Peu importe'||u.madhhab==='Peu importe') score+=20;
+  if(profile.veut_enfants===u.veut_enfants) score+=20;
+  if(profile.origine===u.origine) score+=20;
+  return score;
+}
+
+function getRegion(ville){
+  const r={'Paris':'Île-de-France','Lyon':'Auvergne-Rhône-Alpes','Marseille':'PACA','Toulouse':'Occitanie','Nice':'PACA','Nantes':'Pays de la Loire','Strasbourg':'Grand Est','Bordeaux':'Nouvelle-Aquitaine','Lille':'Hauts-de-France'};
+  return r[ville]||ville||'—';
+}
+
+// ══════════ COMPLÉTION PROFIL ══════════
+function getProfileCompletion(u){
+  if(!u) return 0;
+  const fields=['prenom','age','ville','origine','pratique','bio','madhhab'];
+  const filled=fields.filter(f=>u[f]&&u[f]!=='').length;
+  let bonus=0;
+  if(u.bio&&u.bio.length>50) bonus+=10;
+  if(u.audio_attested) bonus+=15;
+  return Math.min(100,Math.round((filled/fields.length)*75)+bonus);
+}
+
+// ══════════ FAQ ══════════
+const faqData=[
+  {q:"Comment fonctionne Oumelia ?",a:"Oumelia est une plateforme de mise en relation halal. Créez votre profil, il sera validé par l'administratrice (24-48h), puis explorez les profils et envoyez des demandes de mise en relation."},
+  {q:"Mon profil est-il visible immédiatement ?",a:"Non. Chaque profil est vérifié manuellement avant activation pour garantir la qualité et le sérieux de la plateforme."},
+  {q:"Comment fonctionne le compteur de demandes ?",a:"Vous disposez de 3 demandes. Le compteur ne diminue QUE lorsqu'une demande est acceptée. Si elle est refusée ou sans réponse, votre compteur n'est pas affecté."},
+  {q:"Qu'est-ce que l'attestation audio pour les sœurs ?",a:"Pour garantir l'authenticité des profils féminins, chaque sœur doit enregistrer une attestation vocale. L'administratrice vérifie cet enregistrement avant validation."},
+  {q:"Mes données sont-elles sécurisées ?",a:"Oui. Toutes vos données sont stockées sur des serveurs certifiés (Supabase). Nous ne vendons jamais vos données à des tiers."},
+  {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 24 heures."},
+  {q:"Puis-je supprimer mon compte ?",a:"Oui, à tout moment depuis Profil → Zone de danger → Supprimer mon compte. Toutes vos données seront effacées définitivement."},
+  {q:"Comment contacter l'équipe Oumelia ?",a:"Par email : contact@oumelia.com — ou via la messagerie avec l'Administratrice dans l'application."},
+];
+
+function openFAQ(){
+  const list=document.getElementById('faq-list');
+  list.innerHTML=faqData.map((item,i)=>`
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFAQ(${i})">
+        <span>${item.q}</span><span id="faq-arrow-${i}" style="color:var(--gold);flex-shrink:0">▾</span>
+      </div>
+      <div class="faq-a" id="faq-a-${i}">${item.a}</div>
+    </div>`).join('');
+  openModal('modal-faq');
+}
+
+function toggleFAQ(i){
+  const a=document.getElementById('faq-a-'+i);
+  const arrow=document.getElementById('faq-arrow-'+i);
+  const isOpen=a.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(el=>el.classList.remove('open'));
+  document.querySelectorAll('[id^="faq-arrow-"]').forEach(el=>el.textContent='▾');
+  if(!isOpen){ a.classList.add('open'); arrow.textContent='▴'; }
+}
+
+// ══════════ SIGNALEMENT ══════════
+let selectedReport='', reportTargetId=null;
+
+function openReport(profileId){
+  reportTargetId=profileId; selectedReport='';
+  document.querySelectorAll('.report-reason').forEach(r=>r.classList.remove('selected'));
+  const d=document.getElementById('report-details'); if(d) d.value='';
+  openModal('modal-report');
+}
+
+function selectReport(el,reason){
+  selectedReport=reason;
+  document.querySelectorAll('.report-reason').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function submitReport(){
+  if(!selectedReport) return showToast('⚠ Choisissez une raison','red');
+  closeModal('modal-report');
+  showToast('✅ Signalement envoyé — merci pour votre vigilance','green');
+}
+
+// ══════════ PAGES LÉGALES ══════════
+const legalContent={
+  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumelia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>contact@oumelia.com</p>`},
+  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : contact@oumelia.com</p>`}
+};
+
+function showLegal(type){
+  const content=legalContent[type]; if(!content) return;
+  document.getElementById('legal-title').textContent=content.title;
+  document.getElementById('legal-body').innerHTML=content.body;
+  openModal('modal-legal');
+}
+
+function showLegalPage(type){
+  const c=document.getElementById('app-content');
+  const content=legalContent[type]; if(!content) return;
+  scrollToTop();
+  c.innerHTML=`<div class="page-header"><button class="back-btn" onclick="navTo('profil')">←</button><h2>${content.title}</h2></div><div class="legal-content">${content.body}</div>`;
+}
+
+
+let recTimer=null;
+function toggleRecord(){
+  const btn=document.getElementById('rec-btn'), st=document.getElementById('rec-status');
+  if(!state.recording){
+    state.recording=true; btn.classList.add('recording'); btn.textContent='⏹️';
+    st.innerHTML='<span style="color:var(--red)">● Enregistrement en cours...</span>';
+    recTimer=setTimeout(()=>{
+      state.recording=false; state.audioRecorded=true;
+      btn.classList.remove('recording'); btn.textContent='🎙️'; st.style.display='none';
+      document.getElementById('rec-done').classList.remove('hidden');
+    },4000);
+  } else {
+    clearTimeout(recTimer); state.recording=false; state.audioRecorded=true;
+    btn.classList.remove('recording'); btn.textContent='🎙️'; st.style.display='none';
+    document.getElementById('rec-done').classList.remove('hidden');
+  }
+}
+
+async function doRegister(){
+  const email=document.getElementById('reg-email').value.trim();
+  const pwd=document.getElementById('reg-pwd').value;
+  const pwd2=document.getElementById('reg-pwd2')?.value;
+  const cgu=document.getElementById('reg-cgu')?.checked;
+  if(!email||!pwd) return showToast('⚠ Remplissez tous les champs','red');
+  if(pwd.length<8) return showToast('⚠ Mot de passe trop court (8 caractères min)','red');
+  if(pwd2 && pwd2!==pwd) return showToast('⚠ Les mots de passe ne correspondent pas','red');
+  if(!cgu) return showToast('⚠ Acceptez les conditions d\'utilisation','red');
+  if(state.gender==='femme'&&!state.audioRecorded) return showToast('⚠ Enregistrez votre attestation audio','red');
+
+  showToast('⏳ Création du compte...','gold');
+
+  // 1. Créer le compte auth Supabase
+  const { data, error } = await getSB().auth.signUp({ email, password: pwd });
+  if(error){ showToast('❌ '+error.message,'red'); return; }
+
+  // 2. Créer le profil en base
+  const profileData = {
+    user_id: data.user.id,
+    prenom: document.getElementById('reg-prenom').value||'Utilisateur',
+    gender: state.gender,
+    age: parseInt(document.getElementById('reg-age').value)||25,
+    ville: document.getElementById('reg-ville').value||'',
+    origine: document.getElementById('reg-origine').value||'',
+    pratique: document.getElementById('reg-pratique').value||'Pratiquant(e)',
+    voile: state.gender==='femme'?document.getElementById('reg-voile').value:null,
+    barbe: state.gender==='homme'?document.getElementById('reg-barbe').value:null,
+    madhhab: document.getElementById('reg-madhhab').value||'Peu importe',
+    coran: document.getElementById('reg-coran').value||'Régulièrement',
+    halal: document.getElementById('reg-halal').value||'Oui strict',
+    situation: document.getElementById('reg-situation').value||'Célibataire',
+    enfants: document.getElementById('reg-enfants').value||'non',
+    veut_enfants: document.getElementById('reg-veut-enfants').value||'Oui',
+    bio: document.getElementById('reg-bio').value||'',
+    recherche: document.getElementById('reg-recherche').value||'',
+    status: 'pending',
+    paid: false,
+    boosted: false,
+    audio_attested: state.gender==='femme' && state.audioRecorded,
+    is_online: true,
+    last_seen: new Date().toISOString(),
+  };
+
+  const { error: profileError } = await getSB().from('profils').insert(profileData);
+  if(profileError){ showToast('❌ Erreur profil: '+profileError.message,'red'); return; }
+
+  state.user = { ...profileData, email };
+  state.profileActive = false;
+  document.getElementById('header-user-name').textContent = profileData.prenom;
+  showScreen('screen-app');
+  navTo('explorer');
+  showToast('✅ Profil créé — en attente de validation','green');
+}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pwd=document.getElementById('login-pwd').value;
+  const errEl=document.getElementById('login-error');
+
+  // Admin check local
+  if(ADMIN_EMAILS.map(e=>e.toLowerCase()).includes(email.toLowerCase()) && pwd.toLowerCase()===ADMIN_PWD.toLowerCase()){
+    errEl.classList.add('hidden');
+    state.isAdmin=true;
+    // Charger les vrais profils depuis Supabase pour l'admin
+    await loadAllProfilesForAdmin();
+    showScreen('screen-admin');
+    updateAdminBadges();
+    adminTab('dashboard');
+    return;
+  }
+
+  if(!email){errEl.textContent='Entrez votre email.';errEl.classList.remove('hidden');return;}
+  errEl.classList.add('hidden');
+  showToast('⏳ Connexion...','gold');
+
+  const { data, error } = await getSB().auth.signInWithPassword({ email, password: pwd });
+  if(error){
+    errEl.textContent = error.message.includes('Invalid') ? 'Email ou mot de passe incorrect.' : error.message;
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  await loadUserProfile(data.user);
+  if(!state.user){
+    errEl.textContent='Profil introuvable.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  enterApp();
+}
+
+async function doForgotPwd(){
+  const email=document.getElementById('forgot-email').value.trim();
+  const errEl=document.getElementById('forgot-error');
+  const succEl=document.getElementById('forgot-success');
+  if(!email){errEl.classList.remove('hidden');succEl.classList.add('hidden');return;}
+  errEl.classList.add('hidden');
+  const { error } = await getSB().auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://oumelia.fr'
+  });
+  if(error){ errEl.textContent=error.message; errEl.classList.remove('hidden'); return; }
+  succEl.classList.remove('hidden');
+}
+
+function enterApp(){
+  document.getElementById('header-user-name').textContent=state.user.prenom;
+  showScreen('screen-app');
+  navTo('explorer');
+  // Charger les profils réels depuis Supabase
+  loadProfilesFromDB();
+  // Charger les demandes reçues
+  loadDemandesRecues();
+}
+
+async function doLogout(){
+  // Mettre hors ligne
+  if(state.user?.supabaseId){
+    await getSB().from('profils').update({is_online:false, last_seen:new Date().toISOString()}).eq('user_id', state.user.supabaseId);
+  }
+  await getSB().auth.signOut();
+  state.user=null; state.isAdmin=false;
+  showScreen('screen-landing');
+}
+
+// ══════════ CHARGEMENT DONNÉES SUPABASE ══════════
+async function loadProfilesFromDB(){
+  if(!state.user) return;
+  const oppositeGender = state.user.gender==='femme' ? 'homme' : 'femme';
+  const { data, error } = await sb
+    .from('profils')
+    .select('*')
+    .eq('gender', oppositeGender)
+    .eq('status', 'active')
+    .neq('user_id', state.user.supabaseId||'');
+  if(error){ console.error('Erreur chargement profils:', error); return; }
+  if(data && data.length > 0){
+    // Mettre à jour allProfiles avec les données réelles
+    // On garde les profils de démo si la DB est vide
+    const dbProfiles = data.map(p => ({
+      id: p.id,
+      prenom: p.prenom,
+      gender: p.gender,
+      age: p.age,
+      ville: p.ville,
+      origine: p.origine,
+      pratique: p.pratique,
+      voile: p.voile,
+      barbe: p.barbe,
+      situation: p.situation,
+      madhhab: p.madhhab,
+      coran: p.coran,
+      halal: p.halal,
+      enfants: p.enfants,
+      veut_enfants: p.veut_enfants,
+      bio: p.bio||'',
+      boosted: p.boosted||false,
+      status: p.status,
+      paid: p.paid,
+      isDB: true,
+    }));
+    // Mettre à jour le statut en ligne
+    dbProfiles.forEach(p => {
+      if(data.find(d=>d.id===p.id)?.is_online) onlineStatus[p.id]='online';
+    });
+    // Remplacer les profils de démo par les vrais (si disponibles)
+    window._dbProfiles = dbProfiles;
+    renderTab(state.currentNav);
+  }
+}
+
+async function loadDemandesRecues(){
+  if(!state.user?.id) return;
+  const { data } = await sb
+    .from('demandes')
+    .select('*, profils!demandes_from_profile_id_fkey(prenom, gender, age, ville, pratique, voile, barbe, situation, madhhab, bio, is_online)')
+    .eq('to_profile_id', state.user.id)
+    .eq('statut', 'en_attente');
+  if(data && data.length > 0){
+    data.forEach(d => {
+      const exists = userNotifs.find(n=>n.id==='db_'+d.id);
+      if(!exists && d.profils){
+        userNotifs.unshift({
+          id: 'db_'+d.id,
+          type: 'demande_recue',
+          icon: '💌',
+          text: `<strong>${d.profils.prenom}</strong> vous a envoyé une demande de mise en relation`,
+          time: new Date(d.created_at).toLocaleDateString('fr-FR'),
+          unread: true,
+          profileId: d.from_profile_id,
+          fromPrenom: d.profils.prenom,
+          statut: 'en_attente',
+          dbId: d.id,
+        });
+      }
+    });
+  }
+}
+
+async function loadAllProfilesForAdmin(){
+  const { data } = await getSB().from('profils').select('*').order('created_at', {ascending:false});
+  if(data && data.length > 0){
+    window._adminProfiles = data;
+  }
+}
+
+function navTo(tab){
+  state.currentNav=tab;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=document.getElementById('nav-'+tab);
+  if(el) el.classList.add('active');
+  renderTab(tab);
+}
+
+function renderTab(tab){
+  const c=document.getElementById('app-content');
+  switch(tab){
+    case 'explorer': renderExplorer(c); break;
+    case 'messages': renderMessages(c); break;
+    case 'notifs':   renderNotifs(c);   break;
+    case 'profil':   renderMyProfile(c);break;
+    case 'boost':    renderBoost(c);    break;
+  }
+  // Remonter en haut à chaque changement d'onglet
+  scrollToTop();
+}
+
+// Remonte en haut du conteneur actif instantanément
+function scrollToTop(){
+  window.scrollTo({top:0,behavior:'instant'});
+  const appC=document.getElementById('app-content');
+  if(appC) appC.scrollTop=0;
+  const admC=document.getElementById('admin-content');
+  if(admC) admC.scrollTop=0;
+}
+
+// ══════════ EXPLORER ══════════
+function getVisibleProfiles(){
+  const opp=state.user.gender==='femme'?'homme':'femme';
+  let list=allProfiles.filter(p=>p.gender===opp && p.status==='active');
+  list.sort((a,b)=>(b.boosted?1:0)-(a.boosted?1:0));
+  const f=state.filters;
+  // Recherche texte
+  if(state.searchQuery){
+    const q=state.searchQuery.toLowerCase();
+    list=list.filter(p=>p.prenom.toLowerCase().includes(q)||p.ville.toLowerCase().includes(q)||p.origine.toLowerCase().includes(q)||p.pratique.toLowerCase().includes(q));
+  }
+  // Filtres multi-critères
+  if(f.situation.length)    list=list.filter(p=>f.situation.includes(p.situation));
+  if(f.pratique.length)     list=list.filter(p=>f.pratique.some(v=>p.pratique.includes(v)));
+  // Voile = filtre sur profils femme (visible quand l'homme cherche une femme)
+  if(f.voile.length)        list=list.filter(p=>f.voile.includes(p.voile));
+  // Barbe = filtre sur profils homme (visible quand la femme cherche un homme)
+  if(f.barbe.length)        list=list.filter(p=>f.barbe.includes(p.barbe));
+  if(f.origine.length)      list=list.filter(p=>f.origine.includes(p.origine));
+  if(f.ageMin)              list=list.filter(p=>parseInt(p.age)>=parseInt(f.ageMin));
+  if(f.ageMax)              list=list.filter(p=>parseInt(p.age)<=parseInt(f.ageMax));
+  if(f.online)              list=list.filter(p=>onlineStatus[p.id]==='online'||onlineStatus[p.id]==='recent');
+  if(f.enfants)             list=list.filter(p=>p.enfants===f.enfants);
+  if(f.veut_enfants)        list=list.filter(p=>p.veut_enfants===f.veut_enfants||p.veut_enfants.toLowerCase()===f.veut_enfants.toLowerCase());
+  // Tri
+  if(currentSort==='boost') list.sort((a,b)=>(b.boosted?1:0)-(a.boosted?1:0));
+  else if(currentSort==='recent') list.sort((a,b)=>(b.id||0)-(a.id||0));
+  else if(currentSort==='active') list.sort((a,b)=>{const os={'online':3,'recent':2,'offline':1};return (os[onlineStatus[b.id]]||0)-(os[onlineStatus[a.id]]||0);});
+  else if(currentSort==='compatible') list.sort((a,b)=>getCompatibilityScore(b)-getCompatibilityScore(a));
+  return list;
+}
+
+// Retourne la liste des filtres actifs pour les tags
+function getActiveFiltersList(){
+  const f=state.filters;
+  const tags=[];
+  f.situation.forEach(v=>tags.push({key:'situation',val:v,label:v}));
+  f.pratique.forEach(v=>tags.push({key:'pratique',val:v,label:v}));
+  f.voile.forEach(v=>tags.push({key:'voile',val:v,label:v}));
+  f.barbe.forEach(v=>tags.push({key:'barbe',val:v,label:v}));
+  f.origine.forEach(v=>tags.push({key:'origine',val:v,label:v}));
+  if(f.ageMin||f.ageMax) tags.push({key:'age',val:'age',label:`${f.ageMin||'?'}–${f.ageMax||'?'} ans`});
+  if(f.online) tags.push({key:'online',val:'online',label:'En ligne'});
+  if(f.enfants) tags.push({key:'enfants',val:f.enfants,label:`Enfants: ${f.enfants}`});
+  if(f.veut_enfants) tags.push({key:'veut_enfants',val:f.veut_enfants,label:`Veut enfants: ${f.veut_enfants}`});
+  return tags;
+}
+
+function removeFilter(key, val){
+  const f=state.filters;
+  if(['situation','pratique','voile','barbe','origine'].includes(key)){
+    f[key]=f[key].filter(v=>v!==val);
+  } else if(key==='age'){f.ageMin=null;f.ageMax=null;}
+  else if(key==='online') f.online=false;
+  else if(key==='enfants') f.enfants='';
+  else if(key==='veut_enfants') f.veut_enfants='';
+  renderTab('explorer');
+}
+
+function resetFilters(){
+  state.filters={situation:[],pratique:[],voile:[],barbe:[],origine:[],ageMin:null,ageMax:null,online:false,enfants:'',veut_enfants:''};
+  closeFilterPanel();
+  renderTab('explorer');
+}
+
+// Ouvre le panel avec les critères adaptés au genre de l'utilisateur
+function openFilterPanel(){
+  const isWoman=state.user.gender==='femme';
+  // L'utilisateur est une femme → elle cherche des HOMMES → on filtre par critères hommes
+  // L'utilisateur est un homme → il cherche des FEMMES → on filtre par critères femmes
+  const f=state.filters;
+
+  let html='';
+
+  // Présence en ligne
+  html+=`<div class="filter-section">
+    <div class="filter-section-title">Présence</div>
+    <div class="filter-options">
+      <button class="filter-opt ${f.online?'selected':''}" onclick="toggleFilterBool('online')">🟢 En ligne / Récemment</button>
+    </div>
+  </div>`;
+
+  // Situation matrimoniale
+  html+=`<div class="filter-section">
+    <div class="filter-section-title">Situation matrimoniale</div>
+    <div class="filter-options">
+      ${['Célibataire','Veuf(ve)','Divorcé(e)','Converti(e)'].map(v=>`<button class="filter-opt ${f.situation.includes(v)?'selected':''}" onclick="toggleFilterArr('situation','${v}')">${v}</button>`).join('')}
+    </div>
+  </div>`;
+
+  // Niveau de pratique
+  html+=`<div class="filter-section">
+    <div class="filter-section-title">Niveau de pratique</div>
+    <div class="filter-options">
+      ${['Pratiquant(e)','Très pratiquant(e)','Salafi/Sunnah','Débutant(e)'].map(v=>`<button class="filter-opt ${f.pratique.includes(v)?'selected':''}" onclick="toggleFilterArr('pratique','${v}')">${v}</button>`).join('')}
+    </div>
+  </div>`;
+
+  // Critères spécifiques au genre RECHERCHÉ (pas de l'utilisateur)
+  if(isWoman){
+    // Femme cherche un homme → filtres sur les hommes : barbe
+    html+=`<div class="filter-section">
+      <div class="filter-section-title">Barbe</div>
+      <div class="filter-options">
+        ${['Oui (sunnah)','Non','En progression'].map(v=>`<button class="filter-opt ${f.barbe.includes(v)?'selected':''}" onclick="toggleFilterArr('barbe','${v}')">${v}</button>`).join('')}
+      </div>
+    </div>`;
+  } else {
+    // Homme cherche une femme → filtres sur les femmes : voile
+    html+=`<div class="filter-section">
+      <div class="filter-section-title">Voile</div>
+      <div class="filter-options">
+        ${['Hijab','Niqab','Jilbab','Sans voile','En progression'].map(v=>`<button class="filter-opt ${f.voile.includes(v)?'selected':''}" onclick="toggleFilterArr('voile','${v}')">${v}</button>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  // Origine
+  html+=`<div class="filter-section">
+    <div class="filter-section-title">Origine</div>
+    <div class="filter-options">
+      ${['Algérienne','Marocaine','Tunisienne','Française','Sénégalaise','Malienne','Turque','Égyptienne','Syrienne','Pakistanaise'].map(v=>`<button class="filter-opt ${f.origine.includes(v)?'selected':''}" onclick="toggleFilterArr('origine','${v}')">${v}</button>`).join('')}
+    </div>
+  </div>`;
+
+  // Tranche d'âge
+  html+=`<div class="filter-section">
+    <div class="filter-section-title">Tranche d'âge</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <input type="number" id="fp-age-min" value="${f.ageMin||''}" placeholder="Min" min="18" max="70"
+        style="flex:1;background:var(--black);border:1px solid var(--border);color:var(--white);padding:9px 12px;border-radius:6px;font-family:'Cairo',sans-serif;font-size:.88rem">
+      <span style="color:var(--muted)">—</span>
+      <input type="number" id="fp-age-max" value="${f.ageMax||''}" placeholder="Max" min="18" max="70"
+        style="flex:1;background:var(--black);border:1px solid var(--border);color:var(--white);padding:9px 12px;border-radius:6px;font-family:'Cairo',sans-serif;font-size:.88rem">
+      <span style="color:var(--muted);font-size:.84rem">ans</span>
+    </div>
+  </div>`;
+
+  // Enfants
+  html+=`<div class="filter-section">
+    <div class="filter-section-title">A des enfants</div>
+    <div class="filter-options">
+      <button class="filter-opt ${f.enfants==='oui'?'selected':''}" onclick="setFilterVal('enfants','${f.enfants==='oui'?'':'oui'}')">Oui</button>
+      <button class="filter-opt ${f.enfants==='non'?'selected':''}" onclick="setFilterVal('enfants','${f.enfants==='non'?'':'non'}')">Non</button>
+    </div>
+  </div>`;
+
+  html+=`<div class="filter-section">
+    <div class="filter-section-title">Veut des enfants</div>
+    <div class="filter-options">
+      <button class="filter-opt ${f.veut_enfants==='Oui'?'selected':''}" onclick="setFilterVal('veut_enfants','${f.veut_enfants==='Oui'?'':'Oui'}')">Oui</button>
+      <button class="filter-opt ${f.veut_enfants==='Non'?'selected':''}" onclick="setFilterVal('veut_enfants','${f.veut_enfants==='Non'?'':'Non'}')">Non</button>
+      <button class="filter-opt ${f.veut_enfants==='Inchallah'?'selected':''}" onclick="setFilterVal('veut_enfants','${f.veut_enfants==='Inchallah'?'':'Inchallah'}')">Inchallah</button>
+    </div>
+  </div>`;
+
+  document.getElementById('filter-panel-content').innerHTML=html;
+  document.getElementById('filter-panel-overlay').classList.add('open');
+}
+
+function closeFilterPanel(e){
+  if(e && e.target !== document.getElementById('filter-panel-overlay')) return;
+  document.getElementById('filter-panel-overlay').classList.remove('open');
+}
+
+function toggleFilterArr(key, val){
+  const arr=state.filters[key];
+  const idx=arr.indexOf(val);
+  if(idx===-1) arr.push(val);
+  else arr.splice(idx,1);
+  // Rafraîchir le panel
+  openFilterPanel();
+}
+
+function toggleFilterBool(key){
+  state.filters[key]=!state.filters[key];
+  openFilterPanel();
+}
+
+function setFilterVal(key, val){
+  state.filters[key]=val;
+  openFilterPanel();
+}
+
+function applyFilters(){
+  // Récupérer les valeurs d'âge depuis les inputs
+  const minEl=document.getElementById('fp-age-min');
+  const maxEl=document.getElementById('fp-age-max');
+  if(minEl) state.filters.ageMin=minEl.value||null;
+  if(maxEl) state.filters.ageMax=maxEl.value||null;
+  document.getElementById('filter-panel-overlay').classList.remove('open');
+  renderTab('explorer');
+}
+
+function renderExplorer(c){
+  const oppLabel=state.user.gender==='femme'?'frères':'sœurs';
+  // Section échanges en cours
+  const myExchangePartners=getExchangePartners(state.user?.id||0);
+  let html='';
+  if(myExchangePartners.length>0){
+    html+=`<div class="exchange-section">
+      <h4>↔ Échanges en cours (${myExchangePartners.length})</h4>`;
+    myExchangePartners.forEach(p=>{
+      const av=p.gender==='femme'?svgFemme(36):svgHomme(36);
+      const dot=onlineDot(p.id,9);
+      html+=`<div class="exchange-profile-row">
+        <div style="position:relative;display:inline-block">${av}<span style="position:absolute;bottom:0;right:0">${dot}</span></div>
+        <div style="flex:1">
+          <div style="font-size:.86rem;font-weight:600">${p.prenom}, ${p.age} ans · ${p.ville}</div>
+          <div style="font-size:.72rem;color:var(--muted)">${p.pratique}</div>
+        </div>
+        <button class="btn-tiny msg" onclick="openProfile(${p.id})">Voir</button>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`
+    <div class="view-toggle">
+      <button class="toggle-btn ${state.viewMode==='liste'?'active':''}" onclick="setView('liste')">📋 Liste</button>
+      <button class="toggle-btn ${state.viewMode==='swipe'?'active':''}" onclick="setView('swipe')">🃏 Swipe</button>
+    </div>`;
+  if(!state.profileActive){
+    html+=`<div class="paywall-banner">
+      <h3>✦ Profil non activé</h3>
+      <p>Pour accéder aux profils et recevoir les demandes, activez votre profil.</p>
+      <div class="price-tag">5,99 €</div><br>
+      <button class="btn btn-gold" onclick="openModal('modal-paywall')">Activer mon profil</button>
+    </div>`;
+  }
+  html+=`
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <input type="text" placeholder="Rechercher parmi les ${oppLabel}..." value="${state.searchQuery}" oninput="state.searchQuery=this.value;renderTab('explorer')">
+      </div>
+    </div>`;
+
+  // Bouton filtre + tags actifs
+  const activeFilters=getActiveFiltersList();
+  const hasFilters=activeFilters.length>0;
+  html+=`<div class="filter-bar">
+    <button class="filter-trigger-btn ${hasFilters?'has-filters':''}" onclick="openFilterPanel()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+      Filtrer
+      ${hasFilters?`<span class="filter-count-badge">${activeFilters.length}</span>`:''}
+    </button>
+    <div class="active-filters-row">
+      ${activeFilters.map(f=>`<span class="active-filter-tag">${f.label}<button onclick="removeFilter('${f.key}','${f.val}');event.stopPropagation()">×</button></span>`).join('')}
+    </div>
+  </div>`;
+
+  // Barre de tri
+  html+=`<div class="sort-bar">
+    <div class="sort-chip active" id="sort-boost" onclick="setSortMode('boost')">⚡ Boostés</div>
+    <div class="sort-chip" id="sort-recent" onclick="setSortMode('recent')">🕐 Récents</div>
+    <div class="sort-chip" id="sort-active" onclick="setSortMode('active')">🟢 En ligne</div>
+    <div class="sort-chip" id="sort-compatible" onclick="setSortMode('compatible')">💫 Compatibles</div>
+  </div>`;
+  const profiles=getVisibleProfiles();
+  if(state.viewMode==='liste'){
+    if(!profiles.length) html+=`<div style="padding:40px;text-align:center;color:var(--muted)">Aucun profil trouvé</div>`;
+    else{
+      html+=`<div class="profiles-list">`;
+      profiles.forEach(p=>{
+        const av=p.gender==='femme'?svgFemme(50):svgHomme(50);
+        const isFav=state.favorites.includes(p.id);
+        const dot=onlineDot(p.id,9);
+        const lastSeen=lastSeenText[p.id]||'Hors ligne';
+        const inExch=isInExchange(p.id, state.user?.id||0);
+        html+=`<div class="profile-card ${p.boosted?'boosted':''}" onclick="openProfile(${p.id})">
+          ${p.boosted?'<span class="boost-badge">⚡ BOOST</span>':''}
+          <div class="profile-avatar-box" style="position:relative">
+            ${av}
+            ${inExch?'<span class="exchange-badge">↔ Échange</span>':''}
+            <span style="position:absolute;bottom:4px;right:4px">${dot}</span>
+          </div>
+        <div class="profile-info">
+            <div class="profile-name">${p.prenom}, ${p.age} ans ${isFav?'<span style="color:var(--gold);font-size:.68rem">♥</span>':''}
+              ${getCompatibilityScore(p)>=60?'<span class="compatible-tag" style="font-size:.58rem;padding:1px 6px;margin-left:4px">💫 Compatible</span>':''}
+            </div>
+            <div class="profile-meta">📍 ${p.ville} · <span style="font-size:.68rem;color:var(--muted)">${getRegion(p.ville)}</span> · <span style="font-size:.7rem;color:${onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)'}">${lastSeen}</span></div>
+            <div class="profile-tags">
+              <span class="tag gold">${p.pratique}</span>
+              ${p.voile?`<span class="tag">${p.voile}</span>`:''}
+              ${p.barbe?`<span class="tag">${p.barbe}</span>`:''}
+              <span class="tag">${p.situation}</span>
+            </div>
+          </div>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+  } else {
+    if(!profiles.length) html+=`<div style="padding:60px;text-align:center;color:var(--muted)">Aucun profil disponible</div>`;
+    else{
+      const p=profiles[state.swipeIndex%profiles.length];
+      const av=p.gender==='femme'?svgFemme(110):svgHomme(110);
+      html+=`<div class="swipe-container">
+        <div class="swipe-card" id="swipe-card">
+          <div class="swipe-card-avatar">
+            ${p.boosted?'<div class="boosted-ribbon">⚡ BOOST</div>':''}${av}
+          </div>
+          <div class="swipe-card-body">
+            <div class="swipe-card-name">${p.prenom}, ${p.age} ans</div>
+            <div style="color:var(--muted);font-size:.84rem;margin-bottom:9px">📍 ${p.ville} · ${p.origine}</div>
+            <div class="profile-tags" style="margin-bottom:9px">
+              <span class="tag gold">${p.pratique}</span>
+              ${p.voile?`<span class="tag">${p.voile}</span>`:''}
+              ${p.barbe?`<span class="tag">${p.barbe}</span>`:''}
+            </div>
+            <p style="font-size:.8rem;color:var(--muted);line-height:1.6">${p.bio}</p>
+          </div>
+        </div>
+        <div class="swipe-actions">
+          <button class="swipe-btn pass" onclick="swipeAction('pass')">✗</button>
+          <button class="swipe-btn like" onclick="swipeAction('like','${p.prenom}',${p.id})">♡</button>
+          <button class="swipe-btn ask"  onclick="swipeAction('ask','${p.prenom}')">💌</button>
+        </div>
+        <p style="color:var(--muted);font-size:.68rem;margin-top:8px;text-align:center">${(state.swipeIndex%profiles.length)+1}/${profiles.length}</p>
+      </div>`;
+    }
+  }
+  c.innerHTML=html;
+}
+
+function setView(mode){state.viewMode=mode;renderTab('explorer');}
+
+function swipeAction(action,prenom,pid){
+  const card=document.getElementById('swipe-card');
+  if(card){
+    if(action==='pass') {card.style.transform='translateX(-110%) rotate(-12deg)';card.style.opacity='0';}
+    else if(action==='like'){card.style.transform='translateX(110%) rotate(12deg)';card.style.opacity='0';}
+    else {card.style.transform='translateY(-110%)';card.style.opacity='0';}
+  }
+  if(action==='ask'){openDemandeModal(prenom);return;}
+  if(action==='like' && pid){
+    if(!state.favorites.includes(pid)) state.favorites.push(pid);
+    showToast('💛 Ajouté à vos favoris !','gold');
+  }
+  setTimeout(()=>{state.swipeIndex++;renderTab('explorer');},300);
+}
+
+function openProfile(id){
+  if(!state.profileActive){openModal('modal-paywall');return;}
+  const p=allProfiles.find(x=>x.id===id); if(!p) return;
+  const av=p.gender==='femme'?svgFemme(80):svgHomme(80);
+  const isFav=state.favorites.includes(p.id);
+  const dot=onlineDot(p.id,11);
+  const lastSeen=lastSeenText[p.id]||'Hors ligne';
+  const onlineColor=onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)';
+  const inExch=isInExchange(p.id, state.user?.id||0);
+  const c=document.getElementById('app-content');
+  scrollToTop();
+  c.innerHTML=`
+    <div class="page-header">
+      <button class="back-btn" onclick="navTo('explorer')">←</button>
+      <h2>${p.prenom}</h2>
+      ${inExch?'<span style="background:var(--green);color:#fff;font-size:.64rem;padding:2px 8px;border-radius:10px;margin-left:auto">↔ Échange en cours</span>':''}
+    </div>
+    <div class="profile-page">
+      <div style="position:relative;width:100px;margin:0 auto 14px">
+        <div class="profile-page-avatar">${av}</div>
+        <span style="position:absolute;bottom:6px;right:6px">${dot}</span>
+      </div>
+      <div class="profile-page-name">${p.prenom}</div>
+      <div style="color:${onlineColor};text-align:center;font-size:.8rem;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:6px">${dot} ${lastSeen}</div>
+      <div style="color:var(--muted);text-align:center;font-size:.82rem;margin-bottom:14px">${p.age} ans · ${p.ville}</div>
+      ${p.boosted?'<div style="text-align:center;margin-bottom:12px"><span class="status-badge active">⚡ Profil boosté</span></div>':''}
+      ${inExch?`<div style="background:linear-gradient(135deg,#0a1800,#0d2010);border:1px solid var(--green);border-radius:8px;padding:12px;margin-bottom:14px;text-align:center">
+        <span style="color:var(--green);font-size:.84rem">↔ Vous êtes en échange avec ${p.prenom}</span>
+      </div>`:''}
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <button class="btn btn-gold" style="flex:1;font-size:.84rem;padding:10px" onclick="openDemandeModal('${p.prenom}')">💌 Demande</button>
+        <button class="fav-btn ${isFav?'active':''}" id="fav-btn-${p.id}" onclick="toggleFav(${p.id})">
+          ${isFav?'♥ Favori':'♡ Favori'}
+        </button>
+        <button onclick="openReport(${p.id})" style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);padding:10px;cursor:pointer;font-size:.82rem" title="Signaler">🚨</button>
+      </div>
+      <div class="profile-section">
+        <h4>Informations générales</h4>
+        <div class="profile-detail-row"><span>Âge</span><span>${p.age} ans</span></div>
+        <div class="profile-detail-row"><span>Ville</span><span>${p.ville}</span></div>
+        <div class="profile-detail-row"><span>Origine</span><span>${p.origine}</span></div>
+        <div class="profile-detail-row"><span>Situation</span><span>${p.situation}</span></div>
+        <div class="profile-detail-row"><span>A des enfants</span><span>${p.enfants}</span></div>
+        <div class="profile-detail-row"><span>Veut des enfants</span><span>${p.veut_enfants}</span></div>
+      </div>
+      <div class="profile-section">
+        <h4>Pratique religieuse</h4>
+        <div class="profile-detail-row"><span>Niveau</span><span>${p.pratique}</span></div>
+        ${p.voile?`<div class="profile-detail-row"><span>Voile</span><span>${p.voile}</span></div>`:''}
+        ${p.barbe?`<div class="profile-detail-row"><span>Barbe</span><span>${p.barbe}</span></div>`:''}
+        <div class="profile-detail-row"><span>École juridique</span><span>${p.madhhab}</span></div>
+        <div class="profile-detail-row"><span>Lecture Coran</span><span>${p.coran}</span></div>
+        <div class="profile-detail-row"><span>Halal</span><span>${p.halal}</span></div>
+      </div>
+      <div class="profile-section">
+        <h4>Présentation</h4>
+        <p style="font-size:.86rem;line-height:1.7">${p.bio}</p>
+      </div>
+    </div>`;
+}
+
+function toggleFav(id){
+  const idx=state.favorites.indexOf(id);
+  const btn=document.getElementById('fav-btn-'+id);
+  if(idx===-1){
+    state.favorites.push(id);
+    if(btn){btn.innerHTML='♥ Favori';btn.classList.add('active');}
+    showToast('♥ Ajouté aux favoris','gold');
+  } else {
+    state.favorites.splice(idx,1);
+    if(btn){btn.innerHTML='♡ Favori';btn.classList.remove('active');}
+    showToast('Retiré des favoris','gold');
+  }
+}
+
+// ══════════ DEMANDES ══════════
+// Le compteur ne diminue QUE si la demande est ACCEPTÉE
+// Envoi d'une demande ne diminue pas encore (elle est "en attente")
+let currentDemandeTarget='';
+function openDemandeModal(prenom){
+  if(!state.profileActive){openModal('modal-paywall');return;}
+  // Vérifier si l'utilisateur a encore des slots (demandes acceptées utilisées)
+  const acceptedUsed=Object.values(demandesEnvoyees).filter(d=>d==='acceptee').length;
+  const maxAccepted=3; // 3 demandes acceptées max
+  if(acceptedUsed>=maxAccepted){openModal('modal-plus-demandes');return;}
+  currentDemandeTarget=prenom;
+  document.getElementById('demande-prenom').textContent=prenom;
+  // Afficher les slots restants basés sur demandes ACCEPTÉES
+  const remaining=maxAccepted-acceptedUsed;
+  document.getElementById('modal-dots').innerHTML=[0,1,2].map(i=>`<div class="demand-dot ${i>=remaining?'used':''}"></div>`).join('');
+  // Note explicative
+  document.getElementById('modal-dots').insertAdjacentHTML('afterend','<p style="font-size:.72rem;color:var(--muted);margin-top:8px">Le compteur diminue uniquement quand une demande est acceptée.</p>');
+  openModal('modal-demande');
+}
+
+async function sendDemande(){
+  const msg = document.getElementById('demande-msg')?.value||'';
+  demandesEnvoyees[currentDemandeTarget]='en_attente';
+  closeModal('modal-demande');
+  // Sauvegarder en base
+  if(state.user?.id){
+    const targetProfile = [...allProfiles,...(window._dbProfiles||[])].find(p=>p.prenom===currentDemandeTarget);
+    if(targetProfile){
+      await getSB().from('demandes').insert({
+        from_profile_id: state.user.id,
+        to_profile_id: targetProfile.id,
+        message: msg,
+        statut: 'en_attente',
+        created_at: new Date().toISOString(),
+      });
+    }
+  }
+  showToast('💌 Demande envoyée ! En attente de réponse.','gold');
+}
+
+// Simuler réception acceptation → décrémente le compteur
+function simulateAccept(prenom){
+  if(demandesEnvoyees[prenom]==='en_attente'){
+    demandesEnvoyees[prenom]='acceptee';
+    showToast(`💚 ${prenom} a accepté votre demande !`,'green');
+  }
+}
+
+function buyDemandes(){
+  closeModal('modal-plus-demandes');
+  openStripePayment('demandes', async ()=>{
+    // Réinitialiser les demandes acceptées
+    Object.keys(demandesEnvoyees).forEach(k=>{if(demandesEnvoyees[k]==='acceptee') delete demandesEnvoyees[k];});
+    // Enregistrer le paiement dans Supabase
+    if(state.user?.id){
+      await getSB().from('paiements').insert({
+        profile_id: state.user.id,
+        type: 'demandes',
+        montant: 2.99,
+        created_at: new Date().toISOString(),
+      }).catch(()=>{}); // table optionnelle
+    }
+    showToast('✅ 3 nouvelles demandes débloquées !','green');
+    renderTab(state.currentNav);
+  });
+}
+
+function activateProfile(){
+  closeModal('modal-paywall');
+  openStripePayment('profil', async ()=>{
+    state.profileActive=true;
+    if(state.user?.supabaseId){
+      await getSB().from('profils').update({status:'active', paid:true}).eq('user_id', state.user.supabaseId);
+    }
+    showToast('✅ Profil activé ! Barak Allahu fikoum','green');
+    renderTab('explorer');
+  });
+}
+
+// ══════════ MESSAGES ══════════
+const userChatHistory={
+  'Administratrice':[{from:'admin',text:'Assalamu Alaykum wa rahmatullahi wa barakatuh,\n\nUne demande de mise en relation vous concernant a été acceptée. Avez-vous un Wali pour superviser cette démarche ?\n\nBarak Allahu fikoum.\nOumelia'}]
+};
+
+function renderMessages(c){
+  c.innerHTML=`
+    <div class="page-header"><h2>Messages</h2></div>
+    <div class="conversations-list">
+      <div class="convo-item" onclick="openChat('Administratrice','admin')">
+        <div class="convo-avatar"><div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);display:flex;align-items:center;justify-content:center;position:relative"><div style="width:10px;height:10px;border-radius:50%;background:var(--card);position:absolute;right:6px;top:5px"></div></div></div>
+        <div class="convo-info"><div class="convo-name">Administratrice Oumelia</div><div class="convo-preview">Une demande de mise en relation vous concernant...</div></div>
+        <div class="convo-time">Auj.</div>
+        <div class="convo-dot"></div>
+      </div>
+    </div>`;
+}
+
+function openChat(name, type){
+  const c=document.getElementById('app-content');
+  scrollToTop();
+  const msgs=userChatHistory[name]||[];
+  const iconHtml=`<div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);flex-shrink:0"></div>`;
+  c.innerHTML=`
+    <div class="page-header">
+      <button class="back-btn" onclick="navTo('messages')">←</button>
+      ${iconHtml}<h2>${name}</h2>
+    </div>
+    <div class="chat-wrap">
+      <div class="chat-messages" id="chat-msgs">
+        ${msgs.map(m=>`<div class="msg ${m.from==='admin'?'theirs':'mine'}">${m.text}</div>`).join('')}
+        ${!msgs.length?'<p style="color:var(--muted);text-align:center;padding:20px;font-size:.84rem">Aucun message</p>':''}
+      </div>
+      <div class="chat-input-bar">
+        <input type="text" id="chat-input" placeholder="Votre réponse..." onkeydown="if(event.key==='Enter')sendUserMsg('${name}')">
+        <button class="chat-send" onclick="sendUserMsg('${name}')">➤</button>
+      </div>
+    </div>`;
+  const el=document.getElementById('chat-msgs');
+  if(el) el.scrollTop=el.scrollHeight;
+}
+
+function sendUserMsg(name){
+  const inp=document.getElementById('chat-input');
+  if(!inp||!inp.value.trim()) return;
+  const txt=inp.value;
+  if(!userChatHistory[name]) userChatHistory[name]=[];
+  userChatHistory[name].push({from:'user',text:txt});
+  inp.value='';
+  // Si réponse à l'admin → wali response
+  const match=matchesData.find(m=>m.femmeId===1);
+  if(match && name==='Administratrice' && !match.waliResponse){
+    match.waliResponse={text:txt};
+    const ex=waliResponses.find(r=>r.matchId===match.id);
+    if(!ex) waliResponses.push({matchId:match.id,femmeId:1,prenom:'Yasmine',response:txt,time:'À l\'instant',read:false});
+    updateAdminBadges();
+  }
+  openChat(name,'admin');
+  showToast('✅ Message envoyé','green');
+}
+
+// ══════════ NOTIFICATIONS ══════════
+// type: 'demande_recue' | 'like' | 'systeme' | 'acceptee' | 'refusee'
+const userNotifs=[
+  {id:'n1', type:'demande_recue', icon:'💌', text:'<strong>Ibrahim</strong> vous a envoyé une demande de mise en relation', time:'Il y a 2h',  unread:true,  profileId:5, fromPrenom:'Ibrahim', statut:'en_attente'},
+  {id:'n2', type:'systeme',       icon:'✅', text:'Votre profil a été <strong>validé</strong> par l\'administratrice',           time:'Il y a 1j', unread:true,  profileId:null},
+  {id:'n3', type:'like',          icon:'💛', text:'<strong>Moussa</strong> a liké votre profil',                                  time:'Il y a 2j', unread:true,  profileId:7,  fromPrenom:'Moussa'},
+  {id:'n5', type:'demande_recue', icon:'💌', text:'<strong>Youssef</strong> vous a envoyé une demande de mise en relation',       time:'Il y a 4j', unread:false, profileId:6,  fromPrenom:'Youssef', statut:'en_attente'},
+];
+
+function renderNotifs(c){
+  document.getElementById('notif-badge').style.display='none';
+  let html=`<div class="page-header"><h2>Notifications</h2></div><div class="notif-list">`;
+  userNotifs.forEach(n=>{
+    const isDemande = n.type==='demande_recue';
+    const accepted  = n.statut==='acceptee';
+    const refused   = n.statut==='refusee';
+    const pending   = n.statut==='en_attente';
+
+    html+=`<div class="notif-item ${n.unread?'unread':''} ${n.profileId&&!isDemande?'clickable':''}"
+      ${n.profileId&&!isDemande?`onclick="openProfileFromNotif(${n.profileId})"`:''}>
+      <div class="notif-icon">${accepted?'💚':refused?'✗':n.icon}</div>
+      <div style="flex:1">
+        <div class="notif-text">${n.text}</div>
+        <div class="notif-time">${n.time}</div>`;
+
+    if(isDemande && pending){
+      // Boutons Voir profil + Accepter + Refuser
+      html+=`<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-outline btn-sm" style="width:100%;font-size:.82rem" onclick="openProfileFromNotifDemande('${n.id}',${n.profileId})">
+          👤 Voir le profil de ${n.fromPrenom}
+        </button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" style="flex:1;background:var(--green);color:#fff;font-size:.82rem" onclick="acceptDemande('${n.id}')">
+            ✓ Accepter
+          </button>
+          <button class="btn btn-sm" style="flex:1;background:rgba(192,57,43,.2);color:var(--red);border:1px solid var(--red);font-size:.82rem" onclick="refuseDemande('${n.id}')">
+            ✗ Refuser
+          </button>
+        </div>
+      </div>`;
+    } else if(isDemande && accepted){
+      html+=`<div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+        <span style="color:var(--green);font-size:.82rem">✓ Demande acceptée</span>
+        <button class="btn-tiny msg" onclick="openProfileFromNotif(${n.profileId})">Voir profil</button>
+      </div>`;
+    } else if(isDemande && refused){
+      html+=`<div style="margin-top:8px"><span style="color:var(--red);font-size:.82rem">✗ Demande refusée</span></div>`;
+    } else if(n.profileId){
+      html+=`<div style="font-size:.7rem;color:var(--gold);margin-top:4px">Appuyer pour voir le profil →</div>`;
+    }
+
+    html+=`</div></div>`;
+  });
+  html+=`</div>`;
+  c.innerHTML=html;
+}
+
+// Ouvre le profil depuis une demande reçue SANS quitter les notifs (overlay par dessus)
+function openProfileFromNotifDemande(notifId, profileId){
+  const p=allProfiles.find(x=>x.id===profileId);
+  if(!p) return;
+  const av=p.gender==='femme'?svgFemme(70):svgHomme(70);
+  const dot=onlineDot(p.id,10);
+  const lastSeen=lastSeenText[p.id]||'Hors ligne';
+  const onlineColor=onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)';
+
+  // Afficher dans un modal dédié
+  const existing=document.getElementById('modal-profil-demande');
+  if(existing) existing.remove();
+
+  const overlay=document.createElement('div');
+  overlay.id='modal-profil-demande';
+  overlay.className='modal-overlay open';
+  overlay.innerHTML=`
+    <div class="modal" style="max-width:400px;padding:0;overflow:hidden">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#0e1a0a,#1a2f10);padding:24px 16px;text-align:center;position:relative">
+        <button onclick="document.getElementById('modal-profil-demande').remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer">×</button>
+        <div style="margin-bottom:10px">${av}</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem">${p.prenom}</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;font-size:.8rem;color:${onlineColor}">${dot} ${lastSeen}</div>
+        <div style="color:var(--muted);font-size:.82rem;margin-top:4px">${p.age} ans · ${p.ville} · ${p.origine}</div>
+      </div>
+      <!-- Infos -->
+      <div style="padding:16px">
+        <div style="background:var(--black);border-radius:8px;padding:12px;margin-bottom:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.82rem">
+            <div><span style="color:var(--muted)">Pratique</span><br>${p.pratique}</div>
+            <div><span style="color:var(--muted)">Situation</span><br>${p.situation}</div>
+            <div><span style="color:var(--muted)">${p.voile?'Voile':'Barbe'}</span><br>${p.voile||p.barbe||'—'}</div>
+            <div><span style="color:var(--muted)">Madhhab</span><br>${p.madhhab}</div>
+          </div>
+        </div>
+        ${p.bio?`<div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:14px">${p.bio}</div>`:''}
+        <!-- Actions -->
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-sm" style="flex:1;background:var(--green);color:#fff" onclick="acceptDemandeFromModal('${notifId}')">✓ Accepter</button>
+          <button class="btn btn-sm" style="flex:1;background:rgba(192,57,43,.2);color:var(--red);border:1px solid var(--red)" onclick="refuseDemandeFromModal('${notifId}')">✗ Refuser</button>
+        </div>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+async function acceptDemande(notifId){
+  const n=userNotifs.find(x=>x.id===notifId);
+  if(!n) return;
+  n.statut='acceptee';
+  n.unread=false;
+  // Mettre à jour en base si c'est une vraie demande DB
+  if(n.dbId){
+    await getSB().from('demandes').update({statut:'acceptee'}).eq('id', n.dbId);
+    // Créer un échange
+    await getSB().from('echanges').insert({
+      femme_profile_id: state.user.gender==='femme' ? state.user.id : n.profileId,
+      homme_profile_id: state.user.gender==='homme' ? state.user.id : n.profileId,
+      created_at: new Date().toISOString(),
+    });
+  }
+  showToast(`✅ Demande de ${n.fromPrenom} acceptée !`,'green');
+  // Ajouter aux échanges locaux
+  const femmeId=state.user.gender==='femme'?state.user.id||1:n.profileId;
+  const hommeId=state.user.gender==='homme'?state.user.id||1:n.profileId;
+  if(!exchangesList.some(e=>e.femmeId===femmeId&&e.hommeId===hommeId)){
+    exchangesList.push({femmeId, hommeId});
+  }
+  renderNotifs(document.getElementById('app-content'));
+}
+
+function acceptDemandeFromModal(notifId){
+  document.getElementById('modal-profil-demande')?.remove();
+  acceptDemande(notifId);
+}
+
+async function refuseDemande(notifId){
+  const n=userNotifs.find(x=>x.id===notifId);
+  if(!n) return;
+  n.statut='refusee';
+  n.unread=false;
+  if(n.dbId){
+    await getSB().from('demandes').update({statut:'refusee'}).eq('id', n.dbId);
+  }
+  showToast(`Demande de ${n.fromPrenom} refusée`,'red');
+  renderNotifs(document.getElementById('app-content'));
+}
+
+function refuseDemandeFromModal(notifId){
+  document.getElementById('modal-profil-demande')?.remove();
+  refuseDemande(notifId);
+}
+
+function openProfileFromNotif(profileId){
+  // Marquer les notifs comme lues
+  userNotifs.forEach(n=>{if(n.profileId===profileId) n.unread=false;});
+  // Naviguer sur l'onglet explorer puis afficher le profil
+  state.currentNav='explorer';
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=document.getElementById('nav-explorer');
+  if(el) el.classList.add('active');
+  openProfile(profileId);
+}
+
+// ══════════ MON PROFIL ══════════
+function renderMyProfile(c){
+  const u=state.user||{};
+  const acceptedUsed=Object.values(demandesEnvoyees).filter(d=>d==='acceptee').length;
+  const remaining=Math.max(0,3-acceptedUsed);
+  const dots=[0,1,2].map(i=>`<div class="demand-dot ${i>=remaining?'used':''}"></div>`).join('');
+  const av=u.gender==='femme'?svgFemme(60):svgHomme(60);
+  const completion=getProfileCompletion(u);
+  const isVerified=u.audio_attested||u.status==='active';
+
+  c.innerHTML=`
+    <div class="my-profile-header">
+      <div style="margin-bottom:8px">${av}</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.35rem">${u.prenom||'Mon profil'}
+        ${isVerified?'<span class="verified-badge" style="margin-left:6px;vertical-align:middle">✓ Vérifié</span>':''}
+      </h2>
+      <p style="color:var(--muted);font-size:.84rem;margin-top:4px">${u.age||''}${u.age?' ans':''} · ${u.ville||''}</p>
+      <span class="status-badge ${state.profilePaused?'paused':state.profileActive?'active':'inactive'}">
+        ${state.profilePaused?'⏸ Profil en pause':state.profileActive?'✓ Profil actif':'⚠ Profil non activé'}
+      </span>
+    </div>
+    <div style="padding:16px">
+
+      <!-- Complétion du profil -->
+      <div class="completion-bar">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:.82rem;font-weight:600">Complétion du profil</span>
+          <span style="font-size:.84rem;color:var(--gold);font-weight:700">${completion}%</span>
+        </div>
+        <div class="completion-bar-track">
+          <div class="completion-bar-fill" style="width:${completion}%"></div>
+        </div>
+        ${completion<100?`<p style="font-size:.72rem;color:var(--muted);margin-top:5px">💡 Complétez votre bio pour augmenter votre visibilité</p>`:'<p style="font-size:.72rem;color:var(--green);margin-top:5px">✓ Profil complet !</p>'}
+      </div>
+
+      ${!state.profileActive?`<div class="paywall-banner" style="margin:0 0 14px">
+        <h3>Activez votre profil</h3>
+        <p>Pour accéder aux profils et recevoir des demandes, activez votre profil.</p>
+        <div class="price-tag">5,99 €</div><br>
+        <button class="btn btn-gold btn-sm" onclick="openModal('modal-paywall')">Activer — 5,99 €</button>
+      </div>`:''}
+
+      ${state.profilePaused?`<div style="background:var(--blue-soft);border:1px solid rgba(74,158,255,.3);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;text-align:center">
+        <p style="color:var(--blue);font-size:.84rem;margin-bottom:10px">Votre profil est en pause — invisible pour les autres membres.</p>
+        <button class="btn btn-sm" style="background:var(--blue);color:#fff;font-size:.84rem" onclick="resumeProfile()">▶ Réactiver mon profil</button>
+      </div>`:''}
+
+      <div class="demand-counter">
+        <div>
+          <span style="font-size:.84rem;display:block;font-weight:600">Demandes utilisées</span>
+          <span style="font-size:.72rem;color:var(--muted)">Diminue uniquement si acceptée</span>
+        </div>
+        <div class="demand-dots">${dots}</div>
+      </div>
+
+      <div class="profile-section" style="margin-top:12px">
+        <h4>Mes informations</h4>
+        <div class="profile-detail-row"><span>Prénom</span><span>${u.prenom||'—'}</span></div>
+        <div class="profile-detail-row"><span>Âge</span><span>${u.age||'—'}${u.age?' ans':''}</span></div>
+        <div class="profile-detail-row"><span>Ville</span><span>${u.ville||'—'}</span></div>
+        <div class="profile-detail-row"><span>Email</span><span style="color:var(--muted);font-size:.78rem">${u.email||'—'}</span></div>
+        <div class="profile-detail-row"><span>Statut</span><span class="badge ${state.profileActive?'badge-active':'badge-pending'}">${state.profileActive?'✓ Validé':'⏳ En attente'}</span></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:9px;margin-top:4px">
+        <button class="btn btn-outline btn-sm" onclick="renderEditProfile()">✏️ Modifier mon profil</button>
+        ${!state.profilePaused?`<button class="btn btn-sm" style="background:var(--blue-soft);border:1px solid rgba(74,158,255,.3);color:var(--blue)" onclick="openModal('modal-pause')">⏸ Mettre en pause</button>`:''}
+      </div>
+
+      <!-- Liens utiles -->
+      <div class="profile-section" style="margin-top:12px">
+        <h4>Aide & informations</h4>
+        <div class="profile-detail-row" style="cursor:pointer" onclick="openFAQ()">
+          <span>❓ Questions fréquentes</span><span style="color:var(--gold)">›</span>
+        </div>
+        <div class="profile-detail-row" style="cursor:pointer" onclick="showLegalPage('cgu')">
+          <span>📄 Conditions d'utilisation</span><span style="color:var(--gold)">›</span>
+        </div>
+        <div class="profile-detail-row" style="cursor:pointer" onclick="showLegalPage('privacy')">
+          <span>🔒 Politique de confidentialité</span><span style="color:var(--gold)">›</span>
+        </div>
+        <div class="profile-detail-row">
+          <span>📧 Contact</span><span style="color:var(--muted);font-size:.78rem">contact@oumelia.com</span>
+        </div>
+        <div class="profile-detail-row">
+          <span>📱 Version</span><span style="color:var(--muted);font-size:.78rem">1.0.0</span>
+        </div>
+      </div>
+
+      <div class="danger-zone" style="margin-top:14px">
+        <h4>⚠ Zone de danger</h4>
+        <button class="btn btn-danger btn-sm" style="width:100%" onclick="openModal('modal-delete')">🗑️ Supprimer mon compte</button>
+        <p style="color:var(--muted);font-size:.72rem;margin-top:8px;text-align:center">Action irréversible. Toutes vos données seront supprimées.</p>
+      </div>
+    </div>`;
+}
+
+function renderEditProfile(){
+  const c=document.getElementById('app-content'),u=state.user||{};
+  scrollToTop();
+  c.innerHTML=`
+    <div class="page-header"><button class="back-btn" onclick="navTo('profil')">←</button><h2>Modifier mon profil</h2></div>
+    <div style="padding:16px">
+      <div class="form-group"><label>Prénom</label><input type="text" id="edit-prenom" value="${u.prenom||''}"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Âge</label><input type="number" id="edit-age" value="${u.age||''}"></div>
+        <div class="form-group"><label>Ville</label><input type="text" id="edit-ville" value="${u.ville||''}"></div>
+      </div>
+      <div class="form-group"><label>Présentation</label><textarea id="edit-bio">${u.bio||''}</textarea></div>
+      <div class="gold-divider"></div>
+      <p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Changer le mot de passe</p>
+      <div class="form-group"><label>Mot de passe actuel</label><input type="password" id="edit-pwd-old" placeholder="••••••••"></div>
+      <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="edit-pwd-new" placeholder="Minimum 8 caractères"></div>
+      <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="submitEdit()">Soumettre pour validation</button>
+      <p style="color:var(--muted);font-size:.73rem;text-align:center;margin-top:10px">Toute modification est vérifiée par l'admin avant publication.</p>
+    </div>`;
+}
+
+async function submitEdit(){
+  const prenom = document.getElementById('edit-prenom')?.value;
+  const age    = document.getElementById('edit-age')?.value;
+  const ville  = document.getElementById('edit-ville')?.value;
+  const bio    = document.getElementById('edit-bio')?.value;
+  const newPwd = document.getElementById('edit-pwd-new')?.value;
+
+  if(state.user?.supabaseId){
+    await getSB().from('profils').update({
+      prenom: prenom||state.user.prenom,
+      age: age||state.user.age,
+      ville: ville||state.user.ville,
+      bio: bio||state.user.bio,
+      status: 'pending', // repasse en validation
+    }).eq('user_id', state.user.supabaseId);
+
+    if(newPwd && newPwd.length>=8){
+      await getSB().auth.updateUser({ password: newPwd });
+    }
+  }
+  navTo('profil');
+  showToast('✅ Modification soumise — en attente de validation');
+}
+
+async function pauseProfile(){
+  closeModal('modal-pause');
+  state.profilePaused=true;
+  if(state.user?.supabaseId){
+    await getSB().from('profils').update({status:'paused'}).eq('user_id', state.user.supabaseId);
+  }
+  renderTab('profil');
+  showToast('⏸ Profil mis en pause — vous êtes invisible','blue');
+}
+
+async function resumeProfile(){
+  state.profilePaused=false;
+  if(state.user?.supabaseId){
+    await getSB().from('profils').update({status:'active'}).eq('user_id', state.user.supabaseId);
+  }
+  renderTab('profil');
+  showToast('▶ Profil réactivé ! Vous êtes à nouveau visible','green');
+}
+
+async function deleteAccount(){
+  const val=document.getElementById('delete-confirm-input').value;
+  if(val!=='SUPPRIMER') return showToast('⚠ Tapez exactement "SUPPRIMER"','red');
+  closeModal('modal-delete');
+  showToast('🗑️ Suppression en cours...','red');
+  if(state.user?.supabaseId){
+    // Supprimer le profil et toutes les données liées
+    await getSB().from('demandes').delete().or(`from_profile_id.eq.${state.user.id},to_profile_id.eq.${state.user.id}`);
+    await getSB().from('messages').delete().or(`from_id.eq.${state.user.id},to_id.eq.${state.user.id}`);
+    await getSB().from('echanges').delete().or(`femme_profile_id.eq.${state.user.id},homme_profile_id.eq.${state.user.id}`);
+    await getSB().from('profils').delete().eq('user_id', state.user.supabaseId);
+    await getSB().auth.signOut();
+  }
+  setTimeout(()=>{ state.user=null; state.isAdmin=false; showScreen('screen-landing'); },1500);
+}
+
+// ══════════ BOOST ══════════
+function renderBoost(c){
+  c.innerHTML=`
+    <div class="page-header"><h2>Boostez votre profil ⚡</h2></div>
+    <div style="padding:16px">
+      <div class="boost-promo">
+        <h4>✦ Restez en tête de liste</h4>
+        <p>Votre profil apparaît en premier dans les résultats pendant 7 jours.</p>
+        <div class="price-tag" style="font-size:1.15rem">2,99 €</div>
+        <p style="font-size:.72rem;color:var(--muted);margin:6px 0 10px">7 jours de visibilité maximale</p>
+        <button class="btn btn-gold" onclick="buyBoost()">⚡ Booster mon profil — 2,99 €</button>
+      </div>
+      <div class="profile-section">
+        <h4>Ce qu'inclut le boost</h4>
+        <div class="profile-detail-row"><span>Durée</span><span>7 jours</span></div>
+        <div class="profile-detail-row"><span>Position</span><span>En tête de liste</span></div>
+        <div class="profile-detail-row"><span>Badge visible</span><span>⚡ BOOST</span></div>
+        <div class="profile-detail-row"><span>Prix</span><span>2,99 €</span></div>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════
+// ADMIN
+// ══════════════════════════════
+function updateAdminBadges(){
+  const np=allProfiles.filter(p=>p.status==='pending').length;
+  const pb=document.getElementById('pending-badge');
+  if(pb) pb.textContent=np||'';
+  const nw=waliResponses.filter(r=>!r.read).length;
+  const wb=document.getElementById('wali-badge');
+  if(wb) wb.textContent=nw>0?nw:'';
+}
+
+function adminTab(tab){
+  state.activeAdminTab=tab;
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  const el=document.getElementById('atab-'+tab);
+  if(el) el.classList.add('active');
+  const c=document.getElementById('admin-content');
+  scrollToTop();
+  switch(tab){
+    case 'dashboard': renderAdminDashboard(c); break;
+    case 'pending':   renderAdminPending(c);   break;
+    case 'users':     renderAdminUsers(c);     break;
+    case 'matches':   renderAdminMatches(c);   break;
+    case 'wali':      renderAdminWali(c);      break;
+    case 'msgs':      renderAdminMsgs(c);      break;
+  }
+}
+
+function renderAdminDashboard(c){
+  const active=allProfiles.filter(p=>p.status==='active').length;
+  const pending=allProfiles.filter(p=>p.status==='pending').length;
+  const paid=allProfiles.filter(p=>p.paid).length;
+  const femmes=allProfiles.filter(p=>p.gender==='femme').length;
+  const hommes=allProfiles.filter(p=>p.gender==='homme').length;
+  const nwali=waliResponses.filter(r=>!r.read).length;
+  const nOnline=allProfiles.filter(p=>onlineStatus[p.id]==='online').length;
+  const nExchanges=exchangesList.length;
+  c.innerHTML=`<div style="padding:16px">
+    <div class="section-title">📊 Vue d'ensemble</div>
+    <div class="admin-stats">
+      <div class="stat-card"><div class="stat-num gold-text">${active}</div><div class="stat-label">Profils actifs</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--gold)">${pending}</div><div class="stat-label">En attente</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#39ff7a">${nOnline}</div><div class="stat-label">En ligne</div></div>
+      <div class="stat-card"><div class="stat-num gold-text">${(paid*5.99).toFixed(0)}€</div><div class="stat-label">Revenus</div></div>
+    </div>
+    <div class="admin-stats">
+      <div class="stat-card"><div class="stat-num" style="color:#E91E63">${femmes}</div><div class="stat-label">Sœurs</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#2196F3">${hommes}</div><div class="stat-label">Frères</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">${nExchanges}</div><div class="stat-label">Échanges</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">${nwali}</div><div class="stat-label">Rép. Wali</div></div>
+    </div>
+    <div class="gold-divider"></div>
+    <div class="section-title">⚡ Actions rapides</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <button class="btn btn-gold btn-sm" onclick="adminTab('pending')">⏳ Attentes (${pending})</button>
+      <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="adminTab('wali')">🌸 Rép. Wali (${nwali})</button>
+    </div>
+    <div class="section-title">🔔 Activité récente</div>
+    <div class="notif-item unread"><div class="notif-icon">🌸</div><div><div class="notif-text"><strong>Yasmine</strong> a répondu au message Wali</div><div class="notif-time">Il y a 1h</div></div></div>
+    <div class="notif-item unread"><div class="notif-icon">💚</div><div><div class="notif-text">Nouveau match : <strong>Maryam</strong> × <strong>Youssef</strong></div><div class="notif-time">Il y a 2h</div></div></div>
+    <div class="notif-item"><div class="notif-icon">🌸</div><div><div class="notif-text">Nouveau profil : <strong>Fatima</strong> (audio à vérifier)</div><div class="notif-time">Il y a 5h</div></div></div>
+  </div>`;
+}
+
+function renderAdminPending(c){
+  const pending=allProfiles.filter(p=>p.status==='pending');
+  let html=`<div style="padding:16px"><div class="section-title">⏳ En attente <span class="sc">${pending.length}</span></div>`;
+  if(!pending.length) html+=`<p style="color:var(--muted);text-align:center;padding:28px">Aucun profil en attente ✓</p>`;
+  pending.forEach(p=>{
+    const av=p.gender==='femme'?svgFemme(34):svgHomme(34);
+    html+=`<div class="admin-user-row">
+      <div class="admin-user-avatar">${av}</div>
+      <div class="admin-user-info">
+        <div class="admin-user-name">${p.prenom}, ${p.age} ans — ${p.ville}</div>
+        <div class="admin-user-sub">${p.gender==='femme'?'Sœur':'Frère'} · ${p.pratique} · ${p.origine}
+          ${p.audioAttested?' · <span style="color:var(--gold)">🎙️ Audio à écouter</span>':''}
+          ${!p.paid?' · <span style="color:var(--muted)">Non payé</span>':''}
+        </div>
+      </div>
+      <div class="admin-actions">
+        ${p.audioAttested?`<button class="btn-tiny audio" onclick="openAudioVerif(${p.id},'${p.prenom}')">🎙</button>`:''}
+        <button class="btn-tiny approve" onclick="approveProfile(${p.id})">✓</button>
+        <button class="btn-tiny reject"  onclick="openRejectModal(${p.id},'${p.prenom}')">✗</button>
+        <button class="btn-tiny msg"     onclick="openAdminMsgModal('${p.prenom}')">✉</button>
+        ${!p.paid?`<button class="btn-tiny free" onclick="freeActivate(${p.id})">🎁</button>`:''}
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  c.innerHTML=html;
+}
+
+function renderAdminUsers(c){
+  c.innerHTML=`<div style="padding:16px">
+    <div style="margin-bottom:12px">
+      <div class="search-input-wrap">
+        <input type="text" placeholder="Rechercher..." oninput="filterAdminUsers(this.value)" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--white);padding:9px 14px 9px 36px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:.88rem">
+      </div>
+    </div>
+    <div id="admin-users-list">${buildUserList(allProfiles)}</div>
+  </div>`;
+}
+
+function buildUserList(list){
+  return list.map(p=>{
+    const av=p.gender==='femme'?svgFemme(34):svgHomme(34);
+    const dot=onlineDot(p.id,8);
+    const inExch=exchangesList.some(e=>e.femmeId===p.id||e.hommeId===p.id);
+    return`<div class="admin-user-row">
+      <div class="admin-user-avatar" style="position:relative">${av}<span style="position:absolute;bottom:0;right:0">${dot}</span></div>
+      <div class="admin-user-info">
+        <div class="admin-user-name">${p.prenom}, ${p.age} ans — ${p.ville} ${inExch?'<span style="color:var(--green);font-size:.66rem">↔ En échange</span>':''}</div>
+        <div class="admin-user-sub">${p.gender==='femme'?'Sœur':'Frère'} · ${p.origine} · 
+          <span class="badge badge-${p.status}">${p.status==='active'?'Actif':p.status==='pending'?'Attente':'Inactif'}</span>
+          ${p.paid?' · <span style="color:var(--green);font-size:.66rem">✓ Payé</span>':' · <span style="color:var(--muted);font-size:.66rem">Non payé</span>'}
+          · <span style="font-size:.66rem;color:${onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)'}">${lastSeenText[p.id]||'—'}</span>
+        </div>
+      </div>
+      <div class="admin-actions">
+        ${p.status==='active'?`<button class="btn-tiny deact" onclick="deactivateProfile(${p.id})" title="Désactiver">⏸</button>`:''}
+        ${p.status==='inactive'?`<button class="btn-tiny react" onclick="reactivateProfile(${p.id})" title="Réactiver">▶</button>`:''}
+        ${p.status==='pending'?`<button class="btn-tiny approve" onclick="approveProfile(${p.id})">✓</button>`:''}
+        ${!p.paid?`<button class="btn-tiny free" onclick="freeActivate(${p.id})">🎁</button>`:''}
+        <button class="btn-tiny msg" onclick="openAdminMsgModal('${p.prenom}')">✉</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterAdminUsers(q){
+  const filtered=q?allProfiles.filter(p=>p.prenom.toLowerCase().includes(q.toLowerCase())||p.ville.toLowerCase().includes(q.toLowerCase())):allProfiles;
+  const el=document.getElementById('admin-users-list');
+  if(el) el.innerHTML=buildUserList(filtered);
+}
+
+function renderAdminMatches(c){
+  let html=`<div style="padding:16px"><div class="section-title">💚 Mises en relation <span class="sc">${matchesData.length}</span></div>
+  <div style="background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.2);border-radius:8px;padding:10px;margin-bottom:14px;font-size:.78rem;color:var(--muted)">
+    ↔ Les profils marqués <strong style="color:var(--green)">"En échange"</strong> sont visibles comme tels par les deux membres.
+  </div>`;
+  matchesData.forEach((m,idx)=>{
+    const femme=allProfiles.find(p=>p.id===m.femmeId);
+    const homme=allProfiles.find(p=>p.id===m.hommeId);
+    if(!femme||!homme) return;
+    const waliResp=waliResponses.find(r=>r.matchId===m.id);
+    const fDot=onlineDot(femme.id,9);
+    const hDot=onlineDot(homme.id,9);
+    html+=`<div class="match-notif">
+      <div class="match-title">
+        💚 Match · ${m.date}
+        ${m.waliSent?'· <span style="color:var(--green)">Wali ✓</span>':'· <span style="color:var(--gold)">Wali à envoyer</span>'}
+        ${m.hommeNotified?'· <span style="color:var(--blue)">Frère notifié</span>':''}
+        ${waliResp?'· <span style="color:var(--green)">Réponse reçue</span>':''}
+        · <span style="color:var(--green)">↔ En échange</span>
+      </div>
+      <div class="match-profiles">
+        <div class="match-mini-profile">
+          <div style="position:relative;display:inline-block">${svgFemme(38)}<span style="position:absolute;bottom:0;right:0">${fDot}</span></div>
+          <div class="mini-name">${femme.prenom}, ${femme.age}</div>
+          <div class="mini-hint">${femme.ville} · ${lastSeenText[femme.id]||''}</div>
+        </div>
+        <div class="match-heart">↔</div>
+        <div class="match-mini-profile">
+          <div style="position:relative;display:inline-block">${svgHomme(38)}<span style="position:absolute;bottom:0;right:0">${hDot}</span></div>
+          <div class="mini-name">${homme.prenom}, ${homme.age}</div>
+          <div class="mini-hint">${homme.ville} · ${lastSeenText[homme.id]||''}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        ${!m.waliSent?`<button class="btn-tiny approve" onclick="sendWaliFromMatch(${idx})">🌸 Envoyer Wali auto</button>`:''}
+        <button class="btn-tiny msg" onclick="openAdminChatDirect('${femme.prenom}','femme')">✉ ${femme.prenom}</button>
+        <button class="btn-tiny msg" onclick="openAdminChatDirect('${homme.prenom}','homme')">✉ ${homme.prenom}</button>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  c.innerHTML=html;
+}
+
+function renderAdminWali(c){
+  let html=`<div style="padding:16px"><div class="section-title">🌸 Réponses Wali <span class="sc">${waliResponses.length}</span></div>`;
+  if(!waliResponses.length){
+    html+=`<div style="padding:30px;text-align:center;color:var(--muted)"><div style="font-size:2rem;margin-bottom:10px">🌸</div><p>Aucune réponse reçue.</p></div>`;
+  }
+  waliResponses.forEach(wr=>{
+    const match=matchesData.find(m=>m.id===wr.matchId);
+    const homme=match?allProfiles.find(p=>p.id===match.hommeId):null;
+    html+=`<div class="wali-response-item">
+      <div class="wr-title">
+        Réponse de ${wr.prenom} ${!wr.read?'· <span style="color:var(--gold);font-weight:700">NOUVEAU</span>':''} · ${wr.time}
+        ${homme?`· Demande de <strong>${homme.prenom}</strong>`:''}
+      </div>
+      <div class="wr-msg">${wr.response}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-tiny msg" onclick="openAdminChatDirect('${wr.prenom}','femme');markWaliRead('${wr.matchId}')">💬 Répondre</button>
+        ${homme?`<button class="btn-tiny react" onclick="notifyHomme('${homme.prenom}','${wr.prenom}')">📨 Notifier ${homme.prenom}</button>`:''}
+        <button class="btn-tiny deact" onclick="markWaliRead('${wr.matchId}');adminTab('wali')">✓ Marquer lu</button>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  c.innerHTML=html;
+}
+
+function markWaliRead(matchId){const wr=waliResponses.find(r=>r.matchId===matchId);if(wr)wr.read=true;updateAdminBadges();}
+
+function notifyHomme(hommePrenom,femmePrenom){
+  if(!adminConvos[hommePrenom]) adminConvos[hommePrenom]=[];
+  adminConvos[hommePrenom].push({from:'admin',text:`Assalamu Alaykum ${hommePrenom},\n\nLa sœur ${femmePrenom} a répondu concernant son Wali. Nous vous tiendrons informé de la suite inchallah.\n\nBarak Allahu fikoum.\nOumelia`});
+  showToast(`📨 ${hommePrenom} notifié`,'green');
+}
+
+function renderAdminMsgs(c){
+  const members=allProfiles.filter(p=>p.status==='active');
+  let html=`<div style="padding:16px"><div class="section-title">✉️ Conversations</div>`;
+  html+=members.map(p=>{
+    const av=p.gender==='femme'?svgFemme(36):svgHomme(36);
+    const last=adminConvos[p.prenom]?.slice(-1)[0];
+    return`<div class="convo-item" onclick="openAdminChatDirect('${p.prenom}','${p.gender}')">
+      <div class="convo-avatar">${av}</div>
+      <div class="convo-info">
+        <div class="convo-name">${p.prenom}, ${p.age} ans</div>
+        <div class="convo-preview">${last?last.text:'Aucun message'}</div>
+      </div>
+      <div class="convo-time">${p.ville}</div>
+    </div>`;
+  }).join('');
+  html+=`</div>`;
+  c.innerHTML=html;
+}
+
+function openAdminChatDirect(name,gender){
+  if(!adminConvos[name]) adminConvos[name]=[];
+  scrollToTop();
+  renderAdminChatView(document.getElementById('admin-content'),name,gender);
+}
+
+function renderAdminChatView(c,name,gender){
+  const msgs=adminConvos[name]||[];
+  const av=gender==='femme'?svgFemme(30):svgHomme(30);
+  c.innerHTML=`
+    <div class="page-header" style="background:var(--dark);position:sticky;top:0;z-index:10">
+      <button class="back-btn" onclick="adminTab('msgs')">←</button>
+      <div style="width:30px">${av}</div><h2>${name}</h2>
+    </div>
+    <div class="chat-wrap">
+      <div class="chat-messages" id="admin-chat-msgs">
+        ${msgs.map(m=>`<div class="msg ${m.from==='admin'?'mine':'theirs'}">${m.text}</div>`).join('')||'<p style="color:var(--muted);text-align:center;padding:20px;font-size:.84rem">Commencez la conversation</p>'}
+      </div>
+      <div class="chat-input-bar">
+        <input type="text" id="admin-chat-input" placeholder="Message admin..." onkeydown="if(event.key==='Enter')sendAdminChat('${name}','${gender}')">
+        <button class="chat-send" onclick="sendAdminChat('${name}','${gender}')">➤</button>
+      </div>
+    </div>`;
+  const el=document.getElementById('admin-chat-msgs');
+  if(el) el.scrollTop=el.scrollHeight;
+}
+
+function sendAdminChat(name,gender){
+  const inp=document.getElementById('admin-chat-input');
+  if(!inp||!inp.value.trim()) return;
+  if(!adminConvos[name]) adminConvos[name]=[];
+  adminConvos[name].push({from:'admin',text:inp.value});
+  inp.value='';
+  renderAdminChatView(document.getElementById('admin-content'),name,gender);
+  showToast(`✉️ Message envoyé à ${name}`,'green');
+}
+
+// ══════════ ADMIN ACTIONS ══════════
+async function approveProfile(id){
+  const p=getAdminProfile(id); if(!p) return;
+  p.status='active'; p.paid=true; p.audio_attested=false;
+  if(p.user_id) await getSB().from('profils').update({status:'active', audio_attested:false}).eq('id',id);
+  updateAdminBadges(); showToast(`✅ Profil de ${p.prenom} validé`,'green');
+  adminTab(state.activeAdminTab);
+}
+
+async function freeActivate(id){
+  const p=getAdminProfile(id); if(!p) return;
+  p.status='active'; p.paid=true;
+  if(p.user_id) await getSB().from('profils').update({status:'active', paid:true}).eq('id',id);
+  updateAdminBadges(); showToast(`🎁 ${p.prenom} activé gratuitement`,'gold');
+  adminTab(state.activeAdminTab);
+}
+
+async function deactivateProfile(id){
+  const p=getAdminProfile(id); if(!p) return;
+  p.status='inactive';
+  if(p.user_id) await getSB().from('profils').update({status:'inactive'}).eq('id',id);
+  showToast(`⏸ ${p.prenom} désactivé`,'red');
+  adminTab(state.activeAdminTab);
+}
+
+async function reactivateProfile(id){
+  const p=getAdminProfile(id); if(!p) return;
+  p.status='active';
+  if(p.user_id) await getSB().from('profils').update({status:'active'}).eq('id',id);
+  showToast(`▶ ${p.prenom} réactivé`,'green');
+  adminTab(state.activeAdminTab);
+}
+
+// Helper — cherche dans les profils démo ET les profils DB
+function getAdminProfile(id){
+  return (window._adminProfiles||[]).find(p=>p.id===id) || allProfiles.find(p=>p.id===id);
+}
+
+let rejectId=null;
+function openRejectModal(id,name){
+  rejectId=id;
+  document.getElementById('reject-target').textContent=name;
+  document.getElementById('reject-reason').value='';
+  openModal('modal-admin-reject');
+}
+
+async function confirmReject(){
+  const reason=document.getElementById('reject-reason').value;
+  if(!reason.trim()) return showToast('⚠ Entrez une raison','red');
+  const p=getAdminProfile(rejectId); if(p) p.status='inactive';
+  if(p?.user_id) await getSB().from('profils').update({status:'inactive', reject_reason:reason}).eq('id',rejectId);
+  updateAdminBadges(); closeModal('modal-admin-reject');
+  showToast(`✗ ${p?.prenom} notifié(e) du refus`,'red');
+  adminTab(state.activeAdminTab);
+}
+
+let adminMsgTarget='';
+function openAdminMsgModal(name){
+  adminMsgTarget=name;
+  document.getElementById('admin-msg-target').textContent=name;
+  document.getElementById('admin-msg-content').value='';
+  openModal('modal-admin-msg');
+}
+
+function sendAdminMsg(){
+  const msg=document.getElementById('admin-msg-content').value;
+  if(!msg.trim())return showToast('⚠ Écrivez un message','red');
+  if(!adminConvos[adminMsgTarget]) adminConvos[adminMsgTarget]=[];
+  adminConvos[adminMsgTarget].push({from:'admin',text:msg});
+  closeModal('modal-admin-msg');
+  showToast(`✉️ Message envoyé à ${adminMsgTarget}`,'green');
+}
+
+// MATCH → envoi automatique wali + notif homme
+function sendWaliFromMatch(idx){
+  const m=matchesData[idx];if(!m)return;
+  const femme=allProfiles.find(p=>p.id===m.femmeId);
+  const homme=allProfiles.find(p=>p.id===m.hommeId);
+  if(!femme||!homme)return;
+  const waliTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh chère sœur ${femme.prenom},\n\nUne demande de mise en relation vous concernant a été acceptée sur Oumelia. Conformément aux valeurs islamiques et à la sunnah du Prophète ﷺ, nous souhaitons savoir si vous disposez d'un tuteur matrimonial (Wali) pour superviser cette démarche.\n\n• Si vous avez un Wali, merci de nous le confirmer et de nous transmettre ses coordonnées.\n• Si vous n'en avez pas, nous pouvons vous orienter inchallah.\n\nVeuillez répondre directement à ce message.\n\nBarak Allahu fikoum.\nL'équipe Oumelia`;
+  if(!adminConvos[femme.prenom]) adminConvos[femme.prenom]=[];
+  adminConvos[femme.prenom].push({from:'admin',text:waliTxt});
+  m.waliSent=true;
+  const hommeTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh cher frère ${homme.prenom},\n\nAlhamdulillah ! La demande de mise en relation a été acceptée. Nous attendons actuellement la confirmation de la sœur ${femme.prenom} concernant son tuteur matrimonial (Wali).\n\nNous vous contacterons dès que nous aurons sa réponse inchallah.\n\nBarak Allahu fikoum.\nL'équipe Oumelia`;
+  if(!adminConvos[homme.prenom]) adminConvos[homme.prenom]=[];
+  adminConvos[homme.prenom].push({from:'admin',text:hommeTxt});
+  m.hommeNotified=true;
+  showToast(`✅ Wali envoyé à ${femme.prenom} · ${homme.prenom} notifié`,'green');
+  adminTab('matches');
+}
+
+let audioVerifId=null;
+function openAudioVerif(id,name){
+  audioVerifId=id;
+  document.getElementById('audio-target-name').textContent=name;
+  openModal('modal-audio');
+}
+
+function audioValidate(){
+  const p=allProfiles.find(x=>x.id===audioVerifId);if(p){p.status='active';p.paid=true;p.audioAttested=false;}
+  updateAdminBadges();closeModal('modal-audio');
+  showToast(`✅ Audio validé — ${p?.prenom} approuvée`,'green');
+  adminTab(state.activeAdminTab);
+}
+
+function audioRejectFn(){
+  closeModal('modal-audio');
+  const p=allProfiles.find(x=>x.id===audioVerifId);
+  openRejectModal(audioVerifId,p?.prenom||'');
+}
+
+function buyBoost(){
+  openStripePayment('boost', async ()=>{
+    // Activer le boost dans Supabase — expire dans 7 jours
+    if(state.user?.supabaseId){
+      const boostUntil = new Date(Date.now() + 7*24*60*60*1000).toISOString();
+      await getSB().from('profils').update({
+        boosted: true,
+        boost_until: boostUntil,
+      }).eq('user_id', state.user.supabaseId);
+    }
+    showToast('⚡ Boost activé 7 jours ! Barak Allahu fikoum','gold');
+    renderTab('boost');
+  });
+}
+
+// ══════════ STRIPE PAIEMENT INTÉGRÉ ══════════
+const STRIPE_PK = 'pk_live_51RfjYzDBg3GyY5i7Ho8bJ2y526OdrCXNgtxvpQ11HM56BsdSj5UCyzlEK49AzbXR6IJTWmV0KC0APYX9BROSdEYG00TzfS1a3w';
+let stripeClient = null; // initialisé de façon lazy au premier paiement
+let stripeElements = null;
+let stripeCardElement = null;
+let stripeCurrentType = null;
+let stripeCallback = null;
+let stripeClientSecret = null;
+
+function getStripe(){
+  if(!stripeClient){
+    if(typeof Stripe === 'undefined'){
+      showToast('❌ Erreur de chargement Stripe, réessayez','red');
+      return null;
+    }
+    stripeClient = Stripe(STRIPE_PK);
+  }
+  return stripeClient;
+}
+
+const STRIPE_PRODUCTS = {
+  profil:   { name: 'Activation profil Oumelia', price: '5,99 €', amount: 599 },
+  demandes: { name: 'Pack 3 demandes',            price: '2,99 €', amount: 299 },
+  boost:    { name: 'Boost 7 jours',              price: '2,99 €', amount: 299 },
+};
+
+async function openStripePayment(type, callbackFn){
+  const stripe = getStripe();
+  if(!stripe) return;
+  stripeCurrentType = type;
+  stripeCallback = callbackFn;
+  const product = STRIPE_PRODUCTS[type];
+
+  // Afficher le modal
+  document.getElementById('stripe-product-name').textContent = product.name;
+  document.getElementById('stripe-product-price').textContent = product.price;
+  document.getElementById('stripe-error-msg').style.display = 'none';
+  document.getElementById('stripe-pay-btn').disabled = false;
+  document.getElementById('stripe-pay-label').textContent = `🔒 Payer ${product.price}`;
+  document.getElementById('stripe-spinner').style.display = 'none';
+  document.getElementById('stripe-modal-overlay').classList.add('open');
+
+  // Initialiser Stripe Elements
+  stripeElements = stripe.elements();
+  stripeCardElement = stripeElements.create('card', {
+    style: {
+      base: {
+        color: '#F5F0E8',
+        fontFamily: 'Cairo, sans-serif',
+        fontSize: '16px',
+        '::placeholder': { color: '#888' },
+        iconColor: '#C9A84C',
+      },
+      invalid: { color: '#C0392B' },
+    },
+    hidePostalCode: true,
+  });
+  stripeCardElement.mount('#stripe-card-element');
+
+  // Créer le PaymentIntent via Netlify Function
+  try {
+    const res = await fetch('/.netlify/functions/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, email: state.user?.email || '' }),
+    });
+    const data = await res.json();
+    if(data.error){ showStripeError(data.error); return; }
+    stripeClientSecret = data.clientSecret;
+  } catch(err){
+    showStripeError('Erreur de connexion. Vérifiez votre connexion internet.');
+  }
+}
+
+function closeStripeModal(){
+  document.getElementById('stripe-modal-overlay').classList.remove('open');
+  if(stripeCardElement){ stripeCardElement.unmount(); stripeCardElement=null; }
+  stripeClientSecret = null;
+}
+
+async function confirmStripePayment(){
+  if(!stripeClientSecret || !stripeCardElement) return;
+  const stripe = getStripe();
+  if(!stripe) return;
+
+  const btn = document.getElementById('stripe-pay-btn');
+  const spinner = document.getElementById('stripe-spinner');
+  const label = document.getElementById('stripe-pay-label');
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  label.textContent = 'Traitement en cours...';
+
+  const { error, paymentIntent } = await stripe.confirmCardPayment(stripeClientSecret, {
+    payment_method: {
+      card: stripeCardElement,
+      billing_details: {
+        email: state.user?.email || '',
+      },
+    },
+  });
+
+  if(error){
+    showStripeError(error.message);
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    label.textContent = `🔒 Payer ${STRIPE_PRODUCTS[stripeCurrentType]?.price}`;
+    return;
+  }
+
+  if(paymentIntent.status === 'succeeded'){
+    closeStripeModal();
+    if(typeof stripeCallback === 'function') await stripeCallback();
+    showToast('✅ Paiement confirmé ! Barak Allahu fikoum 🌙','green');
+  }
+}
+
+function showStripeError(msg){
+  const el = document.getElementById('stripe-error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+let deferredPrompt=null;
+
+const manifestData={
+  name:"Oumelia",
+  short_name:"Oumelia",
+  description:"Mariage halal pour musulmans pratiquants sunnites",
+  start_url:"/",
+  display:"standalone",
+  background_color:"#080808",
+  theme_color:"#080808",
+  orientation:"portrait",
+  icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23080808'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23C9A84C'/%3E%3Ccircle cx='306' cy='216' r='154' fill='%23080808'/%3E%3Cpath d='M256 170L268 234L332 256L268 278L256 342L244 278L180 256L244 234Z' fill='white' opacity='0.95'/%3E%3C/svg%3E",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]
+};
+
+const manifestBlob=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
+document.getElementById('pwa-manifest').href=URL.createObjectURL(manifestBlob);
+document.getElementById('apple-icon').href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23080808'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23C9A84C'/%3E%3Ccircle cx='306' cy='216' r='154' fill='%23080808'/%3E%3Cpath d='M256 170L268 234L332 256L268 278L256 342L244 278L180 256L244 234Z' fill='white' opacity='0.95'/%3E%3C/svg%3E";
+
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('pwa-install-btn').style.display='block';
+});
+
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('pwa-install-btn').style.display='none';
+  showToast('✅ Oumelia installée sur votre écran d\'accueil !','green');
+});
+
+function installPWA(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(r=>{
+      if(r.outcome==='accepted') showToast('✅ Oumelia installée !','green');
+      deferredPrompt=null;
+      document.getElementById('pwa-install-btn').style.display='none';
+    });
+  } else {
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+    if(isIOS) showToast('Safari : appuyez ⬆ → "Sur l\'écran d\'accueil"','gold');
+    else showToast('Chrome : menu ⋮ → "Installer l\'application"','gold');
+  }
+}
+
+if('serviceWorker' in navigator){
+  const sw=`self.addEventListener('install',e=>{e.waitUntil(caches.open('oumelia-v2').then(c=>c.addAll(['/']).catch(()=>{})));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response(''))));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+}
+
+// ══════════ INIT ══════════
+document.getElementById('field-voile').style.display='none';
+document.getElementById('field-barbe').style.display='';
+
+// Charger Supabase et Stripe dynamiquement après le chargement de la page
+function loadScript(src, onload, onerror){
+  const s = document.createElement('script');
+  s.src = src;
+  s.onload = onload || (()=>{});
+  s.onerror = onerror || (()=>{});
+  document.head.appendChild(s);
+}
+
+// Charger les scripts après que la page soit prête
+window.addEventListener('load', ()=>{
+  loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', ()=>{
+    setTimeout(initDB, 100);
+  });
+  // Stripe — chargé en fallback si le premier échoue
+  loadScript('https://js.stripe.com/v3/', ()=>{}, ()=>{
+    // Fallback via unpkg si jsdelivr bloqué
+    loadScript('https://unpkg.com/@stripe/stripe-js@latest/dist/stripe.js', ()=>{});
+  });
+});
+</script>
+</body>
+</html>
