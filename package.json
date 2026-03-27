@@ -1,0 +1,7 @@
+{
+  "name": "oumelia-root",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@netlify/plugin-functions-install-core": "^1.0.3"
+  }
+}
