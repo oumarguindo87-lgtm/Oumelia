@@ -374,11 +374,23 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
 /* ══ COMPATIBLE TAG ══ */
 .compatible-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:3px 9px;border-radius:10px;font-size:.68rem;}
 
-/* ══ SORT BAR ══ */
-.sort-bar{display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:none;}
-.sort-bar::-webkit-scrollbar{display:none;}
-.sort-chip{white-space:nowrap;padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:.74rem;cursor:pointer;transition:all .2s;}
-.sort-chip.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);}
+/* ══ SORT CHIP SHIMMER ══ */
+.sort-chip{white-space:nowrap;padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:.74rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.sort-chip::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(201,168,76,.25) 50%,transparent 100%);transform:translateX(-100%);transition:none;}
+.sort-chip.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);box-shadow:0 0 12px rgba(201,168,76,.2);}
+.sort-chip.active::after{animation:chipShimmer .6s ease forwards;}
+@keyframes chipShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* ══ SWIPE TOUCH ══ */
+.swipe-card{width:100%;max-width:340px;background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;transition:transform .35s cubic-bezier(.25,.46,.45,.94),opacity .35s;box-shadow:var(--shadow);cursor:grab;user-select:none;}
+.swipe-card:active{cursor:grabbing;}
+.swipe-card.dragging{transition:none;}
+.swipe-overlay{position:absolute;inset:0;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:900;opacity:0;transition:opacity .15s;pointer-events:none;z-index:10;}
+.swipe-overlay.left{background:linear-gradient(135deg,rgba(224,82,82,.7),transparent);color:#fff;}
+.swipe-overlay.right{background:linear-gradient(225deg,rgba(46,204,113,.7),transparent);color:#fff;}
+.swipe-hint{display:flex;align-items:center;justify-content:center;gap:20px;color:var(--muted);font-size:.72rem;margin-top:10px;}
+.swipe-hint-arrow{display:flex;align-items:center;gap:5px;}
+.swipe-actions{display:flex;justify-content:center;gap:16px;padding:12px 0 0;}
 
 /* ══ REGION TAG ══ */
 .region-tag{display:inline-flex;align-items:center;gap:3px;color:var(--muted);font-size:.72rem;}
@@ -409,16 +421,30 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
 <!-- ══ LANDING ══ -->
 <div id="screen-landing" class="screen active">
   <div class="landing-bismillah">بسم الله الرحمن الرحيم</div>
-  <!-- LOGO inspiré de la photo : cercle doré + lune (cercle noir décalé) + étoile blanche -->
+  <!-- LOGO : cercle doré avec étoile blanche centrée et lune blanche -->
   <div class="logo-mark">
-    <div class="logo-circle-outer">
-      <div class="logo-circle-inner"></div>
-      <div class="logo-star">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M11 1L12.5 9.5L21 11L12.5 12.5L11 21L9.5 12.5L1 11L9.5 9.5Z" fill="white" opacity="0.95"/>
-        </svg>
-      </div>
-    </div>
+    <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <!-- Cercle blanc extérieur (lune/halo) -->
+      <circle cx="50" cy="50" r="48" fill="white" opacity="0.95"/>
+      <!-- Cercle doré principal -->
+      <circle cx="50" cy="50" r="42" fill="url(#goldGrad)"/>
+      <!-- Cercle noir décalé pour créer l'effet lune -->
+      <circle cx="62" cy="38" r="32" fill="url(#goldGrad2)"/>
+      <!-- Étoile blanche centrale -->
+      <path d="M50 28 L52.5 44 L68 50 L52.5 56 L50 72 L47.5 56 L32 50 L47.5 44 Z" fill="white" opacity="0.95"/>
+      <defs>
+        <radialGradient id="goldGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#f5e8a0"/>
+          <stop offset="45%" stop-color="#C9A84C"/>
+          <stop offset="100%" stop-color="#7a5810"/>
+        </radialGradient>
+        <radialGradient id="goldGrad2" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#d4a843"/>
+          <stop offset="50%" stop-color="#C9A84C"/>
+          <stop offset="100%" stop-color="#8B6914"/>
+        </radialGradient>
+      </defs>
+    </svg>
   </div>
   <h1 class="landing-logo-name gold-text">OUMELIA</h1>
   <p class="landing-tagline">✦ Trouver sa moitié dans la voie d'Allah ✦</p>
@@ -530,12 +556,12 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
             <select id="reg-origine"><option value="">Choisir</option><option>Algérienne</option><option>Marocaine</option><option>Tunisienne</option><option>Française</option><option>Sénégalaise</option><option>Malienne</option><option>Turque</option><option>Égyptienne</option><option>Syrienne</option><option>Pakistanaise</option><option>Autre</option></select>
           </div>
           <div class="form-group"><label>Situation</label>
-            <select id="reg-situation"><option>Célibataire</option><option>Veuf(ve)</option><option>Divorcé(e)</option><option>Converti(e)</option></select>
+            <select id="reg-situation"><option>Jamais marié(e)</option><option>Divorcé(e)</option><option>Veuf(ve)</option></select>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>A des enfants</label><select id="reg-enfants"><option value="non">Non</option><option value="oui">Oui</option></select></div>
-          <div class="form-group"><label>Veut des enfants</label><select id="reg-veut-enfants"><option>Oui</option><option>Non</option><option>Inchallah</option></select></div>
+          <div class="form-group"><label>Veut des enfants</label><select id="reg-veut-enfants"><option>Oui</option><option>Non</option></select></div>
         </div>
         <div class="form-group"><label>Présentation</label><textarea id="reg-bio" placeholder="Parlez de vous dans le respect de la pudeur islamique..." rows="3"></textarea></div>
         <div class="form-group"><label>Ce que je recherche</label><textarea id="reg-recherche" placeholder="Décrivez ce que vous attendez de votre futur(e) époux(se)..." rows="3"></textarea></div>
@@ -559,7 +585,7 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
           <div class="form-group"><label>Madhhab</label><select id="reg-madhhab"><option>Hanafite</option><option>Malékite</option><option>Chaféite</option><option>Hanbalite</option><option>Peu importe</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Alimentation</label><select id="reg-halal"><option>Oui strict</option><option>Oui globalement</option><option>En progression</option></select></div>
+          <div class="form-group"><label>Alimentation halal</label><select id="reg-halal"><option>Oui</option><option>Non</option></select></div>
           <div class="form-group"><label>Fumeur(se)</label><select id="reg-fumeur"><option>Non</option><option>Oui</option><option>J'arrête</option></select></div>
         </div>
         <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="regStep3()">Continuer → Créer le compte</button>
@@ -589,12 +615,39 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
         </div>
         <div id="audio-attestation" class="hidden">
           <div class="gold-divider"></div>
-          <p style="color:var(--gold);font-size:.84rem;margin-bottom:10px;text-align:center">✦ Attestation audio obligatoire</p>
-          <p style="color:var(--muted);font-size:.78rem;margin-bottom:14px;line-height:1.6;text-align:center">Enregistrez vocalement votre attestation. L'administratrice vérifiera l'audio avant validation.</p>
+          <p style="color:var(--gold);font-size:.84rem;margin-bottom:6px;text-align:center">✦ Attestation audio obligatoire</p>
+          <p style="color:var(--muted);font-size:.78rem;margin-bottom:14px;line-height:1.6;text-align:center">Lisez la phrase ci-dessous à voix haute. L'administratrice vérifiera l'enregistrement avant validation.</p>
+
           <div class="audio-record-area">
+            <!-- Phrase à lire -->
+            <div style="background:var(--gold-soft);border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:12px;margin-bottom:16px;text-align:center">
+              <p style="font-size:.78rem;color:var(--muted);margin-bottom:4px">Lisez cette phrase :</p>
+              <p style="font-size:.92rem;color:var(--gold);font-weight:600;font-style:italic;line-height:1.6">"Je prends Allah comme témoin que je suis bien une femme cherchant le mariage halal sur Oumelia"</p>
+            </div>
+
+            <!-- Compte à rebours -->
+            <div id="rec-countdown-wrap" style="display:none;text-align:center;margin-bottom:12px">
+              <div id="rec-countdown" style="font-size:2.5rem;font-weight:800;color:var(--red);font-family:'Playfair Display',serif">5</div>
+              <div style="font-size:.72rem;color:var(--muted)">secondes restantes</div>
+              <!-- Barre de progression de l'enregistrement -->
+              <div style="height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden">
+                <div id="rec-progress-bar" style="height:100%;background:var(--red);border-radius:2px;width:0%;transition:width .1s linear"></div>
+              </div>
+            </div>
+
+            <!-- Bouton micro -->
             <button class="record-btn" id="rec-btn" onclick="toggleRecord()">🎙️</button>
-            <p id="rec-status" style="color:var(--muted);font-size:.82rem">Appuyez pour enregistrer :<br><em style="color:var(--gold)">"Je prends Allah comme témoin que je suis bien une femme"</em></p>
-            <p id="rec-done" class="hidden" style="color:var(--green);font-size:.84rem;margin-top:8px">✓ Enregistrement sauvegardé</p>
+
+            <p id="rec-status" style="color:var(--muted);font-size:.82rem;margin-top:8px;text-align:center">Appuyez sur le micro pour commencer</p>
+
+            <!-- Audio playback après enregistrement -->
+            <div id="rec-playback" class="hidden" style="margin-top:12px;text-align:center">
+              <audio id="rec-audio" controls style="width:100%;border-radius:8px;margin-bottom:8px"></audio>
+              <p style="color:var(--green);font-size:.84rem">✓ Enregistrement sauvegardé — écoutez pour vérifier</p>
+              <button onclick="reRecord()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:6px;font-family:'Cairo',sans-serif;font-size:.78rem;cursor:pointer;margin-top:6px">🔄 Recommencer</button>
+            </div>
+
+            <p id="rec-done" class="hidden" style="color:var(--green);font-size:.84rem;margin-top:8px;text-align:center">✓ Enregistrement sauvegardé</p>
           </div>
         </div>
         <!-- CGU -->
@@ -1037,15 +1090,15 @@ const ADMIN_EMAILS = ['admin@oumelia.com','admin@gmail.com','Admin@gmail.com','A
 
 // ══════════ DONNÉES ══════════
 const allProfiles = [
-  {id:1,prenom:'Yasmine', gender:'femme',age:26,ville:'Paris',     origine:'Algérienne', pratique:'Très pratiquant(e)',voile:'Hijab',  barbe:null,            situation:'Célibataire',boosted:true, bio:'Alhamdulillah, je cherche mon moitié dans la sunnah.',madhhab:'Malékite',  coran:'Quotidiennement',halal:'Oui strict',    enfants:'non',veut_enfants:'Inchallah',status:'active', paid:true},
-  {id:2,prenom:'Khadija', gender:'femme',age:31,ville:'Marseille', origine:'Marocaine',  pratique:'Salafi/Sunnah',    voile:'Niqab',  barbe:null,            situation:'Divorcée',   boosted:false,bio:'Mère cherchant à se remarier en Islam.',             madhhab:'Hanbalite', coran:'Quotidiennement',halal:'Oui strict',    enfants:'oui',veut_enfants:'Inchallah',status:'active', paid:true},
-  {id:3,prenom:'Maryam',  gender:'femme',age:24,ville:'Toulouse',  origine:'Française',  pratique:'Pratiquant(e)',    voile:'Jilbab', barbe:null,            situation:'Convertie',  boosted:false,bio:'Convertie depuis 5 ans alhamdulillah.',               madhhab:'Peu importe',coran:'En apprentissage',halal:'Oui strict',  enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
-  {id:4,prenom:'Fatima',  gender:'femme',age:28,ville:'Lyon',      origine:'Sénégalaise',pratique:'Pratiquant(e)',    voile:'Hijab',  barbe:null,            situation:'Célibataire',boosted:false,bio:'Femme sérieuse cherchant un frère pratiquant.',       madhhab:'Malékite',  coran:'Régulièrement',  halal:'Oui globalement',enfants:'non',veut_enfants:'Oui',      status:'pending',paid:false,audioAttested:true},
-  {id:5,prenom:'Ibrahim', gender:'homme',age:30,ville:'Lyon',      origine:'Sénégalais', pratique:'Très pratiquant(e)',voile:null,    barbe:'Oui (sunnah)',  situation:'Célibataire',boosted:false,bio:'Frère sérieux cherchant une épouse pratiquante.',    madhhab:'Malékite',  coran:'Régulièrement',  halal:'Oui strict',    enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
-  {id:6,prenom:'Youssef', gender:'homme',age:28,ville:'Bordeaux',  origine:'Tunisien',   pratique:'Pratiquant(e)',    voile:null,    barbe:'Oui (sunnah)',  situation:'Célibataire',boosted:false,bio:'Ingénieur, pratiquant, sérieux dans sa démarche.',    madhhab:'Hanafite',  coran:'Régulièrement',  halal:'Oui globalement',enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
-  {id:7,prenom:'Moussa',  gender:'homme',age:35,ville:'Lille',     origine:'Malien',     pratique:'Très pratiquant(e)',voile:null,    barbe:'Oui (sunnah)',  situation:'Veuf',       boosted:true, bio:'Veuf cherchant une épouse pieuse pour refonder une famille.',madhhab:'Malékite',coran:'Quotidiennement',halal:'Oui strict', enfants:'oui',veut_enfants:'Inchallah',status:'active', paid:true},
-  {id:8,prenom:'Omar',    gender:'homme',age:33,ville:'Nantes',    origine:'Marocain',   pratique:'Salafi/Sunnah',    voile:null,    barbe:'Oui (sunnah)',  situation:'Célibataire',boosted:false,bio:'Je cherche une sœur salafi pour construire un foyer islamique.',madhhab:'Hanbalite',coran:'Quotidiennement',halal:'Oui strict',enfants:'non',veut_enfants:'Oui',status:'pending',paid:false},
-  {id:9,prenom:'Bilal',   gender:'homme',age:27,ville:'Strasbourg',origine:'Algérien',   pratique:'Pratiquant(e)',    voile:null,    barbe:'En progression',situation:'Célibataire',boosted:false,bio:'Frère en progression dans son deen.',               madhhab:'Malékite',  coran:'Parfois',        halal:'Oui globalement',enfants:'non',veut_enfants:'Oui',      status:'inactive',paid:true},
+  {id:1,prenom:'Yasmine', gender:'femme',age:26,ville:'Paris',     origine:'Algérienne', pratique:'Très pratiquant(e)',voile:'Hijab',  barbe:null,            situation:'Jamais marié(e)',boosted:true, bio:'Alhamdulillah, je cherche mon moitié dans la sunnah.',madhhab:'Malékite',  coran:'Quotidiennement',halal:'Oui',    enfants:'non',veut_enfants:'Oui',status:'active', paid:true},
+  {id:2,prenom:'Khadija', gender:'femme',age:31,ville:'Marseille', origine:'Marocaine',  pratique:'Salafi/Sunnah',    voile:'Niqab',  barbe:null,            situation:'Divorcée',   boosted:false,bio:'Mère cherchant à se remarier en Islam.',             madhhab:'Hanbalite', coran:'Quotidiennement',halal:'Oui',    enfants:'oui',veut_enfants:'Oui',status:'active', paid:true},
+  {id:3,prenom:'Maryam',  gender:'femme',age:24,ville:'Toulouse',  origine:'Française',  pratique:'Pratiquant(e)',    voile:'Jilbab', barbe:null,            situation:'Convertie',  boosted:false,bio:'Convertie depuis 5 ans alhamdulillah.',               madhhab:'Peu importe',coran:'En apprentissage',halal:'Oui',  enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
+  {id:4,prenom:'Fatima',  gender:'femme',age:28,ville:'Lyon',      origine:'Sénégalaise',pratique:'Pratiquant(e)',    voile:'Hijab',  barbe:null,            situation:'Jamais marié(e)',boosted:false,bio:'Femme sérieuse cherchant un frère pratiquant.',       madhhab:'Malékite',  coran:'Régulièrement',  halal:'Oui',enfants:'non',veut_enfants:'Oui',      status:'pending',paid:false,audioAttested:true},
+  {id:5,prenom:'Ibrahim', gender:'homme',age:30,ville:'Lyon',      origine:'Sénégalais', pratique:'Très pratiquant(e)',voile:null,    barbe:'Oui (sunnah)',  situation:'Jamais marié(e)',boosted:false,bio:'Frère sérieux cherchant une épouse pratiquante.',    madhhab:'Malékite',  coran:'Régulièrement',  halal:'Oui',    enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
+  {id:6,prenom:'Youssef', gender:'homme',age:28,ville:'Bordeaux',  origine:'Tunisien',   pratique:'Pratiquant(e)',    voile:null,    barbe:'Oui (sunnah)',  situation:'Jamais marié(e)',boosted:false,bio:'Ingénieur, pratiquant, sérieux dans sa démarche.',    madhhab:'Hanafite',  coran:'Régulièrement',  halal:'Oui',enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
+  {id:7,prenom:'Moussa',  gender:'homme',age:35,ville:'Lille',     origine:'Malien',     pratique:'Très pratiquant(e)',voile:null,    barbe:'Oui (sunnah)',  situation:'Veuf',       boosted:true, bio:'Veuf cherchant une épouse pieuse pour refonder une famille.',madhhab:'Malékite',coran:'Quotidiennement',halal:'Oui', enfants:'oui',veut_enfants:'Oui',status:'active', paid:true},
+  {id:8,prenom:'Omar',    gender:'homme',age:33,ville:'Nantes',    origine:'Marocain',   pratique:'Salafi/Sunnah',    voile:null,    barbe:'Oui (sunnah)',  situation:'Jamais marié(e)',boosted:false,bio:'Je cherche une sœur salafi pour construire un foyer islamique.',madhhab:'Hanbalite',coran:'Quotidiennement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'pending',paid:false},
+  {id:9,prenom:'Bilal',   gender:'homme',age:27,ville:'Strasbourg',origine:'Algérien',   pratique:'Pratiquant(e)',    voile:null,    barbe:'En progression',situation:'Jamais marié(e)',boosted:false,bio:'Frère en progression dans son deen.',               madhhab:'Malékite',  coran:'Parfois',        halal:'Oui',enfants:'non',veut_enfants:'Oui',      status:'inactive',paid:true},
 ];
 
 const adminConvos = {};
@@ -1354,22 +1407,116 @@ function showLegalPage(type){
 }
 
 
-let recTimer=null;
-function toggleRecord(){
-  const btn=document.getElementById('rec-btn'), st=document.getElementById('rec-status');
-  if(!state.recording){
-    state.recording=true; btn.classList.add('recording'); btn.textContent='⏹️';
-    st.innerHTML='<span style="color:var(--red)">● Enregistrement en cours...</span>';
-    recTimer=setTimeout(()=>{
-      state.recording=false; state.audioRecorded=true;
-      btn.classList.remove('recording'); btn.textContent='🎙️'; st.style.display='none';
-      document.getElementById('rec-done').classList.remove('hidden');
-    },4000);
-  } else {
-    clearTimeout(recTimer); state.recording=false; state.audioRecorded=true;
-    btn.classList.remove('recording'); btn.textContent='🎙️'; st.style.display='none';
-    document.getElementById('rec-done').classList.remove('hidden');
+// ══════════ ENREGISTREMENT AUDIO RÉEL ══════════
+let mediaRecorder = null;
+let audioChunks = [];
+let recCountdownInterval = null;
+let recProgressInterval = null;
+let audioBlob = null;
+const REC_DURATION = 15; // secondes max
+
+async function toggleRecord(){
+  if(state.recording){
+    stopRecording();
+    return;
   }
+  // Demander accès micro
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    startRecording(stream);
+  } catch(err){
+    showToast('⚠ Accès au microphone refusé. Vérifiez les permissions.','red');
+    console.error('Micro:', err);
+  }
+}
+
+function startRecording(stream){
+  state.recording = true;
+  audioChunks = [];
+  audioBlob = null;
+  state.audioRecorded = false;
+
+  const btn = document.getElementById('rec-btn');
+  const status = document.getElementById('rec-status');
+  const countdownWrap = document.getElementById('rec-countdown-wrap');
+  const countdownEl = document.getElementById('rec-countdown');
+  const progressBar = document.getElementById('rec-progress-bar');
+
+  btn.classList.add('recording');
+  btn.textContent = '⏹️';
+  btn.title = 'Appuyez pour arrêter';
+  status.innerHTML = '<span style="color:var(--red)">● Enregistrement en cours... (appuyez ⏹ pour terminer)</span>';
+  countdownWrap.style.display = 'block';
+
+  // MediaRecorder
+  mediaRecorder = new MediaRecorder(stream);
+  mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    const url = URL.createObjectURL(audioBlob);
+    const audioEl = document.getElementById('rec-audio');
+    if(audioEl) audioEl.src = url;
+    document.getElementById('rec-playback').classList.remove('hidden');
+    document.getElementById('rec-done').classList.remove('hidden');
+    state.audioRecorded = true;
+  };
+  mediaRecorder.start();
+
+  // Compte à rebours
+  let secondsLeft = REC_DURATION;
+  let elapsed = 0;
+  countdownEl.textContent = secondsLeft;
+  progressBar.style.width = '0%';
+
+  recCountdownInterval = setInterval(()=>{
+    secondsLeft--;
+    elapsed++;
+    countdownEl.textContent = secondsLeft;
+    countdownEl.style.color = secondsLeft <= 5 ? 'var(--red)' : 'var(--gold)';
+    progressBar.style.width = (elapsed/REC_DURATION*100)+'%';
+    if(secondsLeft <= 0) stopRecording();
+  }, 1000);
+}
+
+function stopRecording(){
+  if(!state.recording) return;
+  state.recording = false;
+  clearInterval(recCountdownInterval);
+
+  const btn = document.getElementById('rec-btn');
+  const status = document.getElementById('rec-status');
+  const countdownWrap = document.getElementById('rec-countdown-wrap');
+
+  btn.classList.remove('recording');
+  btn.textContent = '🎙️';
+  btn.style.display = 'none'; // cacher le bouton après enregistrement
+  status.style.display = 'none';
+  countdownWrap.style.display = 'none';
+
+  if(mediaRecorder && mediaRecorder.state !== 'inactive'){
+    mediaRecorder.stop();
+  }
+}
+
+function reRecord(){
+  // Réinitialiser pour recommencer
+  state.audioRecorded = false;
+  audioBlob = null;
+  const btn = document.getElementById('rec-btn');
+  const status = document.getElementById('rec-status');
+  const playback = document.getElementById('rec-playback');
+  const done = document.getElementById('rec-done');
+  const countdownWrap = document.getElementById('rec-countdown-wrap');
+
+  btn.style.display = 'flex';
+  btn.textContent = '🎙️';
+  btn.classList.remove('recording');
+  status.style.display = 'block';
+  status.innerHTML = 'Appuyez sur le micro pour recommencer';
+  playback.classList.add('hidden');
+  done.classList.add('hidden');
+  countdownWrap.style.display = 'none';
 }
 
 async function doRegister(){
@@ -1416,8 +1563,18 @@ async function doRegister(){
     last_seen: new Date().toISOString(),
   };
 
-  const { error: profileError } = await getSB().from('profils').insert(profileData);
+  const { data: insertData, error: profileError } = await getSB().from('profils').insert(profileData).select().single();
   if(profileError){ showToast('❌ Erreur profil: '+profileError.message,'red'); return; }
+
+  // Uploader l'audio si enregistré (sœurs)
+  if(state.gender==='femme' && audioBlob && insertData?.id){
+    try {
+      const fileName = `attestation_${insertData.id}_${Date.now()}.webm`;
+      await getSB().storage.from('attestations').upload(fileName, audioBlob, {
+        contentType: 'audio/webm', upsert: false
+      });
+    } catch(e){ console.log('Audio upload:', e); }
+  }
 
   state.user = { ...profileData, email };
   state.profileActive = false;
@@ -1760,7 +1917,6 @@ function openFilterPanel(){
     <div class="filter-options">
       <button class="filter-opt ${f.veut_enfants==='Oui'?'selected':''}" onclick="setFilterVal('veut_enfants','${f.veut_enfants==='Oui'?'':'Oui'}')">Oui</button>
       <button class="filter-opt ${f.veut_enfants==='Non'?'selected':''}" onclick="setFilterVal('veut_enfants','${f.veut_enfants==='Non'?'':'Non'}')">Non</button>
-      <button class="filter-opt ${f.veut_enfants==='Inchallah'?'selected':''}" onclick="setFilterVal('veut_enfants','${f.veut_enfants==='Inchallah'?'':'Inchallah'}')">Inchallah</button>
     </div>
   </div>`;
 
@@ -1906,6 +2062,8 @@ function renderExplorer(c){
       const av=p.gender==='femme'?svgFemme(110):svgHomme(110);
       html+=`<div class="swipe-container">
         <div class="swipe-card" id="swipe-card">
+          <div class="swipe-overlay left" id="swipe-overlay-left">✗</div>
+          <div class="swipe-overlay right" id="swipe-overlay-right">♡</div>
           <div class="swipe-card-avatar">
             ${p.boosted?'<div class="boosted-ribbon">⚡ BOOST</div>':''}${av}
           </div>
@@ -1920,16 +2078,33 @@ function renderExplorer(c){
             <p style="font-size:.8rem;color:var(--muted);line-height:1.6">${p.bio}</p>
           </div>
         </div>
-        <div class="swipe-actions">
-          <button class="swipe-btn pass" onclick="swipeAction('pass')">✗</button>
-          <button class="swipe-btn like" onclick="swipeAction('like','${p.prenom}',${p.id})">♡</button>
-          <button class="swipe-btn ask"  onclick="swipeAction('ask','${p.prenom}')">💌</button>
+        <div class="swipe-hint">
+          <span class="swipe-hint-arrow" style="color:var(--red)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+            Passer
+          </span>
+          <span style="color:var(--muted);font-size:.8rem">${(state.swipeIndex%profiles.length)+1}/${profiles.length}</span>
+          <span class="swipe-hint-arrow" style="color:var(--gold)">
+            Aimer
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M14 5l7 7-7 7"/></svg>
+          </span>
         </div>
-        <p style="color:var(--muted);font-size:.68rem;margin-top:8px;text-align:center">${(state.swipeIndex%profiles.length)+1}/${profiles.length}</p>
+        <div class="swipe-actions">
+          <button class="swipe-btn pass" onclick="swipeAction('pass')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <button class="swipe-btn ask" onclick="swipeAction('ask','${p.prenom}')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </button>
+          <button class="swipe-btn like" onclick="swipeAction('like','${p.prenom}',${p.id})">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
       </div>`;
     }
   }
   c.innerHTML=html;
+  if(state.viewMode==='swipe') setTimeout(initSwipeTouch, 50);
 }
 
 function setView(mode){state.viewMode=mode;renderTab('explorer');}
@@ -1937,16 +2112,79 @@ function setView(mode){state.viewMode=mode;renderTab('explorer');}
 function swipeAction(action,prenom,pid){
   const card=document.getElementById('swipe-card');
   if(card){
-    if(action==='pass') {card.style.transform='translateX(-110%) rotate(-12deg)';card.style.opacity='0';}
-    else if(action==='like'){card.style.transform='translateX(110%) rotate(12deg)';card.style.opacity='0';}
-    else {card.style.transform='translateY(-110%)';card.style.opacity='0';}
+    if(action==='pass'){card.style.transform='translateX(-120%) rotate(-15deg)';card.style.opacity='0';}
+    else if(action==='like'){card.style.transform='translateX(120%) rotate(15deg)';card.style.opacity='0';}
+    else{card.style.transform='translateY(-110%)';card.style.opacity='0';}
   }
   if(action==='ask'){openDemandeModal(prenom);return;}
-  if(action==='like' && pid){
+  if(action==='like'&&pid){
     if(!state.favorites.includes(pid)) state.favorites.push(pid);
     showToast('💛 Ajouté à vos favoris !','gold');
   }
-  setTimeout(()=>{state.swipeIndex++;renderTab('explorer');},300);
+  setTimeout(()=>{state.swipeIndex++;renderTab('explorer');},350);
+}
+
+// ══════════ TOUCH SWIPE ══════════
+function initSwipeTouch(){
+  const card=document.getElementById('swipe-card');
+  if(!card) return;
+  let startX=0, startY=0, currentX=0, isDragging=false;
+  const overlayL=document.getElementById('swipe-overlay-left');
+  const overlayR=document.getElementById('swipe-overlay-right');
+  const threshold=80;
+
+  function onStart(e){
+    const t=e.touches?e.touches[0]:e;
+    startX=t.clientX; startY=t.clientY;
+    isDragging=true;
+    card.classList.add('dragging');
+  }
+
+  function onMove(e){
+    if(!isDragging) return;
+    const t=e.touches?e.touches[0]:e;
+    currentX=t.clientX-startX;
+    const currentY=t.clientY-startY;
+    const rotate=currentX*0.08;
+    card.style.transform=`translateX(${currentX}px) translateY(${currentY*0.3}px) rotate(${rotate}deg)`;
+    const progress=Math.abs(currentX)/threshold;
+    if(currentX<0){
+      overlayL.style.opacity=Math.min(progress,1);
+      overlayR.style.opacity=0;
+    } else {
+      overlayR.style.opacity=Math.min(progress,1);
+      overlayL.style.opacity=0;
+    }
+    if(e.cancelable) e.preventDefault();
+  }
+
+  function onEnd(){
+    if(!isDragging) return;
+    isDragging=false;
+    card.classList.remove('dragging');
+    overlayL.style.opacity=0;
+    overlayR.style.opacity=0;
+
+    if(currentX<-threshold){
+      swipeAction('pass');
+    } else if(currentX>threshold){
+      const profiles=getVisibleProfiles();
+      const p=profiles[state.swipeIndex%profiles.length];
+      swipeAction('like',p?.prenom,p?.id);
+    } else {
+      // Revenir au centre
+      card.style.transition='transform .3s,opacity .3s';
+      card.style.transform='';
+    }
+    currentX=0;
+  }
+
+  card.addEventListener('touchstart',onStart,{passive:true});
+  card.addEventListener('touchmove',onMove,{passive:false});
+  card.addEventListener('touchend',onEnd);
+  card.addEventListener('mousedown',onStart);
+  document.addEventListener('mousemove',e=>{if(isDragging) onMove(e);});
+  document.addEventListener('mouseup',()=>{if(isDragging) onEnd();});
 }
 
 function openProfile(id){
@@ -2621,43 +2859,64 @@ function renderAdminPending(c){
 
 function renderAdminUsers(c){
   c.innerHTML=`<div style="padding:16px">
-    <div style="margin-bottom:12px">
-      <div class="search-input-wrap">
-        <input type="text" placeholder="Rechercher..." oninput="filterAdminUsers(this.value)" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--white);padding:9px 14px 9px 36px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:.88rem">
+    <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <div class="search-input-wrap" style="flex:1">
+        <input type="text" placeholder="Rechercher..." oninput="filterAdminUsers(this.value,'${''}')" id="admin-search" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--white);padding:9px 14px 9px 36px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:.88rem">
       </div>
+    </div>
+    <!-- Filtres par statut -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn-tiny approve" style="padding:5px 12px" onclick="filterByStatus('all')">Tous</button>
+      <button class="btn-tiny approve" style="padding:5px 12px" onclick="filterByStatus('active')">✓ Actifs</button>
+      <button class="btn-tiny msg" style="padding:5px 12px" onclick="filterByStatus('pending')">⏳ En attente</button>
+      <button class="btn-tiny deact" style="padding:5px 12px" onclick="filterByStatus('inactive')">⏸ Inactifs</button>
+      <button class="btn-tiny reject" style="padding:5px 12px" onclick="filterByStatus('paused')">🔇 En pause</button>
     </div>
     <div id="admin-users-list">${buildUserList(allProfiles)}</div>
   </div>`;
 }
 
+let adminStatusFilter='all';
+
+function filterByStatus(status){
+  adminStatusFilter=status;
+  const q=document.getElementById('admin-search')?.value||'';
+  filterAdminUsers(q,status);
+}
+
 function buildUserList(list){
-  return list.map(p=>{
+  const filtered=adminStatusFilter&&adminStatusFilter!=='all'?list.filter(p=>p.status===adminStatusFilter):list;
+  if(!filtered.length) return `<div style="text-align:center;color:var(--muted);padding:30px">Aucun profil</div>`;
+  return filtered.map(p=>{
     const av=p.gender==='femme'?svgFemme(34):svgHomme(34);
     const dot=onlineDot(p.id,8);
     const inExch=exchangesList.some(e=>e.femmeId===p.id||e.hommeId===p.id);
+    const statusColor=p.status==='active'?'badge-active':p.status==='pending'?'badge-pending':p.status==='paused'?'badge-paused':'badge-inactive';
+    const statusLabel=p.status==='active'?'✓ Actif':p.status==='pending'?'⏳ Attente':p.status==='paused'?'⏸ Pause':'✗ Inactif';
     return`<div class="admin-user-row">
       <div class="admin-user-avatar" style="position:relative">${av}<span style="position:absolute;bottom:0;right:0">${dot}</span></div>
       <div class="admin-user-info">
-        <div class="admin-user-name">${p.prenom}, ${p.age} ans — ${p.ville} ${inExch?'<span style="color:var(--green);font-size:.66rem">↔ En échange</span>':''}</div>
+        <div class="admin-user-name">${p.prenom}, ${p.age} ans — ${p.ville} ${inExch?'<span style="color:var(--green);font-size:.66rem">↔ Échange</span>':''}</div>
         <div class="admin-user-sub">${p.gender==='femme'?'Sœur':'Frère'} · ${p.origine} · 
-          <span class="badge badge-${p.status}">${p.status==='active'?'Actif':p.status==='pending'?'Attente':'Inactif'}</span>
+          <span class="badge ${statusColor}">${statusLabel}</span>
           ${p.paid?' · <span style="color:var(--green);font-size:.66rem">✓ Payé</span>':' · <span style="color:var(--muted);font-size:.66rem">Non payé</span>'}
-          · <span style="font-size:.66rem;color:${onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)'}">${lastSeenText[p.id]||'—'}</span>
         </div>
       </div>
       <div class="admin-actions">
+        ${p.status!=='active'?`<button class="btn-tiny approve" onclick="approveProfile(${p.id})" title="Activer">✓</button>`:''}
         ${p.status==='active'?`<button class="btn-tiny deact" onclick="deactivateProfile(${p.id})" title="Désactiver">⏸</button>`:''}
-        ${p.status==='inactive'?`<button class="btn-tiny react" onclick="reactivateProfile(${p.id})" title="Réactiver">▶</button>`:''}
-        ${p.status==='pending'?`<button class="btn-tiny approve" onclick="approveProfile(${p.id})">✓</button>`:''}
-        ${!p.paid?`<button class="btn-tiny free" onclick="freeActivate(${p.id})">🎁</button>`:''}
+        ${p.status==='inactive'||p.status==='paused'?`<button class="btn-tiny react" onclick="reactivateProfile(${p.id})" title="Réactiver">▶</button>`:''}
+        ${!p.paid?`<button class="btn-tiny free" onclick="freeActivate(${p.id})" title="Activer gratuitement">🎁</button>`:''}
         <button class="btn-tiny msg" onclick="openAdminMsgModal('${p.prenom}')">✉</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function filterAdminUsers(q){
-  const filtered=q?allProfiles.filter(p=>p.prenom.toLowerCase().includes(q.toLowerCase())||p.ville.toLowerCase().includes(q.toLowerCase())):allProfiles;
+function filterAdminUsers(q,status){
+  if(status) adminStatusFilter=status;
+  const allP=[...allProfiles,...(window._adminProfiles||[]).filter(p=>!allProfiles.find(x=>x.id===p.id))];
+  const filtered=q?allP.filter(p=>p.prenom?.toLowerCase().includes(q.toLowerCase())||p.ville?.toLowerCase().includes(q.toLowerCase())):allP;
   const el=document.getElementById('admin-users-list');
   if(el) el.innerHTML=buildUserList(filtered);
 }
