@@ -1,13 +1,2 @@
-[build]
-  publish = "."
-  functions = "netlify/functions"
-
-[[redirects]]
-  from = "/"
-  to = "/oumelia.html"
-  status = 200
-
-[[redirects]]
-  from = "/*"
-  to = "/oumelia.html"
-  status = 200
+[[plugins]]
+package = "@netlify/plugin-functions-install-core"
