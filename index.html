@@ -1096,8 +1096,11 @@ function svgHomme(size=54){
 // ══════════ CONSTANTES ══════════
 const ADMIN_EMAIL = 'admin@oumelia.com';
 const ADMIN_PWD   = 'Admin123';
-// Accepte aussi admin@gmail.com / admin@oumelia.com
-const ADMIN_EMAILS = ['admin@oumelia.com','admin@gmail.com','Admin@gmail.com','Admin@oumelia.com'];
+const ADMIN_EMAILS = [
+  'admin@oumelia.com','admin@gmail.com',
+  'Admin@gmail.com','Admin@oumelia.com',
+  'oumarguindo87@gmail.com', // email réel admin
+];
 
 // ══════════ DONNÉES ══════════
 const allProfiles = [
@@ -1769,10 +1772,45 @@ async function loadDemandesRecues(){
 }
 
 async function loadAllProfilesForAdmin(){
-  const { data } = await getSB().from('profils').select('*').order('created_at', {ascending:false});
-  if(data && data.length > 0){
-    window._adminProfiles = data;
-  }
+  try {
+    const client = getSB();
+    if(!client) return;
+    const { data, error } = await client.from('profils').select('*').order('created_at', {ascending:false});
+    if(error){ console.log('Admin profiles error:', error.message); return; }
+    if(data && data.length > 0){
+      window._adminProfiles = data;
+      // Fusionner avec allProfiles (remplacer les demo par les vrais)
+      data.forEach(p => {
+        const existing = allProfiles.findIndex(x => x.id === p.id);
+        const profile = {
+          id: p.id,
+          prenom: p.prenom,
+          gender: p.gender,
+          age: p.age,
+          ville: p.ville || '',
+          origine: p.origine || '',
+          pratique: p.pratique || '',
+          voile: p.voile || null,
+          barbe: p.barbe || null,
+          situation: p.situation || '',
+          madhhab: p.madhhab || '',
+          coran: p.coran || '',
+          halal: p.halal || '',
+          enfants: p.enfants || 'non',
+          veut_enfants: p.veut_enfants || 'Oui',
+          bio: p.bio || '',
+          status: p.status,
+          paid: p.paid || false,
+          boosted: p.boosted || false,
+          audioAttested: p.audio_attested || false,
+          user_id: p.user_id,
+          isDB: true,
+        };
+        if(existing >= 0) allProfiles[existing] = profile;
+        else allProfiles.unshift(profile);
+      });
+    }
+  } catch(e){ console.log('loadAllProfilesForAdmin:', e); }
 }
 
 function navTo(tab){
@@ -2953,22 +2991,40 @@ function renderAdminPending(c){
   c.innerHTML=html;
 }
 
+function getAllAdminProfiles(){
+  const dbProfiles = window._adminProfiles || [];
+  const merged = [...allProfiles];
+  dbProfiles.forEach(p => {
+    if(!merged.find(x=>String(x.id)===String(p.id))){
+      merged.unshift({
+        id:p.id, prenom:p.prenom, gender:p.gender, age:p.age,
+        ville:p.ville||'', origine:p.origine||'', pratique:p.pratique||'',
+        situation:p.situation||'', status:p.status, paid:p.paid||false,
+        boosted:p.boosted||false, audioAttested:p.audio_attested||false,
+        user_id:p.user_id, isDB:true, bio:p.bio||'',
+        madhhab:p.madhhab||'', voile:p.voile||null, barbe:p.barbe||null,
+      });
+    }
+  });
+  return merged;
+}
+
 function renderAdminUsers(c){
+  const allP=getAllAdminProfiles();
   c.innerHTML=`<div style="padding:16px">
-    <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
-      <div class="search-input-wrap" style="flex:1">
-        <input type="text" placeholder="Rechercher..." oninput="filterAdminUsers(this.value,'${''}')" id="admin-search" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--white);padding:9px 14px 9px 36px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:.88rem">
+    <div class="section-title">👥 Tous les membres <span class="sc">${allP.length}</span></div>
+    <div style="margin-bottom:12px">
+      <div class="search-input-wrap">
+        <input type="text" id="admin-search" placeholder="Rechercher..." oninput="filterAdminUsers(this.value)" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--white);padding:9px 14px 9px 36px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:.88rem">
       </div>
     </div>
-    <!-- Filtres par statut -->
     <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="btn-tiny approve" style="padding:5px 12px" onclick="filterByStatus('all')">Tous</button>
-      <button class="btn-tiny approve" style="padding:5px 12px" onclick="filterByStatus('active')">✓ Actifs</button>
-      <button class="btn-tiny msg" style="padding:5px 12px" onclick="filterByStatus('pending')">⏳ En attente</button>
-      <button class="btn-tiny deact" style="padding:5px 12px" onclick="filterByStatus('inactive')">⏸ Inactifs</button>
-      <button class="btn-tiny reject" style="padding:5px 12px" onclick="filterByStatus('paused')">🔇 En pause</button>
+      <button class="btn-tiny approve" style="padding:5px 10px" onclick="filterByStatus('all')">Tous (${allP.length})</button>
+      <button class="btn-tiny approve" style="padding:5px 10px" onclick="filterByStatus('active')">✓ Actifs (${allP.filter(p=>p.status==='active').length})</button>
+      <button class="btn-tiny msg" style="padding:5px 10px" onclick="filterByStatus('pending')">⏳ Attente (${allP.filter(p=>p.status==='pending').length})</button>
+      <button class="btn-tiny deact" style="padding:5px 10px" onclick="filterByStatus('inactive')">⏸ Inactifs (${allP.filter(p=>p.status==='inactive').length})</button>
     </div>
-    <div id="admin-users-list">${buildUserList(allProfiles)}</div>
+    <div id="admin-users-list">${buildUserList(allP)}</div>
   </div>`;
 }
 
@@ -2976,13 +3032,12 @@ let adminStatusFilter='all';
 
 function filterByStatus(status){
   adminStatusFilter=status;
-  const q=document.getElementById('admin-search')?.value||'';
-  filterAdminUsers(q,status);
+  filterAdminUsers(document.getElementById('admin-search')?.value||'');
 }
 
 function buildUserList(list){
   const filtered=adminStatusFilter&&adminStatusFilter!=='all'?list.filter(p=>p.status===adminStatusFilter):list;
-  if(!filtered.length) return `<div style="text-align:center;color:var(--muted);padding:30px">Aucun profil</div>`;
+  if(!filtered.length) return `<div style="text-align:center;color:var(--muted);padding:30px;font-size:.84rem">Aucun profil dans cette catégorie</div>`;
   return filtered.map(p=>{
     const av=p.gender==='femme'?svgFemme(34):svgHomme(34);
     const dot=onlineDot(p.id,8);
@@ -2992,27 +3047,27 @@ function buildUserList(list){
     return`<div class="admin-user-row">
       <div class="admin-user-avatar" style="position:relative">${av}<span style="position:absolute;bottom:0;right:0">${dot}</span></div>
       <div class="admin-user-info">
-        <div class="admin-user-name">${p.prenom}, ${p.age} ans — ${p.ville} ${inExch?'<span style="color:var(--green);font-size:.66rem">↔ Échange</span>':''}</div>
-        <div class="admin-user-sub">${p.gender==='femme'?'Sœur':'Frère'} · ${p.origine} · 
+        <div class="admin-user-name">${p.prenom||'—'}, ${p.age||'—'} ans — ${p.ville||'—'} ${inExch?'<span style="color:var(--green);font-size:.66rem">↔</span>':''}</div>
+        <div class="admin-user-sub">${p.gender==='femme'?'Sœur':'Frère'} · ${p.origine||'—'} · 
           <span class="badge ${statusColor}">${statusLabel}</span>
           ${p.paid?' · <span style="color:var(--green);font-size:.66rem">✓ Payé</span>':' · <span style="color:var(--muted);font-size:.66rem">Non payé</span>'}
         </div>
       </div>
       <div class="admin-actions">
-        ${p.status!=='active'?`<button class="btn-tiny approve" onclick="approveProfile(${p.id})" title="Activer">✓</button>`:''}
-        ${p.status==='active'?`<button class="btn-tiny deact" onclick="deactivateProfile(${p.id})" title="Désactiver">⏸</button>`:''}
-        ${p.status==='inactive'||p.status==='paused'?`<button class="btn-tiny react" onclick="reactivateProfile(${p.id})" title="Réactiver">▶</button>`:''}
-        ${!p.paid?`<button class="btn-tiny free" onclick="freeActivate(${p.id})" title="Activer gratuitement">🎁</button>`:''}
+        ${p.status==='pending'?`<button class="btn-tiny approve" onclick="approveProfile(${p.id})" title="Valider">✓ Valider</button>`:''}
+        ${p.status==='pending'?`<button class="btn-tiny reject" onclick="openRejectModal(${p.id},'${p.prenom}')" title="Refuser">✗</button>`:''}
+        ${p.status==='active'?`<button class="btn-tiny deact" onclick="deactivateProfile(${p.id})" title="Désactiver">⏸ Désactiver</button>`:''}
+        ${p.status==='inactive'||p.status==='paused'?`<button class="btn-tiny react" onclick="reactivateProfile(${p.id})" title="Réactiver">▶ Réactiver</button>`:''}
+        ${!p.paid?`<button class="btn-tiny free" onclick="freeActivate(${p.id})" title="Activer gratuitement">🎁 Gratuit</button>`:''}
         <button class="btn-tiny msg" onclick="openAdminMsgModal('${p.prenom}')">✉</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function filterAdminUsers(q,status){
-  if(status) adminStatusFilter=status;
-  const allP=[...allProfiles,...(window._adminProfiles||[]).filter(p=>!allProfiles.find(x=>x.id===p.id))];
-  const filtered=q?allP.filter(p=>p.prenom?.toLowerCase().includes(q.toLowerCase())||p.ville?.toLowerCase().includes(q.toLowerCase())):allP;
+function filterAdminUsers(q){
+  const allP=getAllAdminProfiles();
+  const filtered=q?allP.filter(p=>(p.prenom||'').toLowerCase().includes(q.toLowerCase())||(p.ville||'').toLowerCase().includes(q.toLowerCase())):allP;
   const el=document.getElementById('admin-users-list');
   if(el) el.innerHTML=buildUserList(filtered);
 }
