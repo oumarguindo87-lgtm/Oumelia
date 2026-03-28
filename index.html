@@ -553,7 +553,14 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
         </div>
         <div class="form-row">
           <div class="form-group"><label>Origine</label>
-            <select id="reg-origine"><option value="">Choisir</option><option>Algérienne</option><option>Marocaine</option><option>Tunisienne</option><option>Française</option><option>Sénégalaise</option><option>Malienne</option><option>Turque</option><option>Égyptienne</option><option>Syrienne</option><option>Pakistanaise</option><option>Autre</option></select>
+            <select id="reg-origine"><option value="">Choisir</option>
+              <optgroup label="Maghreb"><option>Algérienne</option><option>Marocaine</option><option>Tunisienne</option><option>Libyenne</option><option>Mauritanienne</option></optgroup>
+              <optgroup label="Afrique subsaharienne"><option>Sénégalaise</option><option>Malienne</option><option>Guinéenne</option><option>Ivoirienne</option><option>Camerounaise</option><option>Congolaise</option><option>Togolaise</option><option>Burkinabè</option><option>Nigériane</option><option>Somalienne</option><option>Éthiopienne</option></optgroup>
+              <optgroup label="Moyen-Orient"><option>Égyptienne</option><option>Syrienne</option><option>Libanaise</option><option>Marocaine</option><option>Saoudienne</option><option>Émiratie</option><option>Palestinienne</option><option>Jordanienne</option><option>Irakienne</option><option>Yéménite</option></optgroup>
+              <optgroup label="Asie"><option>Pakistanaise</option><option>Bangladaise</option><option>Indienne</option><option>Indonésienne</option><option>Turque</option><option>Afghane</option></optgroup>
+              <optgroup label="Europe"><option>Française</option><option>Belge</option><option>Suisse</option><option>Britannique</option><option>Espagnole</option><option>Italienne</option><option>Allemande</option></optgroup>
+              <optgroup label="Autre"><option>Convertie/Converti</option><option>Autre</option></optgroup>
+            </select>
           </div>
           <div class="form-group"><label>Situation</label>
             <select id="reg-situation"><option>Jamais marié(e)</option><option>Divorcé(e)</option><option>Veuf(ve)</option></select>
@@ -573,8 +580,12 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
       <div id="reg-step-2" class="hidden">
         <div class="auth-title" style="margin-bottom:14px">Pratique religieuse</div>
         <div class="form-row">
-          <div class="form-group"><label>Niveau</label><select id="reg-pratique"><option>Débutant(e)</option><option>Pratiquant(e)</option><option>Très pratiquant(e)</option><option>Salafi/Sunnah</option></select></div>
+          <div class="form-group"><label>Niveau de pratique</label><select id="reg-pratique"><option>Débutant(e)</option><option>Pratiquant(e)</option><option>Très pratiquant(e)</option></select></div>
           <div class="form-group"><label>Prière</label><select id="reg-priere"><option>5 prières</option><option>4 prières</option><option>3 prières</option><option>En progression</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Minhaj</label><select id="reg-minhaj"><option>Salafi</option><option>Non salafi</option><option>Je ne sais pas</option></select></div>
+          <div class="form-group"><label>Converti(e)</label><select id="reg-converti"><option>Non</option><option>Oui</option></select></div>
         </div>
         <div class="form-row">
           <div class="form-group" id="field-voile"><label>Voile</label><select id="reg-voile"><option>Hijab</option><option>Niqab</option><option>Jilbab</option><option>Sans voile</option><option>En progression</option></select></div>
@@ -1159,16 +1170,18 @@ const state = {
   searchQuery:'',
   // Nouveau système de filtres multi-critères
   filters:{
-    situation:[],    // Célibataire, Veuf(ve), Divorcé(e), Converti(e)
-    pratique:[],     // Pratiquant(e), Très pratiquant(e), Salafi/Sunnah
-    voile:[],        // Pour filtrer les femmes : Hijab, Niqab, Jilbab (visible pour homme cherchant femme)
-    barbe:[],        // Pour filtrer les hommes : Oui (sunnah), En progression (visible pour femme cherchant homme)
-    origine:[],      // Algérienne, Marocaine, etc.
+    situation:[],
+    pratique:[],
+    minhaj:[],
+    converti:'',
+    voile:[],
+    barbe:[],
+    origine:[],
     ageMin: null,
     ageMax: null,
-    online: false,   // Seulement en ligne
-    enfants: '',     // a des enfants : oui/non
-    veut_enfants: '' // veut des enfants : oui/non
+    online: false,
+    enfants: '',
+    veut_enfants: ''
   },
   favorites:[], // ids des profils en favoris
   profilePaused:false,
@@ -1340,7 +1353,7 @@ const faqData=[
   {q:"Mes données sont-elles sécurisées ?",a:"Oui. Toutes vos données sont stockées sur des serveurs certifiés (Supabase). Nous ne vendons jamais vos données à des tiers."},
   {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 24 heures."},
   {q:"Puis-je supprimer mon compte ?",a:"Oui, à tout moment depuis Profil → Zone de danger → Supprimer mon compte. Toutes vos données seront effacées définitivement."},
-  {q:"Comment contacter l'équipe Oumelia ?",a:"Par email : contact@oumelia.com — ou via la messagerie avec l'Administratrice dans l'application."},
+  {q:"Comment contacter l'équipe Oumelia ?",a:"Par email : oumelia.contacthomme@gmail.com — ou via la messagerie avec l'Administratrice dans l'application."},
 ];
 
 function openFAQ(){
@@ -1388,8 +1401,8 @@ function submitReport(){
 
 // ══════════ PAGES LÉGALES ══════════
 const legalContent={
-  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumelia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>contact@oumelia.com</p>`},
-  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : contact@oumelia.com</p>`}
+  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumelia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>oumelia.contacthomme@gmail.com</p>`},
+  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumelia.contacthomme@gmail.com</p>`}
 };
 
 function showLegal(type){
@@ -1420,14 +1433,24 @@ async function toggleRecord(){
     stopRecording();
     return;
   }
-  // Demander accès micro
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     startRecording(stream);
   } catch(err){
-    showToast('⚠ Accès au microphone refusé. Vérifiez les permissions.','red');
-    console.error('Micro:', err);
+    if(err.name === 'NotAllowedError'){
+      showToast('⚠ Accès micro refusé. Autorisez le micro dans les réglages.','red');
+    } else {
+      showToast('⚠ Microphone non disponible sur cet appareil.','red');
+    }
   }
+}
+
+function getSupportedMimeType(){
+  const types = ['audio/mp4','audio/aac','audio/webm;codecs=opus','audio/webm','audio/ogg'];
+  for(const t of types){
+    if(MediaRecorder.isTypeSupported(t)) return t;
+  }
+  return '';
 }
 
 function startRecording(stream){
@@ -1444,26 +1467,37 @@ function startRecording(stream){
 
   btn.classList.add('recording');
   btn.textContent = '⏹️';
-  btn.title = 'Appuyez pour arrêter';
-  status.innerHTML = '<span style="color:var(--red)">● Enregistrement en cours... (appuyez ⏹ pour terminer)</span>';
+  status.innerHTML = '<span style="color:var(--red)">● Enregistrement en cours... (⏹ pour terminer)</span>';
   countdownWrap.style.display = 'block';
 
-  // MediaRecorder
-  mediaRecorder = new MediaRecorder(stream);
-  mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
+  const mimeType = getSupportedMimeType();
+  const options = mimeType ? { mimeType } : {};
+
+  try {
+    mediaRecorder = new MediaRecorder(stream, options);
+  } catch(e) {
+    mediaRecorder = new MediaRecorder(stream);
+  }
+
+  mediaRecorder.ondataavailable = e => { if(e.data && e.data.size > 0) audioChunks.push(e.data); };
   mediaRecorder.onstop = () => {
     stream.getTracks().forEach(t => t.stop());
-    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    const type = mediaRecorder.mimeType || 'audio/webm';
+    audioBlob = new Blob(audioChunks, { type });
     const url = URL.createObjectURL(audioBlob);
     const audioEl = document.getElementById('rec-audio');
-    if(audioEl) audioEl.src = url;
+    if(audioEl){ audioEl.src = url; audioEl.load(); }
     document.getElementById('rec-playback').classList.remove('hidden');
     document.getElementById('rec-done').classList.remove('hidden');
     state.audioRecorded = true;
   };
-  mediaRecorder.start();
+  mediaRecorder.onerror = () => {
+    showToast('❌ Erreur d\'enregistrement','red');
+    stopRecording();
+  };
 
-  // Compte à rebours
+  mediaRecorder.start(100); // collect data every 100ms
+
   let secondsLeft = REC_DURATION;
   let elapsed = 0;
   countdownEl.textContent = secondsLeft;
@@ -1545,6 +1579,8 @@ async function doRegister(){
     ville: document.getElementById('reg-ville').value||'',
     origine: document.getElementById('reg-origine').value||'',
     pratique: document.getElementById('reg-pratique').value||'Pratiquant(e)',
+    minhaj: document.getElementById('reg-minhaj')?.value||'Je ne sais pas',
+    converti: document.getElementById('reg-converti')?.value||'Non',
     voile: state.gender==='femme'?document.getElementById('reg-voile').value:null,
     barbe: state.gender==='homme'?document.getElementById('reg-barbe').value:null,
     madhhab: document.getElementById('reg-madhhab').value||'Peu importe',
@@ -1645,13 +1681,17 @@ function enterApp(){
 }
 
 async function doLogout(){
-  // Mettre hors ligne
   if(state.user?.supabaseId){
-    await getSB().from('profils').update({is_online:false, last_seen:new Date().toISOString()}).eq('user_id', state.user.supabaseId);
+    const client=getSB();
+    if(client) await client.from('profils').update({is_online:false,last_seen:new Date().toISOString()}).eq('user_id',state.user.supabaseId);
   }
-  await getSB().auth.signOut();
+  const client=getSB();
+  if(client) await client.auth.signOut();
   state.user=null; state.isAdmin=false;
+  state.profileActive=false; state.profilePaused=false;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   showScreen('screen-landing');
+  showToast('À bientôt !','gold');
 }
 
 // ══════════ CHARGEMENT DONNÉES SUPABASE ══════════
@@ -1851,15 +1891,32 @@ function openFilterPanel(){
   html+=`<div class="filter-section">
     <div class="filter-section-title">Situation matrimoniale</div>
     <div class="filter-options">
-      ${['Célibataire','Veuf(ve)','Divorcé(e)','Converti(e)'].map(v=>`<button class="filter-opt ${f.situation.includes(v)?'selected':''}" onclick="toggleFilterArr('situation','${v}')">${v}</button>`).join('')}
+      ${['Jamais marié(e)','Divorcé(e)','Veuf(ve)'].map(v=>`<button class="filter-opt ${f.situation.includes(v)?'selected':''}" onclick="toggleFilterArr('situation','${v}')">${v}</button>`).join('')}
     </div>
   </div>`;
 
-  // Niveau de pratique
+  // Converti(e) - catégorie séparée
+  html+=`<div class="filter-section">
+    <div class="filter-section-title">Converti(e)</div>
+    <div class="filter-options">
+      <button class="filter-opt ${f.converti==='Oui'?'selected':''}" onclick="setFilterVal('converti','${f.converti==='Oui'?'':'Oui'}')">Oui — Chercher des converti(e)s</button>
+      <button class="filter-opt ${f.converti===''?'':''}">Peu importe</button>
+    </div>
+  </div>`;
+
+  // Niveau de pratique (sans Salafi/Sunnah)
   html+=`<div class="filter-section">
     <div class="filter-section-title">Niveau de pratique</div>
     <div class="filter-options">
-      ${['Pratiquant(e)','Très pratiquant(e)','Salafi/Sunnah','Débutant(e)'].map(v=>`<button class="filter-opt ${f.pratique.includes(v)?'selected':''}" onclick="toggleFilterArr('pratique','${v}')">${v}</button>`).join('')}
+      ${['Débutant(e)','Pratiquant(e)','Très pratiquant(e)'].map(v=>`<button class="filter-opt ${f.pratique.includes(v)?'selected':''}" onclick="toggleFilterArr('pratique','${v}')">${v}</button>`).join('')}
+    </div>
+  </div>`;
+
+  // Minhaj - catégorie séparée
+  html+=`<div class="filter-section">
+    <div class="filter-section-title">Minhaj</div>
+    <div class="filter-options">
+      ${['Salafi','Non salafi','Je ne sais pas'].map(v=>`<button class="filter-opt ${(f.minhaj||[]).includes(v)?'selected':''}" onclick="toggleFilterArr('minhaj','${v}')">${v}</button>`).join('')}
     </div>
   </div>`;
 
@@ -1886,7 +1943,7 @@ function openFilterPanel(){
   html+=`<div class="filter-section">
     <div class="filter-section-title">Origine</div>
     <div class="filter-options">
-      ${['Algérienne','Marocaine','Tunisienne','Française','Sénégalaise','Malienne','Turque','Égyptienne','Syrienne','Pakistanaise'].map(v=>`<button class="filter-opt ${f.origine.includes(v)?'selected':''}" onclick="toggleFilterArr('origine','${v}')">${v}</button>`).join('')}
+      ${['Algérienne','Marocaine','Tunisienne','Française','Belge','Sénégalaise','Malienne','Guinéenne','Ivoirienne','Camerounaise','Turque','Égyptienne','Syrienne','Pakistanaise','Libanaise','Mauritanienne','Congolaise','Autre'].map(v=>`<button class="filter-opt ${f.origine.includes(v)?'selected':''}" onclick="toggleFilterArr('origine','${v}')">${v}</button>`).join('')}
     </div>
   </div>`;
 
@@ -2064,6 +2121,7 @@ function renderExplorer(c){
         <div class="swipe-card" id="swipe-card">
           <div class="swipe-overlay left" id="swipe-overlay-left">✗</div>
           <div class="swipe-overlay right" id="swipe-overlay-right">♡</div>
+          <div class="swipe-overlay" id="swipe-overlay-up" style="background:linear-gradient(180deg,rgba(201,168,76,.7),transparent);color:#1a0e00;font-size:2rem;align-items:flex-start;padding-top:20px">💌</div>
           <div class="swipe-card-avatar">
             ${p.boosted?'<div class="boosted-ribbon">⚡ BOOST</div>':''}${av}
           </div>
@@ -2080,13 +2138,17 @@ function renderExplorer(c){
         </div>
         <div class="swipe-hint">
           <span class="swipe-hint-arrow" style="color:var(--red)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
             Passer
           </span>
-          <span style="color:var(--muted);font-size:.8rem">${(state.swipeIndex%profiles.length)+1}/${profiles.length}</span>
+          <span style="display:flex;flex-direction:column;align-items:center;gap:2px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            <span style="color:var(--gold);font-size:.65rem">Demande</span>
+          </span>
+          <span style="color:var(--muted);font-size:.72rem">${(state.swipeIndex%profiles.length)+1}/${profiles.length}</span>
           <span class="swipe-hint-arrow" style="color:var(--gold)">
             Aimer
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M14 5l7 7-7 7"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M14 5l7 7-7 7"/></svg>
           </span>
         </div>
         <div class="swipe-actions">
@@ -2165,14 +2227,22 @@ function initSwipeTouch(){
     overlayL.style.opacity=0;
     overlayR.style.opacity=0;
 
+    const currentY=parseInt(card.style.transform.match(/translateY\(([^p]+)px/)?.[1]||0);
+
     if(currentX<-threshold){
       swipeAction('pass');
     } else if(currentX>threshold){
       const profiles=getVisibleProfiles();
       const p=profiles[state.swipeIndex%profiles.length];
       swipeAction('like',p?.prenom,p?.id);
+    } else if(currentY<-60){
+      // Swipe vers le haut → demande
+      const profiles=getVisibleProfiles();
+      const p=profiles[state.swipeIndex%profiles.length];
+      card.style.transition='transform .3s,opacity .3s';
+      card.style.transform='';
+      if(p) openDemandeModal(p.prenom);
     } else {
-      // Revenir au centre
       card.style.transition='transform .3s,opacity .3s';
       card.style.transform='';
     }
@@ -2268,17 +2338,24 @@ function toggleFav(id){
 let currentDemandeTarget='';
 function openDemandeModal(prenom){
   if(!state.profileActive){openModal('modal-paywall');return;}
-  // Vérifier si l'utilisateur a encore des slots (demandes acceptées utilisées)
+  // Compter les demandes EN ATTENTE (pas acceptées)
+  const pendingCount=Object.values(demandesEnvoyees).filter(d=>d==='en_attente').length;
   const acceptedUsed=Object.values(demandesEnvoyees).filter(d=>d==='acceptee').length;
-  const maxAccepted=3; // 3 demandes acceptées max
+  const maxAccepted=3;
+
+  // Si 3 demandes en attente → message d'attente
+  if(pendingCount>=3){
+    showToast('⏳ Vous avez déjà 3 demandes en attente. Attendez une réponse avant d\'en envoyer d\'autres.','red');
+    return;
+  }
+  // Si 3 demandes acceptées → acheter pack
   if(acceptedUsed>=maxAccepted){openModal('modal-plus-demandes');return;}
+
   currentDemandeTarget=prenom;
   document.getElementById('demande-prenom').textContent=prenom;
-  // Afficher les slots restants basés sur demandes ACCEPTÉES
   const remaining=maxAccepted-acceptedUsed;
   document.getElementById('modal-dots').innerHTML=[0,1,2].map(i=>`<div class="demand-dot ${i>=remaining?'used':''}"></div>`).join('');
-  // Note explicative
-  document.getElementById('modal-dots').insertAdjacentHTML('afterend','<p style="font-size:.72rem;color:var(--muted);margin-top:8px">Le compteur diminue uniquement quand une demande est acceptée.</p>');
+  document.getElementById('modal-dots').insertAdjacentHTML('afterend',`<p style="font-size:.72rem;color:var(--muted);margin-top:8px">Le compteur diminue uniquement quand une demande est acceptée.<br><span style="color:var(--gold)">${3-pendingCount} demande(s) en attente disponible(s)</span></p>`);
   openModal('modal-demande');
 }
 
@@ -2510,24 +2587,43 @@ function openProfileFromNotifDemande(notifId, profileId){
 async function acceptDemande(notifId){
   const n=userNotifs.find(x=>x.id===notifId);
   if(!n) return;
-  n.statut='acceptee';
-  n.unread=false;
-  // Mettre à jour en base si c'est une vraie demande DB
+
+  // Si profil non activé → inviter à activer
+  if(!state.profileActive){
+    document.getElementById('modal-profil-demande')?.remove();
+    // Proposer d'activer ou refuser
+    const overlay=document.createElement('div');
+    overlay.className='modal-overlay open';
+    overlay.innerHTML=`
+      <div class="modal" style="max-width:340px;text-align:center">
+        <h3>✦ Activez votre profil</h3>
+        <p style="color:var(--muted);font-size:.84rem;line-height:1.6;margin-bottom:16px">
+          Pour accepter cette demande, vous devez d'abord activer votre profil (5,99 €).
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-gold btn-sm" onclick="this.closest('.modal-overlay').remove();openModal('modal-paywall')">✦ Activer mon profil — 5,99 €</button>
+          <button class="btn btn-sm" style="background:var(--red-soft);color:var(--red);border:1px solid rgba(224,82,82,.3)" onclick="this.closest('.modal-overlay').remove();refuseDemande('${notifId}')">✗ Refuser la demande</button>
+          <button class="btn-ghost btn-sm" onclick="this.closest('.modal-overlay').remove()">Annuler</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    return;
+  }
+
+  n.statut='acceptee'; n.unread=false;
   if(n.dbId){
-    await getSB().from('demandes').update({statut:'acceptee'}).eq('id', n.dbId);
-    // Créer un échange
+    await getSB().from('demandes').update({statut:'acceptee'}).eq('id',n.dbId);
     await getSB().from('echanges').insert({
-      femme_profile_id: state.user.gender==='femme' ? state.user.id : n.profileId,
-      homme_profile_id: state.user.gender==='homme' ? state.user.id : n.profileId,
-      created_at: new Date().toISOString(),
+      femme_profile_id:state.user.gender==='femme'?state.user.id:n.profileId,
+      homme_profile_id:state.user.gender==='homme'?state.user.id:n.profileId,
+      created_at:new Date().toISOString(),
     });
   }
   showToast(`✅ Demande de ${n.fromPrenom} acceptée !`,'green');
-  // Ajouter aux échanges locaux
   const femmeId=state.user.gender==='femme'?state.user.id||1:n.profileId;
   const hommeId=state.user.gender==='homme'?state.user.id||1:n.profileId;
   if(!exchangesList.some(e=>e.femmeId===femmeId&&e.hommeId===hommeId)){
-    exchangesList.push({femmeId, hommeId});
+    exchangesList.push({femmeId,hommeId});
   }
   renderNotifs(document.getElementById('app-content'));
 }
@@ -2647,7 +2743,7 @@ function renderMyProfile(c){
           <span>🔒 Politique de confidentialité</span><span style="color:var(--gold)">›</span>
         </div>
         <div class="profile-detail-row">
-          <span>📧 Contact</span><span style="color:var(--muted);font-size:.78rem">contact@oumelia.com</span>
+          <span>📧 Contact</span><span style="color:var(--muted);font-size:.78rem">oumelia.contacthomme@gmail.com</span>
         </div>
         <div class="profile-detail-row">
           <span>📱 Version</span><span style="color:var(--muted);font-size:.78rem">1.0.0</span>
@@ -2955,7 +3051,8 @@ function renderAdminMatches(c){
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        ${!m.waliSent?`<button class="btn-tiny approve" onclick="sendWaliFromMatch(${idx})">🌸 Envoyer Wali auto</button>`:''}
+        ${!m.waliSent?`<button class="btn-tiny approve" onclick="sendWaliFromMatch(${idx})">🌸 Administratrice → ${femme.prenom}</button>`:`<span style="color:var(--green);font-size:.7rem">✓ Wali envoyé à ${femme.prenom}</span>`}
+        ${!m.hommeNotified?`<button class="btn-tiny react" onclick="notifyFrereFromMatch(${idx})">📨 Administrateur → ${homme.prenom}</button>`:`<span style="color:var(--blue);font-size:.7rem">✓ ${homme.prenom} notifié</span>`}
         <button class="btn-tiny msg" onclick="openAdminChatDirect('${femme.prenom}','femme')">✉ ${femme.prenom}</button>
         <button class="btn-tiny msg" onclick="openAdminChatDirect('${homme.prenom}','homme')">✉ ${homme.prenom}</button>
       </div>
@@ -3127,21 +3224,37 @@ function sendAdminMsg(){
   showToast(`✉️ Message envoyé à ${adminMsgTarget}`,'green');
 }
 
-// MATCH → envoi automatique wali + notif homme
+// MATCH → envoi wali à la SŒUR seulement (par l'administratrice)
+// L'administrateur notifie le FRÈRE séparément
 function sendWaliFromMatch(idx){
   const m=matchesData[idx];if(!m)return;
   const femme=allProfiles.find(p=>p.id===m.femmeId);
   const homme=allProfiles.find(p=>p.id===m.hommeId);
   if(!femme||!homme)return;
-  const waliTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh chère sœur ${femme.prenom},\n\nUne demande de mise en relation vous concernant a été acceptée sur Oumelia. Conformément aux valeurs islamiques et à la sunnah du Prophète ﷺ, nous souhaitons savoir si vous disposez d'un tuteur matrimonial (Wali) pour superviser cette démarche.\n\n• Si vous avez un Wali, merci de nous le confirmer et de nous transmettre ses coordonnées.\n• Si vous n'en avez pas, nous pouvons vous orienter inchallah.\n\nVeuillez répondre directement à ce message.\n\nBarak Allahu fikoum.\nL'équipe Oumelia`;
+
+  // Message de l'ADMINISTRATRICE → SŒUR uniquement
+  const waliTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh chère sœur ${femme.prenom},\n\nUne demande de mise en relation vous concernant a été acceptée sur Oumelia. Conformément aux valeurs islamiques et à la sunnah du Prophète ﷺ, nous souhaitons savoir si vous disposez d'un tuteur matrimonial (Wali) pour superviser cette démarche.\n\n• Si vous avez un Wali, merci de nous le confirmer et de nous transmettre ses coordonnées.\n• Si vous n'en avez pas, nous pouvons vous orienter inchallah.\n\nVeuillez répondre directement à ce message.\n\nBarak Allahu fikoum.\nL'Administratrice Oumelia`;
+
   if(!adminConvos[femme.prenom]) adminConvos[femme.prenom]=[];
   adminConvos[femme.prenom].push({from:'admin',text:waliTxt});
   m.waliSent=true;
-  const hommeTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh cher frère ${homme.prenom},\n\nAlhamdulillah ! La demande de mise en relation a été acceptée. Nous attendons actuellement la confirmation de la sœur ${femme.prenom} concernant son tuteur matrimonial (Wali).\n\nNous vous contacterons dès que nous aurons sa réponse inchallah.\n\nBarak Allahu fikoum.\nL'équipe Oumelia`;
+  showToast(`✅ Message Wali envoyé à ${femme.prenom}`,'green');
+  adminTab('matches');
+}
+
+// Notifier le FRÈRE séparément (par l'ADMINISTRATEUR)
+function notifyFrereFromMatch(idx){
+  const m=matchesData[idx];if(!m)return;
+  const femme=allProfiles.find(p=>p.id===m.femmeId);
+  const homme=allProfiles.find(p=>p.id===m.hommeId);
+  if(!femme||!homme)return;
+
+  const hommeTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh cher frère ${homme.prenom},\n\nAlhamdulillah ! La demande de mise en relation a été acceptée. Nous attendons actuellement la confirmation de la sœur ${femme.prenom} concernant son tuteur matrimonial (Wali).\n\nNous vous contacterons dès que nous aurons sa réponse inchallah.\n\nBarak Allahu fikoum.\nL'Administrateur Oumelia`;
+
   if(!adminConvos[homme.prenom]) adminConvos[homme.prenom]=[];
   adminConvos[homme.prenom].push({from:'admin',text:hommeTxt});
   m.hommeNotified=true;
-  showToast(`✅ Wali envoyé à ${femme.prenom} · ${homme.prenom} notifié`,'green');
+  showToast(`✅ ${homme.prenom} notifié par l'Administrateur`,'green');
   adminTab('matches');
 }
 
