@@ -2190,13 +2190,15 @@ function renderExplorer(c){
           </span>
         </div>
         <div class="swipe-actions">
-          <button class="swipe-btn pass" onclick="swipeAction('pass')">
+          <button class="swipe-btn pass" onclick="swipeAction('pass')" title="Passer">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
-          <button class="swipe-btn ask" onclick="swipeAction('ask','${p.prenom}')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <button class="swipe-btn ask" onclick="swipeAction('ask','${p.prenom}')" title="Envoyer une demande (ou glisser ↑)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+            </svg>
           </button>
-          <button class="swipe-btn like" onclick="swipeAction('like','${p.prenom}',${p.id})">
+          <button class="swipe-btn like" onclick="swipeAction('like','${p.prenom}',${p.id})" title="Aimer">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
         </div>
@@ -2928,15 +2930,22 @@ function adminTab(tab){
 }
 
 function renderAdminDashboard(c){
-  const active=allProfiles.filter(p=>p.status==='active').length;
-  const pending=allProfiles.filter(p=>p.status==='pending').length;
-  const paid=allProfiles.filter(p=>p.paid).length;
-  const femmes=allProfiles.filter(p=>p.gender==='femme').length;
-  const hommes=allProfiles.filter(p=>p.gender==='homme').length;
+  const allP=getAllAdminProfiles();
+  const active=allP.filter(p=>p.status==='active').length;
+  const pending=allP.filter(p=>p.status==='pending').length;
+  const inactive=allP.filter(p=>p.status==='inactive').length;
+  const paid=allP.filter(p=>p.paid).length;
+  const notPaid=allP.filter(p=>!p.paid).length;
+  const femmes=allP.filter(p=>p.gender==='femme').length;
+  const hommes=allP.filter(p=>p.gender==='homme').length;
   const nwali=waliResponses.filter(r=>!r.read).length;
-  const nOnline=allProfiles.filter(p=>onlineStatus[p.id]==='online').length;
+  const nOnline=allP.filter(p=>onlineStatus[p.id]==='online').length;
   const nExchanges=exchangesList.length;
-  c.innerHTML=`<div style="padding:16px">
+
+  // Profils non activés (inscrit mais pas encore payé ou validé)
+  const nonActives=allP.filter(p=>p.status==='pending'||(!p.paid&&p.status!=='active'));
+
+  let html=`<div style="padding:16px">
     <div class="section-title">📊 Vue d'ensemble</div>
     <div class="admin-stats">
       <div class="stat-card"><div class="stat-num gold-text">${active}</div><div class="stat-label">Profils actifs</div></div>
@@ -2948,19 +2957,51 @@ function renderAdminDashboard(c){
       <div class="stat-card"><div class="stat-num" style="color:#E91E63">${femmes}</div><div class="stat-label">Sœurs</div></div>
       <div class="stat-card"><div class="stat-num" style="color:#2196F3">${hommes}</div><div class="stat-label">Frères</div></div>
       <div class="stat-card"><div class="stat-num" style="color:var(--green)">${nExchanges}</div><div class="stat-label">Échanges</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--green)">${nwali}</div><div class="stat-label">Rép. Wali</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--red)">${notPaid}</div><div class="stat-label">Non payés</div></div>
     </div>
+
     <div class="gold-divider"></div>
+
+    <!-- NOUVEAUX INSCRITS NON ACTIVÉS -->
+    <div class="section-title">🆕 Nouveaux inscrits — Compte non activé
+      <span class="sc">${nonActives.length}</span>
+    </div>`;
+
+  if(!nonActives.length){
+    html+=`<p style="color:var(--muted);font-size:.84rem;text-align:center;padding:16px">Aucun profil en attente d'activation ✓</p>`;
+  } else {
+    nonActives.forEach(p=>{
+      const av=p.gender==='femme'?svgFemme(32):svgHomme(32);
+      html+=`<div class="admin-user-row" style="margin-bottom:8px">
+        <div class="admin-user-avatar">${av}</div>
+        <div class="admin-user-info">
+          <div class="admin-user-name" style="font-size:.84rem">${p.prenom||'—'}, ${p.age||'—'} ans — ${p.ville||'—'}</div>
+          <div class="admin-user-sub">
+            ${p.gender==='femme'?'Sœur':'Frère'} · 
+            <span class="badge badge-pending">⏳ Non activé</span>
+            ${p.audioAttested?' · <span style="color:var(--gold);font-size:.66rem">🎙️ Audio</span>':''}
+          </div>
+        </div>
+        <div class="admin-actions">
+          ${p.audioAttested?`<button class="btn-tiny audio" onclick="openAudioVerif(${p.id},'${p.prenom}')">🎙</button>`:''}
+          <button class="btn-tiny free" onclick="freeActivate(${p.id})" title="Activer gratuitement">🎁 Activer</button>
+          <button class="btn-tiny approve" onclick="approveProfile(${p.id})" title="Valider">✓</button>
+          <button class="btn-tiny reject" onclick="openRejectModal(${p.id},'${p.prenom}')" title="Refuser">✗</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  html+=`<div class="gold-divider"></div>
     <div class="section-title">⚡ Actions rapides</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <button class="btn btn-gold btn-sm" onclick="adminTab('pending')">⏳ Attentes (${pending})</button>
-      <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="adminTab('wali')">🌸 Rép. Wali (${nwali})</button>
+      <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="adminTab('wali')">🌸 Wali (${nwali})</button>
+      <button class="btn btn-sm" style="background:var(--blue);color:#fff" onclick="adminTab('users')">👥 Membres (${allP.length})</button>
+      <button class="btn btn-sm" style="background:var(--card2);color:var(--muted);border:1px solid var(--border)" onclick="adminTab('matches')">💚 Matches (${nExchanges})</button>
     </div>
-    <div class="section-title">🔔 Activité récente</div>
-    <div class="notif-item unread"><div class="notif-icon">🌸</div><div><div class="notif-text"><strong>Yasmine</strong> a répondu au message Wali</div><div class="notif-time">Il y a 1h</div></div></div>
-    <div class="notif-item unread"><div class="notif-icon">💚</div><div><div class="notif-text">Nouveau match : <strong>Maryam</strong> × <strong>Youssef</strong></div><div class="notif-time">Il y a 2h</div></div></div>
-    <div class="notif-item"><div class="notif-icon">🌸</div><div><div class="notif-text">Nouveau profil : <strong>Fatima</strong> (audio à vérifier)</div><div class="notif-time">Il y a 5h</div></div></div>
   </div>`;
+  c.innerHTML=html;
 }
 
 function renderAdminPending(c){
