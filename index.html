@@ -48,16 +48,16 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
 
 /* ══ LANDING ══ */
 #screen-landing{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 24px;background:radial-gradient(ellipse at 50% -10%,#1c1400 0%,#0d0e12 50%,var(--black) 100%);position:relative;overflow:hidden;min-height:100%;}
-#screen-landing::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M48 46v-6h-2v6h-6v2h6v6h2v-6h6v-2h-6zm0-40V0h-2v6h-6v2h6v6h2V8h6V6h-6zM8 46v-6H6v6H0v2h6v6h2v-6h6v-2H8zM8 6V0H6v6H0v2h6v6h2V8h6V6H8z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;}
-.landing-bismillah{font-size:1.9rem;color:var(--gold);margin-bottom:20px;text-shadow:0 0 30px rgba(201,168,76,.4);position:relative;z-index:1;}
+#screen-landing::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M48 46v-6h-2v6h-6v2h6v6h2v-6h6v-2h-6zm0-40V0h-2v6h-6v2h6v6h2V8h6V6h-6zM8 46v-6H6v6H0v2h6v6h2v-6h6v-2H8zM8 6V0H6v6H0v2h6v6h2V8h6V6H8z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;z-index:0;pointer-events:none;z-index:0;}
+.landing-bismillah{font-size:1.9rem;color:var(--gold);margin-bottom:20px;text-shadow:0 0 30px rgba(201,168,76,.4);position:relative;z-index:2;}
 .landing-logo-name{font-family:'Cinzel Decorative',serif;font-size:clamp(1.8rem,7vw,2.6rem);letter-spacing:8px;margin-top:16px;margin-bottom:8px;position:relative;z-index:1;}
 .landing-tagline{font-family:'Playfair Display',serif;font-style:italic;color:var(--white2);font-size:.95rem;margin-bottom:0;position:relative;z-index:1;}
 .landing-divider{width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto 34px;position:relative;z-index:1;}
-.landing-btns{display:flex;flex-direction:column;gap:11px;width:100%;max-width:280px;position:relative;z-index:1;}
+.landing-btns{display:flex;flex-direction:column;gap:11px;width:100%;max-width:280px;position:relative;z-index:2;}
 .pwa-banner{display:none;background:var(--gold-soft);border:1px solid rgba(201,168,76,.2);border-radius:var(--radius-sm);padding:10px 16px;margin-top:14px;font-size:.78rem;color:var(--gold);cursor:pointer;max-width:280px;width:100%;text-align:center;position:relative;z-index:1;}
 
 /* ══ LOGO ══ */
-.logo-mark{position:relative;display:inline-block;z-index:1;}
+.logo-mark{position:relative;display:inline-block;z-index:2;}
 .logo-circle-outer{width:86px;height:86px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f5e8a0,#C9A84C 45%,#7a5810 100%);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 40px rgba(201,168,76,.4),0 0 80px rgba(201,168,76,.15),inset 0 1px 0 rgba(255,255,255,.2);animation:glow 3s ease-in-out infinite;}
 .logo-circle-inner{width:24px;height:24px;border-radius:50%;background:var(--black);position:absolute;right:16px;top:13px;}
 .logo-star{position:absolute;top:50%;left:50%;transform:translate(-62%,-54%);}
@@ -415,7 +415,7 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
 
 
 /* ══ LANGUE ══ */
-.lang-selector{display:flex;gap:6px;position:absolute;top:16px;right:16px;}
+.lang-selector{display:flex;gap:6px;justify-content:center;margin-bottom:12px;}
 .lang-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:12px;font-size:.72rem;cursor:pointer;transition:all .2s;font-family:"Cairo",sans-serif;}
 .lang-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);}
 html[dir="rtl"]{font-family:"Cairo",sans-serif;}
@@ -439,11 +439,6 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 
 <!-- ══ LANDING ══ -->
 <div id="screen-landing" class="screen active">
-  <div class="lang-selector" id="lang-selector-landing">
-    <button class="lang-btn active" onclick="setLang('fr')">FR</button>
-    <button class="lang-btn" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" onclick="setLang('ar')">ع</button>
-  </div>
   <div class="landing-bismillah">بسم الله الرحمن الرحيم</div>
   <!-- LOGO : cercle doré avec étoile blanche centrée et lune blanche -->
   <div class="logo-mark">
@@ -478,7 +473,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <button class="btn btn-outline" onclick="showScreen('screen-login')">Se connecter</button>
   </div>
   <div class="pwa-banner" id="pwa-install-btn" onclick="installPWA()">📲 Installer Oumelia sur mon téléphone</div>
-  <p style="color:var(--muted);font-size:.7rem;margin-top:28px;max-width:280px;line-height:1.7;text-align:center">
+
+  <p style="color:var(--muted);font-size:.7rem;margin-top:20px;max-width:280px;line-height:1.7;text-align:center">
     Plateforme réservée aux musulmans pratiquants sunnites cherchant une union halal.
   </p>
 </div>
@@ -710,12 +706,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
         </div>
         <span class="logo-hdr gold-text">OUMELIA</span>
       </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <div style="display:flex;gap:4px">
-          <button class="lang-btn" onclick="setLang('fr')" id="hdr-lang-fr" style="padding:3px 7px;font-size:.65rem">FR</button>
-          <button class="lang-btn" onclick="setLang('en')" id="hdr-lang-en" style="padding:3px 7px;font-size:.65rem">EN</button>
-          <button class="lang-btn" onclick="setLang('ar')" id="hdr-lang-ar" style="padding:3px 7px;font-size:.65rem">ع</button>
-        </div>
+      <div style="display:flex;gap:8px;align-items:center">
         <span style="font-size:.78rem;color:var(--muted)" id="header-user-name"></span>
         <button class="btn btn-outline btn-sm" onclick="doLogout()" id="btn-logout">Déconnexion</button>
       </div>
@@ -741,7 +732,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
         <div class="atitle gold-text">OUMELIA ADMIN</div>
         <div style="font-size:.68rem;color:var(--muted)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2140454c484f614e544c444d48400f424e4c">[email&#160;protected]</a></div>
       </div>
-      <button class="btn btn-outline btn-sm" onclick="doLogout()">Déconnexion</button>
+      <button class="btn btn-outline btn-sm" id="btn-logout" onclick="doLogout()">Déconnexion</button>
     </div>
     <div class="admin-tabs">
       <div class="admin-tab active" id="atab-dashboard" onclick="adminTab('dashboard')">📊 Dashboard</div>
@@ -1244,7 +1235,7 @@ function showToast(msg,type='gold'){
 
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+// Modal click-outside - initialisé après DOM ready dans window.load
 
 // ══════════ AUTH ══════════
 function selectGender(g){
@@ -1260,367 +1251,6 @@ function selectGender(g){
 // SYSTÈME DE LANGUES — FR / EN / AR
 // ══════════════════════════════════════════════════════════
 let currentLang = localStorage.getItem('oumelia_lang') || 'fr';
-
-const T = {
-  fr: {
-    // Landing
-    tagline: '✦ Trouver sa moitié dans la voie d'Allah ✦',
-    create_profile: 'Créer mon profil',
-    login: 'Se connecter',
-    install_app: '📲 Installer Oumelia sur mon téléphone',
-    platform_desc: 'Plateforme réservée aux musulmans pratiquants sunnites cherchant une union halal.',
-    // Auth
-    connexion: 'Connexion',
-    email: 'Email',
-    password: 'Mot de passe',
-    connect_btn: 'Se connecter',
-    forgot_pwd: 'Mot de passe oublié ?',
-    no_account: 'Pas encore inscrit ?',
-    // Register
-    create_title: 'Créer mon profil',
-    i_am: 'Je suis :',
-    sister: 'Sœur',
-    brother: 'Frère',
-    continue_btn: 'Continuer →',
-    // Nav
-    explorer: 'Explorer',
-    messages: 'Messages',
-    alerts: 'Alertes',
-    my_profile: 'Mon profil',
-    boost: 'Boost',
-    // Actions
-    logout: 'Déconnexion',
-    send_request: '💌 Demande',
-    like: 'Aimer',
-    pass: 'Passer',
-    // Profile
-    active_profile: '✓ Profil actif',
-    inactive_profile: '⚠ Profil non activé',
-    paused_profile: '⏸ Profil en pause',
-    // Toast
-    welcome: 'Bienvenue sur Oumelia !',
-    logout_msg: 'À bientôt !',
-    // Boost expired
-    boost_expired: '⚡ Votre boost de 7 jours a expiré',
-    // Admin
-    dashboard: 'Tableau de bord',
-    members: 'Membres',
-    pending: 'En attente',
-  },
-  en: {
-    tagline: '✦ Find your half in the way of Allah ✦',
-    create_profile: 'Create my profile',
-    login: 'Sign in',
-    install_app: '📲 Install Oumelia on my phone',
-    platform_desc: 'Platform for practicing Sunni Muslims seeking a halal union.',
-    connexion: 'Sign In',
-    email: 'Email',
-    password: 'Password',
-    connect_btn: 'Sign In',
-    forgot_pwd: 'Forgot password?',
-    no_account: 'Not registered yet?',
-    create_title: 'Create my profile',
-    i_am: 'I am:',
-    sister: 'Sister',
-    brother: 'Brother',
-    continue_btn: 'Continue →',
-    explorer: 'Explore',
-    messages: 'Messages',
-    alerts: 'Alerts',
-    my_profile: 'My profile',
-    boost: 'Boost',
-    logout: 'Sign out',
-    send_request: '💌 Request',
-    like: 'Like',
-    pass: 'Pass',
-    active_profile: '✓ Active profile',
-    inactive_profile: '⚠ Profile not activated',
-    paused_profile: '⏸ Profile paused',
-    welcome: 'Welcome to Oumelia!',
-    logout_msg: 'See you soon!',
-    boost_expired: '⚡ Your 7-day boost has expired',
-    dashboard: 'Dashboard',
-    members: 'Members',
-    pending: 'Pending',
-  },
-  ar: {
-    tagline: '✦ ابحث عن نصفك في سبيل الله ✦',
-    create_profile: 'إنشاء ملفي الشخصي',
-    login: 'تسجيل الدخول',
-    install_app: '📲 تثبيت أوميليا على هاتفي',
-    platform_desc: 'منصة مخصصة للمسلمين الممارسين السنيين الباحثين عن زواج حلال.',
-    connexion: 'تسجيل الدخول',
-    email: 'البريد الإلكتروني',
-    password: 'كلمة المرور',
-    connect_btn: 'تسجيل الدخول',
-    forgot_pwd: 'نسيت كلمة المرور؟',
-    no_account: 'لم تسجل بعد؟',
-    create_title: 'إنشاء ملفي الشخصي',
-    i_am: 'أنا :',
-    sister: 'أخت',
-    brother: 'أخ',
-    continue_btn: 'متابعة →',
-    explorer: 'استكشاف',
-    messages: 'رسائل',
-    alerts: 'تنبيهات',
-    my_profile: 'ملفي',
-    boost: 'تعزيز',
-    logout: 'تسجيل الخروج',
-    send_request: '💌 طلب',
-    like: 'إعجاب',
-    pass: 'تخطي',
-    active_profile: '✓ الملف نشط',
-    inactive_profile: '⚠ الملف غير مفعّل',
-    paused_profile: '⏸ الملف متوقف',
-    welcome: 'مرحباً بك في أوميليا!',
-    logout_msg: 'إلى اللقاء!',
-    boost_expired: '⚡ انتهت صلاحية تعزيزك لمدة 7 أيام',
-    dashboard: 'لوحة التحكم',
-    members: 'الأعضاء',
-    pending: 'قيد الانتظار',
-  }
-};
-
-function t(key){ return (T[currentLang]||T.fr)[key] || (T.fr)[key] || key; }
-
-function setLang(lang){
-  currentLang = lang;
-  localStorage.setItem('oumelia_lang', lang);
-
-  // RTL pour l'arabe
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  document.documentElement.lang = lang;
-
-  // Mettre à jour les boutons actifs
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.classList.toggle('active',
-      btn.textContent.trim() === (lang==='fr'?'FR':lang==='en'?'EN':'ع')
-    );
-  });
-
-  // Mettre à jour les textes clés
-  const updates = {
-    'landing-tagline': t('tagline'),
-    'btn-logout': t('logout'),
-    'nav-explorer': null, // géré par renderTab
-    'nav-messages': null,
-    'nav-notifs': null,
-    'nav-profil': null,
-    'nav-boost': null,
-  };
-
-  Object.entries(updates).forEach(([id, val]) => {
-    if(val === null) return;
-    const el = document.getElementById(id);
-    if(el) el.textContent = val;
-  });
-
-  // Mettre à jour nav items
-  const navLabels = document.querySelectorAll('.nav-item');
-  const navKeys = ['explorer','messages','alerts','my_profile','boost'];
-  navLabels.forEach((el, i) => {
-    const icon = el.querySelector('.nav-icon');
-    if(icon && navKeys[i]) {
-      const txt = t(navKeys[i]);
-      el.childNodes.forEach(n=>{ if(n.nodeType===3) n.textContent=txt; });
-    }
-  });
-
-  showToast(lang==='fr'?'🇫🇷 Français':lang==='en'?'🇬🇧 English':'🇸🇦 العربية','gold');
-  // Re-render la vue courante
-  if(state.currentNav) renderTab(state.currentNav);
-}
-
-// ══════════════════════════════════════════════════════════
-// NOTIFICATIONS TEMPS RÉEL — Supabase Realtime
-// ══════════════════════════════════════════════════════════
-let realtimeChannel = null;
-
-function startRealtimeNotifs(){
-  const sb = getSB();
-  if(!sb || !state.user?.id) return;
-
-  // Écouter les nouvelles demandes reçues
-  realtimeChannel = sb
-    .channel('notifs-'+state.user.id)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'demandes',
-      filter: `to_profile_id=eq.${state.user.id}`
-    }, payload => {
-      showRealtimeNotif('💌 Nouvelle demande de mise en relation !');
-      userNotifs.unshift({
-        id: 'rt_'+Date.now(), type:'demande_recue', icon:'💌',
-        text:'<strong>Quelqu'un</strong> vous a envoyé une demande',
-        time:'À l'instant', unread:true, profileId:0,
-        fromPrenom:'', statut:'en_attente'
-      });
-      updateNotifBadge();
-    })
-    .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'demandes',
-      filter: `from_profile_id=eq.${state.user.id}`
-    }, payload => {
-      if(payload.new.statut === 'acceptee'){
-        showRealtimeNotif('✅ Votre demande a été acceptée !');
-        updateNotifBadge();
-      } else if(payload.new.statut === 'refusee'){
-        showRealtimeNotif('❌ Votre demande a été refusée');
-      }
-    })
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'messages',
-      filter: `to_id=eq.${state.user.id}`
-    }, payload => {
-      showRealtimeNotif('💬 Nouveau message reçu');
-      updateNotifBadge();
-    })
-    .subscribe();
-}
-
-function stopRealtimeNotifs(){
-  if(realtimeChannel){ getSB()?.removeChannel(realtimeChannel); realtimeChannel=null; }
-}
-
-function showRealtimeNotif(msg){
-  const el = document.createElement('div');
-  el.className = 'realtime-notif';
-  el.innerHTML = `<span style="font-size:1.1rem">🔔</span><span>${msg}</span>`;
-  document.body.appendChild(el);
-  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .5s'; setTimeout(()=>el.remove(),500); }, 4000);
-}
-
-function updateNotifBadge(){
-  const unread = userNotifs.filter(n=>n.unread).length;
-  const badge = document.getElementById('notif-badge');
-  if(badge){ badge.textContent = unread||''; badge.style.display=unread?'flex':'none'; }
-}
-
-// ══════════════════════════════════════════════════════════
-// DASHBOARD ADMIN — AUTO-REFRESH toutes les 30 secondes
-// ══════════════════════════════════════════════════════════
-let adminRefreshTimer = null;
-
-function startAdminAutoRefresh(){
-  stopAdminAutoRefresh();
-  adminRefreshTimer = setInterval(async ()=>{
-    if(state.isAdmin && state.activeAdminTab === 'dashboard'){
-      await loadAllProfilesForAdmin();
-      const c = document.getElementById('admin-content');
-      if(c) renderAdminDashboard(c);
-      updateAdminBadges();
-      showToast('🔄 Dashboard actualisé','gold');
-    }
-  }, 30000); // 30 secondes
-}
-
-function stopAdminAutoRefresh(){
-  if(adminRefreshTimer){ clearInterval(adminRefreshTimer); adminRefreshTimer=null; }
-}
-
-// ══════════════════════════════════════════════════════════
-// BOOST — EXPIRATION AUTOMATIQUE
-// ══════════════════════════════════════════════════════════
-function checkBoostExpiration(){
-  if(!state.user?.supabaseId) return;
-  const boostKey = 'boost_end_'+state.user.supabaseId;
-  const boostEnd = localStorage.getItem(boostKey);
-  if(!boostEnd) return;
-  if(Date.now() > parseInt(boostEnd)){
-    // Boost expiré
-    localStorage.removeItem(boostKey);
-    getSB().from('profils').update({boosted:false}).eq('user_id',state.user.supabaseId).then(()=>{});
-    showToast(t('boost_expired'),'red');
-    showRealtimeNotif(t('boost_expired'));
-  }
-}
-
-async function buyBoostAndStart(){
-  // Appelé après paiement réussi du boost
-  const boostDurationMs = 7 * 24 * 60 * 60 * 1000; // 7 jours
-  const boostEnd = Date.now() + boostDurationMs;
-  const key = 'boost_end_'+(state.user?.supabaseId||'');
-  localStorage.setItem(key, boostEnd.toString());
-  if(state.user?.supabaseId){
-    await getSB().from('profils').update({boosted:true}).eq('user_id',state.user.supabaseId).catch(()=>{});
-  }
-  showToast('⚡ Boost activé pour 7 jours !','gold');
-}
-
-// ══════════════════════════════════════════════════════════
-// EMAILS AUTOMATIQUES
-// ══════════════════════════════════════════════════════════
-async function sendAutoEmail(type, toEmail, data={}){
-  // Utilise les Edge Functions Supabase ou un service email
-  const templates = {
-    welcome: {
-      subject: 'Bienvenue sur Oumelia — Votre profil est en cours de vérification',
-      body: `Assalamu Alaykum ${data.prenom||''},
-
-Bienvenue sur Oumelia ! Votre profil est en cours de vérification par notre équipe. Vous serez notifié(e) dès que votre compte sera activé (généralement sous 24-48h).
-
-Barak Allahu fikoum.
-L'équipe Oumelia
-oumelia.contacthomme@gmail.com`
-    },
-    profile_approved: {
-      subject: '✅ Votre profil Oumelia est activé !',
-      body: `Assalamu Alaykum ${data.prenom||''},
-
-Alhamdulillah ! Votre profil a été validé. Vous pouvez maintenant accéder à l'application et explorer les profils.
-
-Barak Allahu fikoum.
-L'équipe Oumelia`
-    },
-    profile_rejected: {
-      subject: 'Information concernant votre profil Oumelia',
-      body: `Assalamu Alaykum ${data.prenom||''},
-
-Après vérification, votre profil n'a pas pu être validé pour la raison suivante : ${data.reason||'Non conforme à notre charte'}.
-
-Vous pouvez nous contacter à oumelia.contacthomme@gmail.com pour plus d'informations.
-
-Barak Allahu fikoum.
-L'équipe Oumelia`
-    },
-    request_accepted: {
-      subject: '💚 Votre demande a été acceptée sur Oumelia',
-      body: `Assalamu Alaykum ${data.prenom||''},
-
-Alhamdulillah ! Votre demande de mise en relation a été acceptée. Vous pouvez maintenant communiquer via la messagerie Oumelia.
-
-Barak Allahu fikoum.
-L'équipe Oumelia`
-    },
-    boost_expiring: {
-      subject: '⚡ Votre boost Oumelia expire bientôt',
-      body: `Assalamu Alaykum ${data.prenom||''},
-
-Votre boost de visibilité expire dans 24h. Renouvelez-le pour continuer à apparaître en tête de liste.
-
-Barak Allahu fikoum.
-L'équipe Oumelia`
-    },
-  };
-
-  const tpl = templates[type];
-  if(!tpl || !toEmail) return;
-
-  try {
-    // Supabase Edge Function (à déployer séparément)
-    // Pour l'instant on log — à connecter avec Resend/SendGrid
-    console.log('📧 Email auto:', type, '->', toEmail, tpl.subject);
-    // await fetch('https://nmcvyukbyfnhtufbgqqp.supabase.co/functions/v1/send-email', {
-    //   method:'POST', headers:{'Content-Type':'application/json'},
-    //   body: JSON.stringify({to:toEmail, subject:tpl.subject, text:tpl.body})
-    // });
-  } catch(e){ console.log('Email error:', e); }
-}
 
 // ══════════ VALIDATION INSCRIPTION ══════════
 function validateRegField(input, type){
@@ -2016,7 +1646,7 @@ async function doRegister(){
   document.getElementById('header-user-name').textContent = profileData.prenom;
   showScreen('screen-app');
   navTo('explorer');
-  sendAutoEmail('welcome', email, {prenom: profileData.prenom||''});
+  try{ sendAutoEmail('welcome', email, {prenom: profileData.prenom||''}); }catch(e){}
   showToast('✅ Profil créé — en attente de validation','green');
 }
 
@@ -2074,13 +1704,8 @@ function enterApp(){
   document.getElementById('header-user-name').textContent=state.user.prenom;
   showScreen('screen-app');
   navTo('explorer');
-  // Démarrer les notifications temps réel
-  setTimeout(startRealtimeNotifs, 1000);
-  // Vérifier expiration boost
-  setTimeout(checkBoostExpiration, 2000);
-  // Appliquer la langue sauvegardée
-  const savedLang = localStorage.getItem('oumelia_lang');
-  if(savedLang && savedLang !== 'fr') setTimeout(()=>setLang(savedLang), 500);
+  setTimeout(startRealtime, 2000);
+  setTimeout(checkBoost, 3000);
   // Charger les profils réels depuis Supabase
   loadProfilesFromDB();
   // Charger les demandes reçues
@@ -2088,8 +1713,7 @@ function enterApp(){
 }
 
 async function doLogout(){
-  stopRealtimeNotifs();
-  stopAdminAutoRefresh();
+  try{stopRealtime();stopAdminRefresh();}catch(e){}
   if(state.user?.supabaseId){
     const client=getSB();
     if(client) await client.from('profils').update({is_online:false,last_seen:new Date().toISOString()}).eq('user_id',state.user.supabaseId);
@@ -2178,67 +1802,53 @@ async function loadDemandesRecues(){
 }
 
 async function loadAllProfilesForAdmin(){
-  // Charge TOUS les profils sans aucune limite — pagination par batch de 1000
   try {
     const client = getSB();
     if(!client) return;
 
-    let allData = [];
-    let from = 0;
-    const batchSize = 1000;
+    // Simple select sans range() qui cause DataCloneError sur Safari
+    const { data, error } = await client
+      .from('profils')
+      .select('id,prenom,gender,age,ville,origine,pratique,voile,barbe,situation,madhhab,coran,halal,enfants,veut_enfants,bio,status,paid,free_activated,boosted,audio_attested,created_at,user_id')
+      .order('created_at', {ascending:false});
 
-    // Boucle jusqu'à tout avoir chargé
-    while(true){
-      const { data, error } = await client
-        .from('profils')
-        .select('*')
-        .order('created_at', {ascending:false})
-        .range(from, from + batchSize - 1);
+    if(error){ console.log('Admin profiles error:', error.message); return; }
+    if(!data || data.length === 0) return;
 
-      if(error){ console.log('Admin profiles error:', error.message); break; }
-      if(!data || data.length === 0) break;
+    window._adminProfiles = data;
 
-      allData = allData.concat(data);
-      if(data.length < batchSize) break; // Plus de données
-      from += batchSize;
-    }
-
-    if(allData.length > 0){
-      window._adminProfiles = allData;
-      // Fusionner avec allProfiles
-      allData.forEach(p => {
-        const existing = allProfiles.findIndex(x => String(x.id) === String(p.id));
-        const profile = {
-          id: p.id,
-          prenom: p.prenom,
-          gender: p.gender,
-          age: p.age,
-          ville: p.ville || '',
-          origine: p.origine || '',
-          pratique: p.pratique || '',
-          voile: p.voile || null,
-          barbe: p.barbe || null,
-          situation: p.situation || '',
-          madhhab: p.madhhab || '',
-          coran: p.coran || '',
-          halal: p.halal || '',
-          enfants: p.enfants || 'non',
-          veut_enfants: p.veut_enfants || 'Oui',
-          bio: p.bio || '',
-          status: p.status,
-          paid: p.paid || false,
-          free_activated: p.free_activated || false,
-          boosted: p.boosted || false,
-          audioAttested: p.audio_attested || false,
-          created_at: p.created_at || '',
-          user_id: p.user_id,
-          isDB: true,
-        };
-        if(existing >= 0) allProfiles[existing] = profile;
-        else allProfiles.unshift(profile);
-      });
-      console.log(`✅ Admin: ${allData.length} profils chargés`);
-    }
+    data.forEach(p => {
+      const existing = allProfiles.findIndex(x => String(x.id) === String(p.id));
+      const profile = {
+        id: p.id,
+        prenom: p.prenom || '',
+        gender: p.gender || '',
+        age: p.age || '',
+        ville: p.ville || '',
+        origine: p.origine || '',
+        pratique: p.pratique || '',
+        voile: p.voile || null,
+        barbe: p.barbe || null,
+        situation: p.situation || '',
+        madhhab: p.madhhab || '',
+        coran: p.coran || '',
+        halal: p.halal || '',
+        enfants: p.enfants || 'non',
+        veut_enfants: p.veut_enfants || 'Oui',
+        bio: p.bio || '',
+        status: p.status || 'pending',
+        paid: p.paid === true,
+        free_activated: p.free_activated === true,
+        boosted: p.boosted === true,
+        audioAttested: p.audio_attested === true,
+        created_at: p.created_at || '',
+        user_id: p.user_id || '',
+        isDB: true,
+      };
+      if(existing >= 0) allProfiles[existing] = profile;
+      else allProfiles.unshift(profile);
+    });
+    console.log('Admin: ' + data.length + ' profils chargés');
   } catch(e){ console.log('loadAllProfilesForAdmin:', e); }
 }
 
@@ -3343,8 +2953,7 @@ function updateAdminBadges(){
 
 function adminTab(tab){
   state.activeAdminTab=tab;
-  if(tab==='dashboard') startAdminAutoRefresh();
-  else stopAdminAutoRefresh();
+  if(tab==='dashboard') startAdminRefresh(); else stopAdminRefresh();
   document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
   const el=document.getElementById('atab-'+tab);
   if(el) el.classList.add('active');
@@ -3828,6 +3437,7 @@ function audioRejectFn(){
 }
 
 function buyBoost(){
+  activateBoost();
   openStripePayment('boost', async ()=>{
     // Activer le boost dans Supabase — expire dans 7 jours
     if(state.user?.supabaseId){
@@ -3978,9 +3588,15 @@ const manifestData={
   icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23080808'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23C9A84C'/%3E%3Ccircle cx='306' cy='216' r='154' fill='%23080808'/%3E%3Cpath d='M256 170L268 234L332 256L268 278L256 342L244 278L180 256L244 234Z' fill='white' opacity='0.95'/%3E%3C/svg%3E",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]
 };
 
-const manifestBlob=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
-document.getElementById('pwa-manifest').href=URL.createObjectURL(manifestBlob);
-document.getElementById('apple-icon').href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23080808'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23C9A84C'/%3E%3Ccircle cx='306' cy='216' r='154' fill='%23080808'/%3E%3Cpath d='M256 170L268 234L332 256L268 278L256 342L244 278L180 256L244 234Z' fill='white' opacity='0.95'/%3E%3C/svg%3E";
+function initPWAManifest(){
+  try{
+    const b=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
+    const m=document.getElementById('pwa-manifest');
+    const a=document.getElementById('apple-icon');
+    if(m) m.href=URL.createObjectURL(b);
+    if(a) a.href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23080808'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23C9A84C'/%3E%3Ccircle cx='306' cy='216' r='154' fill='%23080808'/%3E%3Cpath d='M256 170L268 234L332 256L268 278L256 342L244 278L180 256L244 234Z' fill='white' opacity='0.95'/%3E%3C/svg%3E";
+  }catch(e){}
+}
 
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();deferredPrompt=e;
@@ -4012,9 +3628,7 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 }
 
-// ══════════ INIT ══════════
-document.getElementById('field-voile').style.display='none';
-document.getElementById('field-barbe').style.display='';
+// ══════════ INIT dans window.load ══════════
 
 // Charger Supabase et Stripe dynamiquement après le chargement de la page
 function loadScript(src, onload, onerror){
@@ -4026,16 +3640,129 @@ function loadScript(src, onload, onerror){
 }
 
 // Charger les scripts après que la page soit prête
+
 window.addEventListener('load', ()=>{
-  loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', ()=>{
+  // 1. PWA manifest
+  try{ initPWAManifest(); }catch(e){}
+
+  // 2. Init champs sécurisé
+  try{
+    const v=document.getElementById('field-voile');
+    const b=document.getElementById('field-barbe');
+    if(v) v.style.display='none';
+    if(b) b.style.display='';
+  }catch(e){}
+
+  // 3. Modals (click outside)
+  try{
+    document.querySelectorAll('.modal-overlay').forEach(o=>{
+      o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
+    });
+  }catch(e){}
+
+  // Charger Supabase
+  loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', function(){
     setTimeout(initDB, 100);
+  }, function(){
+    loadScript('https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js', function(){
+      setTimeout(initDB, 100);
+    });
   });
-  // Stripe — chargé en fallback si le premier échoue
-  loadScript('https://js.stripe.com/v3/', ()=>{}, ()=>{
-    // Fallback via unpkg si jsdelivr bloqué
-    loadScript('https://unpkg.com/@stripe/stripe-js@latest/dist/stripe.js', ()=>{});
-  });
+  // Charger Stripe
+  loadScript('https://js.stripe.com/v3/', function(){}, function(){});
+
 });
+// ═══════════════════════════════════════
+// FONCTIONNALITÉS ADDITIONNELLES
+// ═══════════════════════════════════════
+
+// 1. REALTIME NOTIFICATIONS
+var rtChan = null;
+function startRealtime(){
+  try{
+    var sb=getSB();
+    if(!sb||!state.user||!state.user.id) return;
+    rtChan = sb.channel('rt_'+state.user.id)
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'demandes',filter:'to_profile_id=eq.'+state.user.id},function(){
+        showRTNotif('💌 Nouvelle demande reçue !');
+        updateNotifBadge();
+      })
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'demandes',filter:'from_profile_id=eq.'+state.user.id},function(p){
+        if(p.new && p.new.statut==='acceptee') showRTNotif('✅ Votre demande a été acceptée !');
+      })
+      .subscribe();
+  }catch(e){ console.log('realtime:',e); }
+}
+function stopRealtime(){
+  try{ if(rtChan){ getSB().removeChannel(rtChan); rtChan=null; } }catch(e){}
+}
+function showRTNotif(msg){
+  try{
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#13161d;border:1px solid #C9A84C;border-radius:12px;padding:10px 18px;font-size:.82rem;color:#F0EBE0;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.6);max-width:300px;text-align:center;pointer-events:none;';
+    d.textContent=msg;
+    document.body.appendChild(d);
+    setTimeout(function(){
+      d.style.opacity='0'; d.style.transition='opacity .4s';
+      setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); },400);
+    },4000);
+  }catch(e){}
+}
+function updateNotifBadge(){
+  try{
+    var u=userNotifs.filter(function(n){ return n.unread; }).length;
+    var b=document.getElementById('notif-badge');
+    if(b) b.textContent=u||'';
+  }catch(e){}
+}
+
+// 2. ADMIN AUTO-REFRESH (30s)
+var admTimer=null;
+function startAdminRefresh(){
+  stopAdminRefresh();
+  admTimer=setInterval(function(){
+    try{
+      if(state.isAdmin && state.activeAdminTab==='dashboard'){
+        loadAllProfilesForAdmin().then(function(){
+          var el=document.getElementById('admin-content');
+          if(el) renderAdminDashboard(el);
+          updateAdminBadges();
+        });
+      }
+    }catch(e){}
+  },30000);
+}
+function stopAdminRefresh(){
+  if(admTimer){ clearInterval(admTimer); admTimer=null; }
+}
+
+// 3. BOOST EXPIRATION
+function checkBoost(){
+  try{
+    if(!state.user||!state.user.supabaseId) return;
+    var k='boost_'+state.user.supabaseId;
+    var e=localStorage.getItem(k);
+    if(e && Date.now()>parseInt(e)){
+      localStorage.removeItem(k);
+      getSB().from('profils').update({boosted:false}).eq('user_id',state.user.supabaseId).then(function(){});
+      showToast('⚡ Votre boost de 7 jours a expiré','red');
+    }
+  }catch(e){}
+}
+function activateBoost(){
+  try{
+    var k='boost_'+(state.user&&state.user.supabaseId||'');
+    localStorage.setItem(k,String(Date.now()+7*24*3600*1000));
+    if(state.user&&state.user.supabaseId){
+      getSB().from('profils').update({boosted:true}).eq('user_id',state.user.supabaseId).then(function(){});
+    }
+    showToast('⚡ Boost activé pour 7 jours !','gold');
+  }catch(e){}
+}
+
+// 4. EMAILS AUTO (log — à connecter avec Resend)
+function sendAutoEmail(type,email,data){
+  try{ if(!email) return; console.log('EMAIL ['+type+'] -> '+email); }catch(e){}
+}
+
 </script>
-</body>
-</html>
