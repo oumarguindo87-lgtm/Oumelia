@@ -413,6 +413,25 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
 .legal-content ul{padding-left:18px;margin-bottom:10px;}
 .legal-content ul li{margin-bottom:5px;}
 
+
+/* ══ LANGUE ══ */
+.lang-selector{display:flex;gap:6px;position:absolute;top:16px;right:16px;}
+.lang-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:12px;font-size:.72rem;cursor:pointer;transition:all .2s;font-family:"Cairo",sans-serif;}
+.lang-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);}
+html[dir="rtl"]{font-family:"Cairo",sans-serif;}
+html[dir="rtl"] .auth-wrap{direction:rtl;}
+html[dir="rtl"] .bottom-nav{direction:rtl;}
+
+/* ══ NOTIF REALTIME ══ */
+@keyframes notifPop{0%{transform:scale(0) translateY(-10px);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.realtime-notif{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:10px 18px;font-size:.82rem;color:var(--white);z-index:9999;animation:notifPop .4s ease;box-shadow:0 4px 20px rgba(0,0,0,.5);max-width:320px;text-align:center;display:flex;align-items:center;gap:10px;}
+
+/* ══ STATS GRAPHIQUE ══ */
+.stat-bar-wrap{margin-bottom:10px;}
+.stat-bar-label{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted);margin-bottom:4px;}
+.stat-bar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .6s ease;}
+
 .hidden{display:none!important;}
 </style>
 </head>
@@ -420,6 +439,11 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
 
 <!-- ══ LANDING ══ -->
 <div id="screen-landing" class="screen active">
+  <div class="lang-selector" id="lang-selector-landing">
+    <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('ar')">ع</button>
+  </div>
   <div class="landing-bismillah">بسم الله الرحمن الرحيم</div>
   <!-- LOGO : cercle doré avec étoile blanche centrée et lune blanche -->
   <div class="logo-mark">
@@ -686,9 +710,14 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
         </div>
         <span class="logo-hdr gold-text">OUMELIA</span>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
+      <div style="display:flex;gap:6px;align-items:center">
+        <div style="display:flex;gap:4px">
+          <button class="lang-btn" onclick="setLang('fr')" id="hdr-lang-fr" style="padding:3px 7px;font-size:.65rem">FR</button>
+          <button class="lang-btn" onclick="setLang('en')" id="hdr-lang-en" style="padding:3px 7px;font-size:.65rem">EN</button>
+          <button class="lang-btn" onclick="setLang('ar')" id="hdr-lang-ar" style="padding:3px 7px;font-size:.65rem">ع</button>
+        </div>
         <span style="font-size:.78rem;color:var(--muted)" id="header-user-name"></span>
-        <button class="btn btn-outline btn-sm" onclick="doLogout()">Déconnexion</button>
+        <button class="btn btn-outline btn-sm" onclick="doLogout()" id="btn-logout">Déconnexion</button>
       </div>
     </div>
     <div class="app-content" id="app-content"></div>
@@ -1226,6 +1255,373 @@ function selectGender(g){
   document.getElementById('field-barbe').style.display=g==='homme'?'':'none';
 }
 
+
+// ══════════════════════════════════════════════════════════
+// SYSTÈME DE LANGUES — FR / EN / AR
+// ══════════════════════════════════════════════════════════
+let currentLang = localStorage.getItem('oumelia_lang') || 'fr';
+
+const T = {
+  fr: {
+    // Landing
+    tagline: '✦ Trouver sa moitié dans la voie d'Allah ✦',
+    create_profile: 'Créer mon profil',
+    login: 'Se connecter',
+    install_app: '📲 Installer Oumelia sur mon téléphone',
+    platform_desc: 'Plateforme réservée aux musulmans pratiquants sunnites cherchant une union halal.',
+    // Auth
+    connexion: 'Connexion',
+    email: 'Email',
+    password: 'Mot de passe',
+    connect_btn: 'Se connecter',
+    forgot_pwd: 'Mot de passe oublié ?',
+    no_account: 'Pas encore inscrit ?',
+    // Register
+    create_title: 'Créer mon profil',
+    i_am: 'Je suis :',
+    sister: 'Sœur',
+    brother: 'Frère',
+    continue_btn: 'Continuer →',
+    // Nav
+    explorer: 'Explorer',
+    messages: 'Messages',
+    alerts: 'Alertes',
+    my_profile: 'Mon profil',
+    boost: 'Boost',
+    // Actions
+    logout: 'Déconnexion',
+    send_request: '💌 Demande',
+    like: 'Aimer',
+    pass: 'Passer',
+    // Profile
+    active_profile: '✓ Profil actif',
+    inactive_profile: '⚠ Profil non activé',
+    paused_profile: '⏸ Profil en pause',
+    // Toast
+    welcome: 'Bienvenue sur Oumelia !',
+    logout_msg: 'À bientôt !',
+    // Boost expired
+    boost_expired: '⚡ Votre boost de 7 jours a expiré',
+    // Admin
+    dashboard: 'Tableau de bord',
+    members: 'Membres',
+    pending: 'En attente',
+  },
+  en: {
+    tagline: '✦ Find your half in the way of Allah ✦',
+    create_profile: 'Create my profile',
+    login: 'Sign in',
+    install_app: '📲 Install Oumelia on my phone',
+    platform_desc: 'Platform for practicing Sunni Muslims seeking a halal union.',
+    connexion: 'Sign In',
+    email: 'Email',
+    password: 'Password',
+    connect_btn: 'Sign In',
+    forgot_pwd: 'Forgot password?',
+    no_account: 'Not registered yet?',
+    create_title: 'Create my profile',
+    i_am: 'I am:',
+    sister: 'Sister',
+    brother: 'Brother',
+    continue_btn: 'Continue →',
+    explorer: 'Explore',
+    messages: 'Messages',
+    alerts: 'Alerts',
+    my_profile: 'My profile',
+    boost: 'Boost',
+    logout: 'Sign out',
+    send_request: '💌 Request',
+    like: 'Like',
+    pass: 'Pass',
+    active_profile: '✓ Active profile',
+    inactive_profile: '⚠ Profile not activated',
+    paused_profile: '⏸ Profile paused',
+    welcome: 'Welcome to Oumelia!',
+    logout_msg: 'See you soon!',
+    boost_expired: '⚡ Your 7-day boost has expired',
+    dashboard: 'Dashboard',
+    members: 'Members',
+    pending: 'Pending',
+  },
+  ar: {
+    tagline: '✦ ابحث عن نصفك في سبيل الله ✦',
+    create_profile: 'إنشاء ملفي الشخصي',
+    login: 'تسجيل الدخول',
+    install_app: '📲 تثبيت أوميليا على هاتفي',
+    platform_desc: 'منصة مخصصة للمسلمين الممارسين السنيين الباحثين عن زواج حلال.',
+    connexion: 'تسجيل الدخول',
+    email: 'البريد الإلكتروني',
+    password: 'كلمة المرور',
+    connect_btn: 'تسجيل الدخول',
+    forgot_pwd: 'نسيت كلمة المرور؟',
+    no_account: 'لم تسجل بعد؟',
+    create_title: 'إنشاء ملفي الشخصي',
+    i_am: 'أنا :',
+    sister: 'أخت',
+    brother: 'أخ',
+    continue_btn: 'متابعة →',
+    explorer: 'استكشاف',
+    messages: 'رسائل',
+    alerts: 'تنبيهات',
+    my_profile: 'ملفي',
+    boost: 'تعزيز',
+    logout: 'تسجيل الخروج',
+    send_request: '💌 طلب',
+    like: 'إعجاب',
+    pass: 'تخطي',
+    active_profile: '✓ الملف نشط',
+    inactive_profile: '⚠ الملف غير مفعّل',
+    paused_profile: '⏸ الملف متوقف',
+    welcome: 'مرحباً بك في أوميليا!',
+    logout_msg: 'إلى اللقاء!',
+    boost_expired: '⚡ انتهت صلاحية تعزيزك لمدة 7 أيام',
+    dashboard: 'لوحة التحكم',
+    members: 'الأعضاء',
+    pending: 'قيد الانتظار',
+  }
+};
+
+function t(key){ return (T[currentLang]||T.fr)[key] || (T.fr)[key] || key; }
+
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('oumelia_lang', lang);
+
+  // RTL pour l'arabe
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+
+  // Mettre à jour les boutons actifs
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active',
+      btn.textContent.trim() === (lang==='fr'?'FR':lang==='en'?'EN':'ع')
+    );
+  });
+
+  // Mettre à jour les textes clés
+  const updates = {
+    'landing-tagline': t('tagline'),
+    'btn-logout': t('logout'),
+    'nav-explorer': null, // géré par renderTab
+    'nav-messages': null,
+    'nav-notifs': null,
+    'nav-profil': null,
+    'nav-boost': null,
+  };
+
+  Object.entries(updates).forEach(([id, val]) => {
+    if(val === null) return;
+    const el = document.getElementById(id);
+    if(el) el.textContent = val;
+  });
+
+  // Mettre à jour nav items
+  const navLabels = document.querySelectorAll('.nav-item');
+  const navKeys = ['explorer','messages','alerts','my_profile','boost'];
+  navLabels.forEach((el, i) => {
+    const icon = el.querySelector('.nav-icon');
+    if(icon && navKeys[i]) {
+      const txt = t(navKeys[i]);
+      el.childNodes.forEach(n=>{ if(n.nodeType===3) n.textContent=txt; });
+    }
+  });
+
+  showToast(lang==='fr'?'🇫🇷 Français':lang==='en'?'🇬🇧 English':'🇸🇦 العربية','gold');
+  // Re-render la vue courante
+  if(state.currentNav) renderTab(state.currentNav);
+}
+
+// ══════════════════════════════════════════════════════════
+// NOTIFICATIONS TEMPS RÉEL — Supabase Realtime
+// ══════════════════════════════════════════════════════════
+let realtimeChannel = null;
+
+function startRealtimeNotifs(){
+  const sb = getSB();
+  if(!sb || !state.user?.id) return;
+
+  // Écouter les nouvelles demandes reçues
+  realtimeChannel = sb
+    .channel('notifs-'+state.user.id)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'demandes',
+      filter: `to_profile_id=eq.${state.user.id}`
+    }, payload => {
+      showRealtimeNotif('💌 Nouvelle demande de mise en relation !');
+      userNotifs.unshift({
+        id: 'rt_'+Date.now(), type:'demande_recue', icon:'💌',
+        text:'<strong>Quelqu'un</strong> vous a envoyé une demande',
+        time:'À l'instant', unread:true, profileId:0,
+        fromPrenom:'', statut:'en_attente'
+      });
+      updateNotifBadge();
+    })
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'demandes',
+      filter: `from_profile_id=eq.${state.user.id}`
+    }, payload => {
+      if(payload.new.statut === 'acceptee'){
+        showRealtimeNotif('✅ Votre demande a été acceptée !');
+        updateNotifBadge();
+      } else if(payload.new.statut === 'refusee'){
+        showRealtimeNotif('❌ Votre demande a été refusée');
+      }
+    })
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `to_id=eq.${state.user.id}`
+    }, payload => {
+      showRealtimeNotif('💬 Nouveau message reçu');
+      updateNotifBadge();
+    })
+    .subscribe();
+}
+
+function stopRealtimeNotifs(){
+  if(realtimeChannel){ getSB()?.removeChannel(realtimeChannel); realtimeChannel=null; }
+}
+
+function showRealtimeNotif(msg){
+  const el = document.createElement('div');
+  el.className = 'realtime-notif';
+  el.innerHTML = `<span style="font-size:1.1rem">🔔</span><span>${msg}</span>`;
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .5s'; setTimeout(()=>el.remove(),500); }, 4000);
+}
+
+function updateNotifBadge(){
+  const unread = userNotifs.filter(n=>n.unread).length;
+  const badge = document.getElementById('notif-badge');
+  if(badge){ badge.textContent = unread||''; badge.style.display=unread?'flex':'none'; }
+}
+
+// ══════════════════════════════════════════════════════════
+// DASHBOARD ADMIN — AUTO-REFRESH toutes les 30 secondes
+// ══════════════════════════════════════════════════════════
+let adminRefreshTimer = null;
+
+function startAdminAutoRefresh(){
+  stopAdminAutoRefresh();
+  adminRefreshTimer = setInterval(async ()=>{
+    if(state.isAdmin && state.activeAdminTab === 'dashboard'){
+      await loadAllProfilesForAdmin();
+      const c = document.getElementById('admin-content');
+      if(c) renderAdminDashboard(c);
+      updateAdminBadges();
+      showToast('🔄 Dashboard actualisé','gold');
+    }
+  }, 30000); // 30 secondes
+}
+
+function stopAdminAutoRefresh(){
+  if(adminRefreshTimer){ clearInterval(adminRefreshTimer); adminRefreshTimer=null; }
+}
+
+// ══════════════════════════════════════════════════════════
+// BOOST — EXPIRATION AUTOMATIQUE
+// ══════════════════════════════════════════════════════════
+function checkBoostExpiration(){
+  if(!state.user?.supabaseId) return;
+  const boostKey = 'boost_end_'+state.user.supabaseId;
+  const boostEnd = localStorage.getItem(boostKey);
+  if(!boostEnd) return;
+  if(Date.now() > parseInt(boostEnd)){
+    // Boost expiré
+    localStorage.removeItem(boostKey);
+    getSB().from('profils').update({boosted:false}).eq('user_id',state.user.supabaseId).then(()=>{});
+    showToast(t('boost_expired'),'red');
+    showRealtimeNotif(t('boost_expired'));
+  }
+}
+
+async function buyBoostAndStart(){
+  // Appelé après paiement réussi du boost
+  const boostDurationMs = 7 * 24 * 60 * 60 * 1000; // 7 jours
+  const boostEnd = Date.now() + boostDurationMs;
+  const key = 'boost_end_'+(state.user?.supabaseId||'');
+  localStorage.setItem(key, boostEnd.toString());
+  if(state.user?.supabaseId){
+    await getSB().from('profils').update({boosted:true}).eq('user_id',state.user.supabaseId).catch(()=>{});
+  }
+  showToast('⚡ Boost activé pour 7 jours !','gold');
+}
+
+// ══════════════════════════════════════════════════════════
+// EMAILS AUTOMATIQUES
+// ══════════════════════════════════════════════════════════
+async function sendAutoEmail(type, toEmail, data={}){
+  // Utilise les Edge Functions Supabase ou un service email
+  const templates = {
+    welcome: {
+      subject: 'Bienvenue sur Oumelia — Votre profil est en cours de vérification',
+      body: `Assalamu Alaykum ${data.prenom||''},
+
+Bienvenue sur Oumelia ! Votre profil est en cours de vérification par notre équipe. Vous serez notifié(e) dès que votre compte sera activé (généralement sous 24-48h).
+
+Barak Allahu fikoum.
+L'équipe Oumelia
+oumelia.contacthomme@gmail.com`
+    },
+    profile_approved: {
+      subject: '✅ Votre profil Oumelia est activé !',
+      body: `Assalamu Alaykum ${data.prenom||''},
+
+Alhamdulillah ! Votre profil a été validé. Vous pouvez maintenant accéder à l'application et explorer les profils.
+
+Barak Allahu fikoum.
+L'équipe Oumelia`
+    },
+    profile_rejected: {
+      subject: 'Information concernant votre profil Oumelia',
+      body: `Assalamu Alaykum ${data.prenom||''},
+
+Après vérification, votre profil n'a pas pu être validé pour la raison suivante : ${data.reason||'Non conforme à notre charte'}.
+
+Vous pouvez nous contacter à oumelia.contacthomme@gmail.com pour plus d'informations.
+
+Barak Allahu fikoum.
+L'équipe Oumelia`
+    },
+    request_accepted: {
+      subject: '💚 Votre demande a été acceptée sur Oumelia',
+      body: `Assalamu Alaykum ${data.prenom||''},
+
+Alhamdulillah ! Votre demande de mise en relation a été acceptée. Vous pouvez maintenant communiquer via la messagerie Oumelia.
+
+Barak Allahu fikoum.
+L'équipe Oumelia`
+    },
+    boost_expiring: {
+      subject: '⚡ Votre boost Oumelia expire bientôt',
+      body: `Assalamu Alaykum ${data.prenom||''},
+
+Votre boost de visibilité expire dans 24h. Renouvelez-le pour continuer à apparaître en tête de liste.
+
+Barak Allahu fikoum.
+L'équipe Oumelia`
+    },
+  };
+
+  const tpl = templates[type];
+  if(!tpl || !toEmail) return;
+
+  try {
+    // Supabase Edge Function (à déployer séparément)
+    // Pour l'instant on log — à connecter avec Resend/SendGrid
+    console.log('📧 Email auto:', type, '->', toEmail, tpl.subject);
+    // await fetch('https://nmcvyukbyfnhtufbgqqp.supabase.co/functions/v1/send-email', {
+    //   method:'POST', headers:{'Content-Type':'application/json'},
+    //   body: JSON.stringify({to:toEmail, subject:tpl.subject, text:tpl.body})
+    // });
+  } catch(e){ console.log('Email error:', e); }
+}
+
 // ══════════ VALIDATION INSCRIPTION ══════════
 function validateRegField(input, type){
   const err = document.getElementById('err-'+type);
@@ -1620,6 +2016,7 @@ async function doRegister(){
   document.getElementById('header-user-name').textContent = profileData.prenom;
   showScreen('screen-app');
   navTo('explorer');
+  sendAutoEmail('welcome', email, {prenom: profileData.prenom||''});
   showToast('✅ Profil créé — en attente de validation','green');
 }
 
@@ -1677,6 +2074,13 @@ function enterApp(){
   document.getElementById('header-user-name').textContent=state.user.prenom;
   showScreen('screen-app');
   navTo('explorer');
+  // Démarrer les notifications temps réel
+  setTimeout(startRealtimeNotifs, 1000);
+  // Vérifier expiration boost
+  setTimeout(checkBoostExpiration, 2000);
+  // Appliquer la langue sauvegardée
+  const savedLang = localStorage.getItem('oumelia_lang');
+  if(savedLang && savedLang !== 'fr') setTimeout(()=>setLang(savedLang), 500);
   // Charger les profils réels depuis Supabase
   loadProfilesFromDB();
   // Charger les demandes reçues
@@ -1684,6 +2088,8 @@ function enterApp(){
 }
 
 async function doLogout(){
+  stopRealtimeNotifs();
+  stopAdminAutoRefresh();
   if(state.user?.supabaseId){
     const client=getSB();
     if(client) await client.from('profils').update({is_online:false,last_seen:new Date().toISOString()}).eq('user_id',state.user.supabaseId);
@@ -1772,16 +2178,36 @@ async function loadDemandesRecues(){
 }
 
 async function loadAllProfilesForAdmin(){
+  // Charge TOUS les profils sans aucune limite — pagination par batch de 1000
   try {
     const client = getSB();
     if(!client) return;
-    const { data, error } = await client.from('profils').select('*').order('created_at', {ascending:false});
-    if(error){ console.log('Admin profiles error:', error.message); return; }
-    if(data && data.length > 0){
-      window._adminProfiles = data;
-      // Fusionner avec allProfiles (remplacer les demo par les vrais)
-      data.forEach(p => {
-        const existing = allProfiles.findIndex(x => x.id === p.id);
+
+    let allData = [];
+    let from = 0;
+    const batchSize = 1000;
+
+    // Boucle jusqu'à tout avoir chargé
+    while(true){
+      const { data, error } = await client
+        .from('profils')
+        .select('*')
+        .order('created_at', {ascending:false})
+        .range(from, from + batchSize - 1);
+
+      if(error){ console.log('Admin profiles error:', error.message); break; }
+      if(!data || data.length === 0) break;
+
+      allData = allData.concat(data);
+      if(data.length < batchSize) break; // Plus de données
+      from += batchSize;
+    }
+
+    if(allData.length > 0){
+      window._adminProfiles = allData;
+      // Fusionner avec allProfiles
+      allData.forEach(p => {
+        const existing = allProfiles.findIndex(x => String(x.id) === String(p.id));
         const profile = {
           id: p.id,
           prenom: p.prenom,
@@ -1801,14 +2227,17 @@ async function loadAllProfilesForAdmin(){
           bio: p.bio || '',
           status: p.status,
           paid: p.paid || false,
+          free_activated: p.free_activated || false,
           boosted: p.boosted || false,
           audioAttested: p.audio_attested || false,
+          created_at: p.created_at || '',
           user_id: p.user_id,
           isDB: true,
         };
         if(existing >= 0) allProfiles[existing] = profile;
         else allProfiles.unshift(profile);
       });
+      console.log(`✅ Admin: ${allData.length} profils chargés`);
     }
   } catch(e){ console.log('loadAllProfilesForAdmin:', e); }
 }
@@ -2078,7 +2507,7 @@ function renderExplorer(c){
   html+=`
     <div class="view-toggle">
       <button class="toggle-btn ${state.viewMode==='liste'?'active':''}" onclick="setView('liste')">📋 Liste</button>
-      <button class="toggle-btn ${state.viewMode==='swipe'?'active':''}" onclick="setView('swipe')">🃏 Swipe</button>
+      <button class="toggle-btn ${state.viewMode==='swipe'?'active':''}" onclick="setView('swipe')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M5 12h14M14 6l6 6-6 6"/></svg>Swipe</button>
     </div>`;
   if(!state.profileActive){
     html+=`<div class="paywall-banner">
@@ -2914,6 +3343,8 @@ function updateAdminBadges(){
 
 function adminTab(tab){
   state.activeAdminTab=tab;
+  if(tab==='dashboard') startAdminAutoRefresh();
+  else stopAdminAutoRefresh();
   document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
   const el=document.getElementById('atab-'+tab);
   if(el) el.classList.add('active');
@@ -2933,25 +3364,26 @@ function renderAdminDashboard(c){
   const allP=getAllAdminProfiles();
   const active=allP.filter(p=>p.status==='active').length;
   const pending=allP.filter(p=>p.status==='pending').length;
-  const inactive=allP.filter(p=>p.status==='inactive').length;
-  const paid=allP.filter(p=>p.paid).length;
-  const notPaid=allP.filter(p=>!p.paid).length;
+  // Revenus = seulement les profils qui ont PAYÉ (exclut les activations gratuites)
+  const paidReal=allP.filter(p=>p.paid===true && !p.free_activated).length;
+  const notPaid=allP.filter(p=>!p.paid && !p.free_activated).length;
   const femmes=allP.filter(p=>p.gender==='femme').length;
   const hommes=allP.filter(p=>p.gender==='homme').length;
   const nwali=waliResponses.filter(r=>!r.read).length;
   const nOnline=allP.filter(p=>onlineStatus[p.id]==='online').length;
   const nExchanges=exchangesList.length;
+  const total=allP.length;
 
-  // Profils non activés (inscrit mais pas encore payé ou validé)
-  const nonActives=allP.filter(p=>p.status==='pending'||(!p.paid&&p.status!=='active'));
+  // TOUS les profils non activés : pending + non payés + inactifs
+  const nonActives=allP.filter(p=>p.status==='pending'||(p.status==='inactive'&&!p.paid));
 
   let html=`<div style="padding:16px">
-    <div class="section-title">📊 Vue d'ensemble</div>
+    <div class="section-title">📊 Vue d'ensemble · ${total} inscrits</div>
     <div class="admin-stats">
-      <div class="stat-card"><div class="stat-num gold-text">${active}</div><div class="stat-label">Profils actifs</div></div>
+      <div class="stat-card"><div class="stat-num gold-text">${active}</div><div class="stat-label">Actifs</div></div>
       <div class="stat-card"><div class="stat-num" style="color:var(--gold)">${pending}</div><div class="stat-label">En attente</div></div>
       <div class="stat-card"><div class="stat-num" style="color:#39ff7a">${nOnline}</div><div class="stat-label">En ligne</div></div>
-      <div class="stat-card"><div class="stat-num gold-text">${(paid*5.99).toFixed(0)}€</div><div class="stat-label">Revenus</div></div>
+      <div class="stat-card"><div class="stat-num gold-text">${(paidReal*5.99).toFixed(0)}€</div><div class="stat-label">Revenus</div></div>
     </div>
     <div class="admin-stats">
       <div class="stat-card"><div class="stat-num" style="color:#E91E63">${femmes}</div><div class="stat-label">Sœurs</div></div>
@@ -2962,30 +3394,32 @@ function renderAdminDashboard(c){
 
     <div class="gold-divider"></div>
 
-    <!-- NOUVEAUX INSCRITS NON ACTIVÉS -->
-    <div class="section-title">🆕 Nouveaux inscrits — Compte non activé
+    <!-- TOUS LES INSCRITS NON ACTIVÉS -->
+    <div class="section-title">🆕 Inscrits non activés
       <span class="sc">${nonActives.length}</span>
     </div>`;
 
   if(!nonActives.length){
-    html+=`<p style="color:var(--muted);font-size:.84rem;text-align:center;padding:16px">Aucun profil en attente d'activation ✓</p>`;
+    html+=`<p style="color:var(--green);font-size:.82rem;text-align:center;padding:14px">✓ Aucun profil en attente</p>`;
   } else {
     nonActives.forEach(p=>{
       const av=p.gender==='femme'?svgFemme(32):svgHomme(32);
-      html+=`<div class="admin-user-row" style="margin-bottom:8px">
+      const date=p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'';
+      html+=`<div class="admin-user-row" style="margin-bottom:7px">
         <div class="admin-user-avatar">${av}</div>
         <div class="admin-user-info">
-          <div class="admin-user-name" style="font-size:.84rem">${p.prenom||'—'}, ${p.age||'—'} ans — ${p.ville||'—'}</div>
+          <div class="admin-user-name" style="font-size:.83rem">${p.prenom||'—'}, ${p.age||'—'} ans · ${p.ville||'—'}</div>
           <div class="admin-user-sub">
-            ${p.gender==='femme'?'Sœur':'Frère'} · 
+            ${p.gender==='femme'?'Sœur':'Frère'} · ${p.origine||'—'} ·
             <span class="badge badge-pending">⏳ Non activé</span>
-            ${p.audioAttested?' · <span style="color:var(--gold);font-size:.66rem">🎙️ Audio</span>':''}
+            ${date?'· <span style="font-size:.64rem;color:var(--muted)">'+date+'</span>':''}
+            ${p.audioAttested?' · <span style="color:var(--gold);font-size:.64rem">🎙️ Audio</span>':''}
           </div>
         </div>
         <div class="admin-actions">
           ${p.audioAttested?`<button class="btn-tiny audio" onclick="openAudioVerif(${p.id},'${p.prenom}')">🎙</button>`:''}
-          <button class="btn-tiny free" onclick="freeActivate(${p.id})" title="Activer gratuitement">🎁 Activer</button>
-          <button class="btn-tiny approve" onclick="approveProfile(${p.id})" title="Valider">✓</button>
+          <button class="btn-tiny free" onclick="freeActivateFromDash(${p.id})" title="Activer gratuitement (sans impact sur les revenus)">🎁</button>
+          <button class="btn-tiny approve" onclick="approveProfileFromDash(${p.id})" title="Valider">✓</button>
           <button class="btn-tiny reject" onclick="openRejectModal(${p.id},'${p.prenom}')" title="Refuser">✗</button>
         </div>
       </div>`;
@@ -2994,10 +3428,10 @@ function renderAdminDashboard(c){
 
   html+=`<div class="gold-divider"></div>
     <div class="section-title">⚡ Actions rapides</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px">
       <button class="btn btn-gold btn-sm" onclick="adminTab('pending')">⏳ Attentes (${pending})</button>
       <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="adminTab('wali')">🌸 Wali (${nwali})</button>
-      <button class="btn btn-sm" style="background:var(--blue);color:#fff" onclick="adminTab('users')">👥 Membres (${allP.length})</button>
+      <button class="btn btn-sm" style="background:var(--blue);color:#fff" onclick="adminTab('users')">👥 Membres (${total})</button>
       <button class="btn btn-sm" style="background:var(--card2);color:var(--muted);border:1px solid var(--border)" onclick="adminTab('matches')">💚 Matches (${nExchanges})</button>
     </div>
   </div>`;
@@ -3251,17 +3685,36 @@ function sendAdminChat(name,gender){
 async function approveProfile(id){
   const p=getAdminProfile(id); if(!p) return;
   p.status='active'; p.paid=true; p.audio_attested=false;
-  if(p.user_id) await getSB().from('profils').update({status:'active', audio_attested:false}).eq('id',id);
+  if(p.user_id){
+    await getSB().from('profils').update({status:'active', audio_attested:false}).eq('id',id);
+    if(p.email) sendAutoEmail('profile_approved', p.email, {prenom:p.prenom});
+  }
   updateAdminBadges(); showToast(`✅ Profil de ${p.prenom} validé`,'green');
   adminTab(state.activeAdminTab);
 }
 
 async function freeActivate(id){
   const p=getAdminProfile(id); if(!p) return;
-  p.status='active'; p.paid=true;
-  if(p.user_id) await getSB().from('profils').update({status:'active', paid:true}).eq('id',id);
-  updateAdminBadges(); showToast(`🎁 ${p.prenom} activé gratuitement`,'gold');
+  p.status='active';
+  p.free_activated=true; // marqué gratuit → ne compte PAS dans les revenus
+  // paid reste false pour ne pas fausser le solde
+  if(p.user_id){
+    await getSB().from('profils').update({status:'active', free_activated:true}).eq('id',id).catch(()=>{});
+  }
+  updateAdminBadges();
+  showToast(`🎁 ${p.prenom||'Profil'} activé gratuitement ✓`,'gold');
   adminTab(state.activeAdminTab);
+}
+
+// Activer depuis le Dashboard (même logique)
+async function freeActivateFromDash(id){
+  await freeActivate(id);
+  adminTab('dashboard');
+}
+
+async function approveProfileFromDash(id){
+  await approveProfile(id);
+  adminTab('dashboard');
 }
 
 async function deactivateProfile(id){
