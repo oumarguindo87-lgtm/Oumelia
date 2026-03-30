@@ -484,12 +484,24 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   <div class="auth-wrap">
     <div class="auth-card">
       <div class="auth-logo">
-        <div class="auth-logo-sm">
-          <div class="auth-logo-inner"></div>
-          <div class="auth-logo-star">
-            <svg width="14" height="14" viewBox="0 0 22 22" fill="none"><path d="M11 1L12.5 9.5L21 11L12.5 12.5L11 21L9.5 12.5L1 11L9.5 9.5Z" fill="white" opacity="0.95"/></svg>
-          </div>
-        </div>
+        <svg width="36" height="36" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="48" fill="white" opacity="0.95"/>
+  <circle cx="50" cy="50" r="42" fill="url(#gC)"/>
+  <circle cx="62" cy="38" r="32" fill="url(#gD)"/>
+  <path d="M50 28 L52.5 44 L68 50 L52.5 56 L50 72 L47.5 56 L32 50 L47.5 44 Z" fill="white" opacity="0.95"/>
+  <defs>
+    <radialGradient id="gC" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#f5e8a0"/>
+      <stop offset="45%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#7a5810"/>
+    </radialGradient>
+    <radialGradient id="gD" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#d4a843"/>
+      <stop offset="50%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </radialGradient>
+  </defs>
+</svg>
         <span class="auth-logo-name gold-text">OUMELIA</span>
       </div>
       <div class="auth-title">Connexion</div>
@@ -509,10 +521,24 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   <div class="auth-wrap">
     <div class="auth-card">
       <div class="auth-logo">
-        <div class="auth-logo-sm">
-          <div class="auth-logo-inner"></div>
-          <div class="auth-logo-star"><svg width="14" height="14" viewBox="0 0 22 22" fill="none"><path d="M11 1L12.5 9.5L21 11L12.5 12.5L11 21L9.5 12.5L1 11L9.5 9.5Z" fill="white" opacity="0.95"/></svg></div>
-        </div>
+        <svg width="36" height="36" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="48" fill="white" opacity="0.95"/>
+  <circle cx="50" cy="50" r="42" fill="url(#gC)"/>
+  <circle cx="62" cy="38" r="32" fill="url(#gD)"/>
+  <path d="M50 28 L52.5 44 L68 50 L52.5 56 L50 72 L47.5 56 L32 50 L47.5 44 Z" fill="white" opacity="0.95"/>
+  <defs>
+    <radialGradient id="gC" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#f5e8a0"/>
+      <stop offset="45%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#7a5810"/>
+    </radialGradient>
+    <radialGradient id="gD" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#d4a843"/>
+      <stop offset="50%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </radialGradient>
+  </defs>
+</svg>
         <span class="auth-logo-name gold-text">OUMELIA</span>
       </div>
       <div class="auth-title">Mot de passe oublié</div>
@@ -700,10 +726,16 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   <div class="app-shell">
     <div class="app-header">
       <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);display:flex;align-items:center;justify-content:center;position:relative;">
-          <div style="width:9px;height:9px;border-radius:50%;background:var(--dark);position:absolute;right:5px;top:4px;"></div>
-          <svg width="9" height="9" viewBox="0 0 22 22" fill="none" style="position:absolute;left:7px;top:9px"><path d="M11 1L12.5 9.5L21 11L12.5 12.5L11 21L9.5 12.5L1 11L9.5 9.5Z" fill="white" opacity="0.9"/></svg>
-        </div>
+        <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="white" opacity="0.95"/>
+          <circle cx="50" cy="50" r="42" fill="url(#gE)"/>
+          <circle cx="62" cy="38" r="32" fill="url(#gF)"/>
+          <path d="M50 28 L52.5 44 L68 50 L52.5 56 L50 72 L47.5 56 L32 50 L47.5 44 Z" fill="white" opacity="0.95"/>
+          <defs>
+            <radialGradient id="gE" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#f5e8a0"/><stop offset="45%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#7a5810"/></radialGradient>
+            <radialGradient id="gF" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#d4a843"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#8B6914"/></radialGradient>
+          </defs>
+        </svg>
         <span class="logo-hdr gold-text">OUMELIA</span>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
@@ -1791,8 +1823,13 @@ async function doLogout(){
   if(client) await client.auth.signOut();
   state.user=null; state.isAdmin=false;
   state.profileActive=false; state.profilePaused=false;
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  showScreen('screen-landing');
+  // Reset complet de l'état
+  state.user=null; state.isAdmin=false; state.profileActive=false;
+  state.profilePaused=false; state.gender=null; state.swipeIndex=0;
+  // Masquer tous les écrans et afficher le landing
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  var landing=document.getElementById('screen-landing');
+  if(landing) landing.classList.add('active');
   showToast('À bientôt !','gold');
 }
 
@@ -1912,8 +1949,10 @@ async function loadAllProfilesForAdmin(){
 
 function navTo(tab){
   state.currentNav=tab;
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const el=document.getElementById('nav-'+tab);
+  // Retirer active de TOUS les nav items
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  // Ajouter active sur le bon
+  var el=document.getElementById('nav-'+tab);
   if(el) el.classList.add('active');
   renderTab(tab);
 }
@@ -1927,8 +1966,10 @@ function renderTab(tab){
     case 'profil':   renderMyProfile(c);break;
     case 'boost':    renderBoost(c);    break;
   }
-  // Remonter en haut à chaque changement d'onglet
-  scrollToTop();
+  // Remonter en haut seulement si on n'est pas en mode swipe
+  if(!(tab==='explorer' && state.viewMode==='swipe')){
+    scrollToTop();
+  }
 }
 
 // Remonte en haut du conteneur actif instantanément
@@ -2320,7 +2361,16 @@ function swipeAction(action,prenom,pid){
     if(!state.favorites.includes(pid)) state.favorites.push(pid);
     showToast('💛 Ajouté à vos favoris !','gold');
   }
-  setTimeout(()=>{state.swipeIndex++;renderTab('explorer');},350);
+  setTimeout(()=>{
+    state.swipeIndex++;
+    // Re-render sans scrollToTop pour le mode swipe
+    const c=document.getElementById('app-content');
+    if(c) renderExplorer(c);
+    // Mettre à jour le nav sans scroll
+    document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+    var nav=document.getElementById('nav-explorer');
+    if(nav) nav.classList.add('active');
+  },350);
 }
 
 // ══════════ TOUCH SWIPE ══════════
@@ -2373,7 +2423,6 @@ function initSwipeTouch(){
       const p=profiles[state.swipeIndex%profiles.length];
       swipeAction('like',p?.prenom,p?.id);
     } else if(currentY<-60){
-      // Swipe vers le haut → demande
       const profiles=getVisibleProfiles();
       const p=profiles[state.swipeIndex%profiles.length];
       card.style.transition='transform .3s,opacity .3s';
@@ -2390,8 +2439,8 @@ function initSwipeTouch(){
   card.addEventListener('touchmove',onMove,{passive:false});
   card.addEventListener('touchend',onEnd);
   card.addEventListener('mousedown',onStart);
-  document.addEventListener('mousemove',e=>{if(isDragging) onMove(e);});
-  document.addEventListener('mouseup',()=>{if(isDragging) onEnd();});
+  document.addEventListener('mousemove',function(e){if(isDragging) onMove(e);});
+  document.addEventListener('mouseup',function(){if(isDragging) onEnd();});
 }
 
 function openProfile(id){
