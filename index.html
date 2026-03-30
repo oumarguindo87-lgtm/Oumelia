@@ -1873,52 +1873,41 @@ async function loadDemandesRecues(){
 async function loadAllProfilesForAdmin(){
   try {
     const client = getSB();
-    if(!client) return;
+    if(!client){ console.log('Admin: pas de client Supabase'); return; }
 
-    // Simple select sans range() qui cause DataCloneError sur Safari
+    console.log('Admin: chargement profils...');
+
+    // Utiliser select(*) pour éviter les erreurs de colonnes manquantes
     const { data, error } = await client
       .from('profils')
-      .select('id,prenom,gender,age,ville,origine,pratique,voile,barbe,situation,madhhab,coran,halal,enfants,veut_enfants,bio,status,paid,free_activated,boosted,audio_attested,created_at,user_id')
-      .order('created_at', {ascending:false});
+      .select('*')
+      .order('created_at', {ascending: false});
 
-    if(error){ console.log('Admin profiles error:', error.message); return; }
-    if(!data || data.length === 0) return;
+    if(error){
+      console.log('Admin profiles error:', error.message);
+      // Si erreur sur colonnes, essayer avec colonnes de base uniquement
+      const { data: data2, error: error2 } = await client
+        .from('profils')
+        .select('id, prenom, gender, age, ville, origine, pratique, voile, barbe, situation, madhhab, bio, status, paid, boosted, created_at, user_id')
+        .order('created_at', {ascending: false});
+      if(error2){ console.log('Admin fallback error:', error2.message); return; }
+      if(!data2 || data2.length === 0){ console.log('Admin: aucun profil en DB'); return; }
+      window._adminProfiles = data2;
+      console.log('Admin fallback: ' + data2.length + ' profils');
+      return;
+    }
 
+    if(!data || data.length === 0){
+      console.log('Admin: table profils vide');
+      return;
+    }
+
+    console.log('Admin: ' + data.length + ' profils chargés depuis Supabase');
     window._adminProfiles = data;
 
-    data.forEach(p => {
-      const existing = allProfiles.findIndex(x => String(x.id) === String(p.id));
-      const profile = {
-        id: p.id,
-        prenom: p.prenom || '',
-        gender: p.gender || '',
-        age: p.age || '',
-        ville: p.ville || '',
-        origine: p.origine || '',
-        pratique: p.pratique || '',
-        voile: p.voile || null,
-        barbe: p.barbe || null,
-        situation: p.situation || '',
-        madhhab: p.madhhab || '',
-        coran: p.coran || '',
-        halal: p.halal || '',
-        enfants: p.enfants || 'non',
-        veut_enfants: p.veut_enfants || 'Oui',
-        bio: p.bio || '',
-        status: p.status || 'pending',
-        paid: p.paid === true,
-        free_activated: p.free_activated === true,
-        boosted: p.boosted === true,
-        audioAttested: p.audio_attested === true,
-        created_at: p.created_at || '',
-        user_id: p.user_id || '',
-        isDB: true,
-      };
-      if(existing >= 0) allProfiles[existing] = profile;
-      else allProfiles.unshift(profile);
-    });
-    console.log('Admin: ' + data.length + ' profils chargés');
-  } catch(e){ console.log('loadAllProfilesForAdmin:', e); }
+  } catch(e){
+    console.log('loadAllProfilesForAdmin exception:', e);
+  }
 }
 
 function navTo(tab){
@@ -3146,43 +3135,38 @@ function renderAdminPending(c){
 }
 
 function getAllAdminProfiles(){
-  // Prioriser les vrais profils Supabase
-  const dbProfiles = window._adminProfiles || [];
-  
-  if(dbProfiles.length > 0){
-    // On a des vrais profils — les retourner uniquement
-    // Plus les profils démo dont l'id n'existe pas en DB
-    const dbIds = dbProfiles.map(p => String(p.id));
-    const demoOnly = allProfiles.filter(p => !p.isDB && !dbIds.includes(String(p.id)));
-    
-    const realProfiles = dbProfiles.map(p => ({
-      id: p.id,
-      prenom: p.prenom || '—',
-      gender: p.gender || '',
-      age: p.age || '',
-      ville: p.ville || '',
-      origine: p.origine || '',
-      pratique: p.pratique || '',
-      situation: p.situation || '',
-      status: p.status || 'pending',
-      paid: p.paid === true,
-      free_activated: p.free_activated === true,
-      boosted: p.boosted === true,
-      audioAttested: p.audio_attested === true,
-      created_at: p.created_at || '',
-      user_id: p.user_id || '',
-      bio: p.bio || '',
-      madhhab: p.madhhab || '',
-      voile: p.voile || null,
-      barbe: p.barbe || null,
-      isDB: true,
-    }));
-    
-    return [...realProfiles, ...demoOnly];
+  const dbRaw = window._adminProfiles || [];
+
+  if(dbRaw.length > 0){
+    // Convertir les données brutes Supabase en format unifié
+    return dbRaw.map(function(p){
+      return {
+        id: p.id,
+        prenom: p.prenom || '—',
+        gender: p.gender || '',
+        age: p.age || '',
+        ville: p.ville || '',
+        origine: p.origine || '',
+        pratique: p.pratique || '',
+        situation: p.situation || '',
+        status: p.status || 'pending',
+        paid: p.paid === true,
+        free_activated: p.free_activated === true,
+        boosted: p.boosted === true,
+        audioAttested: p.audio_attested === true,
+        created_at: p.created_at || '',
+        user_id: p.user_id || '',
+        bio: p.bio || '',
+        madhhab: p.madhhab || '',
+        voile: p.voile || null,
+        barbe: p.barbe || null,
+        isDB: true,
+      };
+    });
   }
-  
-  // Pas encore chargé depuis Supabase — retourner les démo
-  return [...allProfiles];
+
+  // Pas encore chargé — retourner profils démo
+  return allProfiles.slice();
 }
 
 function renderAdminUsers(c){
