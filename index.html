@@ -1726,11 +1726,13 @@ async function doLogin(){
   if(ADMIN_EMAILS.map(e=>e.toLowerCase()).includes(email.toLowerCase()) && pwd.toLowerCase()===ADMIN_PWD.toLowerCase()){
     errEl.classList.add('hidden');
     state.isAdmin=true;
-    // Charger les vrais profils depuis Supabase pour l'admin
+    showToast('⏳ Chargement des profils...','gold');
+    // Charger les vrais profils depuis Supabase
     await loadAllProfilesForAdmin();
     showScreen('screen-admin');
     updateAdminBadges();
     adminTab('dashboard');
+    showToast('✅ Connecté — '+((window._adminProfiles||[]).length)+' profils chargés','green');
     return;
   }
 
@@ -3010,12 +3012,13 @@ function renderBoost(c){
 // ADMIN
 // ══════════════════════════════
 function updateAdminBadges(){
-  const np=allProfiles.filter(p=>p.status==='pending').length;
-  const pb=document.getElementById('pending-badge');
-  if(pb) pb.textContent=np||'';
-  const nw=waliResponses.filter(r=>!r.read).length;
-  const wb=document.getElementById('wali-badge');
-  if(wb) wb.textContent=nw>0?nw:'';
+  const allP = getAllAdminProfiles();
+  const np = allP.filter(p=>p.status==='pending').length;
+  const pb = document.getElementById('pending-badge');
+  if(pb) pb.textContent = np || '';
+  const nw = waliResponses.filter(r=>!r.read).length;
+  const wb = document.getElementById('wali-badge');
+  if(wb) wb.textContent = nw > 0 ? nw : '';
 }
 
 function adminTab(tab){
@@ -3143,21 +3146,43 @@ function renderAdminPending(c){
 }
 
 function getAllAdminProfiles(){
+  // Prioriser les vrais profils Supabase
   const dbProfiles = window._adminProfiles || [];
-  const merged = [...allProfiles];
-  dbProfiles.forEach(p => {
-    if(!merged.find(x=>String(x.id)===String(p.id))){
-      merged.unshift({
-        id:p.id, prenom:p.prenom, gender:p.gender, age:p.age,
-        ville:p.ville||'', origine:p.origine||'', pratique:p.pratique||'',
-        situation:p.situation||'', status:p.status, paid:p.paid||false,
-        boosted:p.boosted||false, audioAttested:p.audio_attested||false,
-        user_id:p.user_id, isDB:true, bio:p.bio||'',
-        madhhab:p.madhhab||'', voile:p.voile||null, barbe:p.barbe||null,
-      });
-    }
-  });
-  return merged;
+  
+  if(dbProfiles.length > 0){
+    // On a des vrais profils — les retourner uniquement
+    // Plus les profils démo dont l'id n'existe pas en DB
+    const dbIds = dbProfiles.map(p => String(p.id));
+    const demoOnly = allProfiles.filter(p => !p.isDB && !dbIds.includes(String(p.id)));
+    
+    const realProfiles = dbProfiles.map(p => ({
+      id: p.id,
+      prenom: p.prenom || '—',
+      gender: p.gender || '',
+      age: p.age || '',
+      ville: p.ville || '',
+      origine: p.origine || '',
+      pratique: p.pratique || '',
+      situation: p.situation || '',
+      status: p.status || 'pending',
+      paid: p.paid === true,
+      free_activated: p.free_activated === true,
+      boosted: p.boosted === true,
+      audioAttested: p.audio_attested === true,
+      created_at: p.created_at || '',
+      user_id: p.user_id || '',
+      bio: p.bio || '',
+      madhhab: p.madhhab || '',
+      voile: p.voile || null,
+      barbe: p.barbe || null,
+      isDB: true,
+    }));
+    
+    return [...realProfiles, ...demoOnly];
+  }
+  
+  // Pas encore chargé depuis Supabase — retourner les démo
+  return [...allProfiles];
 }
 
 function renderAdminUsers(c){
