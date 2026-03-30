@@ -1372,10 +1372,15 @@ function backToStep2(){
 let currentSort='boost';
 function setSortMode(mode){
   currentSort=mode;
-  document.querySelectorAll('.sort-chip').forEach(c=>c.classList.remove('active'));
-  const el=document.getElementById('sort-'+mode);
+  // Mettre à jour visuellement les chips immédiatement
+  document.querySelectorAll('.sort-chip').forEach(function(chip){
+    chip.classList.remove('active');
+  });
+  var el=document.getElementById('sort-'+mode);
   if(el) el.classList.add('active');
-  renderTab('explorer');
+  // Re-render la liste sans scroll
+  var c=document.getElementById('app-content');
+  if(c) renderExplorer(c);
 }
 
 // ══════════ COMPATIBILITÉ ══════════
@@ -2249,10 +2254,10 @@ function renderExplorer(c){
 
   // Barre de tri
   html+=`<div class="sort-bar">
-    <div class="sort-chip active" id="sort-boost" onclick="setSortMode('boost')">⚡ Boostés</div>
-    <div class="sort-chip" id="sort-recent" onclick="setSortMode('recent')">🕐 Récents</div>
-    <div class="sort-chip" id="sort-active" onclick="setSortMode('active')">🟢 En ligne</div>
-    <div class="sort-chip" id="sort-compatible" onclick="setSortMode('compatible')">💫 Compatibles</div>
+    <div class="sort-chip ${currentSort==='boost'?'active':''}" id="sort-boost" onclick="setSortMode('boost')">⚡ Boostés</div>
+    <div class="sort-chip ${currentSort==='recent'?'active':''}" id="sort-recent" onclick="setSortMode('recent')">🕐 Récents</div>
+    <div class="sort-chip ${currentSort==='active'?'active':''}" id="sort-active" onclick="setSortMode('active')">🟢 En ligne</div>
+    <div class="sort-chip ${currentSort==='compatible'?'active':''}" id="sort-compatible" onclick="setSortMode('compatible')">💫 Compatibles</div>
   </div>`;
   const profiles=getVisibleProfiles();
   if(state.viewMode==='liste'){
