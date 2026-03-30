@@ -1595,31 +1595,34 @@ async function doRegister(){
 
   showToast('⏳ Création du compte...','gold');
 
-  // 1. Créer le compte auth Supabase
-  const { data, error } = await getSB().auth.signUp({ email, password: pwd });
-  if(error){ showToast('❌ '+error.message,'red'); return; }
+  const sb = getSB();
+  if(!sb) return showToast('❌ Erreur de connexion, réessayez','red');
 
-  // 2. Créer le profil en base
+  // 1. Créer le compte auth Supabase
+  const { data, error } = await sb.auth.signUp({ email, password: pwd });
+  if(error){ showToast('❌ '+error.message,'red'); return; }
+  if(!data || !data.user) { showToast('❌ Erreur création compte','red'); return; }
+
+  const userId = data.user.id;
+
+  // 2. Créer le profil — colonnes de base uniquement (compatibles avec la table)
   const profileData = {
-    user_id: data.user.id,
-    prenom: document.getElementById('reg-prenom').value||'Utilisateur',
+    user_id: userId,
+    prenom: document.getElementById('reg-prenom').value.trim()||'Utilisateur',
     gender: state.gender,
     age: parseInt(document.getElementById('reg-age').value)||25,
-    ville: document.getElementById('reg-ville').value||'',
+    ville: document.getElementById('reg-ville').value.trim()||'',
     origine: document.getElementById('reg-origine').value||'',
     pratique: document.getElementById('reg-pratique').value||'Pratiquant(e)',
-    minhaj: document.getElementById('reg-minhaj')?.value||'Je ne sais pas',
-    converti: document.getElementById('reg-converti')?.value||'Non',
-    voile: state.gender==='femme'?document.getElementById('reg-voile').value:null,
-    barbe: state.gender==='homme'?document.getElementById('reg-barbe').value:null,
-    madhhab: document.getElementById('reg-madhhab').value||'Peu importe',
-    coran: document.getElementById('reg-coran').value||'Régulièrement',
-    halal: document.getElementById('reg-halal').value||'Oui strict',
-    situation: document.getElementById('reg-situation').value||'Célibataire',
-    enfants: document.getElementById('reg-enfants').value||'non',
-    veut_enfants: document.getElementById('reg-veut-enfants').value||'Oui',
-    bio: document.getElementById('reg-bio').value||'',
-    recherche: document.getElementById('reg-recherche').value||'',
+    voile: state.gender==='femme'?(document.getElementById('reg-voile')?.value||null):null,
+    barbe: state.gender==='homme'?(document.getElementById('reg-barbe')?.value||null):null,
+    madhhab: document.getElementById('reg-madhhab')?.value||'Peu importe',
+    coran: document.getElementById('reg-coran')?.value||'Régulièrement',
+    halal: document.getElementById('reg-halal')?.value||'Oui',
+    situation: document.getElementById('reg-situation')?.value||'Jamais marié(e)',
+    enfants: document.getElementById('reg-enfants')?.value||'non',
+    veut_enfants: document.getElementById('reg-veut-enfants')?.value||'Oui',
+    bio: document.getElementById('reg-bio')?.value.trim()||'',
     status: 'pending',
     paid: false,
     boosted: false,
@@ -1628,26 +1631,90 @@ async function doRegister(){
     last_seen: new Date().toISOString(),
   };
 
-  const { data: insertData, error: profileError } = await getSB().from('profils').insert(profileData).select().single();
-  if(profileError){ showToast('❌ Erreur profil: '+profileError.message,'red'); return; }
+  // Ajouter les colonnes optionnelles si elles existent
+  const minhajEl = document.getElementById('reg-minhaj');
+  const convertiEl = document.getElementById('reg-converti');
+  const rechercheEl = document.getElementById('reg-recherche');
+  if(minhajEl) profileData.minhaj = minhajEl.value||'Je ne sais pas';
+  if(convertiEl) profileData.converti = convertiEl.value||'Non';
+  if(rechercheEl) profileData.recherche = rechercheEl.value.trim()||'';
 
-  // Uploader l'audio si enregistré (sœurs)
-  if(state.gender==='femme' && audioBlob && insertData?.id){
+  const { data: insertData, error: profileError } = await sb.from('profils').insert(profileData).select().single();
+
+  if(profileError){
+    console.log('Profil error:', profileError);
+    // Si erreur sur colonnes inconnues, réessayer sans les colonnes optionnelles
+    if(profileError.message && (profileError.message.includes('column') || profileError.message.includes('does not exist'))){
+      const profileDataBasic = {
+        user_id: userId,
+        prenom: profileData.prenom,
+        gender: profileData.gender,
+        age: profileData.age,
+        ville: profileData.ville,
+        origine: profileData.origine,
+        pratique: profileData.pratique,
+        voile: profileData.voile,
+        barbe: profileData.barbe,
+        madhhab: profileData.madhhab,
+        coran: profileData.coran,
+        halal: profileData.halal,
+        situation: profileData.situation,
+        enfants: profileData.enfants,
+        veut_enfants: profileData.veut_enfants,
+        bio: profileData.bio,
+        status: 'pending',
+        paid: false,
+        boosted: false,
+        audio_attested: profileData.audio_attested,
+        is_online: true,
+        last_seen: profileData.last_seen,
+      };
+      const { data: insertData2, error: err2 } = await sb.from('profils').insert(profileDataBasic).select().single();
+      if(err2){ showToast('❌ Erreur: '+err2.message,'red'); return; }
+      profileData.id = insertData2?.id;
+    } else {
+      showToast('❌ Erreur profil: '+profileError.message,'red');
+      return;
+    }
+  } else {
+    profileData.id = insertData?.id;
+  }
+
+  // 3. Upload audio attestation
+  if(state.gender==='femme' && audioBlob && profileData.id){
     try {
-      const fileName = `attestation_${insertData.id}_${Date.now()}.webm`;
-      await getSB().storage.from('attestations').upload(fileName, audioBlob, {
-        contentType: 'audio/webm', upsert: false
+      const mimeType = audioBlob.type || 'audio/webm';
+      const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('aac') ? 'aac' : 'webm';
+      const fileName = 'attestation_'+profileData.id+'_'+Date.now()+'.'+ext;
+      await sb.storage.from('attestations').upload(fileName, audioBlob, {
+        contentType: mimeType, upsert: false
       });
     } catch(e){ console.log('Audio upload:', e); }
   }
 
-  state.user = { ...profileData, email };
+  // 4. Mettre à jour le state
+  state.user = {
+    id: profileData.id,
+    supabaseId: userId,
+    prenom: profileData.prenom,
+    gender: profileData.gender,
+    email: email,
+    age: profileData.age,
+    ville: profileData.ville,
+    origine: profileData.origine,
+    pratique: profileData.pratique,
+    bio: profileData.bio,
+    status: 'pending',
+  };
   state.profileActive = false;
+  state.profilePaused = false;
+  state.gender = profileData.gender;
+
   document.getElementById('header-user-name').textContent = profileData.prenom;
   showScreen('screen-app');
   navTo('explorer');
-  try{ sendAutoEmail('welcome', email, {prenom: profileData.prenom||''}); }catch(e){}
-  showToast('✅ Profil créé — en attente de validation','green');
+  try{ sendAutoEmail('welcome', email, {prenom: profileData.prenom}); }catch(e){}
+  showToast('✅ Profil créé — en attente de validation admin','green');
 }
 
 async function doLogin(){
@@ -3723,14 +3790,19 @@ function startAdminRefresh(){
   admTimer=setInterval(function(){
     try{
       if(state.isAdmin && state.activeAdminTab==='dashboard'){
-        loadAllProfilesForAdmin().then(function(){
-          var el=document.getElementById('admin-content');
-          if(el) renderAdminDashboard(el);
-          updateAdminBadges();
-        });
+        // Pas de .then() dans setInterval - utiliser une fonction async séparée
+        adminAutoRefreshTick();
       }
     }catch(e){}
   },30000);
+}
+async function adminAutoRefreshTick(){
+  try{
+    await loadAllProfilesForAdmin();
+    var el=document.getElementById('admin-content');
+    if(el) renderAdminDashboard(el);
+    updateAdminBadges();
+  }catch(e){ console.log('refresh:', e); }
 }
 function stopAdminRefresh(){
   if(admTimer){ clearInterval(admTimer); admTimer=null; }
