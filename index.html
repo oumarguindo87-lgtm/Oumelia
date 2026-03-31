@@ -434,6 +434,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 
 .hidden{display:none!important;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" crossorigin="anonymous"></script>
+<script src="https://js.stripe.com/v3/" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -1155,40 +1157,19 @@ const ADMIN_EMAILS = [
 ];
 
 // ══════════ DONNÉES ══════════
-const allProfiles = [
-  {id:1,prenom:'Yasmine', gender:'femme',age:26,ville:'Paris',     origine:'Algérienne', pratique:'Très pratiquant(e)',voile:'Hijab',  barbe:null,            situation:'Jamais marié(e)',boosted:true, bio:'Alhamdulillah, je cherche mon moitié dans la sunnah.',madhhab:'Malékite',  coran:'Quotidiennement',halal:'Oui',    enfants:'non',veut_enfants:'Oui',status:'active', paid:true},
-  {id:2,prenom:'Khadija', gender:'femme',age:31,ville:'Marseille', origine:'Marocaine',  pratique:'Salafi/Sunnah',    voile:'Niqab',  barbe:null,            situation:'Divorcée',   boosted:false,bio:'Mère cherchant à se remarier en Islam.',             madhhab:'Hanbalite', coran:'Quotidiennement',halal:'Oui',    enfants:'oui',veut_enfants:'Oui',status:'active', paid:true},
-  {id:3,prenom:'Maryam',  gender:'femme',age:24,ville:'Toulouse',  origine:'Française',  pratique:'Pratiquant(e)',    voile:'Jilbab', barbe:null,            situation:'Convertie',  boosted:false,bio:'Convertie depuis 5 ans alhamdulillah.',               madhhab:'Peu importe',coran:'En apprentissage',halal:'Oui',  enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
-  {id:4,prenom:'Fatima',  gender:'femme',age:28,ville:'Lyon',      origine:'Sénégalaise',pratique:'Pratiquant(e)',    voile:'Hijab',  barbe:null,            situation:'Jamais marié(e)',boosted:false,bio:'Femme sérieuse cherchant un frère pratiquant.',       madhhab:'Malékite',  coran:'Régulièrement',  halal:'Oui',enfants:'non',veut_enfants:'Oui',      status:'pending',paid:false,audioAttested:true},
-  {id:5,prenom:'Ibrahim', gender:'homme',age:30,ville:'Lyon',      origine:'Sénégalais', pratique:'Très pratiquant(e)',voile:null,    barbe:'Oui (sunnah)',  situation:'Jamais marié(e)',boosted:false,bio:'Frère sérieux cherchant une épouse pratiquante.',    madhhab:'Malékite',  coran:'Régulièrement',  halal:'Oui',    enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
-  {id:6,prenom:'Youssef', gender:'homme',age:28,ville:'Bordeaux',  origine:'Tunisien',   pratique:'Pratiquant(e)',    voile:null,    barbe:'Oui (sunnah)',  situation:'Jamais marié(e)',boosted:false,bio:'Ingénieur, pratiquant, sérieux dans sa démarche.',    madhhab:'Hanafite',  coran:'Régulièrement',  halal:'Oui',enfants:'non',veut_enfants:'Oui',      status:'active', paid:true},
-  {id:7,prenom:'Moussa',  gender:'homme',age:35,ville:'Lille',     origine:'Malien',     pratique:'Très pratiquant(e)',voile:null,    barbe:'Oui (sunnah)',  situation:'Veuf',       boosted:true, bio:'Veuf cherchant une épouse pieuse pour refonder une famille.',madhhab:'Malékite',coran:'Quotidiennement',halal:'Oui', enfants:'oui',veut_enfants:'Oui',status:'active', paid:true},
-  {id:8,prenom:'Omar',    gender:'homme',age:33,ville:'Nantes',    origine:'Marocain',   pratique:'Salafi/Sunnah',    voile:null,    barbe:'Oui (sunnah)',  situation:'Jamais marié(e)',boosted:false,bio:'Je cherche une sœur salafi pour construire un foyer islamique.',madhhab:'Hanbalite',coran:'Quotidiennement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'pending',paid:false},
-  {id:9,prenom:'Bilal',   gender:'homme',age:27,ville:'Strasbourg',origine:'Algérien',   pratique:'Pratiquant(e)',    voile:null,    barbe:'En progression',situation:'Jamais marié(e)',boosted:false,bio:'Frère en progression dans son deen.',               madhhab:'Malékite',  coran:'Parfois',        halal:'Oui',enfants:'non',veut_enfants:'Oui',      status:'inactive',paid:true},
-];
+const allProfiles = [];
 
 const adminConvos = {};
 
-const matchesData = [
-  {id:'m1', femmeId:1, hommeId:5, date:'20/03/2026', waliSent:true,  waliResponse:null, hommeNotified:true},
-  {id:'m2', femmeId:3, hommeId:6, date:'22/03/2026', waliSent:false, waliResponse:null, hommeNotified:false},
-];
+const matchesData = [];
 
-const waliResponses = [
-  {matchId:'m1', femmeId:1, prenom:'Yasmine', response:"Assalamu Alaykum wa rahmatullahi wa barakatuh,\n\nJe vous remercie. Oui alhamdulillah, j'ai un Wali — mon père sera présent. Je vous transmets ses coordonnées dès confirmation.\n\nBarak Allahu fikoum.\nYasmine", time:"Il y a 1h", read:false}
-];
+const waliResponses = [];
 
 // ══════════ PRÉSENCE EN LIGNE ══════════
 // online = en ligne maintenant, recent = vu récemment (<30min), offline = hors ligne
-const onlineStatus = {
-  1:'online', 2:'recent', 3:'offline', 4:'offline',
-  5:'online', 6:'recent', 7:'online', 8:'offline', 9:'offline'
-};
+const onlineStatus = {};
 // Simule le temps (en prod : horodatage réel)
-const lastSeenText = {
-  1:'En ligne', 2:'Il y a 18 min', 3:'Il y a 3h', 4:'Il y a 2j',
-  5:'En ligne', 6:'Il y a 22 min', 7:'En ligne', 8:'Hier', 9:'Il y a 5j'
-};
+const lastSeenText = {};
 
 function onlineDot(profileId, size=10){
   const st=onlineStatus[profileId]||'offline';
@@ -1199,9 +1180,7 @@ function onlineDot(profileId, size=10){
 
 // ══════════ ÉCHANGES EN COURS ══════════
 // Paires de profils en échange mutuel accepté
-const exchangesList = [
-  {femmeId:1, hommeId:5},  // Yasmine ↔ Ibrahim
-];
+const exchangesList = [];
 
 function isInExchange(id1, id2){
   return exchangesList.some(e=>(e.femmeId===id1&&e.hommeId===id2)||(e.femmeId===id2&&e.hommeId===id1));
@@ -2663,7 +2642,7 @@ function sendUserMsg(name){
   if(match && name==='Administratrice' && !match.waliResponse){
     match.waliResponse={text:txt};
     const ex=waliResponses.find(r=>r.matchId===match.id);
-    if(!ex) waliResponses.push({matchId:match.id,femmeId:1,prenom:'Yasmine',response:txt,time:'À l\'instant',read:false});
+    if(!ex) waliResponses.push({matchId:match.id,femmeId:0,prenom:'',response:txt,time:'À l\'instant',read:false});
     updateAdminBadges();
   }
   openChat(name,'admin');
@@ -2672,12 +2651,7 @@ function sendUserMsg(name){
 
 // ══════════ NOTIFICATIONS ══════════
 // type: 'demande_recue' | 'like' | 'systeme' | 'acceptee' | 'refusee'
-const userNotifs=[
-  {id:'n1', type:'demande_recue', icon:'💌', text:'<strong>Ibrahim</strong> vous a envoyé une demande de mise en relation', time:'Il y a 2h',  unread:true,  profileId:5, fromPrenom:'Ibrahim', statut:'en_attente'},
-  {id:'n2', type:'systeme',       icon:'✅', text:'Votre profil a été <strong>validé</strong> par l\'administratrice',           time:'Il y a 1j', unread:true,  profileId:null},
-  {id:'n3', type:'like',          icon:'💛', text:'<strong>Moussa</strong> a liké votre profil',                                  time:'Il y a 2j', unread:true,  profileId:7,  fromPrenom:'Moussa'},
-  {id:'n5', type:'demande_recue', icon:'💌', text:'<strong>Youssef</strong> vous a envoyé une demande de mise en relation',       time:'Il y a 4j', unread:false, profileId:6,  fromPrenom:'Youssef', statut:'en_attente'},
-];
+const userNotifs=[];
 
 function renderNotifs(c){
   document.getElementById('notif-badge').style.display='none';
@@ -3771,36 +3745,9 @@ function loadScript(src, onload, onerror){
 
 // Charger les scripts après que la page soit prête
 
-window.addEventListener('load', ()=>{
-  // 1. PWA manifest
-  try{ initPWAManifest(); }catch(e){}
-
-  // 2. Init champs sécurisé
-  try{
-    const v=document.getElementById('field-voile');
-    const b=document.getElementById('field-barbe');
-    if(v) v.style.display='none';
-    if(b) b.style.display='';
-  }catch(e){}
-
-  // 3. Modals (click outside)
-  try{
-    document.querySelectorAll('.modal-overlay').forEach(o=>{
-      o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
-    });
-  }catch(e){}
-
-  // Charger Supabase
-  loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', function(){
-    setTimeout(initDB, 100);
-  }, function(){
-    loadScript('https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js', function(){
-      setTimeout(initDB, 100);
-    });
-  });
-  // Charger Stripe
-  loadScript('https://js.stripe.com/v3/', function(){}, function(){});
-
+window.addEventListener('load', function(){
+  // Supabase et Stripe déjà dans le head
+  setTimeout(function(){ try{ initDB(); }catch(e){ console.log('initDB:',e); } }, 200);
 });
 // ═══════════════════════════════════════
 // FONCTIONNALITÉS ADDITIONNELLES
@@ -3901,3 +3848,5 @@ function sendAutoEmail(type,email,data){
 }
 
 </script>
+</body>
+</html>
