@@ -1779,7 +1779,7 @@ async function doForgotPwd(){
   if(!email){errEl.classList.remove('hidden');succEl.classList.add('hidden');return;}
   errEl.classList.add('hidden');
   const { error } = await getSB().auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://oumelia.fr'
+    redirectTo: window.location.hostname.includes('.fr') ? 'https://oumelia.fr' : 'https://oumelia.com'
   });
   if(error){ errEl.textContent=error.message; errEl.classList.remove('hidden'); return; }
   succEl.classList.remove('hidden');
@@ -3154,7 +3154,7 @@ function renderAdminPending(c){
         <button class="btn-tiny approve" onclick="approveProfile(${p.id})">✓</button>
         <button class="btn-tiny reject"  onclick="openRejectModal(${p.id},'${p.prenom}')">✗</button>
         <button class="btn-tiny msg"     onclick="openAdminMsgModal('${p.prenom}')">✉</button>
-        ${!p.paid?`<button class="btn-tiny free" onclick="freeActivate(${p.id})">🎁</button>`:''}
+        ${(!p.paid && !p.free_activated)?`<button class="btn-tiny free" onclick="freeActivate(${p.id})">🎁</button>`:''}
       </div>
     </div>`;
   });
@@ -3246,7 +3246,7 @@ function buildUserList(list){
         ${p.status==='pending'?`<button class="btn-tiny reject" onclick="openRejectModal(${p.id},'${p.prenom}')" title="Refuser">✗</button>`:''}
         ${p.status==='active'?`<button class="btn-tiny deact" onclick="deactivateProfile(${p.id})" title="Désactiver">⏸ Désactiver</button>`:''}
         ${p.status==='inactive'||p.status==='paused'?`<button class="btn-tiny react" onclick="reactivateProfile(${p.id})" title="Réactiver">▶ Réactiver</button>`:''}
-        ${!p.paid?`<button class="btn-tiny free" onclick="freeActivate(${p.id})" title="Activer gratuitement">🎁 Gratuit</button>`:''}
+        ${(!p.paid && !p.free_activated)?`<button class="btn-tiny free" onclick="freeActivate(${p.id})" title="Activer gratuitement">🎁 Gratuit</button>`:''}
         <button class="btn-tiny msg" onclick="openAdminMsgModal('${p.prenom}')">✉</button>
       </div>
     </div>`;
@@ -3397,12 +3397,14 @@ function sendAdminChat(name,gender){
 // ══════════ ADMIN ACTIONS ══════════
 async function approveProfile(id){
   const p=getAdminProfile(id); if(!p) return;
-  p.status='active'; p.paid=true; p.audio_attested=false;
+  // ✓ Valider = activer le profil SANS toucher au paid
+  // Le paid reste ce qu'il était (false si non payé, true si payé)
+  p.status='active';
   if(p.user_id){
-    await getSB().from('profils').update({status:'active', audio_attested:false}).eq('id',id);
+    await getSB().from('profils').update({status:'active'}).eq('id',id);
     if(p.email) sendAutoEmail('profile_approved', p.email, {prenom:p.prenom});
   }
-  updateAdminBadges(); showToast(`✅ Profil de ${p.prenom} validé`,'green');
+  updateAdminBadges(); showToast('✅ Profil de '+p.prenom+' validé','green');
   adminTab(state.activeAdminTab);
 }
 
