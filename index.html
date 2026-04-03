@@ -2682,19 +2682,25 @@ function sendUserMsg(name){
   // Sauvegarder dans Supabase
   var sb=getSB();
   if(sb && state.user && state.user.id){
-    console.log('Envoi msg admin, from:', state.user.id, state.user.prenom);
-    sb.from('messages').insert({
+    var msgData = {
       from_id: String(state.user.id),
       to_id: 'admin',
       from_prenom: state.user.prenom||'',
       content: txt,
       lu: false
-    }).then(function(r){
-      if(r && r.error) console.log('Erreur msg:', r.error.message);
-      else console.log('Message envoyé OK en DB');
-    }).catch(function(e){ console.log('msg exception:', e); });
+    };
+    console.log('Envoi message:', JSON.stringify(msgData));
+    sb.from('messages').insert(msgData)
+    .then(function(r){
+      if(r && r.error){
+        console.log('ERREUR msg DB:', r.error.message, r.error.code, r.error.details);
+        showToast('⚠ Message non sauvegardé: '+r.error.message,'red');
+      } else {
+        console.log('✅ Message sauvegardé en DB');
+      }
+    }).catch(function(e){ console.log('msg exception:', e.message||e); });
   } else {
-    console.log('msg: sb=', !!sb, 'user=', !!(state.user && state.user.id));
+    console.log('msg non envoyé: sb='+!!sb+' user='+JSON.stringify(state.user));
   }
 
   openChat(name,'admin');
