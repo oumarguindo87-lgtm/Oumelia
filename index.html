@@ -3404,9 +3404,22 @@ function renderAdminMsgs(c){
   var sb=getSB();
   if(!sb){ c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur connexion</p></div>'; return; }
 
-  sb.from('messages').select('*').eq('to_id','admin').order('created_at',{ascending:false})
+  console.log('Admin: chargement messages...');
+  sb.from('messages').select('*').order('created_at',{ascending:false})
   .then(function(res){
-    var msgs = res.data||[];
+    console.log('Admin messages res:', JSON.stringify(res).slice(0,200));
+    if(res.error){ 
+      console.log('Admin msgs error:', res.error.message);
+      c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur: '+res.error.message+'</p></div>';
+      return;
+    }
+    var allMsgs = res.data||[];
+    console.log('Admin: '+allMsgs.length+' messages total');
+    
+    // Filtrer les messages vers admin
+    var msgs = allMsgs.filter(function(m){ return m.to_id==='admin'; });
+    console.log('Admin: '+msgs.length+' messages reçus (to_id=admin)');
+    
     var convos = {};
     msgs.forEach(function(m){
       var uid = m.from_id;
@@ -3417,6 +3430,7 @@ function renderAdminMsgs(c){
     var keys = Object.keys(convos);
     if(!keys.length){
       html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucun message reçu</p>';
+      if(allMsgs.length>0) html+='<p style="color:var(--gold);font-size:.75rem;text-align:center">'+allMsgs.length+' messages en DB (to_id différent de "admin")</p>';
     } else {
       keys.forEach(function(uid){
         var conv = convos[uid];
@@ -3432,7 +3446,8 @@ function renderAdminMsgs(c){
     html+='</div>';
     c.innerHTML=html;
   }).catch(function(e){
-    c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur: '+e+'</p></div>';
+    console.log('Admin msgs exception:', e);
+    c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Exception: '+e+'</p></div>';
   });
 }
 
