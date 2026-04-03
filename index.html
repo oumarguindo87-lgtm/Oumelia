@@ -745,7 +745,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <div class="app-content" id="app-content"></div>
     <nav class="bottom-nav">
       <div class="nav-item active" id="nav-explorer" onclick="navTo('explorer')"><span class="nav-icon">🔍</span>Explorer</div>
-      <div class="nav-item" id="nav-messages" onclick="navTo('messages')"><span class="nav-icon">💬</span>Messages</div>
+      <div class="nav-item" id="nav-messages" onclick="navTo('messages')"><span class="nav-icon" style="position:relative">💬<span id="msg-badge" style="display:none;position:absolute;top:-4px;right:-8px;background:var(--red);color:#fff;border-radius:50%;width:14px;height:14px;font-size:.5rem;font-weight:700;align-items:center;justify-content:center;"></span></span>Messages</div>
       <div class="nav-item" id="nav-notifs" onclick="navTo('notifs')">
         <span class="nav-icon" style="position:relative">🔔<span class="notif-badge" id="notif-badge" style="display:none"></span></span>Alertes
       </div>
@@ -1156,7 +1156,14 @@ const ADMIN_EMAILS = [
 ];
 
 // ══════════ DONNÉES ══════════
-const allProfiles = [];
+const allProfiles = [
+  {id:101,prenom:'Amira',gender:'femme',age:24,ville:'Paris',origine:'Algérienne',pratique:'Très pratiquant(e)',voile:'Hijab',barbe:null,situation:'Jamais marié(e)',boosted:false,bio:'Assalamu Alaykum, je cherche un frère sérieux et pratiquant.',madhhab:'Malékite',coran:'Régulièrement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
+  {id:102,prenom:'Fatou',gender:'femme',age:27,ville:'Lyon',origine:'Sénégalaise',pratique:'Pratiquant(e)',voile:'Hijab',barbe:null,situation:'Jamais marié(e)',boosted:false,bio:'Femme sérieuse cherchant un frère pour fonder un foyer halal.',madhhab:'Malékite',coran:'Régulièrement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
+  {id:103,prenom:'Maryam',gender:'femme',age:30,ville:'Marseille',origine:'Marocaine',pratique:'Très pratiquant(e)',voile:'Jilbab',barbe:null,situation:'Divorcée',boosted:true,bio:'Convertie depuis 7 ans alhamdulillah, cherche un frère stable.',madhhab:'Chaféite',coran:'Quotidiennement',halal:'Oui',enfants:'oui',veut_enfants:'Oui',status:'active',paid:true},
+  {id:104,prenom:'Yusuf',gender:'homme',age:28,ville:'Paris',origine:'Tunisien',pratique:'Pratiquant(e)',voile:null,barbe:'Oui (sunnah)',situation:'Jamais marié(e)',boosted:false,bio:'Frère sérieux, cherche une sœur pratiquante pour le mariage.',madhhab:'Hanafite',coran:'Régulièrement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
+  {id:105,prenom:'Moussa',gender:'homme',age:32,ville:'Bordeaux',origine:'Malien',pratique:'Très pratiquant(e)',voile:null,barbe:'Oui (sunnah)',situation:'Jamais marié(e)',boosted:true,bio:'Alhamdulillah, je cherche ma moitié dans la voie d Allah.',madhhab:'Malékite',coran:'Quotidiennement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
+  {id:106,prenom:'Bilal',gender:'homme',age:25,ville:'Toulouse',origine:'Français',pratique:'Pratiquant(e)',voile:null,barbe:'En progression',situation:'Jamais marié(e)',boosted:false,bio:'Converti depuis 3 ans, cherche une sœur pour construire un foyer islamique.',madhhab:'Peu importe',coran:'Régulièrement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
+];
 
 const adminConvos = {};
 
@@ -1805,7 +1812,8 @@ function enterApp(){
   setTimeout(checkBoost, 3000);
   loadProfilesFromDB();
   loadDemandesRecues();
-  loadUserMessages(); // Charger les messages depuis Supabase
+  loadUserMessages();
+  setTimeout(updateMsgBadge, 2000); // Charger les messages depuis Supabase
 }
 
 function loadUserMessages(){
@@ -1834,24 +1842,32 @@ function loadUserMessages(){
     }).catch(function(e){ console.log('loadUserMessages:',e); });
 }
 
-async function doLogout(){
-  try{stopRealtime();stopAdminRefresh();}catch(e){}
-  if((state.user&&state.user.supabaseId)){
-    const client=getSB();
-    if(client) await client.from('profils').update({is_online:false,last_seen:new Date().toISOString()}).eq('user_id',state.user.supabaseId);
-  }
-  const client=getSB();
-  if(client) await client.auth.signOut();
-  state.user=null; state.isAdmin=false;
-  state.profileActive=false; state.profilePaused=false;
-  // Reset complet de l'état
+function doLogout(){
+  // 1. Afficher le landing IMMÉDIATEMENT (pas d'await qui peut bloquer)
+  try{stopRealtime();}catch(e){}
+  try{stopAdminRefresh();}catch(e){}
+
+  // Reset état immédiat
+  var prevUser = state.user;
   state.user=null; state.isAdmin=false; state.profileActive=false;
   state.profilePaused=false; state.gender=null; state.swipeIndex=0;
-  // Masquer tous les écrans et afficher le landing
+  userChatHistory={}; window._adminProfiles=[];
+
+  // Afficher landing
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   var landing=document.getElementById('screen-landing');
   if(landing) landing.classList.add('active');
   showToast('À bientôt !','gold');
+
+  // 2. Supabase en arrière-plan (non bloquant)
+  var sb=getSB();
+  if(sb){
+    if(prevUser&&prevUser.supabaseId){
+      sb.from('profils').update({is_online:false,last_seen:new Date().toISOString()})
+        .eq('user_id',prevUser.supabaseId).then(function(){}).catch(function(){});
+    }
+    sb.auth.signOut().then(function(){}).catch(function(){});
+  }
 }
 
 // ══════════ CHARGEMENT DONNÉES SUPABASE ══════════
@@ -2635,6 +2651,18 @@ const userChatHistory={
 };
 
 function renderMessages(c){
+  // Marquer les messages comme lus
+  try{
+    var sb=getSB();
+    if(sb&&state.user&&state.user.id){
+      var uid=String(state.user.id);
+      sb.from('messages').update({lu:true}).eq('to_id',uid).eq('lu',false)
+        .then(function(){
+          var b=document.getElementById('msg-badge');
+          if(b){ b.textContent=''; b.style.display='none'; }
+        }).catch(function(){});
+    }
+  }catch(e){}
   c.innerHTML=`
     <div class="page-header"><h2>Messages</h2></div>
     <div class="conversations-list">
@@ -3937,14 +3965,27 @@ function updateNotifBadge(){
     var u=userNotifs.filter(function(n){ return n.unread; }).length;
     var b=document.getElementById('notif-badge');
     if(b){
-      if(u>0){
-        b.textContent=u;
-        b.style.display='flex';
-      } else {
-        b.textContent='';
-        b.style.display='none';
-      }
+      if(u>0){ b.textContent=u; b.style.display='flex'; }
+      else { b.textContent=''; b.style.display='none'; }
     }
+  }catch(e){}
+}
+
+function updateMsgBadge(){
+  try{
+    var sb=getSB();
+    if(!sb||!state.user||!state.user.id) return;
+    var uid=String(state.user.id);
+    // Compter les messages non lus reçus (from admin)
+    sb.from('messages').select('id').eq('to_id',uid).eq('lu',false)
+    .then(function(res){
+      var count=(res.data||[]).length;
+      var b=document.getElementById('msg-badge');
+      if(b){
+        if(count>0){ b.textContent=count; b.style.display='flex'; }
+        else { b.textContent=''; b.style.display='none'; }
+      }
+    }).catch(function(){});
   }catch(e){}
 }
 
