@@ -747,7 +747,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       <div class="nav-item active" id="nav-explorer" onclick="navTo('explorer')"><span class="nav-icon">🔍</span>Explorer</div>
       <div class="nav-item" id="nav-messages" onclick="navTo('messages')"><span class="nav-icon">💬</span>Messages</div>
       <div class="nav-item" id="nav-notifs" onclick="navTo('notifs')">
-        <span class="nav-icon" style="position:relative">🔔<span class="notif-badge" id="notif-badge">3</span></span>Alertes
+        <span class="nav-icon" style="position:relative">🔔<span class="notif-badge" id="notif-badge" style="display:none"></span></span>Alertes
       </div>
       <div class="nav-item" id="nav-profil" onclick="navTo('profil')"><span class="nav-icon">👤</span>Mon profil</div>
       <div class="nav-item" id="nav-boost" onclick="navTo('boost')"><span class="nav-icon">⚡</span>Boost</div>
@@ -1789,8 +1789,9 @@ async function doForgotPwd(){
   const succEl=document.getElementById('forgot-success');
   if(!email){errEl.classList.remove('hidden');succEl.classList.add('hidden');return;}
   errEl.classList.add('hidden');
+  var redirectUrl = window.location.origin || 'https://oumelia.com';
   const { error } = await getSB().auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.hostname.includes('.fr') ? 'https://oumelia.fr' : 'https://oumelia.com'
+    redirectTo: redirectUrl
   });
   if(error){ errEl.textContent=error.message; errEl.classList.remove('hidden'); return; }
   succEl.classList.remove('hidden');
@@ -1802,10 +1803,35 @@ function enterApp(){
   navTo('explorer');
   setTimeout(startRealtime, 2000);
   setTimeout(checkBoost, 3000);
-  // Charger les profils réels depuis Supabase
   loadProfilesFromDB();
-  // Charger les demandes reçues
   loadDemandesRecues();
+  loadUserMessages(); // Charger les messages depuis Supabase
+}
+
+function loadUserMessages(){
+  var sb=getSB();
+  if(!sb||!state.user||!state.user.id) return;
+  var uid=String(state.user.id);
+  sb.from('messages').select('*')
+    .or('from_id.eq.'+uid+',to_id.eq.'+uid)
+    .order('created_at',{ascending:true})
+    .then(function(res){
+      if(!res.data) return;
+      res.data.forEach(function(m){
+        var name=m.from_id==='admin'||m.to_id==='admin'?
+          (state.user.gender==='homme'?'Administrateur':'Administratrice'):'';
+        if(!name) return;
+        if(!userChatHistory[name]) userChatHistory[name]=[];
+        var exists=userChatHistory[name].find(function(x){return x._id===m.id;});
+        if(!exists) userChatHistory[name].push({
+          from: m.from_id==='admin'?'admin':'user',
+          text: m.content,
+          _id: m.id
+        });
+      });
+      // Mettre à jour le badge notifs
+      updateNotifBadge();
+    }).catch(function(e){ console.log('loadUserMessages:',e); });
 }
 
 async function doLogout(){
@@ -2680,7 +2706,10 @@ function sendUserMsg(name){
 const userNotifs=[];
 
 function renderNotifs(c){
-  document.getElementById('notif-badge').style.display='none';
+  // Mettre à jour le badge avec le bon nombre
+  var _unread=userNotifs.filter(function(n){return n.unread;}).length;
+  var _badge=document.getElementById('notif-badge');
+  if(_badge){ if(_unread>0){_badge.textContent=_unread;_badge.style.display='flex';}else{_badge.textContent='';_badge.style.display='none';} }
   let html=`<div class="page-header"><h2>Notifications</h2></div><div class="notif-list">`;
   userNotifs.forEach(n=>{
     const isDemande = n.type==='demande_recue';
@@ -3886,7 +3915,15 @@ function updateNotifBadge(){
   try{
     var u=userNotifs.filter(function(n){ return n.unread; }).length;
     var b=document.getElementById('notif-badge');
-    if(b) b.textContent=u||'';
+    if(b){
+      if(u>0){
+        b.textContent=u;
+        b.style.display='flex';
+      } else {
+        b.textContent='';
+        b.style.display='none';
+      }
+    }
   }catch(e){}
 }
 
