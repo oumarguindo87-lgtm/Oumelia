@@ -376,10 +376,7 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
 
 /* ══ SORT CHIP SHIMMER ══ */
 .sort-chip{white-space:nowrap;padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:.74rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
-.sort-chip::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(201,168,76,.25) 50%,transparent 100%);transform:translateX(-100%);transition:none;}
 .sort-chip.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);box-shadow:0 0 12px rgba(201,168,76,.2);}
-.sort-chip.active::after{animation:chipShimmer .6s ease forwards;}
-@keyframes chipShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
 /* ══ SWIPE TOUCH ══ */
 .swipe-card{width:100%;max-width:340px;background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;transition:transform .35s cubic-bezier(.25,.46,.45,.94),opacity .35s;box-shadow:var(--shadow);cursor:grab;user-select:none;}
@@ -1059,7 +1056,8 @@ async function loadUserProfile(authUser){
 }
 
 // ══════════ SVG AVATARS ══════════
-function svgFemme(size=54){
+function svgFemme(size){
+  if(size===undefined) size=54;
   return`<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <defs><linearGradient id="fg${size}" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#C9A84C"/>
@@ -1082,7 +1080,8 @@ function svgFemme(size=54){
 }
 
 // Mosquée SVG pour les hommes
-function svgHomme(size=54){
+function svgHomme(size){
+  if(size===undefined) size=54;
   const s=size;
   return`<svg width="${s}" height="${s}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <defs>
@@ -1171,7 +1170,8 @@ const onlineStatus = {};
 // Simule le temps (en prod : horodatage réel)
 const lastSeenText = {};
 
-function onlineDot(profileId, size=10){
+function onlineDot(profileId, size){
+  if(size===undefined) size=10;
   const st=onlineStatus[profileId]||'offline';
   const color=st==='online'?'#39ff7a':st==='recent'?'#1aad4c':'#e67e22';
   const shadow=st==='online'?`0 0 6px #39ff7a`:'none';
@@ -1235,7 +1235,8 @@ function showScreen(id){
 }
 
 let toastTimer;
-function showToast(msg,type='gold'){
+function showToast(msg,type){
+  if(type===undefined) type='gold';
   const t=document.getElementById('toast');
   t.textContent=msg;
   t.style.borderColor=type==='red'?'var(--red)':type==='green'?'var(--green)':'var(--gold)';
@@ -1293,7 +1294,7 @@ function checkPwdStrength(pwd){
 }
 
 function checkPwdMatch(){
-  const pwd=document.getElementById('reg-pwd')?.value;
+  const pwd=(document.getElementById('reg-pwd')&&document.getElementById('reg-pwd').value);
   const pwd2=document.getElementById('reg-pwd2');
   const err=document.getElementById('err-pwd2');
   if(!pwd2||!err) return;
@@ -1351,15 +1352,25 @@ function backToStep2(){
 let currentSort='boost';
 function setSortMode(mode){
   currentSort=mode;
-  // Mettre à jour visuellement les chips immédiatement
   document.querySelectorAll('.sort-chip').forEach(function(chip){
     chip.classList.remove('active');
   });
   var el=document.getElementById('sort-'+mode);
   if(el) el.classList.add('active');
-  // Re-render la liste sans scroll
-  var c=document.getElementById('app-content');
-  if(c) renderExplorer(c);
+  renderExplorerList();
+}
+
+// Re-render uniquement la liste sans perdre le focus de la recherche
+function renderExplorerList(){
+  var focused = document.activeElement;
+  var searchVal = state.searchQuery;
+  var appC=document.getElementById('app-content');
+  if(appC) renderExplorer(appC);
+  // Restaurer focus sur la barre de recherche si elle était active
+  if(focused && focused.id==='explorer-search'){
+    var newSearch=document.getElementById('explorer-search');
+    if(newSearch){ newSearch.focus(); newSearch.value=searchVal; newSearch.selectionStart=newSearch.selectionEnd=searchVal.length; }
+  }
 }
 
 // ══════════ COMPATIBILITÉ ══════════
@@ -1601,8 +1612,8 @@ function reRecord(){
 async function doRegister(){
   const email=document.getElementById('reg-email').value.trim();
   const pwd=document.getElementById('reg-pwd').value;
-  const pwd2=document.getElementById('reg-pwd2')?.value;
-  const cgu=document.getElementById('reg-cgu')?.checked;
+  const pwd2=(document.getElementById('reg-pwd2')&&document.getElementById('reg-pwd2').value);
+  const cgu=(document.getElementById('reg-cgu')&&document.getElementById('reg-cgu').checked);
   if(!email||!pwd) return showToast('⚠ Remplissez tous les champs','red');
   if(pwd.length<8) return showToast('⚠ Mot de passe trop court (8 caractères min)','red');
   if(pwd2 && pwd2!==pwd) return showToast('⚠ Les mots de passe ne correspondent pas','red');
@@ -1630,15 +1641,15 @@ async function doRegister(){
     ville: document.getElementById('reg-ville').value.trim()||'',
     origine: document.getElementById('reg-origine').value||'',
     pratique: document.getElementById('reg-pratique').value||'Pratiquant(e)',
-    voile: state.gender==='femme'?(document.getElementById('reg-voile')?.value||null):null,
-    barbe: state.gender==='homme'?(document.getElementById('reg-barbe')?.value||null):null,
-    madhhab: document.getElementById('reg-madhhab')?.value||'Peu importe',
-    coran: document.getElementById('reg-coran')?.value||'Régulièrement',
-    halal: document.getElementById('reg-halal')?.value||'Oui',
-    situation: document.getElementById('reg-situation')?.value||'Jamais marié(e)',
-    enfants: document.getElementById('reg-enfants')?.value||'non',
-    veut_enfants: document.getElementById('reg-veut-enfants')?.value||'Oui',
-    bio: document.getElementById('reg-bio')?.value.trim()||'',
+    voile: state.gender==='femme'?((document.getElementById('reg-voile')&&document.getElementById('reg-voile').value)||null):null,
+    barbe: state.gender==='homme'?((document.getElementById('reg-barbe')&&document.getElementById('reg-barbe').value)||null):null,
+    madhhab: (document.getElementById('reg-madhhab')&&document.getElementById('reg-madhhab').value)||'Peu importe',
+    coran: (document.getElementById('reg-coran')&&document.getElementById('reg-coran').value)||'Régulièrement',
+    halal: (document.getElementById('reg-halal')&&document.getElementById('reg-halal').value)||'Oui',
+    situation: (document.getElementById('reg-situation')&&document.getElementById('reg-situation').value)||'Jamais marié(e)',
+    enfants: (document.getElementById('reg-enfants')&&document.getElementById('reg-enfants').value)||'non',
+    veut_enfants: (document.getElementById('reg-veut-enfants')&&document.getElementById('reg-veut-enfants').value)||'Oui',
+    bio: (document.getElementById('reg-bio')&&document.getElementById('reg-bio').value).trim()||'',
     status: 'pending',
     paid: false,
     boosted: false,
@@ -1687,13 +1698,13 @@ async function doRegister(){
       };
       const { data: insertData2, error: err2 } = await sb.from('profils').insert(profileDataBasic).select().single();
       if(err2){ showToast('❌ Erreur: '+err2.message,'red'); return; }
-      profileData.id = insertData2?.id;
+      profileData.id = (insertData2&&insertData2.id);
     } else {
       showToast('❌ Erreur profil: '+profileError.message,'red');
       return;
     }
   } else {
-    profileData.id = insertData?.id;
+    profileData.id = (insertData&&insertData.id);
   }
 
   // 3. Upload audio attestation
@@ -1743,12 +1754,12 @@ async function doLogin(){
     errEl.classList.add('hidden');
     state.isAdmin=true;
     showToast('⏳ Chargement des profils...','gold');
-    // Charger les vrais profils depuis Supabase
-    await loadAllProfilesForAdmin();
-    showScreen('screen-admin');
-    updateAdminBadges();
-    adminTab('dashboard');
-    showToast('✅ Connecté — '+((window._adminProfiles||[]).length)+' profils chargés','green');
+    loadAllProfilesForAdmin().then(function(){
+      showScreen('screen-admin');
+      updateAdminBadges();
+      adminTab('dashboard');
+      showToast('✅ Connecté — '+((window._adminProfiles||[]).length)+' profils','green');
+    });
     return;
   }
 
@@ -1799,7 +1810,7 @@ function enterApp(){
 
 async function doLogout(){
   try{stopRealtime();stopAdminRefresh();}catch(e){}
-  if(state.user?.supabaseId){
+  if((state.user&&state.user.supabaseId)){
     const client=getSB();
     if(client) await client.from('profils').update({is_online:false,last_seen:new Date().toISOString()}).eq('user_id',state.user.supabaseId);
   }
@@ -1821,12 +1832,13 @@ async function doLogout(){
 async function loadProfilesFromDB(){
   if(!state.user) return;
   const oppositeGender = state.user.gender==='femme' ? 'homme' : 'femme';
-  const { data, error } = await sb
+  const sb2 = getSB(); if(!sb2) return;
+  const { data, error } = await sb2
     .from('profils')
     .select('*')
     .eq('gender', oppositeGender)
     .eq('status', 'active')
-    .neq('user_id', state.user.supabaseId||'');
+    .neq('user_id', (state.user && state.user.supabaseId)||'');
   if(error){ console.error('Erreur chargement profils:', error); return; }
   if(data && data.length > 0){
     // Mettre à jour allProfiles avec les données réelles
@@ -1855,7 +1867,7 @@ async function loadProfilesFromDB(){
     }));
     // Mettre à jour le statut en ligne
     dbProfiles.forEach(p => {
-      if(data.find(d=>d.id===p.id)?.is_online) onlineStatus[p.id]='online';
+      if((function(){var _f=data.find(function(d){return d.id===p.id});return _f&&_f.is_online;})()) onlineStatus[p.id]='online';
     });
     // Remplacer les profils de démo par les vrais (si disponibles)
     window._dbProfiles = dbProfiles;
@@ -1864,7 +1876,7 @@ async function loadProfilesFromDB(){
 }
 
 async function loadDemandesRecues(){
-  if(!state.user?.id) return;
+  if(!(state.user&&state.user.id)) return;
   const { data } = await sb
     .from('demandes')
     .select('*, profils!demandes_from_profile_id_fkey(prenom, gender, age, ville, pratique, voile, barbe, situation, madhhab, bio, is_online)')
@@ -1891,44 +1903,47 @@ async function loadDemandesRecues(){
   }
 }
 
-async function loadAllProfilesForAdmin(){
-  try {
-    const client = getSB();
-    if(!client){ console.log('Admin: pas de client Supabase'); return; }
+function loadAllProfilesForAdmin(){
+  var client = getSB();
+  if(!client){ console.log('Admin: pas de client'); return Promise.resolve(); }
+  console.log('Admin: chargement profils...');
 
-    console.log('Admin: chargement profils...');
-
-    // Utiliser select(*) pour éviter les erreurs de colonnes manquantes
-    const { data, error } = await client
-      .from('profils')
-      .select('*')
-      .order('created_at', {ascending: false});
-
-    if(error){
-      console.log('Admin profiles error:', error.message);
-      // Si erreur sur colonnes, essayer avec colonnes de base uniquement
-      const { data: data2, error: error2 } = await client
-        .from('profils')
-        .select('id, prenom, gender, age, ville, origine, pratique, voile, barbe, situation, madhhab, bio, status, paid, boosted, created_at, user_id')
-        .order('created_at', {ascending: false});
-      if(error2){ console.log('Admin fallback error:', error2.message); return; }
-      if(!data2 || data2.length === 0){ console.log('Admin: aucun profil en DB'); return; }
-      window._adminProfiles = data2;
-      console.log('Admin fallback: ' + data2.length + ' profils');
-      return;
-    }
-
-    if(!data || data.length === 0){
-      console.log('Admin: table profils vide');
-      return;
-    }
-
-    console.log('Admin: ' + data.length + ' profils chargés depuis Supabase');
-    window._adminProfiles = data;
-
-  } catch(e){
-    console.log('loadAllProfilesForAdmin exception:', e);
-  }
+  return client
+    .from('profils')
+    .select('id, prenom, gender, age, ville, origine, pratique, voile, barbe, situation, madhhab, bio, status, paid, free_activated, boosted, audio_attested, created_at, user_id')
+    .order('created_at', {ascending: false})
+    .then(function(res){
+      if(res.error){ console.log('Admin error:', res.error.message); return; }
+      if(!res.data || res.data.length === 0){ console.log('Admin: vide'); window._adminProfiles = []; return; }
+      var plain = [];
+      for(var i=0; i<res.data.length; i++){
+        var p = res.data[i];
+        plain.push({
+          id: String(p.id),
+          prenom: p.prenom || '',
+          gender: p.gender || '',
+          age: p.age || '',
+          ville: p.ville || '',
+          origine: p.origine || '',
+          pratique: p.pratique || '',
+          voile: p.voile || null,
+          barbe: p.barbe || null,
+          situation: p.situation || '',
+          madhhab: p.madhhab || '',
+          bio: p.bio || '',
+          status: p.status || 'pending',
+          paid: p.paid === true,
+          free_activated: p.free_activated === true,
+          boosted: p.boosted === true,
+          audio_attested: p.audio_attested === true,
+          created_at: p.created_at || '',
+          user_id: p.user_id || ''
+        });
+      }
+      window._adminProfiles = plain;
+      console.log('Admin: ' + plain.length + ' profils OK');
+    })
+    .catch(function(e){ console.log('Admin exception:', e.message || e); });
 }
 
 function navTo(tab){
@@ -2051,7 +2066,7 @@ function openFilterPanel(){
   html+=`<div class="filter-section">
     <div class="filter-section-title">Situation matrimoniale</div>
     <div class="filter-options">
-      ${['Jamais marié(e)','Divorcé(e)','Veuf(ve)'].map(v=>`<button class="filter-opt ${f.situation.includes(v)?'selected':''}" onclick="toggleFilterArr('situation','${v}')">${v}</button>`).join('')}
+      ${['Jamais marié(e)','Divorcé(e)','Veuf(ve)'].map(function(v){return filterBtn('situation',v,f.situation);}).join('')}
     </div>
   </div>`;
 
@@ -2068,7 +2083,7 @@ function openFilterPanel(){
   html+=`<div class="filter-section">
     <div class="filter-section-title">Niveau de pratique</div>
     <div class="filter-options">
-      ${['Débutant(e)','Pratiquant(e)','Très pratiquant(e)'].map(v=>`<button class="filter-opt ${f.pratique.includes(v)?'selected':''}" onclick="toggleFilterArr('pratique','${v}')">${v}</button>`).join('')}
+      ${['Débutant(e)','Pratiquant(e)','Très pratiquant(e)'].map(function(v){return filterBtn('pratique',v,f.pratique);}).join('')}
     </div>
   </div>`;
 
@@ -2076,7 +2091,7 @@ function openFilterPanel(){
   html+=`<div class="filter-section">
     <div class="filter-section-title">Minhaj</div>
     <div class="filter-options">
-      ${['Salafi','Non salafi','Je ne sais pas'].map(v=>`<button class="filter-opt ${(f.minhaj||[]).includes(v)?'selected':''}" onclick="toggleFilterArr('minhaj','${v}')">${v}</button>`).join('')}
+      ${['Salafi','Non salafi','Je ne sais pas'].map(function(v){return filterBtn('minhaj',v,f.minhaj||[]);}).join('')}
     </div>
   </div>`;
 
@@ -2086,7 +2101,7 @@ function openFilterPanel(){
     html+=`<div class="filter-section">
       <div class="filter-section-title">Barbe</div>
       <div class="filter-options">
-        ${['Oui (sunnah)','Non','En progression'].map(v=>`<button class="filter-opt ${f.barbe.includes(v)?'selected':''}" onclick="toggleFilterArr('barbe','${v}')">${v}</button>`).join('')}
+        ${['Oui (sunnah)','Non','En progression'].map(function(v){return filterBtn('barbe',v,f.barbe);}).join('')}
       </div>
     </div>`;
   } else {
@@ -2094,7 +2109,7 @@ function openFilterPanel(){
     html+=`<div class="filter-section">
       <div class="filter-section-title">Voile</div>
       <div class="filter-options">
-        ${['Hijab','Niqab','Jilbab','Sans voile','En progression'].map(v=>`<button class="filter-opt ${f.voile.includes(v)?'selected':''}" onclick="toggleFilterArr('voile','${v}')">${v}</button>`).join('')}
+        ${['Hijab','Niqab','Jilbab','Sans voile','En progression'].map(function(v){return filterBtn('voile',v,f.voile);}).join('')}
       </div>
     </div>`;
   }
@@ -2103,7 +2118,7 @@ function openFilterPanel(){
   html+=`<div class="filter-section">
     <div class="filter-section-title">Origine</div>
     <div class="filter-options">
-      ${['Algérienne','Marocaine','Tunisienne','Française','Belge','Sénégalaise','Malienne','Guinéenne','Ivoirienne','Camerounaise','Turque','Égyptienne','Syrienne','Pakistanaise','Libanaise','Mauritanienne','Congolaise','Autre'].map(v=>`<button class="filter-opt ${f.origine.includes(v)?'selected':''}" onclick="toggleFilterArr('origine','${v}')">${v}</button>`).join('')}
+      ${['Algérienne','Marocaine','Tunisienne','Française','Belge','Sénégalaise','Malienne','Guinéenne','Ivoirienne','Camerounaise','Turque','Égyptienne','Syrienne','Pakistanaise','Libanaise','Mauritanienne','Congolaise','Autre'].map(function(v){return filterBtn('origine',v,f.origine);}).join('')}
     </div>
   </div>`;
 
@@ -2178,7 +2193,7 @@ function applyFilters(){
 function renderExplorer(c){
   const oppLabel=state.user.gender==='femme'?'frères':'sœurs';
   // Section échanges en cours
-  const myExchangePartners=getExchangePartners(state.user?.id||0);
+  const myExchangePartners=getExchangePartners((state.user&&state.user.id)||0);
   let html='';
   if(myExchangePartners.length>0){
     html+=`<div class="exchange-section">
@@ -2213,7 +2228,7 @@ function renderExplorer(c){
   html+=`
     <div class="search-bar">
       <div class="search-input-wrap">
-        <input type="text" placeholder="Rechercher parmi les ${oppLabel}..." value="${state.searchQuery}" oninput="state.searchQuery=this.value;renderTab('explorer')">
+        <input type="text" id="explorer-search" placeholder="Rechercher parmi les ${oppLabel}..." value="${state.searchQuery}" oninput="state.searchQuery=this.value;renderExplorerList()" onfocus="this.selectionStart=this.value.length">
       </div>
     </div>`;
 
@@ -2224,10 +2239,10 @@ function renderExplorer(c){
     <button class="filter-trigger-btn ${hasFilters?'has-filters':''}" onclick="openFilterPanel()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
       Filtrer
-      ${hasFilters?`<span class="filter-count-badge">${activeFilters.length}</span>`:''}
+      ${hasFilters?('<span class="filter-count-badge">'+activeFilters.length+'</span>'):''}
     </button>
     <div class="active-filters-row">
-      ${activeFilters.map(f=>`<span class="active-filter-tag">${f.label}<button onclick="removeFilter('${f.key}','${f.val}');event.stopPropagation()">×</button></span>`).join('')}
+      ${activeFilters.map(function(f){return '<span class="active-filter-tag">'+f.label+'<button onclick="removeFilter(&quot;'+f.key+'&quot;,&quot;'+f.val+'&quot;);event.stopPropagation()" >×</button></span>';}).join('')}
     </div>
   </div>`;
 
@@ -2248,7 +2263,7 @@ function renderExplorer(c){
         const isFav=state.favorites.includes(p.id);
         const dot=onlineDot(p.id,9);
         const lastSeen=lastSeenText[p.id]||'Hors ligne';
-        const inExch=isInExchange(p.id, state.user?.id||0);
+        const inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
         html+=`<div class="profile-card ${p.boosted?'boosted':''}" onclick="openProfile(${p.id})">
           ${p.boosted?'<span class="boost-badge">⚡ BOOST</span>':''}
           <div class="profile-avatar-box" style="position:relative">
@@ -2263,8 +2278,8 @@ function renderExplorer(c){
             <div class="profile-meta">📍 ${p.ville} · <span style="font-size:.68rem;color:var(--muted)">${getRegion(p.ville)}</span> · <span style="font-size:.7rem;color:${onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)'}">${lastSeen}</span></div>
             <div class="profile-tags">
               <span class="tag gold">${p.pratique}</span>
-              ${p.voile?`<span class="tag">${p.voile}</span>`:''}
-              ${p.barbe?`<span class="tag">${p.barbe}</span>`:''}
+              ${p.voile?('<span class="tag">'+p.voile+'</span>'):''}
+              ${p.barbe?('<span class="tag">'+p.barbe+'</span>'):''}
               <span class="tag">${p.situation}</span>
             </div>
           </div>
@@ -2290,8 +2305,8 @@ function renderExplorer(c){
             <div style="color:var(--muted);font-size:.84rem;margin-bottom:9px">📍 ${p.ville} · ${p.origine}</div>
             <div class="profile-tags" style="margin-bottom:9px">
               <span class="tag gold">${p.pratique}</span>
-              ${p.voile?`<span class="tag">${p.voile}</span>`:''}
-              ${p.barbe?`<span class="tag">${p.barbe}</span>`:''}
+              ${p.voile?('<span class="tag">'+p.voile+'</span>'):''}
+              ${p.barbe?('<span class="tag">'+p.barbe+'</span>'):''}
             </div>
             <p style="font-size:.8rem;color:var(--muted);line-height:1.6">${p.bio}</p>
           </div>
@@ -2398,14 +2413,14 @@ function initSwipeTouch(){
     overlayL.style.opacity=0;
     overlayR.style.opacity=0;
 
-    const currentY=parseInt(card.style.transform.match(/translateY\(([^p]+)px/)?.[1]||0);
+    var _tY=card.style.transform.match(/translateY\(([^p]+)px/);var currentY=parseInt(_tY?_tY[1]:0)||0;
 
     if(currentX<-threshold){
       swipeAction('pass');
     } else if(currentX>threshold){
       const profiles=getVisibleProfiles();
       const p=profiles[state.swipeIndex%profiles.length];
-      swipeAction('like',p?.prenom,p?.id);
+      swipeAction('like',(p&&p.prenom),(p&&p.id));
     } else if(currentY<-60){
       const profiles=getVisibleProfiles();
       const p=profiles[state.swipeIndex%profiles.length];
@@ -2435,7 +2450,7 @@ function openProfile(id){
   const dot=onlineDot(p.id,11);
   const lastSeen=lastSeenText[p.id]||'Hors ligne';
   const onlineColor=onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)';
-  const inExch=isInExchange(p.id, state.user?.id||0);
+  const inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
   const c=document.getElementById('app-content');
   scrollToTop();
   c.innerHTML=`
@@ -2475,8 +2490,8 @@ function openProfile(id){
       <div class="profile-section">
         <h4>Pratique religieuse</h4>
         <div class="profile-detail-row"><span>Niveau</span><span>${p.pratique}</span></div>
-        ${p.voile?`<div class="profile-detail-row"><span>Voile</span><span>${p.voile}</span></div>`:''}
-        ${p.barbe?`<div class="profile-detail-row"><span>Barbe</span><span>${p.barbe}</span></div>`:''}
+        ${p.voile?('<div class="profile-detail-row"><span>Voile</span><span>'+p.voile+'</span></div>'):''}
+        ${p.barbe?('<div class="profile-detail-row"><span>Barbe</span><span>'+p.barbe+'</span></div>'):''}
         <div class="profile-detail-row"><span>École juridique</span><span>${p.madhhab}</span></div>
         <div class="profile-detail-row"><span>Lecture Coran</span><span>${p.coran}</span></div>
         <div class="profile-detail-row"><span>Halal</span><span>${p.halal}</span></div>
@@ -2524,17 +2539,17 @@ function openDemandeModal(prenom){
   currentDemandeTarget=prenom;
   document.getElementById('demande-prenom').textContent=prenom;
   const remaining=maxAccepted-acceptedUsed;
-  document.getElementById('modal-dots').innerHTML=[0,1,2].map(i=>`<div class="demand-dot ${i>=remaining?'used':''}"></div>`).join('');
+  document.getElementById('modal-dots').innerHTML=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=remaining?'used':'')+'"></div>';}).join('');
   document.getElementById('modal-dots').insertAdjacentHTML('afterend',`<p style="font-size:.72rem;color:var(--muted);margin-top:8px">Le compteur diminue uniquement quand une demande est acceptée.<br><span style="color:var(--gold)">${3-pendingCount} demande(s) en attente disponible(s)</span></p>`);
   openModal('modal-demande');
 }
 
 async function sendDemande(){
-  const msg = document.getElementById('demande-msg')?.value||'';
+  const msg = (document.getElementById('demande-msg')&&document.getElementById('demande-msg').value)||'';
   demandesEnvoyees[currentDemandeTarget]='en_attente';
   closeModal('modal-demande');
   // Sauvegarder en base
-  if(state.user?.id){
+  if((state.user&&state.user.id)){
     const targetProfile = [...allProfiles,...(window._dbProfiles||[])].find(p=>p.prenom===currentDemandeTarget);
     if(targetProfile){
       await getSB().from('demandes').insert({
@@ -2563,7 +2578,7 @@ function buyDemandes(){
     // Réinitialiser les demandes acceptées
     Object.keys(demandesEnvoyees).forEach(k=>{if(demandesEnvoyees[k]==='acceptee') delete demandesEnvoyees[k];});
     // Enregistrer le paiement dans Supabase
-    if(state.user?.id){
+    if((state.user&&state.user.id)){
       await getSB().from('paiements').insert({
         profile_id: state.user.id,
         type: 'demandes',
@@ -2580,7 +2595,7 @@ function activateProfile(){
   closeModal('modal-paywall');
   openStripePayment('profil', async ()=>{
     state.profileActive=true;
-    if(state.user?.supabaseId){
+    if((state.user&&state.user.supabaseId)){
       await getSB().from('profils').update({status:'active', paid:true}).eq('user_id', state.user.supabaseId);
     }
     showToast('✅ Profil activé ! Barak Allahu fikoum','green');
@@ -2597,9 +2612,9 @@ function renderMessages(c){
   c.innerHTML=`
     <div class="page-header"><h2>Messages</h2></div>
     <div class="conversations-list">
-      <div class="convo-item" onclick="openChat('Administratrice','admin')">
+      <div class="convo-item" onclick="openChat(state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice','admin')">
         <div class="convo-avatar"><div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);display:flex;align-items:center;justify-content:center;position:relative"><div style="width:10px;height:10px;border-radius:50%;background:var(--card);position:absolute;right:6px;top:5px"></div></div></div>
-        <div class="convo-info"><div class="convo-name">Administratrice Oumelia</div><div class="convo-preview">Une demande de mise en relation vous concernant...</div></div>
+        <div class="convo-info"><div class="convo-name">${state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice'} Oumelia</div><div class="convo-preview">Une demande de mise en relation vous concernant...</div></div>
         <div class="convo-time">Auj.</div>
         <div class="convo-dot"></div>
       </div>
@@ -2618,7 +2633,7 @@ function openChat(name, type){
     </div>
     <div class="chat-wrap">
       <div class="chat-messages" id="chat-msgs">
-        ${msgs.map(m=>`<div class="msg ${m.from==='admin'?'theirs':'mine'}">${m.text}</div>`).join('')}
+        ${msgs.map(function(m){return '<div class="msg '+(m.from==='admin'?'theirs':'mine')+'">'+(m.text)+'</div>';}).join('')}
         ${!msgs.length?'<p style="color:var(--muted);text-align:center;padding:20px;font-size:.84rem">Aucun message</p>':''}
       </div>
       <div class="chat-input-bar">
@@ -2631,20 +2646,31 @@ function openChat(name, type){
 }
 
 function sendUserMsg(name){
-  const inp=document.getElementById('chat-input');
+  var inp=document.getElementById('chat-input');
   if(!inp||!inp.value.trim()) return;
-  const txt=inp.value;
+  var txt=inp.value.trim();
   if(!userChatHistory[name]) userChatHistory[name]=[];
   userChatHistory[name].push({from:'user',text:txt});
   inp.value='';
-  // Si réponse à l'admin → wali response
-  const match=matchesData.find(m=>m.femmeId===1);
-  if(match && name==='Administratrice' && !match.waliResponse){
-    match.waliResponse={text:txt};
-    const ex=waliResponses.find(r=>r.matchId===match.id);
-    if(!ex) waliResponses.push({matchId:match.id,femmeId:0,prenom:'',response:txt,time:'À l\'instant',read:false});
-    updateAdminBadges();
+
+  // Sauvegarder dans Supabase
+  var sb=getSB();
+  if(sb && state.user && state.user.id){
+    console.log('Envoi msg admin, from:', state.user.id, state.user.prenom);
+    sb.from('messages').insert({
+      from_id: String(state.user.id),
+      to_id: 'admin',
+      from_prenom: state.user.prenom||'',
+      content: txt,
+      lu: false
+    }).then(function(r){
+      if(r && r.error) console.log('Erreur msg:', r.error.message);
+      else console.log('Message envoyé OK en DB');
+    }).catch(function(e){ console.log('msg exception:', e); });
+  } else {
+    console.log('msg: sb=', !!sb, 'user=', !!(state.user && state.user.id));
   }
+
   openChat(name,'admin');
   showToast('✅ Message envoyé','green');
 }
@@ -2663,7 +2689,7 @@ function renderNotifs(c){
     const pending   = n.statut==='en_attente';
 
     html+=`<div class="notif-item ${n.unread?'unread':''} ${n.profileId&&!isDemande?'clickable':''}"
-      ${n.profileId&&!isDemande?`onclick="openProfileFromNotif(${n.profileId})"`:''}>
+      ${n.profileId&&!isDemande?('onclick="openProfileFromNotif('+n.profileId+')"'):''}>
       <div class="notif-icon">${accepted?'💚':refused?'✗':n.icon}</div>
       <div style="flex:1">
         <div class="notif-text">${n.text}</div>
@@ -2737,7 +2763,7 @@ function openProfileFromNotifDemande(notifId, profileId){
             <div><span style="color:var(--muted)">Madhhab</span><br>${p.madhhab}</div>
           </div>
         </div>
-        ${p.bio?`<div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:14px">${p.bio}</div>`:''}
+        ${p.bio?('<div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:14px">'+p.bio+'</div>'):''}
         <!-- Actions -->
         <div style="display:flex;gap:10px">
           <button class="btn btn-sm" style="flex:1;background:var(--green);color:#fff" onclick="acceptDemandeFromModal('${notifId}')">✓ Accepter</button>
@@ -2755,7 +2781,7 @@ async function acceptDemande(notifId){
 
   // Si profil non activé → inviter à activer
   if(!state.profileActive){
-    document.getElementById('modal-profil-demande')?.remove();
+    var _mpd=document.getElementById('modal-profil-demande');if(_mpd)_mpd.remove();
     // Proposer d'activer ou refuser
     const overlay=document.createElement('div');
     overlay.className='modal-overlay open';
@@ -2794,7 +2820,7 @@ async function acceptDemande(notifId){
 }
 
 function acceptDemandeFromModal(notifId){
-  document.getElementById('modal-profil-demande')?.remove();
+  var _mpd=document.getElementById('modal-profil-demande');if(_mpd)_mpd.remove();
   acceptDemande(notifId);
 }
 
@@ -2811,7 +2837,7 @@ async function refuseDemande(notifId){
 }
 
 function refuseDemandeFromModal(notifId){
-  document.getElementById('modal-profil-demande')?.remove();
+  var _mpd=document.getElementById('modal-profil-demande');if(_mpd)_mpd.remove();
   refuseDemande(notifId);
 }
 
@@ -2831,7 +2857,7 @@ function renderMyProfile(c){
   const u=state.user||{};
   const acceptedUsed=Object.values(demandesEnvoyees).filter(d=>d==='acceptee').length;
   const remaining=Math.max(0,3-acceptedUsed);
-  const dots=[0,1,2].map(i=>`<div class="demand-dot ${i>=remaining?'used':''}"></div>`).join('');
+  const dots=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=remaining?'used':'')+'"></div>';}).join('');
   const av=u.gender==='femme'?svgFemme(60):svgHomme(60);
   const completion=getProfileCompletion(u);
   const isVerified=u.audio_attested||u.status==='active';
@@ -2858,7 +2884,7 @@ function renderMyProfile(c){
         <div class="completion-bar-track">
           <div class="completion-bar-fill" style="width:${completion}%"></div>
         </div>
-        ${completion<100?`<p style="font-size:.72rem;color:var(--muted);margin-top:5px">💡 Complétez votre bio pour augmenter votre visibilité</p>`:'<p style="font-size:.72rem;color:var(--green);margin-top:5px">✓ Profil complet !</p>'}
+        ${completion<100?'<p style="font-size:.72rem;color:var(--muted);margin-top:5px">💡 Complétez votre bio pour augmenter votre visibilité</p>':'<p style="font-size:.72rem;color:var(--green);margin-top:5px">✓ Profil complet !</p>'}
       </div>
 
       ${!state.profileActive?`<div class="paywall-banner" style="margin:0 0 14px">
@@ -2892,7 +2918,7 @@ function renderMyProfile(c){
 
       <div style="display:flex;flex-direction:column;gap:9px;margin-top:4px">
         <button class="btn btn-outline btn-sm" onclick="renderEditProfile()">✏️ Modifier mon profil</button>
-        ${!state.profilePaused?`<button class="btn btn-sm" style="background:var(--blue-soft);border:1px solid rgba(74,158,255,.3);color:var(--blue)" onclick="openModal('modal-pause')">⏸ Mettre en pause</button>`:''}
+        ${!state.profilePaused?'<button class="btn btn-sm" style="background:var(--blue-soft);border:1px solid rgba(74,158,255,.3);color:var(--blue)" onclick="openModal(\'modal-pause\')">⏸ Mettre en pause</button>':''}
       </div>
 
       <!-- Liens utiles -->
@@ -2945,13 +2971,13 @@ function renderEditProfile(){
 }
 
 async function submitEdit(){
-  const prenom = document.getElementById('edit-prenom')?.value;
-  const age    = document.getElementById('edit-age')?.value;
-  const ville  = document.getElementById('edit-ville')?.value;
-  const bio    = document.getElementById('edit-bio')?.value;
-  const newPwd = document.getElementById('edit-pwd-new')?.value;
+  const prenom = (document.getElementById('edit-prenom')&&document.getElementById('edit-prenom').value);
+  const age    = (document.getElementById('edit-age')&&document.getElementById('edit-age').value);
+  const ville  = (document.getElementById('edit-ville')&&document.getElementById('edit-ville').value);
+  const bio    = (document.getElementById('edit-bio')&&document.getElementById('edit-bio').value);
+  const newPwd = (document.getElementById('edit-pwd-new')&&document.getElementById('edit-pwd-new').value);
 
-  if(state.user?.supabaseId){
+  if((state.user&&state.user.supabaseId)){
     await getSB().from('profils').update({
       prenom: prenom||state.user.prenom,
       age: age||state.user.age,
@@ -2971,7 +2997,7 @@ async function submitEdit(){
 async function pauseProfile(){
   closeModal('modal-pause');
   state.profilePaused=true;
-  if(state.user?.supabaseId){
+  if((state.user&&state.user.supabaseId)){
     await getSB().from('profils').update({status:'paused'}).eq('user_id', state.user.supabaseId);
   }
   renderTab('profil');
@@ -2980,7 +3006,7 @@ async function pauseProfile(){
 
 async function resumeProfile(){
   state.profilePaused=false;
-  if(state.user?.supabaseId){
+  if((state.user&&state.user.supabaseId)){
     await getSB().from('profils').update({status:'active'}).eq('user_id', state.user.supabaseId);
   }
   renderTab('profil');
@@ -2992,7 +3018,7 @@ async function deleteAccount(){
   if(val!=='SUPPRIMER') return showToast('⚠ Tapez exactement "SUPPRIMER"','red');
   closeModal('modal-delete');
   showToast('🗑️ Suppression en cours...','red');
-  if(state.user?.supabaseId){
+  if((state.user&&state.user.supabaseId)){
     // Supprimer le profil et toutes les données liées
     await getSB().from('demandes').delete().or(`from_profile_id.eq.${state.user.id},to_profile_id.eq.${state.user.id}`);
     await getSB().from('messages').delete().or(`from_id.eq.${state.user.id},to_id.eq.${state.user.id}`);
@@ -3113,7 +3139,7 @@ function renderAdminDashboard(c){
           </div>
         </div>
         <div class="admin-actions">
-          ${p.audioAttested?`<button class="btn-tiny audio" onclick="openAudioVerif(${p.id},'${p.prenom}')">🎙</button>`:''}
+          ${p.audioAttested?('<button class="btn-tiny audio" onclick="openAudioVerif(\''+p.id+'\',\''+p.prenom+'\')" >🎙</button>'):''}
           <button class="btn-tiny free" onclick="freeActivateFromDash(${p.id})" title="Activer gratuitement (sans impact sur les revenus)">🎁</button>
           <button class="btn-tiny approve" onclick="approveProfileFromDash(${p.id})" title="Valider">✓</button>
           <button class="btn-tiny reject" onclick="openRejectModal(${p.id},'${p.prenom}')" title="Refuser">✗</button>
@@ -3150,11 +3176,11 @@ function renderAdminPending(c){
         </div>
       </div>
       <div class="admin-actions">
-        ${p.audioAttested?`<button class="btn-tiny audio" onclick="openAudioVerif(${p.id},'${p.prenom}')">🎙</button>`:''}
+        ${p.audioAttested?('<button class="btn-tiny audio" onclick="openAudioVerif(\''+p.id+'\',\''+p.prenom+'\')" >🎙</button>'):''}
         <button class="btn-tiny approve" onclick="approveProfile(${p.id})">✓</button>
         <button class="btn-tiny reject"  onclick="openRejectModal(${p.id},'${p.prenom}')">✗</button>
         <button class="btn-tiny msg"     onclick="openAdminMsgModal('${p.prenom}')">✉</button>
-        ${(!p.paid && !p.free_activated)?`<button class="btn-tiny free" onclick="freeActivate(${p.id})">🎁</button>`:''}
+        ${(!p.paid&&!p.free_activated)?('<button class="btn-tiny free" onclick="freeActivate(\''+p.id+'\')" >🎁</button>'):''}
       </div>
     </div>`;
   });
@@ -3220,7 +3246,7 @@ let adminStatusFilter='all';
 
 function filterByStatus(status){
   adminStatusFilter=status;
-  filterAdminUsers(document.getElementById('admin-search')?.value||'');
+  filterAdminUsers((document.getElementById('admin-search')&&document.getElementById('admin-search').value)||'');
 }
 
 function buildUserList(list){
@@ -3242,11 +3268,11 @@ function buildUserList(list){
         </div>
       </div>
       <div class="admin-actions">
-        ${p.status==='pending'?`<button class="btn-tiny approve" onclick="approveProfile(${p.id})" title="Valider">✓ Valider</button>`:''}
-        ${p.status==='pending'?`<button class="btn-tiny reject" onclick="openRejectModal(${p.id},'${p.prenom}')" title="Refuser">✗</button>`:''}
-        ${p.status==='active'?`<button class="btn-tiny deact" onclick="deactivateProfile(${p.id})" title="Désactiver">⏸ Désactiver</button>`:''}
-        ${p.status==='inactive'||p.status==='paused'?`<button class="btn-tiny react" onclick="reactivateProfile(${p.id})" title="Réactiver">▶ Réactiver</button>`:''}
-        ${(!p.paid && !p.free_activated)?`<button class="btn-tiny free" onclick="freeActivate(${p.id})" title="Activer gratuitement">🎁 Gratuit</button>`:''}
+        ${p.status==='pending'?('<button class="btn-tiny approve" onclick="approveProfile(\''+p.id+'\')" title="Valider">✓ Valider</button>'):''}
+        ${p.status==='pending'?('<button class="btn-tiny reject" onclick="openRejectModal(\''+p.id+'\',\''+p.prenom+'\')" title="Refuser">✗</button>'):''}
+        ${p.status==='active'?('<button class="btn-tiny deact" onclick="deactivateProfile(\''+p.id+'\')" title="Désactiver">⏸</button>'):''}
+        ${(p.status==='inactive'||p.status==='paused')?('<button class="btn-tiny react" onclick="reactivateProfile(\''+p.id+'\')" title="Réactiver">▶ Réactiver</button>'):''}
+        ${(!p.paid&&!p.free_activated)?('<button class="btn-tiny free" onclick="freeActivate(\''+p.id+'\')" title="Activer gratuitement">🎁 Gratuit</button>'):''}
         <button class="btn-tiny msg" onclick="openAdminMsgModal('${p.prenom}')">✉</button>
       </div>
     </div>`;
@@ -3294,8 +3320,8 @@ function renderAdminMatches(c){
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        ${!m.waliSent?`<button class="btn-tiny approve" onclick="sendWaliFromMatch(${idx})">🌸 Administratrice → ${femme.prenom}</button>`:`<span style="color:var(--green);font-size:.7rem">✓ Wali envoyé à ${femme.prenom}</span>`}
-        ${!m.hommeNotified?`<button class="btn-tiny react" onclick="notifyFrereFromMatch(${idx})">📨 Administrateur → ${homme.prenom}</button>`:`<span style="color:var(--blue);font-size:.7rem">✓ ${homme.prenom} notifié</span>`}
+        ${!m.waliSent?('<button class="btn-tiny approve" onclick="sendWaliFromMatch('+idx+')">🌸 Administratrice → '+femme.prenom+'</button>'):('<span style="color:var(--green);font-size:.7rem">✓ Wali envoyé à '+femme.prenom+'</span>')}
+        ${!m.hommeNotified?('<button class="btn-tiny react" onclick="notifyFrereFromMatch('+idx+')">📨 Administrateur → '+homme.prenom+'</button>'):('<span style="color:var(--blue);font-size:.7rem">✓ '+homme.prenom+' notifié</span>')}
         <button class="btn-tiny msg" onclick="openAdminChatDirect('${femme.prenom}','femme')">✉ ${femme.prenom}</button>
         <button class="btn-tiny msg" onclick="openAdminChatDirect('${homme.prenom}','homme')">✉ ${homme.prenom}</button>
       </div>
@@ -3316,12 +3342,12 @@ function renderAdminWali(c){
     html+=`<div class="wali-response-item">
       <div class="wr-title">
         Réponse de ${wr.prenom} ${!wr.read?'· <span style="color:var(--gold);font-weight:700">NOUVEAU</span>':''} · ${wr.time}
-        ${homme?`· Demande de <strong>${homme.prenom}</strong>`:''}
+        ${homme?('· Demande de <strong>'+homme.prenom+'</strong>'):''}
       </div>
       <div class="wr-msg">${wr.response}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-tiny msg" onclick="openAdminChatDirect('${wr.prenom}','femme');markWaliRead('${wr.matchId}')">💬 Répondre</button>
-        ${homme?`<button class="btn-tiny react" onclick="notifyHomme('${homme.prenom}','${wr.prenom}')">📨 Notifier ${homme.prenom}</button>`:''}
+        ${homme?('<button class="btn-tiny react" onclick="notifyHomme(\''+homme.prenom+'\',\''+wr.prenom+'\')" >📨 Notifier '+homme.prenom+'</button>'):''}
         <button class="btn-tiny deact" onclick="markWaliRead('${wr.matchId}');adminTab('wali')">✓ Marquer lu</button>
       </div>
     </div>`;
@@ -3339,59 +3365,121 @@ function notifyHomme(hommePrenom,femmePrenom){
 }
 
 function renderAdminMsgs(c){
-  const members=allProfiles.filter(p=>p.status==='active');
-  let html=`<div style="padding:16px"><div class="section-title">✉️ Conversations</div>`;
-  html+=members.map(p=>{
-    const av=p.gender==='femme'?svgFemme(36):svgHomme(36);
-    const last=adminConvos[p.prenom]?.slice(-1)[0];
-    return`<div class="convo-item" onclick="openAdminChatDirect('${p.prenom}','${p.gender}')">
-      <div class="convo-avatar">${av}</div>
-      <div class="convo-info">
-        <div class="convo-name">${p.prenom}, ${p.age} ans</div>
-        <div class="convo-preview">${last?last.text:'Aucun message'}</div>
-      </div>
-      <div class="convo-time">${p.ville}</div>
-    </div>`;
-  }).join('');
-  html+=`</div>`;
-  c.innerHTML=html;
+  c.innerHTML='<div style="padding:16px"><div class="section-title">✉️ Messages reçus</div><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
+  var sb=getSB();
+  if(!sb){ c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur connexion</p></div>'; return; }
+
+  sb.from('messages').select('*').eq('to_id','admin').order('created_at',{ascending:false})
+  .then(function(res){
+    var msgs = res.data||[];
+    var convos = {};
+    msgs.forEach(function(m){
+      var uid = m.from_id;
+      if(!convos[uid]) convos[uid] = {prenom: m.from_prenom||'Inconnu', last: m.content, uid: uid};
+    });
+
+    var html='<div style="padding:16px"><div class="section-title">✉️ Messages reçus</div>';
+    var keys = Object.keys(convos);
+    if(!keys.length){
+      html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucun message reçu</p>';
+    } else {
+      keys.forEach(function(uid){
+        var conv = convos[uid];
+        html+='<div class="convo-item" onclick="openAdminConvo(\''+uid+'\',\''+conv.prenom+'\')">'+
+          '<div class="convo-avatar">'+svgFemme(36)+'</div>'+
+          '<div class="convo-info">'+
+            '<div class="convo-name">'+conv.prenom+'</div>'+
+            '<div class="convo-preview">'+conv.last+'</div>'+
+          '</div>'+
+        '</div>';
+      });
+    }
+    html+='</div>';
+    c.innerHTML=html;
+  }).catch(function(e){
+    c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur: '+e+'</p></div>';
+  });
 }
 
 function openAdminChatDirect(name,gender){
-  if(!adminConvos[name]) adminConvos[name]=[];
   scrollToTop();
   renderAdminChatView(document.getElementById('admin-content'),name,gender);
 }
 
+function openAdminConvo(uid, prenom){
+  var sb=getSB(); if(!sb) return;
+  var c=document.getElementById('admin-content');
+  c.innerHTML='<div style="padding:16px">Chargement...</div>';
+
+  sb.from('messages').select('*')
+  .or('from_id.eq.'+uid+',to_id.eq.'+uid)
+  .order('created_at',{ascending:true})
+  .then(function(res){
+    var msgs = res.data||[];
+    var html='<div class="page-header" style="background:var(--dark);position:sticky;top:0;z-index:10">'+
+      '<button class="back-btn" onclick="adminTab(\'msgs\')">←</button>'+
+      '<h2>'+prenom+'</h2></div>'+
+      '<div class="chat-wrap"><div class="chat-messages" id="admin-chat-msgs">';
+    if(!msgs.length) html+='<p style="color:var(--muted);text-align:center;padding:20px">Aucun message</p>';
+    msgs.forEach(function(m){
+      var mine = m.from_id==='admin';
+      html+='<div class="msg '+(mine?'mine':'theirs')+'">'+m.content+'</div>';
+    });
+    html+='</div><div class="chat-input-bar">'+
+      '<input type="text" id="admin-chat-input" placeholder="Répondre à '+prenom+'..." onkeydown="if(event.key===\'Enter\')sendAdminReply(\''+uid+'\',\''+prenom+'\')">'+
+      '<button class="chat-send" onclick="sendAdminReply(\''+uid+'\',\''+prenom+'\')">➤</button>'+
+      '</div></div>';
+    c.innerHTML=html;
+    var el=document.getElementById('admin-chat-msgs');
+    if(el) el.scrollTop=el.scrollHeight;
+  });
+}
+
+function sendAdminReply(toId, prenom){
+  var inp=document.getElementById('admin-chat-input');
+  if(!inp||!inp.value.trim()) return;
+  var txt=inp.value.trim();
+  var sb=getSB(); if(!sb) return;
+  sb.from('messages').insert({
+    from_id: 'admin',
+    to_id: toId,
+    from_prenom: 'Admin',
+    content: txt,
+    lu: false
+  }).then(function(){
+    if(!adminConvos[prenom]) adminConvos[prenom]=[];
+    adminConvos[prenom].push({from:'admin', text:txt});
+    inp.value='';
+    openAdminConvo(toId, prenom);
+    showToast('✉️ Réponse envoyée à '+prenom,'green');
+  }).catch(function(e){ showToast('Erreur: '+e,'red'); });
+}
+
 function renderAdminChatView(c,name,gender){
-  const msgs=adminConvos[name]||[];
-  const av=gender==='femme'?svgFemme(30):svgHomme(30);
-  c.innerHTML=`
-    <div class="page-header" style="background:var(--dark);position:sticky;top:0;z-index:10">
-      <button class="back-btn" onclick="adminTab('msgs')">←</button>
-      <div style="width:30px">${av}</div><h2>${name}</h2>
-    </div>
-    <div class="chat-wrap">
-      <div class="chat-messages" id="admin-chat-msgs">
-        ${msgs.map(m=>`<div class="msg ${m.from==='admin'?'mine':'theirs'}">${m.text}</div>`).join('')||'<p style="color:var(--muted);text-align:center;padding:20px;font-size:.84rem">Commencez la conversation</p>'}
-      </div>
-      <div class="chat-input-bar">
-        <input type="text" id="admin-chat-input" placeholder="Message admin..." onkeydown="if(event.key==='Enter')sendAdminChat('${name}','${gender}')">
-        <button class="chat-send" onclick="sendAdminChat('${name}','${gender}')">➤</button>
-      </div>
-    </div>`;
-  const el=document.getElementById('admin-chat-msgs');
+  var msgs=adminConvos[name]||[];
+  var av=gender==='femme'?svgFemme(30):svgHomme(30);
+  var msgsHtml = msgs.length ? msgs.map(function(m){return '<div class="msg '+(m.from==='admin'?'mine':'theirs')+'">'+m.text+'</div>';}).join('') : '<p style="color:var(--muted);text-align:center;padding:20px;font-size:.84rem">Commencez la conversation</p>';
+  c.innerHTML='<div class="page-header" style="background:var(--dark);position:sticky;top:0;z-index:10">'+
+    '<button class="back-btn" onclick="adminTab(\'msgs\')">←</button>'+
+    '<div style="width:30px">'+av+'</div><h2>'+name+'</h2></div>'+
+    '<div class="chat-wrap"><div class="chat-messages" id="admin-chat-msgs">'+msgsHtml+'</div>'+
+    '<div class="chat-input-bar">'+
+    '<input type="text" id="admin-chat-input" placeholder="Message admin..." onkeydown="if(event.key===\'Enter\')sendAdminChat(\''+name+'\',\''+gender+'\')">'+
+    '<button class="chat-send" onclick="sendAdminChat(\''+name+'\',\''+gender+'\')">➤</button>'+
+    '</div></div>';
+  var el=document.getElementById('admin-chat-msgs');
   if(el) el.scrollTop=el.scrollHeight;
 }
 
 function sendAdminChat(name,gender){
-  const inp=document.getElementById('admin-chat-input');
+  var inp=document.getElementById('admin-chat-input');
   if(!inp||!inp.value.trim()) return;
+  var txt=inp.value.trim();
   if(!adminConvos[name]) adminConvos[name]=[];
-  adminConvos[name].push({from:'admin',text:inp.value});
+  adminConvos[name].push({from:'admin',text:txt});
   inp.value='';
   renderAdminChatView(document.getElementById('admin-content'),name,gender);
-  showToast(`✉️ Message envoyé à ${name}`,'green');
+  showToast('✉️ Message envoyé à '+name,'green');
 }
 
 // ══════════ ADMIN ACTIONS ══════════
@@ -3450,7 +3538,9 @@ async function reactivateProfile(id){
 
 // Helper — cherche dans les profils démo ET les profils DB
 function getAdminProfile(id){
-  return (window._adminProfiles||[]).find(p=>p.id===id) || allProfiles.find(p=>p.id===id);
+  var sid = String(id);
+  return (window._adminProfiles||[]).find(function(p){ return String(p.id)===sid; }) 
+      || allProfiles.find(function(p){ return String(p.id)===sid; });
 }
 
 let rejectId=null;
@@ -3465,9 +3555,9 @@ async function confirmReject(){
   const reason=document.getElementById('reject-reason').value;
   if(!reason.trim()) return showToast('⚠ Entrez une raison','red');
   const p=getAdminProfile(rejectId); if(p) p.status='inactive';
-  if(p?.user_id) await getSB().from('profils').update({status:'inactive', reject_reason:reason}).eq('id',rejectId);
+  if((p&&p.user_id)) await getSB().from('profils').update({status:'inactive', reject_reason:reason}).eq('id',rejectId);
   updateAdminBadges(); closeModal('modal-admin-reject');
-  showToast(`✗ ${p?.prenom} notifié(e) du refus`,'red');
+  showToast(`✗ ${(p&&p.prenom)} notifié(e) du refus`,'red');
   adminTab(state.activeAdminTab);
 }
 
@@ -3532,21 +3622,21 @@ function openAudioVerif(id,name){
 function audioValidate(){
   const p=allProfiles.find(x=>x.id===audioVerifId);if(p){p.status='active';p.paid=true;p.audioAttested=false;}
   updateAdminBadges();closeModal('modal-audio');
-  showToast(`✅ Audio validé — ${p?.prenom} approuvée`,'green');
+  showToast(`✅ Audio validé — ${(p&&p.prenom)} approuvée`,'green');
   adminTab(state.activeAdminTab);
 }
 
 function audioRejectFn(){
   closeModal('modal-audio');
   const p=allProfiles.find(x=>x.id===audioVerifId);
-  openRejectModal(audioVerifId,p?.prenom||'');
+  openRejectModal(audioVerifId,(p&&p.prenom)||'');
 }
 
 function buyBoost(){
   activateBoost();
   openStripePayment('boost', async ()=>{
     // Activer le boost dans Supabase — expire dans 7 jours
-    if(state.user?.supabaseId){
+    if((state.user&&state.user.supabaseId)){
       const boostUntil = new Date(Date.now() + 7*24*60*60*1000).toISOString();
       await getSB().from('profils').update({
         boosted: true,
@@ -3622,7 +3712,7 @@ async function openStripePayment(type, callbackFn){
     const res = await fetch('/.netlify/functions/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, email: state.user?.email || '' }),
+      body: JSON.stringify({ type, email: (state.user&&state.user.email) || '' }),
     });
     const data = await res.json();
     if(data.error){ showStripeError(data.error); return; }
@@ -3655,7 +3745,7 @@ async function confirmStripePayment(){
     payment_method: {
       card: stripeCardElement,
       billing_details: {
-        email: state.user?.email || '',
+        email: (state.user&&state.user.email) || '',
       },
     },
   });
@@ -3664,7 +3754,7 @@ async function confirmStripePayment(){
     showStripeError(error.message);
     btn.disabled = false;
     spinner.style.display = 'none';
-    label.textContent = `🔒 Payer ${STRIPE_PRODUCTS[stripeCurrentType]?.price}`;
+    label.textContent = `🔒 Payer ${(STRIPE_PRODUCTS[stripeCurrentType]&&STRIPE_PRODUCTS[stripeCurrentType].price)}`;
     return;
   }
 
@@ -3747,6 +3837,11 @@ function loadScript(src, onload, onerror){
 
 // Charger les scripts après que la page soit prête
 
+function filterBtn(key,val,arr){
+  var sel=(arr&&arr.includes(val))?'selected':'';
+  return '<button class="filter-opt '+sel+'" onclick="toggleFilterArr(\"'+key+'\",\"'+val+'\")">'+(val)+'</button>';
+}
+
 window.addEventListener('load', function(){
   // Supabase et Stripe déjà dans le head
   setTimeout(function(){ try{ initDB(); }catch(e){ console.log('initDB:',e); } }, 200);
@@ -3808,13 +3903,12 @@ function startAdminRefresh(){
     }catch(e){}
   },30000);
 }
-async function adminAutoRefreshTick(){
-  try{
-    await loadAllProfilesForAdmin();
+function adminAutoRefreshTick(){
+  loadAllProfilesForAdmin().then(function(){
     var el=document.getElementById('admin-content');
     if(el) renderAdminDashboard(el);
     updateAdminBadges();
-  }catch(e){ console.log('refresh:', e); }
+  }).catch(function(e){ console.log('refresh:', e); });
 }
 function stopAdminRefresh(){
   if(admTimer){ clearInterval(admTimer); admTimer=null; }
