@@ -151,9 +151,9 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
 .boost-badge{position:absolute;top:6px;right:6px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#1a0e00;font-size:.56rem;font-weight:800;padding:2px 6px;border-radius:4px;}
 
 /* ══ SWIPE ══ */
-.swipe-container{padding:13px 16px;display:flex;flex-direction:column;align-items:center;}
-.swipe-card{width:100%;max-width:340px;background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;transition:transform .3s,opacity .3s;box-shadow:var(--shadow);}
-.swipe-card-avatar{height:225px;background:linear-gradient(135deg,#0a1208,#142010);display:flex;align-items:center;justify-content:center;position:relative;}
+.swipe-container{position:fixed;inset:0;top:56px;bottom:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 16px;z-index:5;background:var(--black);}
+.swipe-card{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;transition:transform .3s,opacity .3s;box-shadow:var(--shadow);cursor:pointer;}
+.swipe-card-avatar{height:260px;background:linear-gradient(135deg,#0a1208,#142010);display:flex;align-items:center;justify-content:center;position:relative;}
 .boosted-ribbon{position:absolute;top:11px;left:11px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#1a0e00;font-size:.66rem;font-weight:800;padding:3px 9px;border-radius:4px;}
 .swipe-card-body{padding:15px 15px 11px;}
 .swipe-card-name{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:4px;}
@@ -429,6 +429,11 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 .stat-bar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
 .stat-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .6s ease;}
 
+
+/* ══ SWIPE POPUP PROFIL ══ */
+.swipe-popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease;}
+.swipe-popup{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px;padding-bottom:40px;}
+.swipe-popup-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
 .hidden{display:none!important;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" crossorigin="anonymous"></script>
@@ -506,7 +511,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       <div class="auth-title">Connexion</div>
       <div id="login-error" class="error-box hidden"></div>
       <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="votre@email.com"></div>
-      <div class="form-group"><label>Mot de passe</label><input type="password" id="login-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="form-group"><label>MOT DE PASSE</label><div style="position:relative"><input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password" style="padding-right:40px"><button type="button" onclick="var i=document.getElementById('login-pwd');i.type=i.type==='password'?'text':'password'" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer">👁</button></div></div>
       <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="doLogin()">Se connecter</button>
       <div class="auth-link"><a onclick="showScreen('screen-forgot')">Mot de passe oublié ?</a></div>
       <div class="auth-link">Pas encore inscrit ? <a onclick="showScreen('screen-register')">Créer un compte</a></div>
@@ -767,6 +772,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     </div>
     <div class="admin-tabs">
       <div class="admin-tab active" id="atab-dashboard" onclick="adminTab('dashboard')">📊 Dashboard</div>
+      <div class="admin-tab" id="atab-demandes" onclick="adminTab('demandes')">💌 Demandes <span id="demandes-badge" style="background:var(--red);color:#fff;border-radius:8px;padding:1px 5px;font-size:.6rem"></span></div>
       <div class="admin-tab" id="atab-pending" onclick="adminTab('pending')">⏳ Attente <span id="pending-badge" style="background:var(--red);color:#fff;border-radius:8px;padding:1px 5px;font-size:.6rem"></span></div>
       <div class="admin-tab" id="atab-users" onclick="adminTab('users')">👥 Membres</div>
       <div class="admin-tab" id="atab-matches" onclick="adminTab('matches')">💚 Matches</div>
@@ -1040,16 +1046,28 @@ async function loadUserProfile(authUser){
       email: authUser.email,
       age: profile.age,
       ville: profile.ville,
-      origine: profile.origine,
-      pratique: profile.pratique,
-      voile: profile.voile,
-      barbe: profile.barbe,
-      madhhab: profile.madhhab,
-      bio: profile.bio,
+      origine: profile.origine||'',
+      pratique: profile.pratique||'',
+      voile: profile.voile||null,
+      barbe: profile.barbe||null,
+      madhhab: profile.madhhab||'',
+      coran: profile.coran||'',
+      situation: profile.situation||'',
+      enfants: profile.enfants||'',
+      veut_enfants: profile.veut_enfants||'',
+      halal: profile.halal||'',
+      bio: profile.bio||'',
       status: profile.status,
+      paid: profile.paid||false,
+      free_activated: profile.free_activated||false,
+      boosted: profile.boosted||false,
+      minhaj: profile.minhaj||'',
+      converti: profile.converti||false,
+      recherche: profile.recherche||'',
     };
     state.profileActive = profile.status === 'active';
     state.profilePaused = profile.status === 'paused';
+    console.log('Profil chargé:', profile.prenom, '| coran:', profile.coran, '| situation:', profile.situation, '| origine:', profile.origine);
     // Mettre à jour le statut en ligne
     await getSB().from('profils').update({ last_seen: new Date().toISOString(), is_online: true }).eq('user_id', authUser.id);
   }
@@ -1356,7 +1374,7 @@ function backToStep2(){
 }
 
 // ══════════ TRIS EXPLORER ══════════
-let currentSort='boost';
+var currentSort='boost';
 function setSortMode(mode){
   currentSort=mode;
   document.querySelectorAll('.sort-chip').forEach(function(chip){
@@ -1399,12 +1417,12 @@ function getRegion(ville){
 // ══════════ COMPLÉTION PROFIL ══════════
 function getProfileCompletion(u){
   if(!u) return 0;
-  const fields=['prenom','age','ville','origine','pratique','bio','madhhab'];
-  const filled=fields.filter(f=>u[f]&&u[f]!=='').length;
-  let bonus=0;
-  if(u.bio&&u.bio.length>50) bonus+=10;
-  if(u.audio_attested) bonus+=15;
-  return Math.min(100,Math.round((filled/fields.length)*75)+bonus);
+  // Uniquement les champs demandés à l'inscription
+  var allFields=['prenom','age','ville','origine','pratique','bio','madhhab','coran','situation','enfants'];
+  if(u.gender==='femme') allFields.push('voile');
+  if(u.gender==='homme') allFields.push('barbe');
+  var filled=allFields.filter(function(f){ return u[f]&&String(u[f])!==''&&String(u[f])!=='null'; }).length;
+  return Math.min(100, Math.round((filled/allFields.length)*100));
 }
 
 // ══════════ FAQ ══════════
@@ -1421,13 +1439,13 @@ const faqData=[
 
 function openFAQ(){
   const list=document.getElementById('faq-list');
-  list.innerHTML=faqData.map((item,i)=>`
+  list.innerHTML=faqData.map(function(item,i){ return `
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFAQ(${i})">
         <span>${item.q}</span><span id="faq-arrow-${i}" style="color:var(--gold);flex-shrink:0">▾</span>
       </div>
       <div class="faq-a" id="faq-a-${i}">${item.a}</div>
-    </div>`).join('');
+    </div>`; }).join('');
   openModal('modal-faq');
 }
 
@@ -1763,6 +1781,7 @@ async function doLogin(){
     showToast('⏳ Chargement des profils...','gold');
     loadAllProfilesForAdmin().then(function(){
       showScreen('screen-admin');
+      loadAdminDemandes(); // Charger les demandes depuis Supabase
       updateAdminBadges();
       adminTab('dashboard');
       showToast('✅ Connecté — '+((window._adminProfiles||[]).length)+' profils','green');
@@ -1813,7 +1832,8 @@ function enterApp(){
   loadProfilesFromDB();
   loadDemandesRecues();
   loadUserMessages();
-  setTimeout(updateMsgBadge, 2000); // Charger les messages depuis Supabase
+  setTimeout(loadUserNotifications, 500); // après que state.user soit prêt
+  setTimeout(updateMsgBadge, 2000);
 }
 
 function loadUserMessages(){
@@ -1882,39 +1902,22 @@ async function loadProfilesFromDB(){
     .eq('status', 'active')
     .neq('user_id', (state.user && state.user.supabaseId)||'');
   if(error){ console.error('Erreur chargement profils:', error); return; }
-  if(data && data.length > 0){
-    // Mettre à jour allProfiles avec les données réelles
-    // On garde les profils de démo si la DB est vide
-    const dbProfiles = data.map(p => ({
-      id: p.id,
-      prenom: p.prenom,
-      gender: p.gender,
-      age: p.age,
-      ville: p.ville,
-      origine: p.origine,
-      pratique: p.pratique,
-      voile: p.voile,
-      barbe: p.barbe,
-      situation: p.situation,
-      madhhab: p.madhhab,
-      coran: p.coran,
-      halal: p.halal,
-      enfants: p.enfants,
-      veut_enfants: p.veut_enfants,
-      bio: p.bio||'',
-      boosted: p.boosted||false,
-      status: p.status,
-      paid: p.paid,
-      isDB: true,
-    }));
-    // Mettre à jour le statut en ligne
-    dbProfiles.forEach(p => {
-      if((function(){var _f=data.find(function(d){return d.id===p.id});return _f&&_f.is_online;})()) onlineStatus[p.id]='online';
-    });
-    // Remplacer les profils de démo par les vrais (si disponibles)
-    window._dbProfiles = dbProfiles;
-    renderTab(state.currentNav);
-  }
+  // Toujours mettre à jour _dbProfiles (même si vide)
+  window._dbProfiles = (data||[]).map(function(p){
+    return {
+      id: p.id, prenom: p.prenom||'', gender: p.gender||'',
+      age: p.age||'', ville: p.ville||'', origine: p.origine||'',
+      pratique: p.pratique||'', voile: p.voile||null, barbe: p.barbe||null,
+      situation: p.situation||'', madhhab: p.madhhab||'', coran: p.coran||'',
+      halal: p.halal||'', enfants: p.enfants||'', veut_enfants: p.veut_enfants||'',
+      bio: p.bio||'', boosted: p.boosted===true, status: p.status||'active',
+      paid: p.paid===true, isDB: true,
+    };
+  });
+  // Mettre à jour statut en ligne
+  (data||[]).forEach(function(p){ if(p.is_online) onlineStatus[p.id]='online'; });
+  console.log('loadProfilesFromDB: '+window._dbProfiles.length+' profils du genre opposé');
+  renderTab(state.currentNav);
 }
 
 async function loadDemandesRecues(){
@@ -1946,46 +1949,32 @@ async function loadDemandesRecues(){
 }
 
 function loadAllProfilesForAdmin(){
-  var client = getSB();
-  if(!client){ console.log('Admin: pas de client'); return Promise.resolve(); }
   console.log('Admin: chargement profils...');
-
-  return client
-    .from('profils')
-    .select('id, prenom, gender, age, ville, origine, pratique, voile, barbe, situation, madhhab, bio, status, paid, free_activated, boosted, audio_attested, created_at, user_id')
-    .order('created_at', {ascending: false})
-    .then(function(res){
-      if(res.error){ console.log('Admin error:', res.error.message); return; }
-      if(!res.data || res.data.length === 0){ console.log('Admin: vide'); window._adminProfiles = []; return; }
-      var plain = [];
-      for(var i=0; i<res.data.length; i++){
-        var p = res.data[i];
-        plain.push({
-          id: String(p.id),
-          prenom: p.prenom || '',
-          gender: p.gender || '',
-          age: p.age || '',
-          ville: p.ville || '',
-          origine: p.origine || '',
-          pratique: p.pratique || '',
-          voile: p.voile || null,
-          barbe: p.barbe || null,
-          situation: p.situation || '',
-          madhhab: p.madhhab || '',
-          bio: p.bio || '',
-          status: p.status || 'pending',
-          paid: p.paid === true,
-          free_activated: p.free_activated === true,
-          boosted: p.boosted === true,
-          audio_attested: p.audio_attested === true,
-          created_at: p.created_at || '',
-          user_id: p.user_id || ''
-        });
-      }
-      window._adminProfiles = plain;
-      console.log('Admin: ' + plain.length + ' profils OK');
-    })
-    .catch(function(e){ console.log('Admin exception:', e.message || e); });
+  return fetch(SUPABASE_URL+'/rest/v1/profils?select=id,prenom,gender,age,ville,origine,pratique,voile,barbe,situation,madhhab,bio,status,paid,free_activated,boosted,audio_attested,created_at,user_id&order=created_at.desc', {
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer '+SUPABASE_ANON,
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data)){ console.log('Admin error:', JSON.stringify(data).slice(0,100)); return; }
+    window._adminProfiles = data.map(function(p){
+      return {
+        id: String(p.id), prenom: p.prenom||'', gender: p.gender||'',
+        age: p.age||'', ville: p.ville||'', origine: p.origine||'',
+        pratique: p.pratique||'', voile: p.voile||null, barbe: p.barbe||null,
+        situation: p.situation||'', madhhab: p.madhhab||'', bio: p.bio||'',
+        status: p.status||'pending', paid: p.paid===true,
+        free_activated: p.free_activated===true, boosted: p.boosted===true,
+        audio_attested: p.audio_attested===true,
+        created_at: p.created_at||'', user_id: p.user_id||''
+      };
+    });
+    console.log('Admin: '+window._adminProfiles.length+' profils OK');
+  })
+  .catch(function(e){ console.log('Admin exception:', e.message||e); });
 }
 
 function navTo(tab){
@@ -2006,6 +1995,7 @@ function renderTab(tab){
     case 'notifs':   renderNotifs(c);   break;
     case 'profil':   renderMyProfile(c);break;
     case 'boost':    renderBoost(c);    break;
+    case 'favoris':  renderFavoris(c);  break;
   }
   // Remonter en haut seulement si on n'est pas en mode swipe
   if(!(tab==='explorer' && state.viewMode==='swipe')){
@@ -2025,8 +2015,18 @@ function scrollToTop(){
 // ══════════ EXPLORER ══════════
 function getVisibleProfiles(){
   const opp=state.user.gender==='femme'?'homme':'femme';
-  let list=allProfiles.filter(p=>p.gender===opp && p.status==='active');
-  list.sort((a,b)=>(b.boosted?1:0)-(a.boosted?1:0));
+  // Fusionner profils locaux (test) + profils réels Supabase
+  var dbProfs = (window._dbProfiles||[]).filter(function(p){ return p.gender===opp && p.status==='active'; });
+  var localProfs = allProfiles.filter(function(p){ return p.gender===opp && p.status==='active'; });
+  // Les profils DB ont priorité sur les locaux (même id = DB gagne)
+  var dbIds = dbProfs.map(function(p){ return String(p.id); });
+  var localOnly = localProfs.filter(function(p){ return !dbIds.includes(String(p.id)); });
+  var list = dbProfs.concat(localOnly);
+  // En mode swipe, exclure les profils déjà vus
+  if(state.viewMode==='swipe' && state.seenProfiles && state.seenProfiles.length>0){
+    list=list.filter(function(p){ return !state.seenProfiles.includes(String(p.id)); });
+  }
+  list.sort(function(a,b){ return (b.boosted?1:0)-(a.boosted?1:0); });
   const f=state.filters;
   // Recherche texte
   if(state.searchQuery){
@@ -2333,9 +2333,13 @@ function renderExplorer(c){
     if(!profiles.length) html+=`<div style="padding:60px;text-align:center;color:var(--muted)">Aucun profil disponible</div>`;
     else{
       const p=profiles[state.swipeIndex%profiles.length];
+      // Marquer ce profil comme vu dès l'affichage
+      if(!state.seenProfiles) state.seenProfiles=[];
+      if(p && !state.seenProfiles.includes(String(p.id))) state.seenProfiles.push(String(p.id));
       const av=p.gender==='femme'?svgFemme(110):svgHomme(110);
       html+=`<div class="swipe-container">
-        <div class="swipe-card" id="swipe-card">
+        <button onclick="setView('liste')" style="position:absolute;top:8px;left:16px;background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:20px;padding:6px 14px;font-size:.8rem;cursor:pointer;z-index:10">← Liste</button>
+        <div class="swipe-card" id="swipe-card" onclick="openSwipeProfile(${p.id})">
           <div class="swipe-overlay left" id="swipe-overlay-left">✗</div>
           <div class="swipe-overlay right" id="swipe-overlay-right">♡</div>
           <div class="swipe-overlay" id="swipe-overlay-up" style="background:linear-gradient(180deg,rgba(201,168,76,.7),transparent);color:#1a0e00;font-size:2rem;align-items:flex-start;padding-top:20px">💌</div>
@@ -2388,7 +2392,16 @@ function renderExplorer(c){
   if(state.viewMode==='swipe') setTimeout(initSwipeTouch, 50);
 }
 
-function setView(mode){state.viewMode=mode;renderTab('explorer');}
+function setView(mode){
+  state.viewMode=mode;
+  state.swipeIndex=0; // Reset index quand on change de vue
+  var c=document.getElementById('app-content');
+  if(c) renderExplorer(c);
+  // Mettre à jour nav
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var nav=document.getElementById('nav-explorer');
+  if(nav) nav.classList.add('active');
+}
 
 function swipeAction(action,prenom,pid){
   const card=document.getElementById('swipe-card');
@@ -2397,11 +2410,25 @@ function swipeAction(action,prenom,pid){
     else if(action==='like'){card.style.transform='translateX(120%) rotate(15deg)';card.style.opacity='0';}
     else{card.style.transform='translateY(-110%)';card.style.opacity='0';}
   }
-  if(action==='ask'){openDemandeModal(prenom);return;}
+  if(action==='ask'){
+    // Marquer comme vu
+    var curProfiles = getVisibleProfiles();
+    var curP = curProfiles[state.swipeIndex % (curProfiles.length||1)];
+    if(curP){ if(!state.seenProfiles) state.seenProfiles=[]; if(!state.seenProfiles.includes(String(curP.id))) state.seenProfiles.push(String(curP.id)); }
+    openDemandeModal(prenom);
+    // Avancer après fermeture du modal
+    setTimeout(function(){
+      var c2=document.getElementById('app-content');
+      if(c2 && state.viewMode==='swipe') renderExplorer(c2);
+    }, 400);
+    return;
+  }
   if(action==='like'&&pid){
     if(!state.favorites.includes(pid)) state.favorites.push(pid);
     showToast('💛 Ajouté à vos favoris !','gold');
   }
+  // Marquer ce profil comme vu
+  if(pid){ if(!state.seenProfiles) state.seenProfiles=[]; if(!state.seenProfiles.includes(String(pid))) state.seenProfiles.push(String(pid)); }
   setTimeout(()=>{
     state.swipeIndex++;
     // Re-render sans scrollToTop pour le mode swipe
@@ -2427,11 +2454,13 @@ function initSwipeTouch(){
     const t=e.touches?e.touches[0]:e;
     startX=t.clientX; startY=t.clientY;
     isDragging=true;
+    window._isSwiping=false;
     card.classList.add('dragging');
   }
 
   function onMove(e){
     if(!isDragging) return;
+    window._isSwiping=true;
     const t=e.touches?e.touches[0]:e;
     currentX=t.clientX-startX;
     const currentY=t.clientY-startY;
@@ -2452,6 +2481,7 @@ function initSwipeTouch(){
     if(!isDragging) return;
     isDragging=false;
     card.classList.remove('dragging');
+    setTimeout(function(){ window._isSwiping=false; }, 100);
     overlayL.style.opacity=0;
     overlayR.style.opacity=0;
 
@@ -2486,7 +2516,10 @@ function initSwipeTouch(){
 
 function openProfile(id){
   if(!state.profileActive){openModal('modal-paywall');return;}
-  const p=allProfiles.find(x=>x.id===id); if(!p) return;
+  // Chercher dans les profils locaux ET les vrais profils Supabase
+  var p = allProfiles.find(function(x){ return String(x.id)===String(id); })
+       || (window._dbProfiles||[]).find(function(x){ return String(x.id)===String(id); });
+  if(!p) return;
   const av=p.gender==='femme'?svgFemme(80):svgHomme(80);
   const isFav=state.favorites.includes(p.id);
   const dot=onlineDot(p.id,11);
@@ -2546,12 +2579,25 @@ function openProfile(id){
 }
 
 function toggleFav(id){
-  const idx=state.favorites.indexOf(id);
-  const btn=document.getElementById('fav-btn-'+id);
+  var idx=state.favorites.indexOf(id);
+  var btn=document.getElementById('fav-btn-'+id);
   if(idx===-1){
     state.favorites.push(id);
     if(btn){btn.innerHTML='♥ Favori';btn.classList.add('active');}
     showToast('♥ Ajouté aux favoris','gold');
+    // Notifier le profil liké
+    var sb=getSB();
+    if(sb && state.user && state.user.id){
+      sb.from('notifications').insert({
+        profile_id: String(id),
+        type: 'like',
+        content: (state.user.prenom||'Quelqu un') + ' a aimé votre profil',
+        from_profile_id: String(state.user.id),
+        from_prenom: state.user.prenom||'',
+        lu: false,
+        created_at: new Date().toISOString(),
+      }).catch(function(){});
+    }
   } else {
     state.favorites.splice(idx,1);
     if(btn){btn.innerHTML='♡ Favori';btn.classList.remove('active');}
@@ -2565,45 +2611,73 @@ function toggleFav(id){
 let currentDemandeTarget='';
 function openDemandeModal(prenom){
   if(!state.profileActive){openModal('modal-paywall');return;}
-  // Compter les demandes EN ATTENTE (pas acceptées)
-  const pendingCount=Object.values(demandesEnvoyees).filter(d=>d==='en_attente').length;
-  const acceptedUsed=Object.values(demandesEnvoyees).filter(d=>d==='acceptee').length;
-  const maxAccepted=3;
-
-  // Si 3 demandes en attente → message d'attente
-  if(pendingCount>=3){
-    showToast('⏳ Vous avez déjà 3 demandes en attente. Attendez une réponse avant d\'en envoyer d\'autres.','red');
+  // Vérifier si déjà envoyé une demande à ce profil
+  if(demandesEnvoyees[prenom]){
+    showToast('⚠ Vous avez déjà envoyé une demande à ' + prenom,'red');
     return;
   }
-  // Si 3 demandes acceptées → acheter pack
-  if(acceptedUsed>=maxAccepted){openModal('modal-plus-demandes');return;}
+  // Compter les demandes EN ATTENTE (pas acceptées)
+  // Compteur: diminue SEULEMENT si la demande est ACCEPTÉE
+  var acceptedCount=Object.values(demandesEnvoyees).filter(function(d){return d==='acceptee';}).length;
+  var pendingCount=Object.values(demandesEnvoyees).filter(function(d){return d==='en_attente';}).length;
+  if(acceptedCount>=3){openModal('modal-plus-demandes');return;}
+  if(pendingCount>=3){showToast('⏳ 3 demandes en attente — attendez une réponse','red');return;}
 
   currentDemandeTarget=prenom;
   document.getElementById('demande-prenom').textContent=prenom;
-  const remaining=maxAccepted-acceptedUsed;
+  var remaining=3-acceptedCount;
   document.getElementById('modal-dots').innerHTML=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=remaining?'used':'')+'"></div>';}).join('');
-  document.getElementById('modal-dots').insertAdjacentHTML('afterend',`<p style="font-size:.72rem;color:var(--muted);margin-top:8px">Le compteur diminue uniquement quand une demande est acceptée.<br><span style="color:var(--gold)">${3-pendingCount} demande(s) en attente disponible(s)</span></p>`);
+  var oldP=document.getElementById('dots-info');
+  if(oldP) oldP.parentNode.removeChild(oldP);
+  var infoP=document.createElement('p');
+  infoP.id='dots-info';
+  infoP.style.cssText='font-size:.72rem;color:var(--muted);margin-top:8px;text-align:center';
+  infoP.innerHTML='<span style="color:var(--gold)">'+remaining+' demande(s) disponible(s)</span><br><span style="font-size:.68rem">Le compteur diminue uniquement quand une demande est acceptée</span>';
+  document.getElementById('modal-dots').parentNode.appendChild(infoP);
   openModal('modal-demande');
 }
 
 async function sendDemande(){
-  const msg = (document.getElementById('demande-msg')&&document.getElementById('demande-msg').value)||'';
+  var msg = (document.getElementById('demande-msg')&&document.getElementById('demande-msg').value)||'';
   demandesEnvoyees[currentDemandeTarget]='en_attente';
   closeModal('modal-demande');
-  // Sauvegarder en base
-  if((state.user&&state.user.id)){
-    const targetProfile = [...allProfiles,...(window._dbProfiles||[])].find(p=>p.prenom===currentDemandeTarget);
-    if(targetProfile){
-      await getSB().from('demandes').insert({
-        from_profile_id: state.user.id,
-        to_profile_id: targetProfile.id,
-        message: msg,
-        statut: 'en_attente',
-        created_at: new Date().toISOString(),
-      });
-    }
-  }
   showToast('💌 Demande envoyée ! En attente de réponse.','gold');
+
+  if(!(state.user&&state.user.id)) return;
+  var sb = getSB(); if(!sb) return;
+
+  var allP = [...allProfiles,...(window._dbProfiles||[])];
+  var targetProfile = allP.find(function(p){ return p.prenom===currentDemandeTarget; });
+  if(!targetProfile){ console.log('Profil cible introuvable:', currentDemandeTarget); return; }
+
+  // 1. Insérer la demande
+  var insertRes = await sb.from('demandes').insert({
+    from_profile_id: state.user.id,
+    to_profile_id: targetProfile.id,
+    message: msg,
+    statut: 'en_attente',
+    created_at: new Date().toISOString(),
+  }).select().single();
+
+  if(insertRes && insertRes.error){
+    console.log('demande insert error:', insertRes.error.message);
+    return;
+  }
+  console.log('✅ Demande envoyée, id:', insertRes.data && insertRes.data.id);
+
+  // 2. Créer une notification pour le destinataire
+  var notifMsg = (state.user.prenom||'Quelqu un') + ' vous a envoyé une demande de mise en relation';
+  await sb.from('notifications').insert({
+    profile_id: String(targetProfile.id),
+    type: 'demande_recue',
+    content: notifMsg,
+    from_profile_id: String(state.user.id),
+    from_prenom: state.user.prenom||'',
+    lu: false,
+    created_at: new Date().toISOString(),
+  }).catch(function(e){ console.log('notif demande error:', e.message||e); });
+
+  console.log('✅ Notification envoyée à', targetProfile.prenom);
 }
 
 // Simuler réception acceptation → décrémente le compteur
@@ -2646,7 +2720,7 @@ function activateProfile(){
 }
 
 // ══════════ MESSAGES ══════════
-const userChatHistory={
+var userChatHistory={
   'Administratrice':[{from:'admin',text:'Assalamu Alaykum wa rahmatullahi wa barakatuh,\n\nUne demande de mise en relation vous concernant a été acceptée. Avez-vous un Wali pour superviser cette démarche ?\n\nBarak Allahu fikoum.\nOumelia'}]
 };
 
@@ -2774,12 +2848,17 @@ function renderNotifs(c){
         </div>
       </div>`;
     } else if(isDemande && accepted){
-      html+=`<div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-        <span style="color:var(--green);font-size:.82rem">✓ Demande acceptée</span>
-        <button class="btn-tiny msg" onclick="openProfileFromNotif(${n.profileId})">Voir profil</button>
+      html+=`<div style="margin-top:8px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);border-radius:8px;padding:10px">
+        <p style="color:var(--green);font-size:.84rem;font-weight:600;margin-bottom:8px">✅ Vous avez accepté la demande de mise en relation</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn-tiny msg" onclick="openProfileFromNotifDemande('${n.id}',${n.profileId})">👤 Voir profil</button>
+          <button class="btn-tiny" style="background:var(--red-soft);color:var(--red);border:1px solid rgba(224,82,82,.3)" onclick="refuseDemande('${n.id}')">✗ Annuler l'acceptation</button>
+        </div>
       </div>`;
     } else if(isDemande && refused){
       html+=`<div style="margin-top:8px"><span style="color:var(--red);font-size:.82rem">✗ Demande refusée</span></div>`;
+    } else if(n.type==='demande_refusee'){
+      html+=`<div style="margin-top:8px;background:rgba(192,57,43,.08);border-radius:6px;padding:8px"><span style="color:var(--red);font-size:.84rem">✗ ${n.text}</span></div>`;
     } else if(n.profileId){
       html+=`<div style="font-size:.7rem;color:var(--gold);margin-top:4px">Appuyer pour voir le profil →</div>`;
     }
@@ -2792,94 +2871,198 @@ function renderNotifs(c){
 
 // Ouvre le profil depuis une demande reçue SANS quitter les notifs (overlay par dessus)
 function openProfileFromNotifDemande(notifId, profileId){
-  const p=allProfiles.find(x=>x.id===profileId);
-  if(!p) return;
-  const av=p.gender==='femme'?svgFemme(70):svgHomme(70);
-  const dot=onlineDot(p.id,10);
-  const lastSeen=lastSeenText[p.id]||'Hors ligne';
-  const onlineColor=onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)';
+  var sid = String(profileId);
+  var p = allProfiles.find(function(x){ return String(x.id)===sid; })
+       || (window._dbProfiles||[]).find(function(x){ return String(x.id)===sid; });
+  var n = userNotifs.find(function(x){ return x.id===notifId; });
 
-  // Afficher dans un modal dédié
-  const existing=document.getElementById('modal-profil-demande');
-  if(existing) existing.remove();
+  var doRender = function(profile){
+    var existing = document.getElementById('notif-profile-popup');
+    if(existing) existing.parentNode.removeChild(existing);
 
-  const overlay=document.createElement('div');
-  overlay.id='modal-profil-demande';
-  overlay.className='modal-overlay open';
-  overlay.innerHTML=`
-    <div class="modal" style="max-width:400px;padding:0;overflow:hidden">
-      <!-- Header -->
-      <div style="background:linear-gradient(135deg,#0e1a0a,#1a2f10);padding:24px 16px;text-align:center;position:relative">
-        <button onclick="document.getElementById('modal-profil-demande').remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer">×</button>
-        <div style="margin-bottom:10px">${av}</div>
-        <div style="font-family:'Playfair Display',serif;font-size:1.3rem">${p.prenom}</div>
-        <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;font-size:.8rem;color:${onlineColor}">${dot} ${lastSeen}</div>
-        <div style="color:var(--muted);font-size:.82rem;margin-top:4px">${p.age} ans · ${p.ville} · ${p.origine}</div>
-      </div>
-      <!-- Infos -->
-      <div style="padding:16px">
-        <div style="background:var(--black);border-radius:8px;padding:12px;margin-bottom:12px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.82rem">
-            <div><span style="color:var(--muted)">Pratique</span><br>${p.pratique}</div>
-            <div><span style="color:var(--muted)">Situation</span><br>${p.situation}</div>
-            <div><span style="color:var(--muted)">${p.voile?'Voile':'Barbe'}</span><br>${p.voile||p.barbe||'—'}</div>
-            <div><span style="color:var(--muted)">Madhhab</span><br>${p.madhhab}</div>
-          </div>
-        </div>
-        ${p.bio?('<div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:14px">'+p.bio+'</div>'):''}
-        <!-- Actions -->
-        <div style="display:flex;gap:10px">
-          <button class="btn btn-sm" style="flex:1;background:var(--green);color:#fff" onclick="acceptDemandeFromModal('${notifId}')">✓ Accepter</button>
-          <button class="btn btn-sm" style="flex:1;background:rgba(192,57,43,.2);color:var(--red);border:1px solid var(--red)" onclick="refuseDemandeFromModal('${notifId}')">✗ Refuser</button>
-        </div>
-      </div>
-    </div>`;
-  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
-  document.body.appendChild(overlay);
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open';
+    overlay.id = 'notif-profile-popup';
+    overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
+
+    var av = profile ? (profile.gender==='femme' ? svgFemme(70) : svgHomme(70)) : svgFemme(70);
+
+    // Statut
+    var statusHtml = '';
+    if(n && n.statut==='acceptee'){
+      statusHtml = '<div style="background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:8px;padding:12px;text-align:center;margin-bottom:14px">' +
+        '<p style="color:var(--green);font-weight:600;margin-bottom:8px">✅ Vous avez accepté cette demande</p>' +
+        '<button class="btn btn-sm" style="background:var(--red-soft);color:var(--red);border:1px solid var(--red)" id="btn-annuler-demande">Annuler — Ne plus vouloir entrer en relation</button>' +
+      '</div>';
+    } else if(n && n.statut==='refusee'){
+      statusHtml = '<div style="background:rgba(192,57,43,.1);border-radius:8px;padding:10px;text-align:center;margin-bottom:14px"><p style="color:var(--red)">✗ Demande refusée</p></div>';
+    }
+
+    // Infos profil
+    var infoHtml = '<div style="text-align:center;padding:20px;color:var(--muted)">Profil non disponible</div>';
+    if(profile){
+      infoHtml =
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">' +
+          av +
+          '<div><div style="font-size:1.1rem;font-weight:600">' + (profile.prenom||'—') + ', ' + (profile.age||'—') + ' ans</div>' +
+          '<div style="color:var(--muted);font-size:.82rem">📍 ' + (profile.ville||'—') + ' · ' + (profile.origine||'—') + '</div></div>' +
+        '</div>' +
+        '<div class="profile-tags" style="margin-bottom:12px">' +
+          '<span class="tag gold">' + (profile.pratique||'—') + '</span>' +
+          (profile.voile ? '<span class="tag">'+profile.voile+'</span>' : '') +
+          (profile.barbe ? '<span class="tag">'+profile.barbe+'</span>' : '') +
+          (profile.madhhab && profile.madhhab!=='Peu importe' ? '<span class="tag">'+profile.madhhab+'</span>' : '') +
+        '</div>' +
+        (profile.bio ? '<p style="font-size:.84rem;color:var(--muted);line-height:1.6;margin-bottom:12px;padding:10px;background:var(--card2);border-radius:8px">' + profile.bio + '</p>' : '') +
+        '<div style="background:var(--card2);border-radius:8px;padding:10px;margin-bottom:12px">' +
+          '<div class="profile-detail-row"><span>Situation</span><span>' + (profile.situation||'—') + '</span></div>' +
+          '<div class="profile-detail-row"><span>Madhhab</span><span>' + (profile.madhhab||'—') + '</span></div>' +
+          '<div class="profile-detail-row"><span>Coran</span><span>' + (profile.coran||'—') + '</span></div>' +
+          '<div class="profile-detail-row"><span>Alimentation</span><span>' + (profile.halal||'—') + '</span></div>' +
+          '<div class="profile-detail-row"><span>Enfants</span><span>' + (profile.enfants==='oui'?'A des enfants':'Sans enfants') + '</span></div>' +
+          '<div class="profile-detail-row"><span>Veut enfants</span><span>' + (profile.veut_enfants||'—') + '</span></div>' +
+        '</div>';
+    }
+
+    // Actions
+    var actionsHtml = '';
+    if(!n || n.statut==='en_attente'){
+      actionsHtml =
+        '<div style="display:flex;gap:8px;margin-top:14px">' +
+          '<button class="btn" style="flex:1;background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)" id="btn-accepter-demande">✓ Accepter</button>' +
+          '<button class="btn" style="flex:1;background:var(--red-soft);color:var(--red);border:1px solid rgba(224,82,82,.3)" id="btn-refuser-demande">✗ Refuser</button>' +
+        '</div>';
+    }
+
+    overlay.innerHTML =
+      '<div class="modal" style="max-width:420px;max-height:85vh;overflow-y:auto">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
+          '<h3 style="margin:0">💌 Demande reçue</h3>' +
+          '<button id="btn-close-notif-popup" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1">×</button>' +
+        '</div>' +
+        statusHtml + infoHtml + actionsHtml +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    // Attacher les events APRÈS insertion dans le DOM
+    var btnClose = document.getElementById('btn-close-notif-popup');
+    if(btnClose) btnClose.onclick = function(){ overlay.remove(); };
+
+    var btnAccept = document.getElementById('btn-accepter-demande');
+    if(btnAccept) btnAccept.onclick = function(){ overlay.remove(); acceptDemande(notifId); };
+
+    var btnRefuse = document.getElementById('btn-refuser-demande');
+    if(btnRefuse) btnRefuse.onclick = function(){ overlay.remove(); refuseDemande(notifId); };
+
+    var btnAnnuler = document.getElementById('btn-annuler-demande');
+    if(btnAnnuler) btnAnnuler.onclick = function(){ overlay.remove(); refuseDemande(notifId); };
+  };
+
+  if(!p && profileId){
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+profileId+'&select=*', {
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    }).then(function(r){ return r.json(); })
+    .then(function(data){ doRender(data&&data[0]?data[0]:null); })
+    .catch(function(){ doRender(null); });
+  } else {
+    doRender(p);
+  }
 }
 
 async function acceptDemande(notifId){
-  const n=userNotifs.find(x=>x.id===notifId);
-  if(!n) return;
+  var n = userNotifs.find(function(x){ return x.id===notifId; });
+  if(!n){ console.log('Notif introuvable:', notifId); return; }
 
-  // Si profil non activé → inviter à activer
-  if(!state.profileActive){
-    var _mpd=document.getElementById('modal-profil-demande');if(_mpd)_mpd.remove();
-    // Proposer d'activer ou refuser
-    const overlay=document.createElement('div');
-    overlay.className='modal-overlay open';
-    overlay.innerHTML=`
-      <div class="modal" style="max-width:340px;text-align:center">
-        <h3>✦ Activez votre profil</h3>
-        <p style="color:var(--muted);font-size:.84rem;line-height:1.6;margin-bottom:16px">
-          Pour accepter cette demande, vous devez d'abord activer votre profil (5,99 €).
-        </p>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <button class="btn btn-gold btn-sm" onclick="this.closest('.modal-overlay').remove();openModal('modal-paywall')">✦ Activer mon profil — 5,99 €</button>
-          <button class="btn btn-sm" style="background:var(--red-soft);color:var(--red);border:1px solid rgba(224,82,82,.3)" onclick="this.closest('.modal-overlay').remove();refuseDemande('${notifId}')">✗ Refuser la demande</button>
-          <button class="btn-ghost btn-sm" onclick="this.closest('.modal-overlay').remove()">Annuler</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-    return;
-  }
-
+  // Mise à jour locale immédiate
   n.statut='acceptee'; n.unread=false;
-  if(n.dbId){
-    await getSB().from('demandes').update({statut:'acceptee'}).eq('id',n.dbId);
-    await getSB().from('echanges').insert({
-      femme_profile_id:state.user.gender==='femme'?state.user.id:n.profileId,
-      homme_profile_id:state.user.gender==='homme'?state.user.id:n.profileId,
-      created_at:new Date().toISOString(),
-    });
+
+  // Fermer popup et re-render IMMÉDIATEMENT (pas besoin d'attendre Supabase)
+  var popup = document.getElementById('notif-profile-popup');
+  if(popup) popup.remove();
+  var appContent = document.getElementById('app-content');
+  if(appContent) renderNotifs(appContent);
+  showToast('✅ Demande de ' + (n.fromPrenom||'ce profil') + ' acceptée !','green');
+
+  var sb = getSB(); if(!sb) return;
+  var myId = String(state.user&&state.user.id||'');
+  var fromId = String(n.profileId||'');
+
+  console.log('acceptDemande: myId='+myId+' fromId='+fromId+' dbId='+n.dbId+' type notif='+n.id);
+
+  // Chercher la demande en DB
+  var demandeId = null;
+  if(n.dbId && !n.notifDbId){
+    // Notif locale (loadDemandesRecues) → dbId = id de la demande directement
+    demandeId = n.dbId;
+    console.log('Demande via dbId local:', demandeId);
+  } else {
+    // Notif depuis table notifications → chercher par from/to profils
+    console.log('Recherche demande: from='+fromId+' to='+myId);
+    // Chercher la demande (en_attente OU déjà acceptee)
+    var demandeRes = await sb.from('demandes')
+      .select('id,statut')
+      .eq('from_profile_id', fromId)
+      .eq('to_profile_id', myId)
+      .order('created_at', {ascending:false})
+      .limit(1);
+    if(demandeRes && demandeRes.data && demandeRes.data.length>0){
+      demandeId = demandeRes.data[0].id;
+      console.log('Demande trouvée:', demandeId, '| statut:', demandeRes.data[0].statut);
+    } else {
+      console.log('⚠ Aucune demande trouvée entre from='+fromId+' to='+myId, demandeRes&&demandeRes.error);
+    }
   }
-  showToast(`✅ Demande de ${n.fromPrenom} acceptée !`,'green');
-  const femmeId=state.user.gender==='femme'?state.user.id||1:n.profileId;
-  const hommeId=state.user.gender==='homme'?state.user.id||1:n.profileId;
-  if(!exchangesList.some(e=>e.femmeId===femmeId&&e.hommeId===hommeId)){
-    exchangesList.push({femmeId,hommeId});
+
+  if(demandeId){
+    await sb.from('demandes').update({statut:'acceptee'}).eq('id', demandeId);
+    console.log('✅ Demande mise à jour:', demandeId);
+  } else {
+    console.log('⚠ Demande introuvable pour acceptation');
   }
-  renderNotifs(document.getElementById('app-content'));
+
+  // Créer l'échange (match) - déterminer femme/homme
+  var femId, homId;
+  if(state.user.gender==='femme'){
+    femId = myId; homId = fromId;
+  } else {
+    femId = fromId; homId = myId;
+  }
+  // Vérifier si un échange existe déjà
+  var existCheck = await sb.from('echanges')
+    .select('id')
+    .or('and(femme_profile_id.eq.'+femId+',homme_profile_id.eq.'+homId+'),and(femme_profile_id.eq.'+homId+',homme_profile_id.eq.'+femId+')')
+    .limit(1);
+  if(existCheck && existCheck.data && existCheck.data.length>0){
+    console.log('Échange déjà existant, skip insert');
+  } else {
+    console.log('Création échange: femme='+femId+' homme='+homId);
+  
+    var echangeRes = await sb.from('echanges').insert({
+      femme_profile_id: String(femId),
+      homme_profile_id: String(homId),
+      created_at: new Date().toISOString(),
+    }).select().single().catch(function(e){ return {error:{message:String(e)}}; });
+    if(echangeRes && echangeRes.error){
+      console.log('❌ Echange insert error:', echangeRes.error.message||JSON.stringify(echangeRes.error));
+    } else {
+      console.log('✅ Échange créé OK !');
+    }
+  } // fin du else existCheck
+
+  // Notifier le demandeur: "Celia a accepté votre demande"
+  var acceptMsg = (state.user.prenom||'Quelqu un') + ' a accepté votre demande de mise en relation';
+  await sb.from('notifications').insert({
+    profile_id: fromId,
+    type: 'demande_acceptee',
+    content: acceptMsg,
+    from_profile_id: myId,
+    from_prenom: state.user.prenom||'',
+    lu: false,
+    created_at: new Date().toISOString(),
+  }).catch(function(e){ console.log('notif acceptee error:', e); });
+  
+  console.log('✅ Notif acceptation envoyée à profile_id='+fromId);
 }
 
 function acceptDemandeFromModal(notifId){
@@ -2888,14 +3071,27 @@ function acceptDemandeFromModal(notifId){
 }
 
 async function refuseDemande(notifId){
-  const n=userNotifs.find(x=>x.id===notifId);
+  var n=userNotifs.find(function(x){ return x.id===notifId; });
   if(!n) return;
   n.statut='refusee';
   n.unread=false;
-  if(n.dbId){
-    await getSB().from('demandes').update({statut:'refusee'}).eq('id', n.dbId);
+  var sb=getSB();
+  if(n.dbId && sb){
+    // Mettre à jour la demande
+    await sb.from('demandes').update({statut:'refusee'}).eq('id', n.dbId);
+    // Notifier le demandeur avec le BON prénom (celui qui refuse = state.user.prenom)
+    var refuseurPrenom = state.user && state.user.prenom ? state.user.prenom : 'Quelqu un';
+    await sb.from('notifications').insert({
+      profile_id: String(n.profileId),
+      type: 'demande_refusee',
+      content: refuseurPrenom + ' a refusé votre demande de mise en relation',
+      from_profile_id: String(state.user&&state.user.id||''),
+      from_prenom: refuseurPrenom,
+      lu: false,
+      created_at: new Date().toISOString(),
+    }).catch(function(e){ console.log('notif refus error:', e); });
   }
-  showToast(`Demande de ${n.fromPrenom} refusée`,'red');
+  showToast('Demande de ' + (n.fromPrenom||'ce profil') + ' refusée','red');
   renderNotifs(document.getElementById('app-content'));
 }
 
@@ -2918,9 +3114,10 @@ function openProfileFromNotif(profileId){
 // ══════════ MON PROFIL ══════════
 function renderMyProfile(c){
   const u=state.user||{};
-  const acceptedUsed=Object.values(demandesEnvoyees).filter(d=>d==='acceptee').length;
-  const remaining=Math.max(0,3-acceptedUsed);
-  const dots=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=remaining?'used':'')+'"></div>';}).join('');
+  // Compteur: diminue à chaque ENVOI (pas seulement acceptée)
+  var acceptedUsed=Object.values(demandesEnvoyees).filter(function(d){return d==='acceptee';}).length;
+  var remaining=Math.max(0,3-acceptedUsed);
+  var dots=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=remaining?'used':'')+'"></div>';}).join('');
   const av=u.gender==='femme'?svgFemme(60):svgHomme(60);
   const completion=getProfileCompletion(u);
   const isVerified=u.audio_attested||u.status==='active';
@@ -2980,7 +3177,8 @@ function renderMyProfile(c){
       </div>
 
       <div style="display:flex;flex-direction:column;gap:9px;margin-top:4px">
-        <button class="btn btn-outline btn-sm" onclick="renderEditProfile()">✏️ Modifier mon profil</button>
+        <button class="btn btn-outline btn-sm" onclick="navTo('favoris')">💛 Mes favoris (${state.favorites.length})</button>
+      <button class="btn btn-outline btn-sm" onclick="renderEditProfile()">✏️ Modifier mon profil</button>
         ${!state.profilePaused?'<button class="btn btn-sm" style="background:var(--blue-soft);border:1px solid rgba(74,158,255,.3);color:var(--blue)" onclick="openModal(\'modal-pause\')">⏸ Mettre en pause</button>':''}
       </div>
 
@@ -3013,48 +3211,91 @@ function renderMyProfile(c){
 }
 
 function renderEditProfile(){
-  const c=document.getElementById('app-content'),u=state.user||{};
+  var c=document.getElementById('app-content'), u=state.user||{};
   scrollToTop();
-  c.innerHTML=`
-    <div class="page-header"><button class="back-btn" onclick="navTo('profil')">←</button><h2>Modifier mon profil</h2></div>
-    <div style="padding:16px">
-      <div class="form-group"><label>Prénom</label><input type="text" id="edit-prenom" value="${u.prenom||''}"></div>
-      <div class="form-row">
-        <div class="form-group"><label>Âge</label><input type="number" id="edit-age" value="${u.age||''}"></div>
-        <div class="form-group"><label>Ville</label><input type="text" id="edit-ville" value="${u.ville||''}"></div>
-      </div>
-      <div class="form-group"><label>Présentation</label><textarea id="edit-bio">${u.bio||''}</textarea></div>
-      <div class="gold-divider"></div>
-      <p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Changer le mot de passe</p>
-      <div class="form-group"><label>Mot de passe actuel</label><input type="password" id="edit-pwd-old" placeholder="••••••••"></div>
-      <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="edit-pwd-new" placeholder="Minimum 8 caractères"></div>
-      <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="submitEdit()">Soumettre pour validation</button>
-      <p style="color:var(--muted);font-size:.73rem;text-align:center;margin-top:10px">Toute modification est vérifiée par l'admin avant publication.</p>
-    </div>`;
+  var isF = u.gender==='femme';
+  var html='<div class="page-header"><button class="back-btn" onclick="navTo(&quot;profil&quot;)">←</button><h2>Modifier mon profil</h2></div>';
+  html+='<div style="padding:16px">';
+  // Infos de base
+  html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Qui je suis</p>';
+  html+='<div class="form-group"><label>Prénom</label><input type="text" id="edit-prenom" value="'+(u.prenom||'')+'"></div>';
+  html+='<div class="form-row"><div class="form-group"><label>Âge</label><input type="number" id="edit-age" value="'+(u.age||'')+'"></div>';
+  html+='<div class="form-group"><label>Ville</label><input type="text" id="edit-ville" value="'+(u.ville||'')+'"></div></div>';
+  html+='<div class="form-group"><label>Origine</label><select id="edit-origine"><option value="'+(u.origine||'')+'">'+( u.origine||'Choisir')+'</option><option>Algérienne</option><option>Marocaine</option><option>Tunisienne</option><option>Française</option><option>Sénégalaise</option><option>Malienne</option><option>Ivoirienne</option><option>Camerounaise</option><option>Turque</option><option>Égyptienne</option><option>Syrienne</option><option>Pakistanaise</option><option>Autre</option></select></div>';
+  html+='<div class="form-group"><label>Situation</label><select id="edit-situation"><option value="'+(u.situation||'')+'">'+( u.situation||'Choisir')+'</option><option>Jamais marié(e)</option><option>Divorcé(e)</option><option>Veuf(ve)</option></select></div>';
+  html+='<div class="form-group"><label>Enfants</label><select id="edit-enfants"><option value="'+(u.enfants||'non')+'">'+( u.enfants==='oui'?'Oui':'Non')+'</option><option value="non">Non</option><option value="oui">Oui</option></select></div>';
+  // Pratique
+  html+='<div class="gold-divider"></div>';
+  html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Pratique religieuse</p>';
+  html+='<div class="form-group"><label>Niveau de pratique</label><select id="edit-pratique"><option value="'+(u.pratique||'')+'">'+( u.pratique||'Choisir')+'</option><option>Débutant(e)</option><option>Pratiquant(e)</option><option>Très pratiquant(e)</option><option>Salafi/Sunnah</option></select></div>';
+  html+='<div class="form-group"><label>Madhhab</label><select id="edit-madhhab"><option value="'+(u.madhhab||'')+'">'+( u.madhhab||'Choisir')+'</option><option>Hanafite</option><option>Malékite</option><option>Chaféite</option><option>Hanbalite</option><option>Peu importe</option></select></div>';
+  html+='<div class="form-group"><label>Coran</label><select id="edit-coran"><option value="'+(u.coran||'')+'">'+( u.coran||'Choisir')+'</option><option>Quotidiennement</option><option>Régulièrement</option><option>Parfois</option><option>En apprentissage</option></select></div>';
+  if(isF){
+    var voileOpts=['Hijab','Niqab','Jilbab','Sans voile','En progression'];
+    var voileHtml='<div class="form-group"><label>Voile</label><select id="edit-voile">';
+    if(!u.voile) voileHtml+='<option value="">Choisir</option>';
+    voileOpts.forEach(function(v){ voileHtml+='<option value="'+v+'"'+(u.voile===v?' selected':'')+'>'+v+'</option>'; });
+    html+=voileHtml+'</select></div>';
+  }
+  if(!isF){
+    var barbeOpts=['Oui (sunnah)','Non','En progression'];
+    var barbeHtml='<div class="form-group"><label>Barbe</label><select id="edit-barbe">';
+    if(!u.barbe) barbeHtml+='<option value="">Choisir</option>';
+    barbeOpts.forEach(function(v){ barbeHtml+='<option value="'+v+'"'+(u.barbe===v?' selected':'')+'>'+v+'</option>'; });
+    html+=barbeHtml+'</select></div>';
+  }
+  // Bio
+  html+='<div class="gold-divider"></div>';
+  html+='<div class="form-group"><label>Présentation</label><textarea id="edit-bio" style="min-height:100px">'+(u.bio||'')+'</textarea></div>';
+  // Mot de passe
+  html+='<div class="gold-divider"></div>';
+  html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Changer le mot de passe</p>';
+  html+='<div class="form-group" style="position:relative"><label>Nouveau mot de passe</label><input type="password" id="edit-pwd-new" placeholder="Minimum 8 caract\u00e8res" style="padding-right:40px"><button type="button" onclick="var i=document.getElementById(&quot;edit-pwd-new&quot;);i.type=i.type===&quot;password&quot;?&quot;text&quot;:&quot;password&quot;" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer">👁</button></div>';
+  html+='<button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="submitEdit()">✅ Enregistrer les modifications</button>';
+  html+='<p style="color:var(--muted);font-size:.73rem;text-align:center;margin-top:10px">Les modifications sont appliquées immédiatement.</p>';
+  html+='</div>';
+  c.innerHTML=html;
 }
 
 async function submitEdit(){
-  const prenom = (document.getElementById('edit-prenom')&&document.getElementById('edit-prenom').value);
-  const age    = (document.getElementById('edit-age')&&document.getElementById('edit-age').value);
-  const ville  = (document.getElementById('edit-ville')&&document.getElementById('edit-ville').value);
-  const bio    = (document.getElementById('edit-bio')&&document.getElementById('edit-bio').value);
-  const newPwd = (document.getElementById('edit-pwd-new')&&document.getElementById('edit-pwd-new').value);
+  var sb=getSB(); if(!sb) return;
+  var get=function(id){ var el=document.getElementById(id); return el?el.value:''; };
+  var updates={
+    prenom: get('edit-prenom')||state.user.prenom,
+    age: parseInt(get('edit-age'))||state.user.age,
+    ville: get('edit-ville')||state.user.ville,
+    bio: get('edit-bio')||state.user.bio,
+    origine: get('edit-origine')||state.user.origine,
+    situation: get('edit-situation')||state.user.situation,
+    enfants: get('edit-enfants')||state.user.enfants,
+    pratique: get('edit-pratique')||state.user.pratique,
+    madhhab: get('edit-madhhab')||state.user.madhhab,
+    coran: get('edit-coran')||state.user.coran,
+  };
+  var voile=get('edit-voile'), barbe=get('edit-barbe');
+  if(voile) updates.voile=voile;
+  if(barbe) updates.barbe=barbe;
 
-  if((state.user&&state.user.supabaseId)){
-    await getSB().from('profils').update({
-      prenom: prenom||state.user.prenom,
-      age: age||state.user.age,
-      ville: ville||state.user.ville,
-      bio: bio||state.user.bio,
-      status: 'pending', // repasse en validation
-    }).eq('user_id', state.user.supabaseId);
-
+  showToast('⏳ Enregistrement...','gold');
+  console.log('submitEdit, supabaseId:', state.user&&state.user.supabaseId, 'updates:', JSON.stringify(updates).slice(0,100));
+  
+  if(state.user&&state.user.supabaseId){
+    var res = await sb.from('profils').update(updates).eq('user_id', state.user.supabaseId);
+    if(res && res.error) { showToast('❌ Erreur: '+res.error.message,'red'); return; }
+    // Mettre à jour state.user localement
+    var keys = Object.keys(updates);
+    for(var i=0;i<keys.length;i++) state.user[keys[i]]=updates[keys[i]];
+    var newPwd=get('edit-pwd-new');
     if(newPwd && newPwd.length>=8){
-      await getSB().auth.updateUser({ password: newPwd });
+      var pwdRes = await sb.auth.updateUser({password: newPwd});
+      if(pwdRes.error) showToast('⚠ Mot de passe: '+pwdRes.error.message,'red');
     }
+    navTo('profil');
+    showToast('✅ Profil mis à jour','green');
+  } else {
+    console.log('Pas de supabaseId, user:', JSON.stringify(state.user).slice(0,200));
+    showToast('❌ Non connecté — reconnectez-vous','red');
   }
-  navTo('profil');
-  showToast('✅ Modification soumise — en attente de validation');
 }
 
 async function pauseProfile(){
@@ -3137,6 +3378,7 @@ function adminTab(tab){
   scrollToTop();
   switch(tab){
     case 'dashboard': renderAdminDashboard(c); break;
+    case 'demandes':  renderAdminDemandes(c);  break;
     case 'pending':   renderAdminPending(c);   break;
     case 'users':     renderAdminUsers(c);     break;
     case 'matches':   renderAdminMatches(c);   break;
@@ -3350,49 +3592,67 @@ function filterAdminUsers(q){
 }
 
 function renderAdminMatches(c){
-  let html=`<div style="padding:16px"><div class="section-title">💚 Mises en relation <span class="sc">${matchesData.length}</span></div>
-  <div style="background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.2);border-radius:8px;padding:10px;margin-bottom:14px;font-size:.78rem;color:var(--muted)">
-    ↔ Les profils marqués <strong style="color:var(--green)">"En échange"</strong> sont visibles comme tels par les deux membres.
-  </div>`;
-  matchesData.forEach((m,idx)=>{
-    const femme=allProfiles.find(p=>p.id===m.femmeId);
-    const homme=allProfiles.find(p=>p.id===m.hommeId);
-    if(!femme||!homme) return;
-    const waliResp=waliResponses.find(r=>r.matchId===m.id);
-    const fDot=onlineDot(femme.id,9);
-    const hDot=onlineDot(homme.id,9);
-    html+=`<div class="match-notif">
-      <div class="match-title">
-        💚 Match · ${m.date}
-        ${m.waliSent?'· <span style="color:var(--green)">Wali ✓</span>':'· <span style="color:var(--gold)">Wali à envoyer</span>'}
-        ${m.hommeNotified?'· <span style="color:var(--blue)">Frère notifié</span>':''}
-        ${waliResp?'· <span style="color:var(--green)">Réponse reçue</span>':''}
-        · <span style="color:var(--green)">↔ En échange</span>
-      </div>
-      <div class="match-profiles">
-        <div class="match-mini-profile">
-          <div style="position:relative;display:inline-block">${svgFemme(38)}<span style="position:absolute;bottom:0;right:0">${fDot}</span></div>
-          <div class="mini-name">${femme.prenom}, ${femme.age}</div>
-          <div class="mini-hint">${femme.ville} · ${lastSeenText[femme.id]||''}</div>
-        </div>
-        <div class="match-heart">↔</div>
-        <div class="match-mini-profile">
-          <div style="position:relative;display:inline-block">${svgHomme(38)}<span style="position:absolute;bottom:0;right:0">${hDot}</span></div>
-          <div class="mini-name">${homme.prenom}, ${homme.age}</div>
-          <div class="mini-hint">${homme.ville} · ${lastSeenText[homme.id]||''}</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        ${!m.waliSent?('<button class="btn-tiny approve" onclick="sendWaliFromMatch('+idx+')">🌸 Administratrice → '+femme.prenom+'</button>'):('<span style="color:var(--green);font-size:.7rem">✓ Wali envoyé à '+femme.prenom+'</span>')}
-        ${!m.hommeNotified?('<button class="btn-tiny react" onclick="notifyFrereFromMatch('+idx+')">📨 Administrateur → '+homme.prenom+'</button>'):('<span style="color:var(--blue);font-size:.7rem">✓ '+homme.prenom+' notifié</span>')}
-        <button class="btn-tiny msg" onclick="openAdminChatDirect('${femme.prenom}','femme')">✉ ${femme.prenom}</button>
-        <button class="btn-tiny msg" onclick="openAdminChatDirect('${homme.prenom}','homme')">✉ ${homme.prenom}</button>
-      </div>
-    </div>`;
+  c.innerHTML='<div style="padding:16px"><div class="section-title">💚 Matches</div><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
+  
+  // Charger échanges ET profils en parallèle
+  var fetchEchanges = fetch(SUPABASE_URL+'/rest/v1/echanges?select=*&order=created_at.desc', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  }).then(function(r){ return r.json(); });
+  
+  var fetchProfils = fetch(SUPABASE_URL+'/rest/v1/profils?select=id,prenom,gender', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  }).then(function(r){ return r.json(); });
+
+  Promise.all([fetchEchanges, fetchProfils]).then(function(results){
+    var data = results[0];
+    var profils = Array.isArray(results[1]) ? results[1] : [];
+    // Mettre à jour le cache admin
+    if(profils.length) profils.forEach(function(p){ 
+      var ex = (window._adminProfiles||[]).find(function(x){ return String(x.id)===String(p.id); });
+      if(!ex && window._adminProfiles) window._adminProfiles.push(p);
+    });
+    
+    if(!Array.isArray(data)){
+      c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur chargement matches: '+JSON.stringify(data).slice(0,100)+'</p></div>';
+      return;
+    }
+    console.log('Matches chargés:', data.length, '| Profils:', profils.length);
+    // Utiliser les profils frais du fetch
+    var allP = profils.length ? profils : getAllAdminProfiles();
+    var html='<div style="padding:16px"><div class="section-title">💚 Matches ('+data.length+')</div>';
+    if(!data.length){
+      html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucun match pour le moment</p>';
+    } else {
+      data.forEach(function(m){
+        var femme = allP.find(function(p){ return String(p.id)===String(m.femme_profile_id); });
+        var homme = allP.find(function(p){ return String(p.id)===String(m.homme_profile_id); });
+        var fNom = femme ? femme.prenom : ('F:'+m.femme_profile_id);
+        var hNom = homme ? homme.prenom : ('H:'+m.homme_profile_id);
+        var date = m.created_at ? new Date(m.created_at).toLocaleDateString('fr-FR') : '';
+        html += '<div style="background:var(--card2);border:1px solid rgba(46,204,113,.2);border-radius:12px;padding:14px;margin-bottom:10px">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+        html += '<div><span style="color:var(--green);font-weight:600">💚 '+fNom+' × '+hNom+'</span><br>';
+        html += '<span style="font-size:.75rem;color:var(--muted)">'+date+'</span></div>';
+        html += '</div>';
+        html += '<div style="display:flex;gap:8px">';
+        if(femme) html += '<button class="btn-tiny msg" data-uid="'+m.femme_profile_id+'" data-nom="'+fNom+'" onclick="openAdminConvoMatch(this.dataset.uid,this.dataset.nom)">✉ '+fNom+'</button>';
+        if(homme) html += '<button class="btn-tiny msg" data-uid="'+m.homme_profile_id+'" data-nom="'+hNom+'" onclick="openAdminConvoMatch(this.dataset.uid,this.dataset.nom)">✉ '+hNom+'</button>';
+        html += '</div></div>';
+      });
+    }
+    html+='</div>';
+    c.innerHTML=html;
+  }).catch(function(e){
+    console.log('Matches error:', e);
+    c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur: '+String(e)+'</p></div>';
   });
-  html+=`</div>`;
-  c.innerHTML=html;
 }
+
+function openAdminConvoMatch(uid, prenom){
+  openAdminConvo(uid, prenom);
+  adminTab('msgs');
+}
+
 
 function renderAdminWali(c){
   let html=`<div style="padding:16px"><div class="section-title">🌸 Réponses Wali <span class="sc">${waliResponses.length}</span></div>`;
@@ -3429,52 +3689,39 @@ function notifyHomme(hommePrenom,femmePrenom){
 
 function renderAdminMsgs(c){
   c.innerHTML='<div style="padding:16px"><div class="section-title">✉️ Messages reçus</div><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
-  var sb=getSB();
-  if(!sb){ c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur connexion</p></div>'; return; }
-
   console.log('Admin: chargement messages...');
-  sb.from('messages').select('*').order('created_at',{ascending:false})
-  .then(function(res){
-    console.log('Admin messages res:', JSON.stringify(res).slice(0,200));
-    if(res.error){ 
-      console.log('Admin msgs error:', res.error.message);
-      c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur: '+res.error.message+'</p></div>';
+
+  fetch(SUPABASE_URL+'/rest/v1/messages?select=*&order=created_at.desc', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(allMsgs){
+    if(!Array.isArray(allMsgs)){
+      c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur messages</p></div>';
       return;
     }
-    var allMsgs = res.data||[];
-    console.log('Admin: '+allMsgs.length+' messages total');
-    
-    // Filtrer les messages vers admin
+    console.log('Admin: '+allMsgs.length+' messages');
     var msgs = allMsgs.filter(function(m){ return m.to_id==='admin'; });
-    console.log('Admin: '+msgs.length+' messages reçus (to_id=admin)');
-    
     var convos = {};
     msgs.forEach(function(m){
-      var uid = m.from_id;
-      if(!convos[uid]) convos[uid] = {prenom: m.from_prenom||'Inconnu', last: m.content, uid: uid};
+      if(!convos[m.from_id]) convos[m.from_id]={prenom:m.from_prenom||'Inconnu',last:m.content,uid:m.from_id};
     });
-
     var html='<div style="padding:16px"><div class="section-title">✉️ Messages reçus</div>';
-    var keys = Object.keys(convos);
+    var keys=Object.keys(convos);
     if(!keys.length){
       html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucun message reçu</p>';
-      if(allMsgs.length>0) html+='<p style="color:var(--gold);font-size:.75rem;text-align:center">'+allMsgs.length+' messages en DB (to_id différent de "admin")</p>';
     } else {
       keys.forEach(function(uid){
-        var conv = convos[uid];
-        html+='<div class="convo-item" onclick="openAdminConvo(\''+uid+'\',\''+conv.prenom+'\')">'+
+        var conv=convos[uid];
+        html+='<div class="convo-item" onclick="openAdminConvo(&quot;'+uid+'&quot;,&quot;'+conv.prenom+'&quot;)">'+
           '<div class="convo-avatar">'+svgFemme(36)+'</div>'+
-          '<div class="convo-info">'+
-            '<div class="convo-name">'+conv.prenom+'</div>'+
-            '<div class="convo-preview">'+conv.last+'</div>'+
-          '</div>'+
-        '</div>';
+          '<div class="convo-info"><div class="convo-name">'+conv.prenom+'</div>'+
+          '<div class="convo-preview">'+conv.last+'</div></div></div>';
       });
     }
     html+='</div>';
     c.innerHTML=html;
   }).catch(function(e){
-    console.log('Admin msgs exception:', e);
     c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Exception: '+e+'</p></div>';
   });
 }
@@ -3917,7 +4164,218 @@ function loadScript(src, onload, onerror){
 
 function filterBtn(key,val,arr){
   var sel=(arr&&arr.includes(val))?'selected':'';
-  return '<button class="filter-opt '+sel+'" onclick="toggleFilterArr(\"'+key+'\",\"'+val+'\")">'+(val)+'</button>';
+  // Utiliser data-* pour éviter les problèmes d'échappement dans onclick
+  return '<button class="filter-opt '+sel+'" data-key="'+key+'" data-val="'+val+'" onclick="toggleFilterArr(this.dataset.key,this.dataset.val)">'+val+'</button>';
+}
+
+function openSwipeProfile(id){
+  if(window._isSwiping) return;
+  var sid = String(id);
+  var p = (window._dbProfiles||[]).find(function(x){ return String(x.id)===sid; })
+       || allProfiles.find(function(x){ return String(x.id)===sid; });
+  if(!p) return;
+
+  var av = p.gender==='femme' ? svgFemme(80) : svgHomme(80);
+  var overlay = document.createElement('div');
+  overlay.className = 'swipe-popup-overlay';
+  overlay.id = 'swipe-popup';
+  overlay.onclick = function(e){ if(e.target===overlay) closeSwipePopup(); };
+  var popHtml = '<div class="swipe-popup">' +
+    '<div class="swipe-popup-handle"></div>' +
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">' +
+      av +
+      '<div><div style="font-size:1.15rem;font-weight:600">' + p.prenom + ', ' + p.age + ' ans</div>' +
+      '<div style="color:var(--muted);font-size:.82rem">📍 ' + p.ville + ' · ' + p.origine + '</div></div>' +
+    '</div>' +
+    '<div class="profile-tags" style="margin-bottom:14px">' +
+      '<span class="tag gold">' + p.pratique + '</span>' +
+      (p.voile ? '<span class="tag">'+p.voile+'</span>' : '') +
+      (p.barbe ? '<span class="tag">'+p.barbe+'</span>' : '') +
+      (p.madhhab && p.madhhab!=='Peu importe' ? '<span class="tag">'+p.madhhab+'</span>' : '') +
+      (p.boosted ? '<span class="tag" style="background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold)">⚡ Boosté</span>' : '') +
+    '</div>' +
+    (p.bio ? '<p style="font-size:.84rem;color:var(--muted);line-height:1.7;margin-bottom:14px;padding:10px;background:var(--card2);border-radius:8px">' + p.bio + '</p>' : '') +
+    '<div style="background:var(--card2);border-radius:10px;padding:10px;margin-bottom:14px">' +
+      '<div class="profile-detail-row"><span>Situation</span><span>' + (p.situation||'—') + '</span></div>' +
+      '<div class="profile-detail-row"><span>Madhab</span><span>' + (p.madhhab||'—') + '</span></div>' +
+      '<div class="profile-detail-row"><span>Coran</span><span>' + (p.coran||'—') + '</span></div>' +
+      '<div class="profile-detail-row"><span>Alimentation</span><span>' + (p.halal||'—') + '</span></div>' +
+      '<div class="profile-detail-row"><span>Enfants</span><span>' + (p.enfants==='oui'?'A des enfants':'Sans enfants') + '</span></div>' +
+      '<div class="profile-detail-row"><span>Veut enfants</span><span>' + (p.veut_enfants||'—') + '</span></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;margin-top:4px">' +
+      '<button class="btn btn-outline" style="flex:1" onclick="closeSwipePopup()">Fermer</button>' +
+      '<button class="btn btn-gold" style="flex:2" onclick="closeSwipePopup();openDemandeModal(this.dataset.prenom)" data-prenom="' + p.prenom + '">💌 Demande</button>' +
+    '</div>' +
+  '</div>';
+  overlay.innerHTML = popHtml;
+  document.body.appendChild(overlay);
+}
+
+function closeSwipePopup(){
+  var el = document.getElementById('swipe-popup');
+  if(el) el.parentNode.removeChild(el);
+}
+
+function loadAdminDemandes(){
+  fetch(SUPABASE_URL+'/rest/v1/demandes?select=*&order=created_at.desc', {
+    headers: {'apikey': SUPABASE_ANON, 'Authorization': 'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data)){ console.log('demandes error:', JSON.stringify(data).slice(0,100)); return; }
+    window._adminDemandes = data;
+    console.log('Admin demandes:', data.length);
+    // Badge demandes en attente
+    var pendingCount = data.filter(function(d){ return d.statut==='en_attente'; }).length;
+    var db = document.getElementById('demandes-badge');
+    if(db){ if(pendingCount>0){db.textContent=pendingCount;db.style.display='inline';}else{db.style.display='none';} }
+    updateAdminBadges();
+  }).catch(function(e){ console.log('loadAdminDemandes:', e.message||e); });
+  
+  // Charger aussi les échanges pour le badge matches
+  fetch(SUPABASE_URL+'/rest/v1/echanges?select=*', {
+    headers: {'apikey': SUPABASE_ANON, 'Authorization': 'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data)) return;
+    window._adminEchanges = data;
+    console.log('Admin échanges (matches):', data.length);
+    // Mettre à jour le badge matches dans le dashboard
+    var mc = document.querySelector('[onclick*="matches"]');
+    if(mc && data.length > 0) mc.style.background='var(--green)';
+  }).catch(function(){});
+}
+
+function renderFavoris(c){
+  var favIds = state.favorites;
+  var favProfiles = favIds.map(function(id){
+    return allProfiles.find(function(p){ return String(p.id)===String(id); })
+        || (window._dbProfiles||[]).find(function(p){ return String(p.id)===String(id); });
+  }).filter(Boolean);
+
+  var html = '<div class="page-header"><button class="back-btn" onclick="navTo(&quot;profil&quot;)">←</button><h2>💛 Mes favoris</h2></div>';
+  html += '<div style="padding:16px">';
+  if(!favProfiles.length){
+    html += '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:12px">💛</div><p>Aucun favori pour le moment.</p><p style="font-size:.8rem;margin-top:8px">Glissez vers la droite ou cliquez ♡ pour ajouter un profil.</p></div>';
+  } else {
+    favProfiles.forEach(function(p){
+      var av = p.gender==='femme' ? svgFemme(44) : svgHomme(44);
+      html += '<div class="admin-user-row" onclick="openProfile(this.dataset.pid)" data-pid="'+p.id+'" style="cursor:pointer;margin-bottom:10px">'+
+        '<div class="admin-user-avatar">'+av+'</div>'+
+        '<div class="admin-user-info">'+
+          '<div class="admin-user-name">'+p.prenom+', '+p.age+' ans · '+p.ville+'</div>'+
+          '<div class="admin-user-sub">'+p.pratique+' · '+p.origine+'</div>'+
+        '</div>'+
+        '<button onclick="event.stopPropagation();toggleFav(this.dataset.fid)" data-fid="'+p.id+'" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gold)">♥</button>'+
+      '</div>';
+    });
+  }
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+function renderAdminDemandes(c){
+  c.innerHTML='<div style="padding:16px"><div class="section-title">💌 Demandes de mise en relation</div><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
+
+  fetch(SUPABASE_URL+'/rest/v1/demandes?select=*&order=created_at.desc', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data)){
+      c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur: '+JSON.stringify(data).slice(0,100)+'</p></div>';
+      return;
+    }
+    var html='<div style="padding:16px"><div class="section-title">💌 Demandes ('+data.length+')</div>';
+    if(!data.length){
+      html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucune demande</p>';
+    } else {
+      data.forEach(function(d){
+        var allP = getAllAdminProfiles();
+        var fromP = allP.find(function(p){ return String(p.id)===String(d.from_profile_id); });
+        var toP   = allP.find(function(p){ return String(p.id)===String(d.to_profile_id); });
+        var fromName = fromP ? fromP.prenom : ('ID:'+d.from_profile_id);
+        var toName   = toP   ? toP.prenom   : ('ID:'+d.to_profile_id);
+        var date = d.created_at ? new Date(d.created_at).toLocaleDateString('fr-FR') : '';
+        var statutColor = d.statut==='acceptee'?'var(--green)':d.statut==='refusee'?'var(--red)':'var(--gold)';
+        var statutLabel = d.statut==='acceptee'?'✅ Acceptée':d.statut==='refusee'?'✗ Refusée':'⏳ En attente';
+        html+='<div class="admin-user-row" style="flex-direction:column;align-items:flex-start;padding:12px;margin-bottom:8px;border-radius:10px;background:var(--card2)">';
+        html+='<div style="display:flex;justify-content:space-between;width:100%;margin-bottom:6px">';
+        html+='<span style="font-weight:600">💌 '+fromName+' → '+toName+'</span>';
+        html+='<span style="font-size:.75rem;color:'+statutColor+'">'+statutLabel+'</span>';
+        html+='</div>';
+        html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:8px">'+date+(d.message?'<br><em>'+d.message+'</em>':'')+'</div>';
+        // Bouton envoyer message Wali à la sœur
+        if(d.statut==='en_attente'){
+          var soeur = fromP && fromP.gender==='femme' ? fromP : (toP && toP.gender==='femme' ? toP : null);
+          var soeurId = soeur ? soeur.id : null;
+          if(soeur){
+            html+='<button class="btn btn-sm" style="background:var(--green-soft);border:1px solid rgba(46,204,113,.3);color:var(--green);font-size:.78rem" ';
+            html+='onclick="sendWaliMessage(this.dataset.sid,this.dataset.snom)" data-sid="'+soeur.id+'" data-snom="'+soeur.prenom+'" >🌸 Envoyer message Wali à '+soeur.prenom+'</button>';
+          }
+        }
+        html+='</div>';
+      });
+    }
+    html+='</div>';
+    c.innerHTML=html;
+  }).catch(function(e){
+    c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Exception</p></div>';
+  });
+}
+
+function sendWaliMessage(profileId, prenom){
+  var sb=getSB(); if(!sb) return;
+  var waliMsg = 'Assalamu Alaykum wa rahmatullahi wa barakatuh '+prenom+',\n\nNous avons reçu une demande de mise en relation vous concernant. Avez-vous un Wali (père, frère ou tuteur légal) pour superviser cette démarche conformément aux prescriptions islamiques ?\n\nMerci de nous répondre afin que nous puissions continuer dans les meilleures conditions.\n\nBarak Allahu fikoum.\nL\'équipe Oumelia';
+
+  sb.from('messages').insert({
+    from_id: 'admin',
+    to_id: String(profileId),
+    from_prenom: 'Administratrice',
+    content: waliMsg,
+    lu: false
+  }).then(function(res){
+    if(res && res.error){ showToast('Erreur: '+res.error.message,'red'); return; }
+    if(!adminConvos[prenom]) adminConvos[prenom]=[];
+    adminConvos[prenom].push({from:'admin', text:waliMsg});
+    showToast('🌸 Message Wali envoyé à '+prenom,'green');
+  }).catch(function(e){ showToast('Erreur envoi','red'); });
+}
+
+function loadUserNotifications(){
+  var sb=getSB();
+  if(!sb||!state.user||!state.user.id) return;
+  var uid=String(state.user.id);
+
+  fetch(SUPABASE_URL+'/rest/v1/notifications?profile_id=eq.'+uid+'&order=created_at.desc&limit=50', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data)) return;
+    console.log('Notifications chargées:', data.length);
+    data.forEach(function(notif){
+      var existId = 'db_notif_'+notif.id;
+      var exists = userNotifs.find(function(n){ return n.id===existId; });
+      if(exists) return;
+      userNotifs.unshift({
+        id: existId,
+        notifDbId: notif.id,  // id de la NOTIF (pas de la demande)
+        dbId: null,            // id de la DEMANDE — sera cherché dynamiquement
+        type: notif.type,
+        icon: notif.type==='demande_recue'?'💌':notif.type==='demande_acceptee'?'💚':notif.type==='like'?'💛':notif.type==='demande_refusee'?'✗':'✅',
+        text: notif.content||'',
+        time: new Date(notif.created_at).toLocaleDateString('fr-FR'),
+        unread: !notif.lu,
+        profileId: notif.from_profile_id||null,
+        fromPrenom: notif.from_prenom||'',
+        statut: notif.type==='demande_recue' ? 'en_attente' : null,
+      });
+    });
+    updateNotifBadge();
+  }).catch(function(e){ console.log('loadUserNotifications:', e); });
 }
 
 window.addEventListener('load', function(){
