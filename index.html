@@ -1015,7 +1015,7 @@ async function initDB(){
     if(session){
       await loadUserProfile(session.user);
     }
-    client.auth.onAuthStateChange(async (event, session) => {
+    client.auth.onAuthStateChange(async function(event, session){
       if(event === 'SIGNED_IN' && session){
         await loadUserProfile(session.user);
       }
@@ -1028,16 +1028,18 @@ async function initDB(){
   } catch(e){ /* Supabase init silencieux */ }
 }
 
-async function loadUserProfile(authUser){
-  const client = getSB();
-  if(!client) return;
-  const { data: profile } = await client
-    .from('profils')
-    .select('*')
-    .eq('user_id', authUser.id)
-    .single();
-
-  if(profile){
+function loadUserProfile(authUser){
+  return fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+authUser.id+'&select=*&limit=1', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    var profile = Array.isArray(data) && data[0] ? data[0] : null;
+    if(!profile){
+      console.log('loadUserProfile: aucun profil pour user_id='+authUser.id);
+      return;
+    }
+    // Réinitialiser complètement state.user pour éviter les résidus
     state.user = {
       id: profile.id,
       supabaseId: authUser.id,
@@ -1065,12 +1067,18 @@ async function loadUserProfile(authUser){
       converti: profile.converti||false,
       recherche: profile.recherche||'',
     };
-    state.profileActive = profile.status === 'active';
-    state.profilePaused = profile.status === 'paused';
-    console.log('Profil chargé:', profile.prenom, '| coran:', profile.coran, '| situation:', profile.situation, '| origine:', profile.origine);
-    // Mettre à jour le statut en ligne
-    await getSB().from('profils').update({ last_seen: new Date().toISOString(), is_online: true }).eq('user_id', authUser.id);
-  }
+    state.profileActive = profile.status==='active';
+    state.profilePaused = profile.status==='paused';
+    state.gender = profile.gender;
+    console.log('✅ Profil chargé: '+profile.prenom+' (id='+profile.id+', gender='+profile.gender+', supabaseId='+authUser.id+')');
+    // Mettre à jour statut en ligne via fetch direct
+    fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+authUser.id, {
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({last_seen:new Date().toISOString(), is_online:true})
+    }).catch(function(){});
+  })
+  .catch(function(e){ console.log('loadUserProfile error:', e); });
 }
 
 // ══════════ SVG AVATARS ══════════
@@ -1174,14 +1182,7 @@ const ADMIN_EMAILS = [
 ];
 
 // ══════════ DONNÉES ══════════
-const allProfiles = [
-  {id:101,prenom:'Amira',gender:'femme',age:24,ville:'Paris',origine:'Algérienne',pratique:'Très pratiquant(e)',voile:'Hijab',barbe:null,situation:'Jamais marié(e)',boosted:false,bio:'Assalamu Alaykum, je cherche un frère sérieux et pratiquant.',madhhab:'Malékite',coran:'Régulièrement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
-  {id:102,prenom:'Fatou',gender:'femme',age:27,ville:'Lyon',origine:'Sénégalaise',pratique:'Pratiquant(e)',voile:'Hijab',barbe:null,situation:'Jamais marié(e)',boosted:false,bio:'Femme sérieuse cherchant un frère pour fonder un foyer halal.',madhhab:'Malékite',coran:'Régulièrement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
-  {id:103,prenom:'Maryam',gender:'femme',age:30,ville:'Marseille',origine:'Marocaine',pratique:'Très pratiquant(e)',voile:'Jilbab',barbe:null,situation:'Divorcée',boosted:true,bio:'Convertie depuis 7 ans alhamdulillah, cherche un frère stable.',madhhab:'Chaféite',coran:'Quotidiennement',halal:'Oui',enfants:'oui',veut_enfants:'Oui',status:'active',paid:true},
-  {id:104,prenom:'Yusuf',gender:'homme',age:28,ville:'Paris',origine:'Tunisien',pratique:'Pratiquant(e)',voile:null,barbe:'Oui (sunnah)',situation:'Jamais marié(e)',boosted:false,bio:'Frère sérieux, cherche une sœur pratiquante pour le mariage.',madhhab:'Hanafite',coran:'Régulièrement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
-  {id:105,prenom:'Moussa',gender:'homme',age:32,ville:'Bordeaux',origine:'Malien',pratique:'Très pratiquant(e)',voile:null,barbe:'Oui (sunnah)',situation:'Jamais marié(e)',boosted:true,bio:'Alhamdulillah, je cherche ma moitié dans la voie d Allah.',madhhab:'Malékite',coran:'Quotidiennement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
-  {id:106,prenom:'Bilal',gender:'homme',age:25,ville:'Toulouse',origine:'Français',pratique:'Pratiquant(e)',voile:null,barbe:'En progression',situation:'Jamais marié(e)',boosted:false,bio:'Converti depuis 3 ans, cherche une sœur pour construire un foyer islamique.',madhhab:'Peu importe',coran:'Régulièrement',halal:'Oui',enfants:'non',veut_enfants:'Oui',status:'active',paid:true},
-];
+const allProfiles = [];
 
 const adminConvos = {};
 
@@ -1197,10 +1198,16 @@ const lastSeenText = {};
 
 function onlineDot(profileId, size){
   if(size===undefined) size=10;
-  const st=onlineStatus[profileId]||'offline';
-  const color=st==='online'?'#39ff7a':st==='recent'?'#1aad4c':'#e67e22';
-  const shadow=st==='online'?`0 0 6px #39ff7a`:'none';
-  return `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;background:${color};box-shadow:${shadow};border:1.5px solid var(--card);flex-shrink:0"></span>`;
+  var st = onlineStatus[String(profileId)] || onlineStatus[profileId] || 'offline';
+  var color = st==='online' ? '#39ff7a' : st==='recent' ? '#C9A84C' : '#e74c3c';
+  var shadow = st==='online' ? '0 0 6px rgba(57,255,122,.6)' : st==='recent' ? '0 0 4px rgba(201,168,76,.5)' : 'none';
+  return '<span style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';box-shadow:'+shadow+';border:1.5px solid var(--card);flex-shrink:0"></span>';
+}
+function onlineLabel(profileId){
+  var st = onlineStatus[String(profileId)] || onlineStatus[profileId] || 'offline';
+  if(st==='online')  return '<span style="color:#39ff7a;font-size:.75rem;display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#39ff7a;display:inline-block;box-shadow:0 0 5px #39ff7a;flex-shrink:0"></span>En ligne</span>';
+  if(st==='recent')  return '<span style="color:#C9A84C;font-size:.75rem;display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#C9A84C;display:inline-block;flex-shrink:0"></span>Vu récemment</span>';
+  return '<span style="color:#e74c3c;font-size:.75rem;display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#e74c3c;display:inline-block;flex-shrink:0"></span>Hors ligne</span>';
 }
 
 // ══════════ ÉCHANGES EN COURS ══════════
@@ -1208,14 +1215,14 @@ function onlineDot(profileId, size){
 const exchangesList = [];
 
 function isInExchange(id1, id2){
-  return exchangesList.some(e=>(e.femmeId===id1&&e.hommeId===id2)||(e.femmeId===id2&&e.hommeId===id1));
+  return exchangesList.some(function(e){return (e.femmeId===id1&&e.hommeId===id2)||(e.femmeId===id2&&e.hommeId===id1);});
 }
 
 function getExchangePartners(userId){
   const partners=[];
-  exchangesList.forEach(e=>{
-    if(e.femmeId===userId) partners.push(allProfiles.find(p=>p.id===e.hommeId));
-    if(e.hommeId===userId) partners.push(allProfiles.find(p=>p.id===e.femmeId));
+  exchangesList.forEach(function(e){
+    if(e.femmeId===userId) partners.push(allProfiles.find(function(p){return p.id===e.hommeId;}));
+    if(e.hommeId===userId) partners.push(allProfiles.find(function(p){return p.id===e.femmeId;}));
   });
   return partners.filter(Boolean);
 }
@@ -1251,7 +1258,7 @@ const demandesEnvoyees = {};
 
 // ══════════ UTILS ══════════
 function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   const el=document.getElementById(id);
   if(el){
     el.classList.add('active');
@@ -1267,7 +1274,7 @@ function showToast(msg,type){
   t.style.borderColor=type==='red'?'var(--red)':type==='green'?'var(--green)':'var(--gold)';
   t.style.display='block';
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.style.display='none',3200);
+  toastTimer=setTimeout(function(){t.style.display='none';},3200);
 }
 
 function openModal(id){document.getElementById(id).classList.add('open');}
@@ -1331,7 +1338,7 @@ function updateProgressBar(step){
   const pcts={1:33,2:66,3:100};
   const fill=document.getElementById('reg-progress-fill');
   if(fill) fill.style.width=pcts[step]+'%';
-  [1,2,3].forEach(i=>{
+  [1,2,3].forEach(function(i){
     const el=document.getElementById('pstep-'+i);
     if(!el) return;
     el.classList.remove('active','done');
@@ -1453,8 +1460,8 @@ function toggleFAQ(i){
   const a=document.getElementById('faq-a-'+i);
   const arrow=document.getElementById('faq-arrow-'+i);
   const isOpen=a.classList.contains('open');
-  document.querySelectorAll('.faq-a').forEach(el=>el.classList.remove('open'));
-  document.querySelectorAll('[id^="faq-arrow-"]').forEach(el=>el.textContent='▾');
+  document.querySelectorAll('.faq-a').forEach(function(el){el.classList.remove('open');});
+  document.querySelectorAll('[id^="faq-arrow-"]').forEach(function(el){el.textContent='▾';});
   if(!isOpen){ a.classList.add('open'); arrow.textContent='▴'; }
 }
 
@@ -1463,14 +1470,14 @@ let selectedReport='', reportTargetId=null;
 
 function openReport(profileId){
   reportTargetId=profileId; selectedReport='';
-  document.querySelectorAll('.report-reason').forEach(r=>r.classList.remove('selected'));
+  document.querySelectorAll('.report-reason').forEach(function(r){r.classList.remove('selected');});
   const d=document.getElementById('report-details'); if(d) d.value='';
   openModal('modal-report');
 }
 
 function selectReport(el,reason){
   selectedReport=reason;
-  document.querySelectorAll('.report-reason').forEach(r=>r.classList.remove('selected'));
+  document.querySelectorAll('.report-reason').forEach(function(r){r.classList.remove('selected');});
   el.classList.add('selected');
 }
 
@@ -1560,9 +1567,9 @@ function startRecording(stream){
     mediaRecorder = new MediaRecorder(stream);
   }
 
-  mediaRecorder.ondataavailable = e => { if(e.data && e.data.size > 0) audioChunks.push(e.data); };
-  mediaRecorder.onstop = () => {
-    stream.getTracks().forEach(t => t.stop());
+  mediaRecorder.ondataavailable = function(e){ if(e.data && e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = function(){
+    stream.getTracks().forEach(function(t){ t.stop(); });
     const type = mediaRecorder.mimeType || 'audio/webm';
     audioBlob = new Blob(audioChunks, { type });
     const url = URL.createObjectURL(audioBlob);
@@ -1572,7 +1579,7 @@ function startRecording(stream){
     document.getElementById('rec-done').classList.remove('hidden');
     state.audioRecorded = true;
   };
-  mediaRecorder.onerror = () => {
+  mediaRecorder.onerror = function(){
     showToast('❌ Erreur d\'enregistrement','red');
     stopRecording();
   };
@@ -1584,7 +1591,7 @@ function startRecording(stream){
   countdownEl.textContent = secondsLeft;
   progressBar.style.width = '0%';
 
-  recCountdownInterval = setInterval(()=>{
+  recCountdownInterval = setInterval(function(){
     secondsLeft--;
     elapsed++;
     countdownEl.textContent = secondsLeft;
@@ -1775,7 +1782,7 @@ async function doLogin(){
   const errEl=document.getElementById('login-error');
 
   // Admin check local
-  if(ADMIN_EMAILS.map(e=>e.toLowerCase()).includes(email.toLowerCase()) && pwd.toLowerCase()===ADMIN_PWD.toLowerCase()){
+  if(ADMIN_EMAILS.map(function(e){return e.toLowerCase();}).includes(email.toLowerCase()) && pwd.toLowerCase()===ADMIN_PWD.toLowerCase()){
     errEl.classList.add('hidden');
     state.isAdmin=true;
     showToast('⏳ Chargement des profils...','gold');
@@ -1832,8 +1839,10 @@ function enterApp(){
   loadProfilesFromDB();
   loadDemandesRecues();
   loadUserMessages();
-  setTimeout(loadUserNotifications, 500); // après que state.user soit prêt
+  setTimeout(loadUserNotifications, 500);
   setTimeout(updateMsgBadge, 2000);
+  loadUserFavoris();
+  loadUserDemandesEnvoyees();
 }
 
 function loadUserMessages(){
@@ -1871,7 +1880,10 @@ function doLogout(){
   var prevUser = state.user;
   state.user=null; state.isAdmin=false; state.profileActive=false;
   state.profilePaused=false; state.gender=null; state.swipeIndex=0;
-  userChatHistory={}; window._adminProfiles=[];
+  state.favorites=[]; state.seenProfiles=[]; state.filters={situation:[],pratique:[],voile:[],barbe:[],origine:[],ageMin:'',ageMax:'',online:false,enfants:'',veut_enfants:''};
+  userChatHistory={}; window._adminProfiles=[]; window._dbProfiles=[]; window._demandesEnvoyeesDB=[];
+  userNotifs=[]; // ← CRITIQUE: vider les notifs de l'utilisateur précédent
+  Object.keys(demandesEnvoyees).forEach(function(k){ delete demandesEnvoyees[k]; });
 
   // Afficher landing
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
@@ -1883,8 +1895,11 @@ function doLogout(){
   var sb=getSB();
   if(sb){
     if(prevUser&&prevUser.supabaseId){
-      sb.from('profils').update({is_online:false,last_seen:new Date().toISOString()})
-        .eq('user_id',prevUser.supabaseId).then(function(){}).catch(function(){});
+      fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+prevUser.supabaseId, {
+        method:'PATCH',
+        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({is_online:false, last_seen:new Date().toISOString()})
+      }).catch(function(){});
     }
     sb.auth.signOut().then(function(){}).catch(function(){});
   }
@@ -1915,37 +1930,76 @@ async function loadProfilesFromDB(){
     };
   });
   // Mettre à jour statut en ligne
-  (data||[]).forEach(function(p){ if(p.is_online) onlineStatus[p.id]='online'; });
+  (data||[]).forEach(function(p){
+    var sid = String(p.id);
+    var status;
+    if(p.last_seen){
+      var diff = (Date.now() - new Date(p.last_seen).getTime()) / 60000;
+      if(diff < 5)       status = 'online';
+      else if(diff < 30) status = 'recent';
+      else               status = 'offline';
+    } else {
+      status = p.is_online ? 'online' : 'offline';
+    }
+    onlineStatus[sid] = status;
+    onlineStatus[p.id] = status; // aussi en entier pour compatibilité
+  });
   console.log('loadProfilesFromDB: '+window._dbProfiles.length+' profils du genre opposé');
   renderTab(state.currentNav);
 }
 
-async function loadDemandesRecues(){
+function loadDemandesRecues(){
   if(!(state.user&&state.user.id)) return;
-  const { data } = await sb
-    .from('demandes')
-    .select('*, profils!demandes_from_profile_id_fkey(prenom, gender, age, ville, pratique, voile, barbe, situation, madhhab, bio, is_online)')
-    .eq('to_profile_id', state.user.id)
-    .eq('statut', 'en_attente');
-  if(data && data.length > 0){
-    data.forEach(d => {
-      const exists = userNotifs.find(n=>n.id==='db_'+d.id);
-      if(!exists && d.profils){
-        userNotifs.unshift({
-          id: 'db_'+d.id,
-          type: 'demande_recue',
-          icon: '💌',
-          text: `<strong>${d.profils.prenom}</strong> vous a envoyé une demande de mise en relation`,
-          time: new Date(d.created_at).toLocaleDateString('fr-FR'),
-          unread: true,
-          profileId: d.from_profile_id,
-          fromPrenom: d.profils.prenom,
-          statut: 'en_attente',
-          dbId: d.id,
+  // Utiliser fetch direct pour éviter DataCloneError Safari
+  fetch(SUPABASE_URL+'/rest/v1/demandes?to_profile_id=eq.'+String(state.user.id)+'&statut=eq.en_attente&select=*', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data)) return;
+    // Pour chaque demande, charger le profil de l'expéditeur
+    data.forEach(function(d){
+      var exists = userNotifs.find(function(n){return n.id==='db_'+d.id;});
+      if(exists) return;
+      // Chercher le profil expéditeur dans le cache local
+      var allP = allProfiles.concat(window._dbProfiles||[]);
+      var fromP = allP.find(function(p){ return String(p.id)===String(d.from_profile_id); });
+      if(fromP){
+        _addDemandeNotif(d, fromP.prenom, fromP);
+      } else {
+        // Charger le profil depuis Supabase
+        fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+d.from_profile_id+'&select=id,prenom,gender,age,ville,pratique,voile,barbe,situation,madhhab,bio', {
+          headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+        })
+        .then(function(r2){ return r2.json(); })
+        .then(function(pData){
+          var p2 = Array.isArray(pData)&&pData[0] ? pData[0] : null;
+          _addDemandeNotif(d, p2?p2.prenom:('Profil #'+d.from_profile_id), p2);
+        }).catch(function(){
+          _addDemandeNotif(d, 'Profil #'+d.from_profile_id, null);
         });
       }
     });
-  }
+  }).catch(function(e){ console.log('loadDemandesRecues:', e); });
+}
+
+function _addDemandeNotif(d, prenom, profil){
+  var exists = userNotifs.find(function(n){return n.id==='db_'+d.id;});
+  if(exists) return;
+  userNotifs.unshift({
+    id: 'db_'+d.id,
+    type: 'demande_recue',
+    icon: '💌',
+    text: '<strong>'+prenom+'</strong> vous a envoyé une demande de mise en relation',
+    time: new Date(d.created_at).toLocaleDateString('fr-FR'),
+    unread: true,
+    profileId: d.from_profile_id,
+    fromPrenom: prenom,
+    statut: 'en_attente',
+    dbId: d.id,
+    profil: profil,
+  });
+  updateNotifBadge();
 }
 
 function loadAllProfilesForAdmin(){
@@ -1995,7 +2049,8 @@ function renderTab(tab){
     case 'notifs':   renderNotifs(c);   break;
     case 'profil':   renderMyProfile(c);break;
     case 'boost':    renderBoost(c);    break;
-    case 'favoris':  renderFavoris(c);  break;
+    case 'favoris':      renderFavoris(c);        break;
+    case 'mes-demandes': renderMesDemandes(c);    break;
   }
   // Remonter en haut seulement si on n'est pas en mode swipe
   if(!(tab==='explorer' && state.viewMode==='swipe')){
@@ -2031,26 +2086,26 @@ function getVisibleProfiles(){
   // Recherche texte
   if(state.searchQuery){
     const q=state.searchQuery.toLowerCase();
-    list=list.filter(p=>p.prenom.toLowerCase().includes(q)||p.ville.toLowerCase().includes(q)||p.origine.toLowerCase().includes(q)||p.pratique.toLowerCase().includes(q));
+    list=list.filter(function(p){return p.prenom.toLowerCase().includes(q)||p.ville.toLowerCase().includes(q)||p.origine.toLowerCase().includes(q)||p.pratique.toLowerCase().includes(q);}); 
   }
   // Filtres multi-critères
-  if(f.situation.length)    list=list.filter(p=>f.situation.includes(p.situation));
-  if(f.pratique.length)     list=list.filter(p=>f.pratique.some(v=>p.pratique.includes(v)));
+  if(f.situation.length)    list=list.filter(function(p){return f.situation.includes(p.situation);}); 
+  if(f.pratique.length)     list=list.filter(function(p){return f.pratique.some(function(v){return p.pratique.includes(v);});}); 
   // Voile = filtre sur profils femme (visible quand l'homme cherche une femme)
-  if(f.voile.length)        list=list.filter(p=>f.voile.includes(p.voile));
+  if(f.voile.length)        list=list.filter(function(p){return f.voile.includes(p.voile);}); 
   // Barbe = filtre sur profils homme (visible quand la femme cherche un homme)
-  if(f.barbe.length)        list=list.filter(p=>f.barbe.includes(p.barbe));
-  if(f.origine.length)      list=list.filter(p=>f.origine.includes(p.origine));
-  if(f.ageMin)              list=list.filter(p=>parseInt(p.age)>=parseInt(f.ageMin));
-  if(f.ageMax)              list=list.filter(p=>parseInt(p.age)<=parseInt(f.ageMax));
-  if(f.online)              list=list.filter(p=>onlineStatus[p.id]==='online'||onlineStatus[p.id]==='recent');
-  if(f.enfants)             list=list.filter(p=>p.enfants===f.enfants);
-  if(f.veut_enfants)        list=list.filter(p=>p.veut_enfants===f.veut_enfants||p.veut_enfants.toLowerCase()===f.veut_enfants.toLowerCase());
+  if(f.barbe.length)        list=list.filter(function(p){return f.barbe.includes(p.barbe);}); 
+  if(f.origine.length)      list=list.filter(function(p){return f.origine.includes(p.origine);}); 
+  if(f.ageMin)              list=list.filter(function(p){return parseInt(p.age)>=parseInt(f.ageMin);}); 
+  if(f.ageMax)              list=list.filter(function(p){return parseInt(p.age)<=parseInt(f.ageMax);}); 
+  if(f.online)              list=list.filter(function(p){return onlineStatus[p.id]==='online'||onlineStatus[p.id]==='recent';}); 
+  if(f.enfants)             list=list.filter(function(p){return p.enfants===f.enfants;}); 
+  if(f.veut_enfants)        list=list.filter(function(p){return p.veut_enfants===f.veut_enfants||p.veut_enfants.toLowerCase()===f.veut_enfants.toLowerCase();}); 
   // Tri
-  if(currentSort==='boost') list.sort((a,b)=>(b.boosted?1:0)-(a.boosted?1:0));
-  else if(currentSort==='recent') list.sort((a,b)=>(b.id||0)-(a.id||0));
-  else if(currentSort==='active') list.sort((a,b)=>{const os={'online':3,'recent':2,'offline':1};return (os[onlineStatus[b.id]]||0)-(os[onlineStatus[a.id]]||0);});
-  else if(currentSort==='compatible') list.sort((a,b)=>getCompatibilityScore(b)-getCompatibilityScore(a));
+  if(currentSort==='boost') list.sort(function(a,b){return (b.boosted?1:0)-(a.boosted?1:0);})
+  else if(currentSort==='recent') list.sort(function(a,b){return (b.id||0)-(a.id||0);})
+  else if(currentSort==='active') list.sort(function(a,b){var os={'online':3,'recent':2,'offline':1};return (os[onlineStatus[b.id]]||0)-(os[onlineStatus[a.id]]||0);});
+  else if(currentSort==='compatible') list.sort(function(a,b){return getCompatibilityScore(b)-getCompatibilityScore(a);});
   return list;
 }
 
@@ -2058,11 +2113,11 @@ function getVisibleProfiles(){
 function getActiveFiltersList(){
   const f=state.filters;
   const tags=[];
-  f.situation.forEach(v=>tags.push({key:'situation',val:v,label:v}));
-  f.pratique.forEach(v=>tags.push({key:'pratique',val:v,label:v}));
-  f.voile.forEach(v=>tags.push({key:'voile',val:v,label:v}));
-  f.barbe.forEach(v=>tags.push({key:'barbe',val:v,label:v}));
-  f.origine.forEach(v=>tags.push({key:'origine',val:v,label:v}));
+  f.situation.forEach(function(v){tags.push({key:'situation',val:v,label:v});});
+  f.pratique.forEach(function(v){tags.push({key:'pratique',val:v,label:v});});
+  f.voile.forEach(function(v){tags.push({key:'voile',val:v,label:v});});
+  f.barbe.forEach(function(v){tags.push({key:'barbe',val:v,label:v});});
+  f.origine.forEach(function(v){tags.push({key:'origine',val:v,label:v});});
   if(f.ageMin||f.ageMax) tags.push({key:'age',val:'age',label:`${f.ageMin||'?'}–${f.ageMax||'?'} ans`});
   if(f.online) tags.push({key:'online',val:'online',label:'En ligne'});
   if(f.enfants) tags.push({key:'enfants',val:f.enfants,label:`Enfants: ${f.enfants}`});
@@ -2073,7 +2128,7 @@ function getActiveFiltersList(){
 function removeFilter(key, val){
   const f=state.filters;
   if(['situation','pratique','voile','barbe','origine'].includes(key)){
-    f[key]=f[key].filter(v=>v!==val);
+    f[key]=f[key].filter(function(v){return v!==val;});
   } else if(key==='age'){f.ageMin=null;f.ageMax=null;}
   else if(key==='online') f.online=false;
   else if(key==='enfants') f.enfants='';
@@ -2240,7 +2295,7 @@ function renderExplorer(c){
   if(myExchangePartners.length>0){
     html+=`<div class="exchange-section">
       <h4>↔ Échanges en cours (${myExchangePartners.length})</h4>`;
-    myExchangePartners.forEach(p=>{
+    myExchangePartners.forEach(function(p){ 
       const av=p.gender==='femme'?svgFemme(36):svgHomme(36);
       const dot=onlineDot(p.id,9);
       html+=`<div class="exchange-profile-row">
@@ -2300,11 +2355,10 @@ function renderExplorer(c){
     if(!profiles.length) html+=`<div style="padding:40px;text-align:center;color:var(--muted)">Aucun profil trouvé</div>`;
     else{
       html+=`<div class="profiles-list">`;
-      profiles.forEach(p=>{
+      profiles.forEach(function(p){ 
         const av=p.gender==='femme'?svgFemme(50):svgHomme(50);
         const isFav=state.favorites.includes(p.id);
         const dot=onlineDot(p.id,9);
-        const lastSeen=lastSeenText[p.id]||'Hors ligne';
         const inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
         html+=`<div class="profile-card ${p.boosted?'boosted':''}" onclick="openProfile(${p.id})">
           ${p.boosted?'<span class="boost-badge">⚡ BOOST</span>':''}
@@ -2317,7 +2371,8 @@ function renderExplorer(c){
             <div class="profile-name">${p.prenom}, ${p.age} ans ${isFav?'<span style="color:var(--gold);font-size:.68rem">♥</span>':''}
               ${getCompatibilityScore(p)>=60?'<span class="compatible-tag" style="font-size:.58rem;padding:1px 6px;margin-left:4px">💫 Compatible</span>':''}
             </div>
-            <div class="profile-meta">📍 ${p.ville} · <span style="font-size:.68rem;color:var(--muted)">${getRegion(p.ville)}</span> · <span style="font-size:.7rem;color:${onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)'}">${lastSeen}</span></div>
+            <div class="profile-meta">📍 ${p.ville} · <span style="font-size:.68rem;color:var(--muted)">${getRegion(p.ville)}</span></div>
+            <div style="margin-top:2px">${onlineLabel(p.id)}</div>
             <div class="profile-tags">
               <span class="tag gold">${p.pratique}</span>
               ${p.voile?('<span class="tag">'+p.voile+'</span>'):''}
@@ -2429,7 +2484,7 @@ function swipeAction(action,prenom,pid){
   }
   // Marquer ce profil comme vu
   if(pid){ if(!state.seenProfiles) state.seenProfiles=[]; if(!state.seenProfiles.includes(String(pid))) state.seenProfiles.push(String(pid)); }
-  setTimeout(()=>{
+  setTimeout(function(){
     state.swipeIndex++;
     // Re-render sans scrollToTop pour le mode swipe
     const c=document.getElementById('app-content');
@@ -2523,8 +2578,6 @@ function openProfile(id){
   const av=p.gender==='femme'?svgFemme(80):svgHomme(80);
   const isFav=state.favorites.includes(p.id);
   const dot=onlineDot(p.id,11);
-  const lastSeen=lastSeenText[p.id]||'Hors ligne';
-  const onlineColor=onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)';
   const inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
   const c=document.getElementById('app-content');
   scrollToTop();
@@ -2540,7 +2593,7 @@ function openProfile(id){
         <span style="position:absolute;bottom:6px;right:6px">${dot}</span>
       </div>
       <div class="profile-page-name">${p.prenom}</div>
-      <div style="color:${onlineColor};text-align:center;font-size:.8rem;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:6px">${dot} ${lastSeen}</div>
+      <div style="text-align:center;margin-bottom:4px">${onlineLabel(p.id)}</div>
       <div style="color:var(--muted);text-align:center;font-size:.82rem;margin-bottom:14px">${p.age} ans · ${p.ville}</div>
       ${p.boosted?'<div style="text-align:center;margin-bottom:12px"><span class="status-badge active">⚡ Profil boosté</span></div>':''}
       ${inExch?`<div style="background:linear-gradient(135deg,#0a1800,#0d2010);border:1px solid var(--green);border-radius:8px;padding:12px;margin-bottom:14px;text-align:center">
@@ -2579,29 +2632,51 @@ function openProfile(id){
 }
 
 function toggleFav(id){
-  var idx=state.favorites.indexOf(id);
+  var sid = String(id);
+  // Sécurité: ne pas ajouter son propre profil en favori
+  if(sid === String(state.user && state.user.id)){
+    console.log('toggleFav: on ne peut pas se mettre soi-même en favori');
+    return;
+  }
+  var idx = state.favorites.indexOf(id);
+  // Chercher aussi en string
+  if(idx===-1) idx = state.favorites.indexOf(sid);
   var btn=document.getElementById('fav-btn-'+id);
   if(idx===-1){
-    state.favorites.push(id);
+    state.favorites.push(sid);
     if(btn){btn.innerHTML='♥ Favori';btn.classList.add('active');}
     showToast('♥ Ajouté aux favoris','gold');
-    // Notifier le profil liké
-    var sb=getSB();
-    if(sb && state.user && state.user.id){
-      sb.from('notifications').insert({
-        profile_id: String(id),
-        type: 'like',
-        content: (state.user.prenom||'Quelqu un') + ' a aimé votre profil',
-        from_profile_id: String(state.user.id),
-        from_prenom: state.user.prenom||'',
-        lu: false,
-        created_at: new Date().toISOString(),
+    // Sauvegarder en DB
+    fetch(SUPABASE_URL+'/rest/v1/likes', {
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({profile_id:String(state.user.id), liked_profile_id:sid, created_at:new Date().toISOString()})
+    }).catch(function(){});
+    // Notifier le profil liké (seulement si ce n'est pas soi-même)
+    if(sid !== String(state.user.id)){
+      fetch(SUPABASE_URL+'/rest/v1/notifications', {
+        method:'POST',
+        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({
+          profile_id: sid,
+          type: 'like',
+          content: (state.user.prenom||'Quelqu\'un')+' a aim\u00e9 votre profil',
+          from_profile_id: String(state.user.id),
+          from_prenom: state.user.prenom||'',
+          lu: false,
+          created_at: new Date().toISOString()
+        })
       }).catch(function(){});
     }
   } else {
     state.favorites.splice(idx,1);
     if(btn){btn.innerHTML='♡ Favori';btn.classList.remove('active');}
     showToast('Retiré des favoris','gold');
+    // Supprimer en DB
+    fetch(SUPABASE_URL+'/rest/v1/likes?profile_id=eq.'+String(state.user.id)+'&liked_profile_id=eq.'+sid, {
+      method:'DELETE',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    }).catch(function(){});
   }
 }
 
@@ -2637,47 +2712,72 @@ function openDemandeModal(prenom){
   openModal('modal-demande');
 }
 
-async function sendDemande(){
+function sendDemande(){
   var msg = (document.getElementById('demande-msg')&&document.getElementById('demande-msg').value)||'';
   demandesEnvoyees[currentDemandeTarget]='en_attente';
   closeModal('modal-demande');
   showToast('💌 Demande envoyée ! En attente de réponse.','gold');
 
   if(!(state.user&&state.user.id)) return;
-  var sb = getSB(); if(!sb) return;
 
-  var allP = [...allProfiles,...(window._dbProfiles||[])];
+  var allP = allProfiles.concat(window._dbProfiles||[]);
   var targetProfile = allP.find(function(p){ return p.prenom===currentDemandeTarget; });
   if(!targetProfile){ console.log('Profil cible introuvable:', currentDemandeTarget); return; }
 
-  // 1. Insérer la demande
-  var insertRes = await sb.from('demandes').insert({
-    from_profile_id: state.user.id,
-    to_profile_id: targetProfile.id,
+  // Sauvegarder en mémoire locale aussi (pour affichage immédiat)
+  if(!window._demandesEnvoyeesDB) window._demandesEnvoyeesDB = [];
+  window._demandesEnvoyeesDB.push({
+    to_profile_id: String(targetProfile.id),
+    to_prenom: targetProfile.prenom,
+    to_gender: targetProfile.gender,
+    to_ville: targetProfile.ville||'',
+    to_origine: targetProfile.origine||'',
     message: msg,
     statut: 'en_attente',
     created_at: new Date().toISOString(),
-  }).select().single();
+  });
 
-  if(insertRes && insertRes.error){
-    console.log('demande insert error:', insertRes.error.message);
-    return;
-  }
-  console.log('✅ Demande envoyée, id:', insertRes.data && insertRes.data.id);
-
-  // 2. Créer une notification pour le destinataire
-  var notifMsg = (state.user.prenom||'Quelqu un') + ' vous a envoyé une demande de mise en relation';
-  await sb.from('notifications').insert({
-    profile_id: String(targetProfile.id),
-    type: 'demande_recue',
-    content: notifMsg,
-    from_profile_id: String(state.user.id),
-    from_prenom: state.user.prenom||'',
-    lu: false,
-    created_at: new Date().toISOString(),
-  }).catch(function(e){ console.log('notif demande error:', e.message||e); });
-
-  console.log('✅ Notification envoyée à', targetProfile.prenom);
+  // 1. Insérer la demande via fetch direct
+  fetch(SUPABASE_URL+'/rest/v1/demandes', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer '+SUPABASE_ANON,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({
+      from_profile_id: String(state.user.id),
+      to_profile_id: String(targetProfile.id),
+      message: msg,
+      statut: 'en_attente',
+      created_at: new Date().toISOString(),
+    })
+  })
+  .then(function(r){
+    console.log('Demande insert status:', r.status);
+    // 2. Notification pour le destinataire
+    return fetch(SUPABASE_URL+'/rest/v1/notifications', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': 'Bearer '+SUPABASE_ANON,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        profile_id: String(targetProfile.id),
+        type: 'demande_recue',
+        content: (state.user.prenom||'Quelqu un')+' vous a envoyé une demande de mise en relation',
+        from_profile_id: String(state.user.id),
+        from_prenom: state.user.prenom||'',
+        lu: false,
+        created_at: new Date().toISOString(),
+      })
+    });
+  })
+  .then(function(){ console.log('✅ Demande + notif envoyées'); })
+  .catch(function(e){ console.log('sendDemande error:', e); });
 }
 
 // Simuler réception acceptation → décrémente le compteur
@@ -2690,9 +2790,9 @@ function simulateAccept(prenom){
 
 function buyDemandes(){
   closeModal('modal-plus-demandes');
-  openStripePayment('demandes', async ()=>{
+  openStripePayment('demandes', async function(){
     // Réinitialiser les demandes acceptées
-    Object.keys(demandesEnvoyees).forEach(k=>{if(demandesEnvoyees[k]==='acceptee') delete demandesEnvoyees[k];});
+    Object.keys(demandesEnvoyees).forEach(function(k){ if(demandesEnvoyees[k]==='acceptee') delete demandesEnvoyees[k];});
     // Enregistrer le paiement dans Supabase
     if((state.user&&state.user.id)){
       await getSB().from('paiements').insert({
@@ -2700,7 +2800,7 @@ function buyDemandes(){
         type: 'demandes',
         montant: 2.99,
         created_at: new Date().toISOString(),
-      }).catch(()=>{}); // table optionnelle
+      }).catch(function(){}); // table optionnelle
     }
     showToast('✅ 3 nouvelles demandes débloquées !','green');
     renderTab(state.currentNav);
@@ -2709,7 +2809,7 @@ function buyDemandes(){
 
 function activateProfile(){
   closeModal('modal-paywall');
-  openStripePayment('profil', async ()=>{
+  openStripePayment('profil', async function(){
     state.profileActive=true;
     if((state.user&&state.user.supabaseId)){
       await getSB().from('profils').update({status:'active', paid:true}).eq('user_id', state.user.supabaseId);
@@ -2720,9 +2820,7 @@ function activateProfile(){
 }
 
 // ══════════ MESSAGES ══════════
-var userChatHistory={
-  'Administratrice':[{from:'admin',text:'Assalamu Alaykum wa rahmatullahi wa barakatuh,\n\nUne demande de mise en relation vous concernant a été acceptée. Avez-vous un Wali pour superviser cette démarche ?\n\nBarak Allahu fikoum.\nOumelia'}]
-};
+var userChatHistory={};
 
 function renderMessages(c){
   // Marquer les messages comme lus
@@ -2737,16 +2835,25 @@ function renderMessages(c){
         }).catch(function(){});
     }
   }catch(e){}
-  c.innerHTML=`
-    <div class="page-header"><h2>Messages</h2></div>
-    <div class="conversations-list">
-      <div class="convo-item" onclick="openChat(state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice','admin')">
-        <div class="convo-avatar"><div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);display:flex;align-items:center;justify-content:center;position:relative"><div style="width:10px;height:10px;border-radius:50%;background:var(--card);position:absolute;right:6px;top:5px"></div></div></div>
-        <div class="convo-info"><div class="convo-name">${state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice'} Oumelia</div><div class="convo-preview">Une demande de mise en relation vous concernant...</div></div>
-        <div class="convo-time">Auj.</div>
-        <div class="convo-dot"></div>
-      </div>
-    </div>`;
+  var adminName = state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice';
+  var adminMsgs = userChatHistory[adminName]||[];
+  var iconHtml2 = '<div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);display:flex;align-items:center;justify-content:center;position:relative"><div style="width:10px;height:10px;border-radius:50%;background:var(--card);position:absolute;right:6px;top:5px"></div></div>';
+  var html2 = '<div class="page-header"><h2>Messages</h2></div><div class="conversations-list">';
+  if(adminMsgs.length > 0){
+    var lastMsg = adminMsgs[adminMsgs.length-1].text.slice(0,40)+'...';
+    html2 += '<div class="convo-item" onclick="openChat(&quot;'+adminName+'&quot;,&quot;admin&quot;)">'+
+      '<div class="convo-avatar">'+iconHtml2+'</div>'+
+      '<div class="convo-info"><div class="convo-name">'+adminName+' Oumelia</div>'+
+      '<div class="convo-preview">'+lastMsg+'</div></div></div>';
+  } else {
+    html2 += '<div style="text-align:center;padding:48px 20px;color:var(--muted)">'+
+      '<div style="font-size:2.5rem;margin-bottom:14px">&#x1F4AC;</div>'+
+      '<p style="font-size:.88rem">Aucun message pour le moment</p>'+
+      '<p style="font-size:.76rem;margin-top:6px;opacity:.6">L&#39;administratrice vous contactera ici si n&eacute;cessaire.</p>'+
+      '</div>';
+  }
+  html2 += '</div>';
+  c.innerHTML = html2;
 }
 
 function openChat(name, type){
@@ -2819,7 +2926,7 @@ function renderNotifs(c){
   var _badge=document.getElementById('notif-badge');
   if(_badge){ if(_unread>0){_badge.textContent=_unread;_badge.style.display='flex';}else{_badge.textContent='';_badge.style.display='none';} }
   let html=`<div class="page-header"><h2>Notifications</h2></div><div class="notif-list">`;
-  userNotifs.forEach(n=>{
+  userNotifs.forEach(function(n){ 
     const isDemande = n.type==='demande_recue';
     const accepted  = n.statut==='acceptee';
     const refused   = n.statut==='refusee';
@@ -2829,7 +2936,7 @@ function renderNotifs(c){
       ${n.profileId&&!isDemande?('onclick="openProfileFromNotif('+n.profileId+')"'):''}>
       <div class="notif-icon">${accepted?'💚':refused?'✗':n.icon}</div>
       <div style="flex:1">
-        <div class="notif-text">${n.text}</div>
+        <div class="notif-text">${n.text||("<strong>"+(n.fromPrenom||"Quelqu'un")+"</strong> vous a envoyé une demande de mise en relation")}</div>
         <div class="notif-time">${n.time}</div>`;
 
     if(isDemande && pending){
@@ -2902,25 +3009,37 @@ function openProfileFromNotifDemande(notifId, profileId){
     var infoHtml = '<div style="text-align:center;padding:20px;color:var(--muted)">Profil non disponible</div>';
     if(profile){
       infoHtml =
+        // En-tête
         '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">' +
           av +
-          '<div><div style="font-size:1.1rem;font-weight:600">' + (profile.prenom||'—') + ', ' + (profile.age||'—') + ' ans</div>' +
-          '<div style="color:var(--muted);font-size:.82rem">📍 ' + (profile.ville||'—') + ' · ' + (profile.origine||'—') + '</div></div>' +
+          '<div>' +
+            '<div style="font-size:1.1rem;font-weight:600">' + (profile.prenom||'—') + ', ' + (profile.age||'—') + ' ans</div>' +
+            '<div style="color:var(--muted);font-size:.82rem;margin-top:2px">📍 ' + (profile.ville||'—') + ' · ' + (profile.origine||'—') + '</div>' +
+          '</div>' +
         '</div>' +
-        '<div class="profile-tags" style="margin-bottom:12px">' +
-          '<span class="tag gold">' + (profile.pratique||'—') + '</span>' +
-          (profile.voile ? '<span class="tag">'+profile.voile+'</span>' : '') +
-          (profile.barbe ? '<span class="tag">'+profile.barbe+'</span>' : '') +
-          (profile.madhhab && profile.madhhab!=='Peu importe' ? '<span class="tag">'+profile.madhhab+'</span>' : '') +
-        '</div>' +
-        (profile.bio ? '<p style="font-size:.84rem;color:var(--muted);line-height:1.6;margin-bottom:12px;padding:10px;background:var(--card2);border-radius:8px">' + profile.bio + '</p>' : '') +
-        '<div style="background:var(--card2);border-radius:8px;padding:10px;margin-bottom:12px">' +
+        // Présentation
+        (profile.bio ?
+          '<div style="background:var(--card2);border-radius:10px;padding:12px;margin-bottom:10px">' +
+            '<div style="font-size:.65rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Présentation</div>' +
+            '<p style="font-size:.84rem;color:var(--white2);line-height:1.7">' + profile.bio + '</p>' +
+          '</div>' : '') +
+        // Informations générales
+        '<div style="background:var(--card2);border-radius:10px;padding:12px;margin-bottom:10px">' +
+          '<div style="font-size:.65rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Informations générales</div>' +
           '<div class="profile-detail-row"><span>Situation</span><span>' + (profile.situation||'—') + '</span></div>' +
+          '<div class="profile-detail-row"><span>Enfants</span><span>' + (profile.enfants==='oui'?'A des enfants':'Sans enfants') + '</span></div>' +
+          '<div class="profile-detail-row"><span>Veut enfants</span><span>' + (profile.veut_enfants||'—') + '</span></div>' +
+          '<div class="profile-detail-row"><span>Origine</span><span>' + (profile.origine||'—') + '</span></div>' +
+        '</div>' +
+        // Pratique religieuse
+        '<div style="background:var(--card2);border-radius:10px;padding:12px;margin-bottom:12px">' +
+          '<div style="font-size:.65rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Pratique religieuse</div>' +
+          '<div class="profile-detail-row"><span>Pratique</span><span>' + (profile.pratique||'—') + '</span></div>' +
           '<div class="profile-detail-row"><span>Madhhab</span><span>' + (profile.madhhab||'—') + '</span></div>' +
           '<div class="profile-detail-row"><span>Coran</span><span>' + (profile.coran||'—') + '</span></div>' +
           '<div class="profile-detail-row"><span>Alimentation</span><span>' + (profile.halal||'—') + '</span></div>' +
-          '<div class="profile-detail-row"><span>Enfants</span><span>' + (profile.enfants==='oui'?'A des enfants':'Sans enfants') + '</span></div>' +
-          '<div class="profile-detail-row"><span>Veut enfants</span><span>' + (profile.veut_enfants||'—') + '</span></div>' +
+          (profile.voile ? '<div class="profile-detail-row"><span>Voile</span><span>' + profile.voile + '</span></div>' : '') +
+          (profile.barbe ? '<div class="profile-detail-row"><span>Barbe</span><span>' + profile.barbe + '</span></div>' : '') +
         '</div>';
     }
 
@@ -2959,12 +3078,13 @@ function openProfileFromNotifDemande(notifId, profileId){
     if(btnAnnuler) btnAnnuler.onclick = function(){ overlay.remove(); refuseDemande(notifId); };
   };
 
-  if(!p && profileId){
+  // Toujours charger depuis Supabase pour avoir TOUTES les colonnes (bio, coran, halal, etc.)
+  if(profileId){
     fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+profileId+'&select=*', {
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
     }).then(function(r){ return r.json(); })
-    .then(function(data){ doRender(data&&data[0]?data[0]:null); })
-    .catch(function(){ doRender(null); });
+    .then(function(data){ doRender(data&&data[0]?data[0]:(p||null)); })
+    .catch(function(){ doRender(p||null); });
   } else {
     doRender(p);
   }
@@ -3051,15 +3171,11 @@ async function acceptDemande(notifId){
   } // fin du else existCheck
 
   // Notifier le demandeur: "Celia a accepté votre demande"
-  var acceptMsg = (state.user.prenom||'Quelqu un') + ' a accepté votre demande de mise en relation';
-  await sb.from('notifications').insert({
-    profile_id: fromId,
-    type: 'demande_acceptee',
-    content: acceptMsg,
-    from_profile_id: myId,
-    from_prenom: state.user.prenom||'',
-    lu: false,
-    created_at: new Date().toISOString(),
+  var acceptMsg = (state.user.prenom||'Quelqu\'un') + ' a accepté votre demande de mise en relation. Un administrateur rentrera bientôt en contact avec vous.';
+  fetch(SUPABASE_URL+'/rest/v1/notifications', {
+    method:'POST',
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({profile_id:String(fromId),type:'demande_acceptee',content:acceptMsg,from_profile_id:String(myId),from_prenom:state.user.prenom||'',lu:false,created_at:new Date().toISOString()})
   }).catch(function(e){ console.log('notif acceptee error:', e); });
   
   console.log('✅ Notif acceptation envoyée à profile_id='+fromId);
@@ -3102,10 +3218,10 @@ function refuseDemandeFromModal(notifId){
 
 function openProfileFromNotif(profileId){
   // Marquer les notifs comme lues
-  userNotifs.forEach(n=>{if(n.profileId===profileId) n.unread=false;});
+  userNotifs.forEach(function(n){ if(n.profileId===profileId) n.unread=false;});
   // Naviguer sur l'onglet explorer puis afficher le profil
   state.currentNav='explorer';
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   const el=document.getElementById('nav-explorer');
   if(el) el.classList.add('active');
   openProfile(profileId);
@@ -3178,7 +3294,8 @@ function renderMyProfile(c){
 
       <div style="display:flex;flex-direction:column;gap:9px;margin-top:4px">
         <button class="btn btn-outline btn-sm" onclick="navTo('favoris')">💛 Mes favoris (${state.favorites.length})</button>
-      <button class="btn btn-outline btn-sm" onclick="renderEditProfile()">✏️ Modifier mon profil</button>
+        <button class="btn btn-outline btn-sm" onclick="navTo('mes-demandes')">💌 Mes demandes</button>
+        <button class="btn btn-outline btn-sm" onclick="renderEditProfile()">✏️ Modifier mon profil</button>
         ${!state.profilePaused?'<button class="btn btn-sm" style="background:var(--blue-soft);border:1px solid rgba(74,158,255,.3);color:var(--blue)" onclick="openModal(\'modal-pause\')">⏸ Mettre en pause</button>':''}
       </div>
 
@@ -3330,7 +3447,7 @@ async function deleteAccount(){
     await getSB().from('profils').delete().eq('user_id', state.user.supabaseId);
     await getSB().auth.signOut();
   }
-  setTimeout(()=>{ state.user=null; state.isAdmin=false; showScreen('screen-landing'); },1500);
+  setTimeout(function(){ state.user=null; state.isAdmin=false; showScreen('screen-landing'); },1500);
 }
 
 // ══════════ BOOST ══════════
@@ -3360,10 +3477,10 @@ function renderBoost(c){
 // ══════════════════════════════
 function updateAdminBadges(){
   const allP = getAllAdminProfiles();
-  const np = allP.filter(p=>p.status==='pending').length;
+  const np = allP.filter(function(p){return p.status==='pending';}).length;
   const pb = document.getElementById('pending-badge');
   if(pb) pb.textContent = np || '';
-  const nw = waliResponses.filter(r=>!r.read).length;
+  const nw = waliResponses.filter(function(r){return !r.read;}).length;
   const wb = document.getElementById('wali-badge');
   if(wb) wb.textContent = nw > 0 ? nw : '';
 }
@@ -3371,7 +3488,7 @@ function updateAdminBadges(){
 function adminTab(tab){
   state.activeAdminTab=tab;
   if(tab==='dashboard') startAdminRefresh(); else stopAdminRefresh();
-  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(function(t){t.classList.remove('active');});
   const el=document.getElementById('atab-'+tab);
   if(el) el.classList.add('active');
   const c=document.getElementById('admin-content');
@@ -3389,20 +3506,20 @@ function adminTab(tab){
 
 function renderAdminDashboard(c){
   const allP=getAllAdminProfiles();
-  const active=allP.filter(p=>p.status==='active').length;
-  const pending=allP.filter(p=>p.status==='pending').length;
+  const active=allP.filter(function(p){return p.status==='active';}).length;
+  const pending=allP.filter(function(p){return p.status==='pending';}).length;
   // Revenus = seulement les profils qui ont PAYÉ (exclut les activations gratuites)
-  const paidReal=allP.filter(p=>p.paid===true && !p.free_activated).length;
-  const notPaid=allP.filter(p=>!p.paid && !p.free_activated).length;
-  const femmes=allP.filter(p=>p.gender==='femme').length;
-  const hommes=allP.filter(p=>p.gender==='homme').length;
-  const nwali=waliResponses.filter(r=>!r.read).length;
-  const nOnline=allP.filter(p=>onlineStatus[p.id]==='online').length;
+  const paidReal=allP.filter(function(p){return p.paid===true && !p.free_activated;}).length;
+  const notPaid=allP.filter(function(p){return !p.paid && !p.free_activated;}).length;
+  const femmes=allP.filter(function(p){return p.gender==='femme';}).length;
+  const hommes=allP.filter(function(p){return p.gender==='homme';}).length;
+  const nwali=waliResponses.filter(function(r){return !r.read;}).length;
+  const nOnline=allP.filter(function(p){return onlineStatus[p.id]==='online';}).length;
   const nExchanges=exchangesList.length;
   const total=allP.length;
 
   // TOUS les profils non activés : pending + non payés + inactifs
-  const nonActives=allP.filter(p=>p.status==='pending'||(p.status==='inactive'&&!p.paid));
+  const nonActives=allP.filter(function(p){return p.status==='pending'||(p.status==='inactive'&&!p.paid);});
 
   let html=`<div style="padding:16px">
     <div class="section-title">📊 Vue d'ensemble · ${total} inscrits</div>
@@ -3429,7 +3546,7 @@ function renderAdminDashboard(c){
   if(!nonActives.length){
     html+=`<p style="color:var(--green);font-size:.82rem;text-align:center;padding:14px">✓ Aucun profil en attente</p>`;
   } else {
-    nonActives.forEach(p=>{
+    nonActives.forEach(function(p){ 
       const av=p.gender==='femme'?svgFemme(32):svgHomme(32);
       const date=p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'';
       html+=`<div class="admin-user-row" style="margin-bottom:7px">
@@ -3466,10 +3583,10 @@ function renderAdminDashboard(c){
 }
 
 function renderAdminPending(c){
-  const pending=allProfiles.filter(p=>p.status==='pending');
+  const pending=allProfiles.filter(function(p){return p.status==='pending';});
   let html=`<div style="padding:16px"><div class="section-title">⏳ En attente <span class="sc">${pending.length}</span></div>`;
   if(!pending.length) html+=`<p style="color:var(--muted);text-align:center;padding:28px">Aucun profil en attente ✓</p>`;
-  pending.forEach(p=>{
+  pending.forEach(function(p){ 
     const av=p.gender==='femme'?svgFemme(34):svgHomme(34);
     html+=`<div class="admin-user-row">
       <div class="admin-user-avatar">${av}</div>
@@ -3539,9 +3656,9 @@ function renderAdminUsers(c){
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
       <button class="btn-tiny approve" style="padding:5px 10px" onclick="filterByStatus('all')">Tous (${allP.length})</button>
-      <button class="btn-tiny approve" style="padding:5px 10px" onclick="filterByStatus('active')">✓ Actifs (${allP.filter(p=>p.status==='active').length})</button>
-      <button class="btn-tiny msg" style="padding:5px 10px" onclick="filterByStatus('pending')">⏳ Attente (${allP.filter(p=>p.status==='pending').length})</button>
-      <button class="btn-tiny deact" style="padding:5px 10px" onclick="filterByStatus('inactive')">⏸ Inactifs (${allP.filter(p=>p.status==='inactive').length})</button>
+      <button class="btn-tiny approve" style="padding:5px 10px" onclick="filterByStatus('active')">✓ Actifs (${allP.filter(function(p){return p.status==='active';}).length})</button>
+      <button class="btn-tiny msg" style="padding:5px 10px" onclick="filterByStatus('pending')">⏳ Attente (${allP.filter(function(p){return p.status==='pending';}).length})</button>
+      <button class="btn-tiny deact" style="padding:5px 10px" onclick="filterByStatus('inactive')">⏸ Inactifs (${allP.filter(function(p){return p.status==='inactive';}).length})</button>
     </div>
     <div id="admin-users-list">${buildUserList(allP)}</div>
   </div>`;
@@ -3555,12 +3672,12 @@ function filterByStatus(status){
 }
 
 function buildUserList(list){
-  const filtered=adminStatusFilter&&adminStatusFilter!=='all'?list.filter(p=>p.status===adminStatusFilter):list;
+  const filtered=adminStatusFilter&&adminStatusFilter!=='all'?list.filter(function(p){return p.status===adminStatusFilter;}):list;
   if(!filtered.length) return `<div style="text-align:center;color:var(--muted);padding:30px;font-size:.84rem">Aucun profil dans cette catégorie</div>`;
-  return filtered.map(p=>{
+  return filtered.map(function(p){
     const av=p.gender==='femme'?svgFemme(34):svgHomme(34);
     const dot=onlineDot(p.id,8);
-    const inExch=exchangesList.some(e=>e.femmeId===p.id||e.hommeId===p.id);
+    const inExch=exchangesList.some(function(e){return e.femmeId===p.id||e.hommeId===p.id;});
     const statusColor=p.status==='active'?'badge-active':p.status==='pending'?'badge-pending':p.status==='paused'?'badge-paused':'badge-inactive';
     const statusLabel=p.status==='active'?'✓ Actif':p.status==='pending'?'⏳ Attente':p.status==='paused'?'⏸ Pause':'✗ Inactif';
     return`<div class="admin-user-row">
@@ -3586,7 +3703,7 @@ function buildUserList(list){
 
 function filterAdminUsers(q){
   const allP=getAllAdminProfiles();
-  const filtered=q?allP.filter(p=>(p.prenom||'').toLowerCase().includes(q.toLowerCase())||(p.ville||'').toLowerCase().includes(q.toLowerCase())):allP;
+  var filtered=q?allP.filter(function(p){return (p.prenom||'').toLowerCase().includes(q.toLowerCase())||(p.ville||'').toLowerCase().includes(q.toLowerCase());}):allP;
   const el=document.getElementById('admin-users-list');
   if(el) el.innerHTML=buildUserList(filtered);
 }
@@ -3659,9 +3776,9 @@ function renderAdminWali(c){
   if(!waliResponses.length){
     html+=`<div style="padding:30px;text-align:center;color:var(--muted)"><div style="font-size:2rem;margin-bottom:10px">🌸</div><p>Aucune réponse reçue.</p></div>`;
   }
-  waliResponses.forEach(wr=>{
-    const match=matchesData.find(m=>m.id===wr.matchId);
-    const homme=match?allProfiles.find(p=>p.id===match.hommeId):null;
+  waliResponses.forEach(function(wr){ 
+    const match=matchesData.find(function(m){return m.id===wr.matchId;});
+    const homme=match?allProfiles.find(function(p){return p.id===match.hommeId;}):null;
     html+=`<div class="wali-response-item">
       <div class="wr-title">
         Réponse de ${wr.prenom} ${!wr.read?'· <span style="color:var(--gold);font-weight:700">NOUVEAU</span>':''} · ${wr.time}
@@ -3679,7 +3796,7 @@ function renderAdminWali(c){
   c.innerHTML=html;
 }
 
-function markWaliRead(matchId){const wr=waliResponses.find(r=>r.matchId===matchId);if(wr)wr.read=true;updateAdminBadges();}
+function markWaliRead(matchId){const wr=waliResponses.find(function(r){return r.matchId===matchId;});if(wr)wr.read=true;updateAdminBadges();}
 
 function notifyHomme(hommePrenom,femmePrenom){
   if(!adminConvos[hommePrenom]) adminConvos[hommePrenom]=[];
@@ -3827,7 +3944,7 @@ async function freeActivate(id){
   p.free_activated=true; // marqué gratuit → ne compte PAS dans les revenus
   // paid reste false pour ne pas fausser le solde
   if(p.user_id){
-    await getSB().from('profils').update({status:'active', free_activated:true}).eq('id',id).catch(()=>{});
+    await getSB().from('profils').update({status:'active', free_activated:true}).eq('id',id).catch(function(){});
   }
   updateAdminBadges();
   showToast(`🎁 ${p.prenom||'Profil'} activé gratuitement ✓`,'gold');
@@ -3907,8 +4024,8 @@ function sendAdminMsg(){
 // L'administrateur notifie le FRÈRE séparément
 function sendWaliFromMatch(idx){
   const m=matchesData[idx];if(!m)return;
-  const femme=allProfiles.find(p=>p.id===m.femmeId);
-  const homme=allProfiles.find(p=>p.id===m.hommeId);
+  const femme=allProfiles.find(function(p){return p.id===m.femmeId;});
+  const homme=allProfiles.find(function(p){return p.id===m.hommeId;});
   if(!femme||!homme)return;
 
   // Message de l'ADMINISTRATRICE → SŒUR uniquement
@@ -3924,8 +4041,8 @@ function sendWaliFromMatch(idx){
 // Notifier le FRÈRE séparément (par l'ADMINISTRATEUR)
 function notifyFrereFromMatch(idx){
   const m=matchesData[idx];if(!m)return;
-  const femme=allProfiles.find(p=>p.id===m.femmeId);
-  const homme=allProfiles.find(p=>p.id===m.hommeId);
+  const femme=allProfiles.find(function(p){return p.id===m.femmeId;});
+  const homme=allProfiles.find(function(p){return p.id===m.hommeId;});
   if(!femme||!homme)return;
 
   const hommeTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh cher frère ${homme.prenom},\n\nAlhamdulillah ! La demande de mise en relation a été acceptée. Nous attendons actuellement la confirmation de la sœur ${femme.prenom} concernant son tuteur matrimonial (Wali).\n\nNous vous contacterons dès que nous aurons sa réponse inchallah.\n\nBarak Allahu fikoum.\nL'Administrateur Oumelia`;
@@ -3945,7 +4062,7 @@ function openAudioVerif(id,name){
 }
 
 function audioValidate(){
-  const p=allProfiles.find(x=>x.id===audioVerifId);if(p){p.status='active';p.paid=true;p.audioAttested=false;}
+  const p=allProfiles.find(function(x){return x.id===audioVerifId;});if(p){p.status='active';p.paid=true;p.audioAttested=false;}
   updateAdminBadges();closeModal('modal-audio');
   showToast(`✅ Audio validé — ${(p&&p.prenom)} approuvée`,'green');
   adminTab(state.activeAdminTab);
@@ -3953,13 +4070,13 @@ function audioValidate(){
 
 function audioRejectFn(){
   closeModal('modal-audio');
-  const p=allProfiles.find(x=>x.id===audioVerifId);
+  const p=allProfiles.find(function(x){return x.id===audioVerifId;});
   openRejectModal(audioVerifId,(p&&p.prenom)||'');
 }
 
 function buyBoost(){
   activateBoost();
-  openStripePayment('boost', async ()=>{
+  openStripePayment('boost', async function(){
     // Activer le boost dans Supabase — expire dans 7 jours
     if((state.user&&state.user.supabaseId)){
       const boostUntil = new Date(Date.now() + 7*24*60*60*1000).toISOString();
@@ -4119,12 +4236,12 @@ function initPWAManifest(){
   }catch(e){}
 }
 
-window.addEventListener('beforeinstallprompt',e=>{
+window.addEventListener('beforeinstallprompt',function(e){
   e.preventDefault();deferredPrompt=e;
   document.getElementById('pwa-install-btn').style.display='block';
 });
 
-window.addEventListener('appinstalled',()=>{
+window.addEventListener('appinstalled',function(){
   document.getElementById('pwa-install-btn').style.display='none';
   showToast('✅ Oumelia installée sur votre écran d\'accueil !','green');
 });
@@ -4132,7 +4249,7 @@ window.addEventListener('appinstalled',()=>{
 function installPWA(){
   if(deferredPrompt){
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(r=>{
+    deferredPrompt.userChoice.then(function(r){
       if(r.outcome==='accepted') showToast('✅ Oumelia installée !','green');
       deferredPrompt=null;
       document.getElementById('pwa-install-btn').style.display='none';
@@ -4145,8 +4262,8 @@ function installPWA(){
 }
 
 if('serviceWorker' in navigator){
-  const sw=`self.addEventListener('install',e=>{e.waitUntil(caches.open('oumelia-v2').then(c=>c.addAll(['/']).catch(()=>{})));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response(''))));});`;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+  var sw="self.addEventListener('install',function(e){e.waitUntil(caches.open('oumelia-v2').then(c=>c.addAll(['/']).catch(function(){})));});self.addEventListener('fetch',function(e){e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response(''))));});";
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(function(){});
 }
 
 // ══════════ INIT dans window.load ══════════
@@ -4155,8 +4272,8 @@ if('serviceWorker' in navigator){
 function loadScript(src, onload, onerror){
   const s = document.createElement('script');
   s.src = src;
-  s.onload = onload || (()=>{});
-  s.onerror = onerror || (()=>{});
+  s.onload = onload || function(){};
+  s.onerror = onerror || function(){};
   document.head.appendChild(s);
 }
 
@@ -4182,30 +4299,47 @@ function openSwipeProfile(id){
   overlay.onclick = function(e){ if(e.target===overlay) closeSwipePopup(); };
   var popHtml = '<div class="swipe-popup">' +
     '<div class="swipe-popup-handle"></div>' +
-    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">' +
+
+    // ── En-tête avatar + nom ──
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">' +
       av +
-      '<div><div style="font-size:1.15rem;font-weight:600">' + p.prenom + ', ' + p.age + ' ans</div>' +
-      '<div style="color:var(--muted);font-size:.82rem">📍 ' + p.ville + ' · ' + p.origine + '</div></div>' +
+      '<div>' +
+        '<div style="font-family:var(--font-serif,serif);font-size:1.15rem;font-weight:600">' + p.prenom + ', ' + p.age + ' ans</div>' +
+        '<div style="color:var(--muted);font-size:.82rem;margin-top:2px">📍 ' + (p.ville||'—') + ' · ' + (p.origine||'—') + '</div>' +
+        (p.boosted ? '<span style="background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#1a0e00;font-size:.62rem;font-weight:800;padding:2px 8px;border-radius:4px;margin-top:4px;display:inline-block">⚡ Boosté</span>' : '') +
+      '</div>' +
     '</div>' +
-    '<div class="profile-tags" style="margin-bottom:14px">' +
-      '<span class="tag gold">' + p.pratique + '</span>' +
-      (p.voile ? '<span class="tag">'+p.voile+'</span>' : '') +
-      (p.barbe ? '<span class="tag">'+p.barbe+'</span>' : '') +
-      (p.madhhab && p.madhhab!=='Peu importe' ? '<span class="tag">'+p.madhhab+'</span>' : '') +
-      (p.boosted ? '<span class="tag" style="background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold)">⚡ Boosté</span>' : '') +
-    '</div>' +
-    (p.bio ? '<p style="font-size:.84rem;color:var(--muted);line-height:1.7;margin-bottom:14px;padding:10px;background:var(--card2);border-radius:8px">' + p.bio + '</p>' : '') +
-    '<div style="background:var(--card2);border-radius:10px;padding:10px;margin-bottom:14px">' +
+
+    // ── Présentation ──
+    (p.bio ? '<div style="background:var(--card2);border-radius:10px;padding:12px;margin-bottom:12px">' +
+      '<div style="font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Présentation</div>' +
+      '<p style="font-size:.84rem;color:var(--white2);line-height:1.7">' + p.bio + '</p>' +
+    '</div>' : '') +
+
+    // ── Informations générales ──
+    '<div style="background:var(--card2);border-radius:10px;padding:12px;margin-bottom:12px">' +
+      '<div style="font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Informations générales</div>' +
       '<div class="profile-detail-row"><span>Situation</span><span>' + (p.situation||'—') + '</span></div>' +
-      '<div class="profile-detail-row"><span>Madhab</span><span>' + (p.madhhab||'—') + '</span></div>' +
-      '<div class="profile-detail-row"><span>Coran</span><span>' + (p.coran||'—') + '</span></div>' +
-      '<div class="profile-detail-row"><span>Alimentation</span><span>' + (p.halal||'—') + '</span></div>' +
       '<div class="profile-detail-row"><span>Enfants</span><span>' + (p.enfants==='oui'?'A des enfants':'Sans enfants') + '</span></div>' +
       '<div class="profile-detail-row"><span>Veut enfants</span><span>' + (p.veut_enfants||'—') + '</span></div>' +
+      '<div class="profile-detail-row"><span>Origine</span><span>' + (p.origine||'—') + '</span></div>' +
     '</div>' +
-    '<div style="display:flex;gap:10px;margin-top:4px">' +
+
+    // ── Pratique religieuse ──
+    '<div style="background:var(--card2);border-radius:10px;padding:12px;margin-bottom:14px">' +
+      '<div style="font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Pratique religieuse</div>' +
+      '<div class="profile-detail-row"><span>Pratique</span><span>' + (p.pratique||'—') + '</span></div>' +
+      '<div class="profile-detail-row"><span>Madhhab</span><span>' + (p.madhhab||'—') + '</span></div>' +
+      '<div class="profile-detail-row"><span>Coran</span><span>' + (p.coran||'—') + '</span></div>' +
+      '<div class="profile-detail-row"><span>Alimentation</span><span>' + (p.halal||'—') + '</span></div>' +
+      (p.voile ? '<div class="profile-detail-row"><span>Voile</span><span>' + p.voile + '</span></div>' : '') +
+      (p.barbe ? '<div class="profile-detail-row"><span>Barbe</span><span>' + p.barbe + '</span></div>' : '') +
+    '</div>' +
+
+    // ── Boutons ──
+    '<div style="display:flex;gap:10px">' +
       '<button class="btn btn-outline" style="flex:1" onclick="closeSwipePopup()">Fermer</button>' +
-      '<button class="btn btn-gold" style="flex:2" onclick="closeSwipePopup();openDemandeModal(this.dataset.prenom)" data-prenom="' + p.prenom + '">💌 Demande</button>' +
+      '<button class="btn btn-gold" style="flex:2" data-prenom="' + p.prenom + '" onclick="closeSwipePopup();openDemandeModal(this.dataset.prenom)">💌 Envoyer demande</button>' +
     '</div>' +
   '</div>';
   overlay.innerHTML = popHtml;
@@ -4345,25 +4479,46 @@ function sendWaliMessage(profileId, prenom){
 }
 
 function loadUserNotifications(){
-  var sb=getSB();
-  if(!sb||!state.user||!state.user.id) return;
+  if(!state.user||!state.user.id) return;
   var uid=String(state.user.id);
 
-  fetch(SUPABASE_URL+'/rest/v1/notifications?profile_id=eq.'+uid+'&order=created_at.desc&limit=50', {
+  // Charger notifications ET demandes reçues en parallèle
+  var fetchNotifs = fetch(SUPABASE_URL+'/rest/v1/notifications?profile_id=eq.'+uid+'&order=created_at.desc&limit=50', {
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(data){
-    if(!Array.isArray(data)) return;
-    console.log('Notifications chargées:', data.length);
-    data.forEach(function(notif){
+  }).then(function(r){ return r.json(); });
+
+  // Charger TOUTES les demandes reçues (toutes statuts) pour savoir lesquelles sont acceptées
+  var fetchDemandes = fetch(SUPABASE_URL+'/rest/v1/demandes?to_profile_id=eq.'+uid+'&select=id,from_profile_id,statut', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  }).then(function(r){ return r.json(); });
+
+  Promise.all([fetchNotifs, fetchDemandes]).then(function(results){
+    var notifs   = Array.isArray(results[0]) ? results[0] : [];
+    var demandes = Array.isArray(results[1]) ? results[1] : [];
+
+    notifs.forEach(function(notif){
       var existId = 'db_notif_'+notif.id;
       var exists = userNotifs.find(function(n){ return n.id===existId; });
-      if(exists) return;
+      if(exists){
+        // Mettre à jour le statut si la demande a changé
+        if(notif.type==='demande_recue'){
+          var dem = demandes.find(function(d){ return String(d.from_profile_id)===String(notif.from_profile_id); });
+          if(dem) exists.statut = dem.statut;
+        }
+        return;
+      }
+
+      // Déterminer le vrai statut depuis la table demandes
+      var realStatut = null;
+      if(notif.type==='demande_recue'){
+        var dem = demandes.find(function(d){ return String(d.from_profile_id)===String(notif.from_profile_id); });
+        realStatut = dem ? dem.statut : 'en_attente';
+      }
+
       userNotifs.unshift({
         id: existId,
-        notifDbId: notif.id,  // id de la NOTIF (pas de la demande)
-        dbId: null,            // id de la DEMANDE — sera cherché dynamiquement
+        notifDbId: notif.id,
+        dbId: null,
         type: notif.type,
         icon: notif.type==='demande_recue'?'💌':notif.type==='demande_acceptee'?'💚':notif.type==='like'?'💛':notif.type==='demande_refusee'?'✗':'✅',
         text: notif.content||'',
@@ -4371,11 +4526,104 @@ function loadUserNotifications(){
         unread: !notif.lu,
         profileId: notif.from_profile_id||null,
         fromPrenom: notif.from_prenom||'',
-        statut: notif.type==='demande_recue' ? 'en_attente' : null,
+        statut: realStatut,
       });
     });
     updateNotifBadge();
   }).catch(function(e){ console.log('loadUserNotifications:', e); });
+}
+
+function renderMesDemandes(c){
+  c.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navTo(&quot;profil&quot;)">←</button><h2>💌 Mes demandes</h2></div>' +
+    '<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
+
+  if(!state.user||!state.user.id){ c.innerHTML += '<p style="color:var(--red);padding:16px">Non connecté</p>'; return; }
+
+  var url = SUPABASE_URL+'/rest/v1/demandes?from_profile_id=eq.'+state.user.id+'&order=created_at.desc&select=*';
+  fetch(url, { headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON} })
+  .then(function(r){ return r.json(); })
+  .then(function(dbData){
+    // Fusionner les demandes DB + demandes locales non encore en DB
+    var data = Array.isArray(dbData) ? dbData : [];
+    var localDemandes = window._demandesEnvoyeesDB || [];
+    // Ajouter les locales qui ne sont pas encore en DB (par to_profile_id)
+    localDemandes.forEach(function(ld){
+      var inDB = data.find(function(d){ return String(d.to_profile_id)===String(ld.to_profile_id); });
+      if(!inDB) data.push(ld);
+    });
+
+    var html = '<div class="page-header"><button class="back-btn" onclick="navTo(&quot;profil&quot;)">←</button><h2>💌 Mes demandes</h2></div>';
+    html += '<div style="padding:16px">';
+
+    if(!data.length){
+      html += '<div style="text-align:center;padding:40px;color:var(--muted)">' +
+        '<div style="font-size:2rem;margin-bottom:12px">💌</div>' +
+        '<p>Vous n&apos;avez pas encore envoy&eacute; de demande.</p></div>';
+    } else {
+      var allP2 = allProfiles.concat(window._dbProfiles||[]);
+      data.forEach(function(d){
+        var p = allP2.find(function(x){ return String(x.id)===String(d.to_profile_id); });
+        // Utiliser les infos locales si dispo (depuis _demandesEnvoyeesDB)
+        var nom = d.to_prenom || (p ? p.prenom : ('Profil #'+d.to_profile_id));
+        var gender = d.to_gender || (p ? p.gender : 'femme');
+        var av  = gender==='femme' ? svgFemme(40) : svgHomme(40);
+        var date = d.created_at ? new Date(d.created_at).toLocaleDateString('fr-FR') : '';
+        var statutColor = d.statut==='acceptee'?'var(--green)':d.statut==='refusee'?'var(--red)':'var(--gold)';
+        var statutLabel = d.statut==='acceptee'?'✅ Acceptée':d.statut==='refusee'?'✗ Refusée':'⏳ En attente';
+        var statutBg    = d.statut==='acceptee'?'rgba(46,204,113,.1)':d.statut==='refusee'?'rgba(224,82,82,.1)':'rgba(201,168,76,.1)';
+
+        html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:10px;display:flex;align-items:center;gap:12px">';
+        html += '<div style="flex-shrink:0">'+av+'</div>';
+        html += '<div style="flex:1">';
+        html += '<div style="font-weight:600;font-size:.93rem">'+nom+'</div>';
+        var ville = d.to_ville || (p ? p.ville : '');
+        var origine = d.to_origine || (p ? p.origine : '');
+        if(ville||origine) html += '<div style="font-size:.76rem;color:var(--muted);margin-top:2px">'+(ville)+(origine?' · '+origine:'')+'</div>';
+        html += '<div style="font-size:.72rem;color:var(--muted);margin-top:2px">'+date+'</div>';
+        if(d.message) html += '<div style="font-size:.78rem;color:var(--white2);margin-top:6px;padding:7px 9px;background:var(--card2);border-radius:6px;font-style:italic">&quot;'+d.message+'&quot;</div>';
+        html += '</div>';
+        html += '<div style="background:'+statutBg+';color:'+statutColor+';font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;text-align:center;white-space:nowrap">'+statutLabel+'</div>';
+        html += '</div>';
+      });
+    }
+
+    html += '</div>';
+    c.innerHTML = html;
+  })
+  .catch(function(){ c.innerHTML='<p style="color:var(--red);padding:16px">Erreur réseau</p>'; });
+}
+
+function loadUserFavoris(){
+  if(!state.user||!state.user.id) return;
+  fetch(SUPABASE_URL+'/rest/v1/likes?profile_id=eq.'+String(state.user.id)+'&select=liked_profile_id', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data)) return;
+    state.favorites = data.map(function(d){ return String(d.liked_profile_id); });
+    console.log('Favoris chargés:', state.favorites.length);
+  }).catch(function(){});
+}
+
+function loadUserDemandesEnvoyees(){
+  if(!state.user||!state.user.id) return;
+  fetch(SUPABASE_URL+'/rest/v1/demandes?from_profile_id=eq.'+String(state.user.id)+'&select=to_profile_id,statut', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data)) return;
+    // Reconstruire demandesEnvoyees depuis la DB
+    data.forEach(function(d){
+      // Chercher le prenom du profil cible
+      var allP = allProfiles.concat(window._dbProfiles||[]);
+      var target = allP.find(function(p){ return String(p.id)===String(d.to_profile_id); });
+      var key = target ? target.prenom : String(d.to_profile_id);
+      demandesEnvoyees[key] = d.statut;
+    });
+    console.log('Demandes envoyées chargées:', Object.keys(demandesEnvoyees).length);
+  }).catch(function(){});
 }
 
 window.addEventListener('load', function(){
