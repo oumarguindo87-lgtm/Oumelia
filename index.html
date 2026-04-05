@@ -4572,8 +4572,8 @@ function renderAdminDemandes(c){
         html+='</div>';
         html+='<div style="font-size:.74rem;color:var(--muted)">&#128197; '+date+'</div>';
         if(d.message) html+='<div style="font-size:.78rem;color:var(--white2);margin-top:6px;padding:7px 9px;background:var(--card);border-radius:6px;font-style:italic">&#x201C;'+d.message+'&#x201D;</div>';
-        // Bouton Wali si en attente
-        if(d.statut==='en_attente'){
+        // Bouton Wali si demande acceptée
+        if(d.statut==='acceptee'){
           var soeur=fromGender==='femme'?fromP:(toGender==='femme'?toP:null);
           if(soeur) html+='<button class="btn btn-sm" style="margin-top:8px;background:var(--green-soft);border:1px solid rgba(46,204,113,.3);color:var(--green);font-size:.78rem" data-sid="'+soeur.id+'" data-snom="'+soeur.prenom+'" onclick="sendWaliMessage(this.dataset.sid,this.dataset.snom)">&#127800; Message Wali &#224; '+soeur.prenom+'</button>';
         }
