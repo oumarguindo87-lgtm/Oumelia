@@ -1169,7 +1169,7 @@ var lastSeenText = {};
 
 function onlineDot(profileId, size){
   if(size===undefined) size=10;
-  var st=onlineStatus[profileId]||'offline';
+  var st=onlineStatus[String(profileId)]||onlineStatus[profileId]||'offline';
   var color=st==='online'?'#39ff7a':st==='recent'?'#1aad4c':'#e67e22';
   var shadow=st==='online'?`0 0 6px #39ff7a`:'none';
   return `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;background:${color};box-shadow:${shadow};border:1.5px solid var(--card);flex-shrink:0"></span>`;
@@ -1346,7 +1346,7 @@ function backToStep2(){
 }
 
 // ══════════ TRIS EXPLORER ══════════
-var currentSort='boost';
+var currentSort='all';
 function setSortMode(mode){
   currentSort=mode;
   document.querySelectorAll('.sort-chip').forEach(function(chip){
@@ -1377,7 +1377,27 @@ function getCompatibilityScore(profile){
   if(profile.pratique===u.pratique) score+=30;
   if(profile.madhhab===u.madhhab||profile.madhhab==='Peu importe'||u.madhhab==='Peu importe') score+=20;
   if(profile.veut_enfants===u.veut_enfants) score+=20;
-  if(profile.origine===u.origine) score+=20;
+  // Compatibilité d'origine : même origine = 20pts, même groupe culturel = 10pts
+  if(profile.origine===u.origine){
+    score+=20;
+  } else {
+    var _groupes=[
+      ['Algérienne','Marocaine','Tunisienne','Libyenne','Mauritanienne'],
+      ['Française','Belge','Suisse','Canadienne'],
+      ['Sénégalaise','Malienne','Guinéenne','Ivoirienne','Burkinabé','Nigérienne'],
+      ['Turque','Albanaise','Bosniaque'],
+      ['Égyptienne','Syrienne','Libanaise','Jordanienne','Palestinienne','Irakienne'],
+      ['Pakistanaise','Bangladaise','Indienne'],
+      ['Somalienne','Djiboutienne','Érythréenne']
+    ];
+    var _myGrp=null,_profGrp=null;
+    _groupes.forEach(function(grp){
+      if(grp.indexOf(u.origine)>=0) _myGrp=grp;
+      if(grp.indexOf(profile.origine)>=0) _profGrp=grp;
+    });
+    if(_myGrp&&_profGrp&&_myGrp===_profGrp) score+=10;
+  }
+  if(profile.situation===u.situation) score+=10;
   return score;
 }
 
@@ -1835,6 +1855,7 @@ function loadUserDemandesEnvoyees(){
     var allP=allProfiles.concat(window._dbProfiles||[]);
     data.forEach(function(d){
       var p=allP.find(function(x){return String(x.id)===String(d.to_profile_id);});
+      demandesEnvoyees['_id_'+String(d.to_profile_id)]=d.statut;
       if(p) demandesEnvoyees[p.prenom]=d.statut;
     });
     console.log('Demandes envoy\u00e9es charg\u00e9es:',Object.keys(demandesEnvoyees).length);
@@ -1921,6 +1942,14 @@ async function loadProfilesFromDB(){
   (data||[]).forEach(function(p){ if(p.is_online) onlineStatus[p.id]='online'; });
   console.log('loadProfilesFromDB: '+window._dbProfiles.length+' profils du genre opposé');
   renderTab(state.currentNav);
+  // Mettre à jour les prénoms dans demandesEnvoyees maintenant que _dbProfiles est chargé
+  Object.keys(demandesEnvoyees).forEach(function(k){
+    if(k.indexOf('_id_')===0){
+      var pid=k.replace('_id_','');
+      var pp=window._dbProfiles.find(function(x){return String(x.id)===pid;});
+      if(pp&&!demandesEnvoyees[pp.prenom]) demandesEnvoyees[pp.prenom]=demandesEnvoyees[k];
+    }
+  });
 }
 
 async function loadDemandesRecues(){
@@ -1930,34 +1959,42 @@ async function loadDemandesRecues(){
   }).then(function(r){return r.json();})
   .then(function(data){
     if(!Array.isArray(data)) return;
+    var _deletedIdsDem=_getDeletedNotifIds();
     data.forEach(function(d){
       var existId='db_'+d.id;
+      if(_deletedIdsDem.indexOf(existId)>=0) return;
       var exists=userNotifs.find(function(n){return n.id===existId;});
-      if(exists){ exists.statut=d.statut||'en_attente'; return; }
-      var allP=allProfiles.concat(window._dbProfiles||[]);
-      var fromP=allP.find(function(p){return String(p.id)===String(d.from_profile_id);});
-      var prenom=fromP?fromP.prenom:('Profil #'+d.from_profile_id);
       var statut=d.statut||'en_attente';
-      var icon=statut==='acceptee'?'💚':statut==='refusee'?'✗':'💌';
-      var text=statut==='acceptee'?'Vous avez accept\u00e9 la demande de <strong>'+prenom+'</strong>'
-              :statut==='refusee'?'Vous avez refus\u00e9 la demande de <strong>'+prenom+'</strong>'
-              :'<strong>'+prenom+'</strong> vous a envoy\u00e9 une demande de mise en relation';
+      var allP2=allProfiles.concat(window._dbProfiles||[]);
+      var fromP2=allP2.find(function(p){return String(p.id)===String(d.from_profile_id);});
+      var prenom2=fromP2?fromP2.prenom:(exists?exists.fromPrenom:null)||('Profil #'+d.from_profile_id);
+      var icon2=statut==='acceptee'?'💚':statut==='refusee'?'✗':'💌';
+      var text2=statut==='acceptee'?'Vous avez accepté la demande de <strong>'+prenom2+'</strong>'
+              :statut==='refusee'?'Vous avez refusé la demande de <strong>'+prenom2+'</strong>'
+              :'<strong>'+prenom2+'</strong> vous a envoyé une demande de mise en relation';
+      if(exists){
+        exists.statut=statut; exists.icon=icon2; exists.text=text2;
+        exists.unread=(statut==='en_attente')&&exists.unread;
+        return;
+      }
       userNotifs.unshift({
-        id:existId, type:'demande_recue', icon:icon, text:text,
-        time:new Date(d.created_at).toLocaleDateString('fr-FR'),
+        id:existId, type:'demande_recue', icon:icon2, text:text2,
+        time:(function(){var _d=new Date(d.created_at);return _d.toLocaleDateString('fr-FR')+' à '+_d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});})(),
         rawDate:d.created_at,
         unread:statut==='en_attente', profileId:d.from_profile_id,
-        fromPrenom:prenom, statut:statut, dbId:d.id
+        fromPrenom:prenom2, statut:statut, dbId:d.id
       });
       updateNotifBadge();
-      if(!fromP && d.from_profile_id){
+      if(!fromP2 && d.from_profile_id){
         fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+d.from_profile_id+'&select=id,prenom,gender,age,ville,pratique',{
           headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
         }).then(function(r2){return r2.json();}).then(function(pd){
           if(pd&&pd[0]){
             var n2=userNotifs.find(function(x){return x.id===existId;});
-            if(n2){n2.fromPrenom=pd[0].prenom;n2.text=n2.text.replace(prenom,pd[0].prenom);
-              n2.text=n2.text.replace('Profil #'+d.from_profile_id,pd[0].prenom);}
+            if(n2){n2.fromPrenom=pd[0].prenom;
+              var _np=pd[0].prenom;
+              n2.text=n2.text.replace(/Profil #[0-9]+/,_np).replace(prenom2,_np);
+              n2.icon=n2.statut==='acceptee'?'💚':n2.statut==='refusee'?'✗':'💌';}
           }
         }).catch(function(){});
       }
@@ -2064,11 +2101,44 @@ function getVisibleProfiles(){
   if(f.online)              list=list.filter(function(p){return onlineStatus[p.id]==='online'||onlineStatus[p.id]==='recent';}); 
   if(f.enfants)             list=list.filter(function(p){return p.enfants===f.enfants;}); 
   if(f.veut_enfants)        list=list.filter(function(p){return p.veut_enfants===f.veut_enfants||p.veut_enfants.toLowerCase()===f.veut_enfants.toLowerCase();}); 
-  // Tri
-  if(currentSort==='boost') list.sort(function(a,b){return (b.boosted?1:0)-(a.boosted?1:0);})
-  else if(currentSort==='recent') list.sort(function(a,b){return (b.id||0)-(a.id||0);});
-  else if(currentSort==='active') list.sort(function(a,b){var os={'online':3,'recent':2,'offline':1};return (os[onlineStatus[b.id]]||0)-(os[onlineStatus[a.id]]||0);});
-  else if(currentSort==='compatible') list.sort(function(a,b){return getCompatibilityScore(b)-getCompatibilityScore(a);});
+  // Tri ET filtrage selon le mode actif
+  if(currentSort==='all'){
+    // Tous les profils, boostés en premier
+    list.sort(function(a,b){return (b.boosted?1:0)-(a.boosted?1:0);});
+  } else if(currentSort==='boost'){
+    // Seulement les profils boostés (triés boost en premier)
+    list=list.filter(function(p){return p.boosted===true;});
+    list.sort(function(a,b){return (b.boosted?1:0)-(a.boosted?1:0);});
+  } else if(currentSort==='recent'){
+    // Seulement les profils créés récemment (30 derniers jours ou les 20 derniers inscrits)
+    var _now=Date.now();
+    var _30days=30*24*3600*1000;
+    var _recentList=list.filter(function(p){
+      if(!p.created_at) return false;
+      return (_now - new Date(p.created_at).getTime()) <= _30days;
+    });
+    // Si moins de 5 profils récents, prendre les 20 derniers IDs (plus grands = plus récents)
+    if(_recentList.length<5){
+      _recentList=list.slice().sort(function(a,b){return (b.id||0)-(a.id||0);}).slice(0,20);
+    }
+    list=_recentList.sort(function(a,b){return (b.id||0)-(a.id||0);});
+  } else if(currentSort==='active'){
+    // Seulement les profils en ligne ou vus récemment
+    list=list.filter(function(p){
+      var st=onlineStatus[String(p.id)]||onlineStatus[p.id]||'offline';
+      return st==='online'||st==='recent';
+    });
+    list.sort(function(a,b){
+      var os={'online':2,'recent':1,'offline':0};
+      var sa=os[onlineStatus[String(a.id)]||onlineStatus[a.id]||'offline']||0;
+      var sb=os[onlineStatus[String(b.id)]||onlineStatus[b.id]||'offline']||0;
+      return sb-sa;
+    });
+  } else if(currentSort==='compatible'){
+    // Seulement les profils avec un score de compatibilité >= 30
+    list=list.filter(function(p){return getCompatibilityScore(p)>=30;});
+    list.sort(function(a,b){return getCompatibilityScore(b)-getCompatibilityScore(a);});
+  }
   return list;
 }
 
@@ -2308,6 +2378,7 @@ function renderExplorer(c){
 
   // Barre de tri
   html+=`<div class="sort-bar">
+    <div class="sort-chip ${currentSort==='all'?'active':''}" id="sort-all" onclick="setSortMode('all')">👥 Tous</div>
     <div class="sort-chip ${currentSort==='boost'?'active':''}" id="sort-boost" onclick="setSortMode('boost')">⚡ Boostés</div>
     <div class="sort-chip ${currentSort==='recent'?'active':''}" id="sort-recent" onclick="setSortMode('recent')">🕐 Récents</div>
     <div class="sort-chip ${currentSort==='active'?'active':''}" id="sort-active" onclick="setSortMode('active')">🟢 En ligne</div>
@@ -2322,7 +2393,8 @@ function renderExplorer(c){
         var av=p.gender==='femme'?svgFemme(50):svgHomme(50);
         var isFav=state.favorites.includes(p.id);
         var dot=onlineDot(p.id,9);
-        var lastSeen=lastSeenText[p.id]||'Hors ligne';
+        var _st=onlineStatus[String(p.id)]||onlineStatus[p.id]||'offline';
+        var lastSeen=_st==='online'?'En ligne':_st==='recent'?'Vu récemment':'Hors ligne';
         var inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
         html+=`<div class="profile-card ${p.boosted?'boosted':''}" onclick="openProfile(${p.id})">
           ${p.boosted?'<span class="boost-badge">⚡ BOOST</span>':''}
@@ -2348,7 +2420,14 @@ function renderExplorer(c){
       html+=`</div>`;
     }
   } else {
-    if(!profiles.length) html+=`<div style="padding:60px;text-align:center;color:var(--muted)">Aucun profil disponible</div>`;
+    if(!profiles.length){
+      var _em='Aucun profil disponible';
+      if(currentSort==='boost') _em='Aucun profil boosté en ce moment';
+      else if(currentSort==='active') _em='Aucun profil en ligne ou vu récemment';
+      else if(currentSort==='recent') _em='Aucun profil récent';
+      else if(currentSort==='compatible') _em='Aucun profil compatible — complétez votre profil pour de meilleurs résultats';
+      html+=`<div style="padding:60px;text-align:center;color:var(--muted)">${_em}</div>`;
+    }
     else{
       var p=profiles[state.swipeIndex%profiles.length];
       // Marquer ce profil comme vu dès l'affichage
@@ -2541,7 +2620,8 @@ function openProfile(id){
   var av=p.gender==='femme'?svgFemme(80):svgHomme(80);
   var isFav=state.favorites.includes(p.id);
   var dot=onlineDot(p.id,11);
-  var lastSeen=lastSeenText[p.id]||'Hors ligne';
+  var _st2=onlineStatus[String(p.id)]||onlineStatus[p.id]||'offline';
+  var lastSeen=_st2==='online'?'En ligne':_st2==='recent'?'Vu récemment':'Hors ligne';
   var onlineColor=onlineStatus[p.id]==='online'?'#39ff7a':onlineStatus[p.id]==='recent'?'#27AE60':'var(--muted)';
   var inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
   var c=document.getElementById('app-content');
@@ -2566,7 +2646,7 @@ function openProfile(id){
       </div>`:''}
       <div style="display:flex;gap:10px;margin-bottom:14px">
         ${(function(){
-          var st=demandesEnvoyees[p.prenom];
+          var st=demandesEnvoyees[p.prenom]||demandesEnvoyees['_id_'+String(p.id)];
           if(st==='acceptee') return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>✅ Demande acceptée</button>';
           if(st==='en_attente') return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>⏳ En attente</button>';
           return '<button class="btn btn-gold" style="flex:1;font-size:.84rem;padding:10px" onclick="openDemandeModal(\'' + p.prenom + '\')">💌 Demande</button>';
@@ -2634,20 +2714,40 @@ function toggleFav(id){
 var currentDemandeTarget='';
 function openDemandeModal(prenom){
   if(!state.profileActive){openModal('modal-paywall');return;}
-  // Vérifier si déjà envoyé une demande à ce profil
-  if(demandesEnvoyees[prenom]){
-    showToast('⚠ Vous avez déjà envoyé une demande à ' + prenom,'red');
-    return;
-  }
+  // Vérifier si déjà envoyé une demande (par prénom ou ID)
+
+
+
+
   // Compter les demandes EN ATTENTE (pas acceptées)
   // Compteur: diminue SEULEMENT si la demande est ACCEPTÉE
-  var acceptedCount=Object.values(demandesEnvoyees).filter(function(d){return d==='acceptee';}).length;
-  var pendingCount=Object.values(demandesEnvoyees).filter(function(d){return d==='en_attente';}).length;
+  var acceptedCount=Object.keys(demandesEnvoyees).filter(function(k){return k.indexOf('_id_')!==0;}).map(function(k){return demandesEnvoyees[k];}).filter(function(d){return d==='acceptee';}).length;
+  var pendingCount=Object.keys(demandesEnvoyees).filter(function(k){return k.indexOf('_id_')!==0;}).map(function(k){return demandesEnvoyees[k];}).filter(function(d){return d==='en_attente';}).length;
   if(acceptedCount>=3){openModal('modal-plus-demandes');return;}
   if(pendingCount>=3){showToast('⏳ 3 demandes en attente — attendez une réponse','red');return;}
 
   currentDemandeTarget=prenom;
   document.getElementById('demande-prenom').textContent=prenom;
+  // Charger le vrai compteur depuis DB pour le modal
+  if(state.user&&state.user.id){
+    fetch(SUPABASE_URL+'/rest/v1/demandes?from_profile_id=eq.'+String(state.user.id)+'&statut=eq.acceptee&select=id',{
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    }).then(function(r){return r.json();}).then(function(rows){
+      var dbAcc=Array.isArray(rows)?rows.length:acceptedCount;
+      var rem=Math.max(0,3-dbAcc);
+      var dotsEl=document.getElementById('modal-dots');
+      if(dotsEl) dotsEl.innerHTML=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=rem?'used':'')+'"></div>';}).join('');
+      var oldP2=document.getElementById('dots-info');
+      if(oldP2) oldP2.parentNode.removeChild(oldP2);
+      var infoP2=document.createElement('p');
+      infoP2.id='dots-info';
+      infoP2.style.cssText='font-size:.72rem;color:var(--muted);margin-top:8px;text-align:center';
+      infoP2.innerHTML='<span style="color:var(--gold)">'+rem+' demande(s) disponible(s)</span><br><span style="font-size:.68rem">Le compteur diminue quand une demande est acceptée</span>';
+      if(dotsEl) dotsEl.parentNode.appendChild(infoP2);
+      // Bloquer si plus de demandes
+      if(dbAcc>=3){closeModal('modal-demande');openModal('modal-plus-demandes');}
+    }).catch(function(){});
+  }
   var remaining=3-acceptedCount;
   document.getElementById('modal-dots').innerHTML=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=remaining?'used':'')+'"></div>';}).join('');
   var oldP=document.getElementById('dots-info');
@@ -2663,6 +2763,13 @@ function openDemandeModal(prenom){
 function sendDemande(){
   var msg=(document.getElementById('demande-msg')&&document.getElementById('demande-msg').value)||'';
   demandesEnvoyees[currentDemandeTarget]='en_attente';
+  var _allPsend=allProfiles.concat(window._dbProfiles||[]);
+  var _tpsend=_allPsend.find(function(p){return p.prenom===currentDemandeTarget;});
+  if(_tpsend) demandesEnvoyees['_id_'+String(_tpsend.id)]='en_attente';
+  // Stocker aussi par ID pour persistance
+
+
+
   closeModal('modal-demande');
   showToast('&#128140; Demande envoy&#233;e !','gold');
   if(!(state.user&&state.user.id)) return;
@@ -2752,7 +2859,7 @@ function renderMessages(c){
   }catch(e){}
   var adminName=state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice';
   var adminMsgs=userChatHistory[adminName]||[];
-  var iconHtml2='<div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);display:flex;align-items:center;justify-content:center;position:relative"><div style="width:10px;height:10px;border-radius:50%;background:var(--card);position:absolute;right:6px;top:5px"></div></div>';
+  var iconHtml2='<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#0d0f14;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="ogl36" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#f5e8a0"/><stop offset="45%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#7a5810"/></radialGradient><radialGradient id="ogl236" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#d4a843"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#8B6914"/></radialGradient></defs><circle cx="50" cy="50" r="48" fill="white" opacity="0.95"/><circle cx="50" cy="50" r="42" fill="url(#ogl36)"/><circle cx="62" cy="38" r="32" fill="url(#ogl236)"/><path d="M50 28 L52.5 44 L68 50 L52.5 56 L50 72 L47.5 56 L32 50 L47.5 44 Z" fill="white" opacity="0.95"/></svg></div>';
   var html2='<div class="page-header"><h2>Messages</h2></div><div class="conversations-list">';
   if(adminMsgs.length>0){
     html2+='<div class="convo-item" onclick="openChat(&quot;'+adminName+'&quot;,&quot;admin&quot;)">'+
@@ -2772,7 +2879,7 @@ function openChat(name, type){
   var c=document.getElementById('app-content');
   scrollToTop();
   var msgs=userChatHistory[name]||[];
-  var iconHtml=`<div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);flex-shrink:0"></div>`;
+  var iconHtml='<div style="width:30px;height:30px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#0d0f14;display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="ogl30" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#f5e8a0"/><stop offset="45%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#7a5810"/></radialGradient><radialGradient id="ogl230" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#d4a843"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#8B6914"/></radialGradient></defs><circle cx="50" cy="50" r="48" fill="white" opacity="0.95"/><circle cx="50" cy="50" r="42" fill="url(#ogl30)"/><circle cx="62" cy="38" r="32" fill="url(#ogl230)"/><path d="M50 28 L52.5 44 L68 50 L52.5 56 L50 72 L47.5 56 L32 50 L47.5 44 Z" fill="white" opacity="0.95"/></svg></div>';
   c.innerHTML=`
     <div class="page-header">
       <button class="back-btn" onclick="navTo('messages')">←</button>
@@ -2847,8 +2954,11 @@ function refreshNotifs(btnEl){
   Promise.all([p1,p2]).then(function(res){
     var notifs=Array.isArray(res[0])?res[0]:[];
     var demandes=Array.isArray(res[1])?res[1]:[];
+    var _deletedIds=_getDeletedNotifIds();
     notifs.forEach(function(notif){
       var existId='db_notif_'+notif.id;
+      // Ne pas réafficher une notif supprimée par l'utilisateur
+      if(_deletedIds.indexOf(existId)>=0) return;
       var exists=userNotifs.find(function(n){return n.id===existId;});
       if(exists){
         // Mettre à jour UNIQUEMENT le statut depuis DB, conserver les modifs locales
@@ -2860,9 +2970,16 @@ function refreshNotifs(btnEl){
           var order={en_attente:0,acceptee:1,refusee:2};
           var localOrder=order[exists.statut]||0;
           var dbOrder=order[dbStatut]||0;
-          if(dbOrder>=localOrder) exists.statut=dbStatut;
+          if(dbOrder>=localOrder){
+          exists.statut=dbStatut;
+          var _p=exists.fromPrenom||'';
+          exists.icon=dbStatut==='acceptee'?'💚':dbStatut==='refusee'?'✗':'💌';
+          exists.text=dbStatut==='acceptee'?'Vous avez accepté la demande de <strong>'+_p+'</strong>'
+                     :dbStatut==='refusee'?'Vous avez refusé la demande de <strong>'+_p+'</strong>'
+                     :'<strong>'+_p+'</strong> vous a envoyé une demande de mise en relation';
         }
-        exists.unread=!notif.lu && exists.unread; // garder lu si déjà lu localement
+        }
+        exists.unread=!notif.lu&&exists.unread;
         return;
       }
       // Nouvelle notif — l'ajouter
@@ -2876,7 +2993,7 @@ function refreshNotifs(btnEl){
         type:notif.type,
         icon:notif.type==='demande_recue'?'💌':notif.type==='demande_acceptee'?'💚':notif.type==='like'?'💛':notif.type==='demande_refusee'?'✗':'✅',
         text:notif.content||'',
-        time:new Date(notif.created_at).toLocaleDateString('fr-FR'),
+        time:(function(){var _d=new Date(notif.created_at);return _d.toLocaleDateString('fr-FR')+' à '+_d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});})(),
         rawDate:notif.created_at,
         unread:!notif.lu,
         profileId:notif.from_profile_id||null,
@@ -2963,11 +3080,9 @@ function renderNotifs(c){
 // Ouvre le profil depuis une demande reçue SANS quitter les notifs (overlay par dessus)
 function openProfileFromNotifDemande(notifId, profileId){
   var sid = String(profileId);
-  var p = allProfiles.find(function(x){ return String(x.id)===sid; })
-       || (window._dbProfiles||[]).find(function(x){ return String(x.id)===sid; });
   var n = userNotifs.find(function(x){ return x.id===notifId; });
 
-  var doRender = function(profile){
+  function doRender(profile){
     var existing = document.getElementById('notif-profile-popup');
     if(existing) existing.parentNode.removeChild(existing);
 
@@ -3048,16 +3163,23 @@ function openProfileFromNotifDemande(notifId, profileId){
 
     var btnAnnuler = document.getElementById('btn-annuler-demande');
     if(btnAnnuler) btnAnnuler.onclick = function(){ overlay.remove(); refuseDemande(notifId); };
-  };
+  
+  }
 
-  if(!p && profileId){
-    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+profileId+'&select=*', {
-      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
-    }).then(function(r){ return r.json(); })
-    .then(function(data){ doRender(data&&data[0]?data[0]:null); })
-    .catch(function(){ doRender(null); });
-  } else {
+  var p = allProfiles.find(function(x){ return String(x.id)===sid; })
+       || (window._dbProfiles||[]).find(function(x){ return String(x.id)===sid; });
+
+  if(p){
     doRender(p);
+  } else if(sid && sid!=='null' && sid!=='undefined'){
+    // Charger le profil complet depuis Supabase
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+sid+'&select=*&limit=1',{
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    }).then(function(r){return r.json();}).then(function(data){
+      doRender(Array.isArray(data)&&data[0]?data[0]:null);
+    }).catch(function(){ doRender(null); });
+  } else {
+    doRender(null);
   }
 }
 
@@ -3161,10 +3283,30 @@ function openProfileFromNotif(profileId){
 // ══════════ MON PROFIL ══════════
 function renderMyProfile(c){
   var u=state.user||{};
-  // Compteur: diminue à chaque ENVOI (pas seulement acceptée)
-  var acceptedUsed=Object.values(demandesEnvoyees).filter(function(d){return d==='acceptee';}).length;
-  var remaining=Math.max(0,3-acceptedUsed);
+  // Compteur basé sur les demandes acceptées en DB
+  var _acceptedLocal=Object.keys(demandesEnvoyees).filter(function(k){
+    return k.indexOf('_id_')!==0 && demandesEnvoyees[k]==='acceptee';
+  }).length;
+  var remaining=Math.max(0,3-_acceptedLocal);
   var dots=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=remaining?'used':'')+'"></div>';}).join('');
+  // Recharger depuis DB en arrière-plan et mettre à jour les dots
+  if(state.user&&state.user.id){
+    fetch(SUPABASE_URL+'/rest/v1/demandes?from_profile_id=eq.'+String(state.user.id)+'&statut=eq.acceptee&select=id',{
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    }).then(function(r){return r.json();}).then(function(rows){
+      if(!Array.isArray(rows)) return;
+      var dbAccepted=rows.length;
+      var dbRemaining=Math.max(0,3-dbAccepted);
+      var dotsEl=document.getElementById('demand-dots-live');
+      if(dotsEl){
+        dotsEl.innerHTML=[0,1,2].map(function(i){
+          return '<div class="demand-dot '+(i>=dbRemaining?'used':'')+'"></div>';
+        }).join('');
+      }
+      var infoEl=document.getElementById('demand-count-live');
+      if(infoEl) infoEl.textContent=dbRemaining+' demande(s) disponible(s)';
+    }).catch(function(){});
+  }
   var av=u.gender==='femme'?svgFemme(60):svgHomme(60);
   var completion=getProfileCompletion(u);
   var isVerified=u.audio_attested||u.status==='active';
@@ -3211,8 +3353,9 @@ function renderMyProfile(c){
           <span style="font-size:.84rem;display:block;font-weight:600">Demandes utilisées</span>
           <span style="font-size:.72rem;color:var(--muted)">Diminue uniquement si acceptée</span>
         </div>
-        <div class="demand-dots">${dots}</div>
+        <div class="demand-dots" id="demand-dots-live">${dots}</div>
       </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:4px;text-align:right" id="demand-count-live">${remaining} demande(s) disponible(s)</div>
 
       <div class="profile-section" style="margin-top:12px">
         <h4>Mes informations</h4>
@@ -4221,42 +4364,92 @@ function openSwipeProfile(id){
   var sid = String(id);
   var p = (window._dbProfiles||[]).find(function(x){ return String(x.id)===sid; })
        || allProfiles.find(function(x){ return String(x.id)===sid; });
-  if(!p) return;
-
-  var av = p.gender==='femme' ? svgFemme(80) : svgHomme(80);
+  if(!p){
+    // Charger depuis DB si absent du cache
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+sid+'&select=*&limit=1',{
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    }).then(function(r){return r.json();}).then(function(data){
+      if(data&&data[0]) _renderSwipePopup(data[0]);
+    }).catch(function(){});
+    return;
+  }
+  _renderSwipePopup(p);
+}
+function _renderSwipePopup(p){
+  var av = p.gender==='femme' ? svgFemme(72) : svgHomme(72);
   var overlay = document.createElement('div');
   overlay.className = 'swipe-popup-overlay';
   overlay.id = 'swipe-popup';
   overlay.onclick = function(e){ if(e.target===overlay) closeSwipePopup(); };
-  var popHtml = '<div class="swipe-popup">' +
-    '<div class="swipe-popup-handle"></div>' +
-    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">' +
-      av +
-      '<div><div style="font-size:1.15rem;font-weight:600">' + p.prenom + ', ' + p.age + ' ans</div>' +
-      '<div style="color:var(--muted);font-size:.82rem">📍 ' + p.ville + ' · ' + p.origine + '</div></div>' +
-    '</div>' +
-    '<div class="profile-tags" style="margin-bottom:14px">' +
-      '<span class="tag gold">' + p.pratique + '</span>' +
-      (p.voile ? '<span class="tag">'+p.voile+'</span>' : '') +
-      (p.barbe ? '<span class="tag">'+p.barbe+'</span>' : '') +
-      (p.madhhab && p.madhhab!=='Peu importe' ? '<span class="tag">'+p.madhhab+'</span>' : '') +
-      (p.boosted ? '<span class="tag" style="background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold)">⚡ Boosté</span>' : '') +
-    '</div>' +
-    (p.bio ? '<p style="font-size:.84rem;color:var(--muted);line-height:1.7;margin-bottom:14px;padding:10px;background:var(--card2);border-radius:8px">' + p.bio + '</p>' : '') +
-    '<div style="background:var(--card2);border-radius:10px;padding:10px;margin-bottom:14px">' +
-      '<div class="profile-detail-row"><span>Situation</span><span>' + (p.situation||'—') + '</span></div>' +
-      '<div class="profile-detail-row"><span>Madhab</span><span>' + (p.madhhab||'—') + '</span></div>' +
-      '<div class="profile-detail-row"><span>Coran</span><span>' + (p.coran||'—') + '</span></div>' +
-      '<div class="profile-detail-row"><span>Alimentation</span><span>' + (p.halal||'—') + '</span></div>' +
-      '<div class="profile-detail-row"><span>Enfants</span><span>' + (p.enfants==='oui'?'A des enfants':'Sans enfants') + '</span></div>' +
-      '<div class="profile-detail-row"><span>Veut enfants</span><span>' + (p.veut_enfants||'—') + '</span></div>' +
-    '</div>' +
-    '<div style="display:flex;gap:10px;margin-top:4px">' +
-      '<button class="btn btn-outline" style="flex:1" onclick="closeSwipePopup()">Fermer</button>' +
-      '<button class="btn btn-gold" style="flex:2" onclick="closeSwipePopup();openDemandeModal(this.dataset.prenom)" data-prenom="' + p.prenom + '">💌 Demande</button>' +
-    '</div>' +
-  '</div>';
-  overlay.innerHTML = popHtml;
+
+  var demandeStatut = demandesEnvoyees[p.prenom]||demandesEnvoyees['_id_'+String(p.id)]||null;
+  var demandeBtn = '';
+  if(demandeStatut==='acceptee'){
+    demandeBtn = '<button class="btn" style="flex:2;background:var(--green-soft);color:var(--green);border:1px solid var(--green);cursor:not-allowed" disabled>&#10003; Demande accept&#233;e</button>';
+  } else if(demandeStatut==='en_attente'){
+    demandeBtn = '<button class="btn" style="flex:2;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>&#9203; En attente</button>';
+  } else {
+    demandeBtn = '<button class="btn btn-gold" style="flex:2" data-prenom="'+p.prenom+'" onclick="closeSwipePopup();openDemandeModal(this.dataset.prenom)">&#128140; Demande</button>';
+  }
+
+  var html = '<div class="swipe-popup">';
+  html += '<div class="swipe-popup-handle"></div>';
+
+  // En-tete
+  html += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">';
+  html += av;
+  html += '<div style="flex:1">';
+  html += '<div style="font-size:1.1rem;font-weight:700">'+(p.prenom||'')+(p.age?', '+p.age+' ans':'');
+  if(p.boosted) html += ' <span style="font-size:.7rem;background:rgba(201,168,76,.15);border:1px solid var(--gold);color:var(--gold);border-radius:10px;padding:1px 6px">&#9889; Boost&#233;</span>';
+  html += '</div>';
+  html += '<div style="color:var(--muted);font-size:.8rem;margin-top:3px">&#128205; '+(p.ville||'')+(p.origine?' &middot; '+p.origine:'')+'</div>';
+  html += '</div></div>';
+
+  // Tags
+  html += '<div class="profile-tags" style="margin-bottom:12px">';
+  if(p.pratique) html += '<span class="tag gold">'+p.pratique+'</span>';
+  if(p.voile) html += '<span class="tag">'+p.voile+'</span>';
+  if(p.barbe) html += '<span class="tag">'+p.barbe+'</span>';
+  if(p.madhhab && p.madhhab!='Peu importe') html += '<span class="tag">'+p.madhhab+'</span>';
+  html += '</div>';
+
+  // Presentation
+  if(p.bio){
+    html += '<div class="profile-section" style="margin-bottom:12px">';
+    html += '<h4 style="font-size:.78rem;color:var(--gold);margin-bottom:6px">Pr&#233;sentation</h4>';
+    html += '<p style="font-size:.83rem;line-height:1.6;margin:0;color:var(--white2)">'+p.bio+'</p>';
+    html += '</div>';
+  }
+
+  // Infos generales
+  html += '<div class="profile-section" style="margin-bottom:12px">';
+  html += '<h4 style="font-size:.78rem;color:var(--gold);margin-bottom:6px">Informations g&#233;n&#233;rales</h4>';
+  html += '<div class="profile-detail-row"><span>&#194;ge</span><span>'+(p.age||'&#8212;')+' ans</span></div>';
+  html += '<div class="profile-detail-row"><span>Ville</span><span>'+(p.ville||'&#8212;')+'</span></div>';
+  html += '<div class="profile-detail-row"><span>Origine</span><span>'+(p.origine||'&#8212;')+'</span></div>';
+  html += '<div class="profile-detail-row"><span>Situation</span><span>'+(p.situation||'&#8212;')+'</span></div>';
+  html += '<div class="profile-detail-row"><span>A des enfants</span><span>'+(p.enfants==='oui'?'Oui':p.enfants==='non'?'Non':p.enfants||'&#8212;')+'</span></div>';
+  html += '<div class="profile-detail-row"><span>Veut des enfants</span><span>'+(p.veut_enfants||'&#8212;')+'</span></div>';
+  html += '</div>';
+
+  // Pratique religieuse
+  html += '<div class="profile-section" style="margin-bottom:14px">';
+  html += '<h4 style="font-size:.78rem;color:var(--gold);margin-bottom:6px">Pratique religieuse</h4>';
+  html += '<div class="profile-detail-row"><span>Niveau</span><span>'+(p.pratique||'&#8212;')+'</span></div>';
+  if(p.voile) html += '<div class="profile-detail-row"><span>Voile</span><span>'+p.voile+'</span></div>';
+  if(p.barbe) html += '<div class="profile-detail-row"><span>Barbe</span><span>'+p.barbe+'</span></div>';
+  html += '<div class="profile-detail-row"><span>&#201;cole juridique</span><span>'+(p.madhhab||'&#8212;')+'</span></div>';
+  html += '<div class="profile-detail-row"><span>Lecture Coran</span><span>'+(p.coran||'&#8212;')+'</span></div>';
+  html += '<div class="profile-detail-row"><span>Alimentation halal</span><span>'+(p.halal||'&#8212;')+'</span></div>';
+  html += '</div>';
+
+  // Boutons
+  html += '<div style="display:flex;gap:10px;padding-top:2px">';
+  html += '<button class="btn btn-outline" style="flex:1" onclick="closeSwipePopup()">Fermer</button>';
+  html += demandeBtn;
+  html += '</div></div>';
+
+  overlay.innerHTML = html;
   document.body.appendChild(overlay);
 }
 
@@ -4431,16 +4624,33 @@ function loadUserNotifications(){
   refreshNotifs(null);
 }
 
+function _getDeletedNotifIds(){
+  try{
+    var raw=localStorage.getItem('oumelia_deleted_notifs');
+    return raw?JSON.parse(raw):[];
+  }catch(e){return [];}
+}
+function _saveDeletedNotifId(notifId){
+  try{
+    var ids=_getDeletedNotifIds();
+    if(ids.indexOf(notifId)<0){
+      ids.push(notifId);
+      // Garder max 200 entrées pour ne pas surcharger localStorage
+      if(ids.length>200) ids=ids.slice(ids.length-200);
+      localStorage.setItem('oumelia_deleted_notifs',JSON.stringify(ids));
+    }
+  }catch(e){}
+}
 function deleteNotif(notifId){
-  // Supprimer de la liste locale
+  // 1. Supprimer de la liste locale
   userNotifs=userNotifs.filter(function(n){return n.id!==notifId;});
   updateNotifBadge();
-  // Re-render
+  // 2. Re-render
   var ac=document.getElementById('app-content');
   if(ac&&state.currentNav==='notifs') renderNotifs(ac);
-  // Supprimer en DB si notif table
-  var n=userNotifs.find(function(x){return x.id===notifId;}); // déjà supprimé, chercher par notifDbId
-  // Trouver dans la liste initiale via le DOM (id suffixé)
+  // 3. Mémoriser l'ID supprimé dans localStorage (persiste après déco)
+  _saveDeletedNotifId(notifId);
+  // 4. Supprimer en DB (table notifications)
   if(notifId.indexOf('db_notif_')===0){
     var dbId=notifId.replace('db_notif_','');
     fetch(SUPABASE_URL+'/rest/v1/notifications?id=eq.'+dbId,{
@@ -4448,6 +4658,8 @@ function deleteNotif(notifId){
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
     }).catch(function(){});
   }
+  // 5. Si c'est une demande reçue (id 'db_XXXX'), supprimer aussi de la table demandes (côté notif seulement)
+  // On ne supprime pas la demande elle-même, juste on ignore la notif au prochain chargement
 }
 
 function markNotifRead(notifId){
