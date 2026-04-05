@@ -994,9 +994,9 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 
 <script>
 // ══════════ SUPABASE ══════════
-const SUPABASE_URL  = 'https://nmcvyukbyfnhtufbgqqp.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tY3Z5dWtieWZuaHR1ZmJncXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODc2NTUsImV4cCI6MjA4OTc2MzY1NX0.JaJuiWxxAXcGK38FT7DlOHve5pi2UDI1PZ5K1JR1qj4';
-let sb = null;
+var SUPABASE_URL  = 'https://nmcvyukbyfnhtufbgqqp.supabase.co';
+var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tY3Z5dWtieWZuaHR1ZmJncXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODc2NTUsImV4cCI6MjA4OTc2MzY1NX0.JaJuiWxxAXcGK38FT7DlOHve5pi2UDI1PZ5K1JR1qj4';
+var sb = null;
 
 function getSB(){
   if(!sb){
@@ -1008,24 +1008,30 @@ function getSB(){
 
 // Créer les tables si elles n'existent pas (via RPC SQL)
 async function initDB(){
-  const client = getSB();
-  if(!client) return; // Supabase pas encore chargé — pas grave, on continue sans
+  var client = getSB();
+  if(!client) return;
   try {
-    const { data: { session } } = await client.auth.getSession();
-    if(session){
-      await loadUserProfile(session.user);
+    // Restaurer session uniquement si token présent en localStorage
+    var hasToken = false;
+    try{
+      Object.keys(localStorage).forEach(function(k){
+        if(k.startsWith('sb-') && localStorage.getItem(k)) hasToken=true;
+      });
+    }catch(e){}
+
+    if(hasToken){
+      var { data: { session } } = await client.auth.getSession();
+      if(session && session.user && !state.user && !state.isAdmin){
+        var emailSession = session.user.email||'';
+        var isAdminEmail = ADMIN_EMAILS.map(function(e){return e.toLowerCase();}).includes(emailSession.toLowerCase());
+        if(!isAdminEmail){
+          await loadUserProfile(session.user);
+          if(state.user) enterApp();
+        }
+      }
     }
-    client.auth.onAuthStateChange(async function(event, session){
-      if(event === 'SIGNED_IN' && session){
-        await loadUserProfile(session.user);
-      }
-      if(event === 'SIGNED_OUT'){
-        state.user = null;
-        state.isAdmin = false;
-        showScreen('screen-landing');
-      }
-    });
-  } catch(e){ /* Supabase init silencieux */ }
+    // Routing géré par doLogin/doLogout/doRegister uniquement
+  } catch(e){ console.log('initDB:', e); }
 }
 
 function loadUserProfile(authUser){
@@ -1108,7 +1114,7 @@ function svgFemme(size){
 // Mosquée SVG pour les hommes
 function svgHomme(size){
   if(size===undefined) size=54;
-  const s=size;
+  var s=size;
   return`<svg width="${s}" height="${s}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="mq${s}" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -1173,28 +1179,28 @@ function svgHomme(size){
 }
 
 // ══════════ CONSTANTES ══════════
-const ADMIN_EMAIL = 'admin@oumelia.com';
-const ADMIN_PWD   = 'Admin123';
-const ADMIN_EMAILS = [
+var ADMIN_EMAIL = 'admin@oumelia.com';
+var ADMIN_PWD   = 'Admin123';
+var ADMIN_EMAILS = [
   'admin@oumelia.com','admin@gmail.com',
   'Admin@gmail.com','Admin@oumelia.com',
   'oumarguindo87@gmail.com', // email réel admin
 ];
 
 // ══════════ DONNÉES ══════════
-const allProfiles = [];
+var allProfiles = [];
 
-const adminConvos = {};
+var adminConvos = {};
 
-const matchesData = [];
+var matchesData = [];
 
-const waliResponses = [];
+var waliResponses = [];
 
 // ══════════ PRÉSENCE EN LIGNE ══════════
 // online = en ligne maintenant, recent = vu récemment (<30min), offline = hors ligne
-const onlineStatus = {};
+var onlineStatus = {};
 // Simule le temps (en prod : horodatage réel)
-const lastSeenText = {};
+var lastSeenText = {};
 
 function onlineDot(profileId, size){
   if(size===undefined) size=10;
@@ -1212,21 +1218,21 @@ function onlineLabel(profileId){
 
 // ══════════ ÉCHANGES EN COURS ══════════
 // Paires de profils en échange mutuel accepté
-const exchangesList = [];
+var exchangesList = [];
 
 function isInExchange(id1, id2){
   return exchangesList.some(function(e){return (e.femmeId===id1&&e.hommeId===id2)||(e.femmeId===id2&&e.hommeId===id1);});
 }
 
 function getExchangePartners(userId){
-  const partners=[];
+  var partners=[];
   exchangesList.forEach(function(e){
     if(e.femmeId===userId) partners.push(allProfiles.find(function(p){return p.id===e.hommeId;}));
     if(e.hommeId===userId) partners.push(allProfiles.find(function(p){return p.id===e.femmeId;}));
   });
   return partners.filter(Boolean);
 }
-const state = {
+var state = {
   user:null, isAdmin:false,
   profileActive:false, demandesLeft:3,
   gender:null, viewMode:'liste',
@@ -1254,22 +1260,22 @@ const state = {
 };
 
 // Demandes envoyées (id profil → statut)
-const demandesEnvoyees = {};
+var demandesEnvoyees = {};
 
 // ══════════ UTILS ══════════
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
-  const el=document.getElementById(id);
+  var el=document.getElementById(id);
   if(el){
     el.classList.add('active');
     el.scrollTop=0;
   }
 }
 
-let toastTimer;
+var toastTimer;
 function showToast(msg,type){
   if(type===undefined) type='gold';
-  const t=document.getElementById('toast');
+  var t=document.getElementById('toast');
   t.textContent=msg;
   t.style.borderColor=type==='red'?'var(--red)':type==='green'?'var(--green)':'var(--gold)';
   t.style.display='block';
@@ -1294,52 +1300,52 @@ function selectGender(g){
 // ══════════════════════════════════════════════════════════
 // SYSTÈME DE LANGUES — FR / EN / AR
 // ══════════════════════════════════════════════════════════
-let currentLang = localStorage.getItem('oumelia_lang') || 'fr';
+var currentLang = localStorage.getItem('oumelia_lang') || 'fr';
 
 // ══════════ VALIDATION INSCRIPTION ══════════
 function validateRegField(input, type){
-  const err = document.getElementById('err-'+type);
+  var err = document.getElementById('err-'+type);
   if(!err) return;
-  let msg = '';
+  var msg = '';
   if(type==='prenom' && input.value.trim().length < 2) msg = 'Prénom trop court';
-  if(type==='age'){ const v=parseInt(input.value); if(v<18) msg='Minimum 18 ans'; if(v>70) msg='Âge invalide'; }
+  if(type==='age'){ var v=parseInt(input.value); if(v<18) msg='Minimum 18 ans'; if(v>70) msg='Âge invalide'; }
   if(type==='email' && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) msg='Email invalide';
   err.textContent=msg; err.style.display=msg?'block':'none';
   input.style.borderColor=msg?'var(--red)':'';
 }
 
 function checkPwdStrength(pwd){
-  const wrap=document.getElementById('pwd-strength-wrap');
-  const fill=document.getElementById('pwd-strength-fill');
-  const label=document.getElementById('pwd-strength-label');
+  var wrap=document.getElementById('pwd-strength-wrap');
+  var fill=document.getElementById('pwd-strength-fill');
+  var label=document.getElementById('pwd-strength-label');
   if(!wrap) return;
   wrap.style.display=pwd.length>0?'block':'none';
-  let score=0;
+  var score=0;
   if(pwd.length>=8) score++;
   if(/[A-Z]/.test(pwd)) score++;
   if(/[0-9]/.test(pwd)) score++;
   if(/[^A-Za-z0-9]/.test(pwd)) score++;
-  const levels=[{w:'25%',c:'var(--red)',t:'Trop faible'},{w:'50%',c:'#f39c12',t:'Moyen'},{w:'75%',c:'#f1c40f',t:'Bien'},{w:'100%',c:'var(--green)',t:'Excellent'}];
-  const l=levels[Math.max(0,score-1)];
+  var levels=[{w:'25%',c:'var(--red)',t:'Trop faible'},{w:'50%',c:'#f39c12',t:'Moyen'},{w:'75%',c:'#f1c40f',t:'Bien'},{w:'100%',c:'var(--green)',t:'Excellent'}];
+  var l=levels[Math.max(0,score-1)];
   fill.style.width=l.w; fill.style.background=l.c;
   label.textContent=l.t; label.style.color=l.c;
 }
 
 function checkPwdMatch(){
-  const pwd=(document.getElementById('reg-pwd')&&document.getElementById('reg-pwd').value);
-  const pwd2=document.getElementById('reg-pwd2');
-  const err=document.getElementById('err-pwd2');
+  var pwd=(document.getElementById('reg-pwd')&&document.getElementById('reg-pwd').value);
+  var pwd2=document.getElementById('reg-pwd2');
+  var err=document.getElementById('err-pwd2');
   if(!pwd2||!err) return;
   if(pwd2.value && pwd2.value!==pwd){ err.textContent='Les mots de passe ne correspondent pas'; err.style.display='block'; pwd2.style.borderColor='var(--red)'; }
   else { err.style.display='none'; pwd2.style.borderColor=pwd2.value?'var(--green)':''; }
 }
 
 function updateProgressBar(step){
-  const pcts={1:33,2:66,3:100};
-  const fill=document.getElementById('reg-progress-fill');
+  var pcts={1:33,2:66,3:100};
+  var fill=document.getElementById('reg-progress-fill');
   if(fill) fill.style.width=pcts[step]+'%';
   [1,2,3].forEach(function(i){
-    const el=document.getElementById('pstep-'+i);
+    var el=document.getElementById('pstep-'+i);
     if(!el) return;
     el.classList.remove('active','done');
     if(i<step) el.classList.add('done');
@@ -1350,7 +1356,7 @@ function updateProgressBar(step){
 function regStep2(){
   if(!state.gender) return showToast('⚠ Choisissez votre genre','red');
   if(!document.getElementById('reg-prenom').value.trim()) return showToast('⚠ Entrez votre prénom','red');
-  const age=parseInt(document.getElementById('reg-age').value);
+  var age=parseInt(document.getElementById('reg-age').value);
   if(!age||age<18) return showToast('⚠ Âge invalide (minimum 18 ans)','red');
   document.getElementById('reg-step-1').classList.add('hidden');
   document.getElementById('reg-step-2').classList.remove('hidden');
@@ -1407,8 +1413,8 @@ function renderExplorerList(){
 
 // ══════════ COMPATIBILITÉ ══════════
 function getCompatibilityScore(profile){
-  const u=state.user; if(!u) return 0;
-  let score=0;
+  var u=state.user; if(!u) return 0;
+  var score=0;
   if(profile.pratique===u.pratique) score+=30;
   if(profile.madhhab===u.madhhab||profile.madhhab==='Peu importe'||u.madhhab==='Peu importe') score+=20;
   if(profile.veut_enfants===u.veut_enfants) score+=20;
@@ -1417,7 +1423,7 @@ function getCompatibilityScore(profile){
 }
 
 function getRegion(ville){
-  const r={'Paris':'Île-de-France','Lyon':'Auvergne-Rhône-Alpes','Marseille':'PACA','Toulouse':'Occitanie','Nice':'PACA','Nantes':'Pays de la Loire','Strasbourg':'Grand Est','Bordeaux':'Nouvelle-Aquitaine','Lille':'Hauts-de-France'};
+  var r={'Paris':'Île-de-France','Lyon':'Auvergne-Rhône-Alpes','Marseille':'PACA','Toulouse':'Occitanie','Nice':'PACA','Nantes':'Pays de la Loire','Strasbourg':'Grand Est','Bordeaux':'Nouvelle-Aquitaine','Lille':'Hauts-de-France'};
   return r[ville]||ville||'—';
 }
 
@@ -1433,7 +1439,7 @@ function getProfileCompletion(u){
 }
 
 // ══════════ FAQ ══════════
-const faqData=[
+var faqData=[
   {q:"Comment fonctionne Oumelia ?",a:"Oumelia est une plateforme de mise en relation halal. Créez votre profil, il sera validé par l'administratrice (24-48h), puis explorez les profils et envoyez des demandes de mise en relation."},
   {q:"Mon profil est-il visible immédiatement ?",a:"Non. Chaque profil est vérifié manuellement avant activation pour garantir la qualité et le sérieux de la plateforme."},
   {q:"Comment fonctionne le compteur de demandes ?",a:"Vous disposez de 3 demandes. Le compteur ne diminue QUE lorsqu'une demande est acceptée. Si elle est refusée ou sans réponse, votre compteur n'est pas affecté."},
@@ -1445,7 +1451,7 @@ const faqData=[
 ];
 
 function openFAQ(){
-  const list=document.getElementById('faq-list');
+  var list=document.getElementById('faq-list');
   list.innerHTML=faqData.map(function(item,i){ return `
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFAQ(${i})">
@@ -1457,21 +1463,21 @@ function openFAQ(){
 }
 
 function toggleFAQ(i){
-  const a=document.getElementById('faq-a-'+i);
-  const arrow=document.getElementById('faq-arrow-'+i);
-  const isOpen=a.classList.contains('open');
+  var a=document.getElementById('faq-a-'+i);
+  var arrow=document.getElementById('faq-arrow-'+i);
+  var isOpen=a.classList.contains('open');
   document.querySelectorAll('.faq-a').forEach(function(el){el.classList.remove('open');});
   document.querySelectorAll('[id^="faq-arrow-"]').forEach(function(el){el.textContent='▾';});
   if(!isOpen){ a.classList.add('open'); arrow.textContent='▴'; }
 }
 
 // ══════════ SIGNALEMENT ══════════
-let selectedReport='', reportTargetId=null;
+var selectedReport='', reportTargetId=null;
 
 function openReport(profileId){
   reportTargetId=profileId; selectedReport='';
   document.querySelectorAll('.report-reason').forEach(function(r){r.classList.remove('selected');});
-  const d=document.getElementById('report-details'); if(d) d.value='';
+  var d=document.getElementById('report-details'); if(d) d.value='';
   openModal('modal-report');
 }
 
@@ -1488,33 +1494,33 @@ function submitReport(){
 }
 
 // ══════════ PAGES LÉGALES ══════════
-const legalContent={
+var legalContent={
   cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumelia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>oumelia.contacthomme@gmail.com</p>`},
   privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumelia.contacthomme@gmail.com</p>`}
 };
 
 function showLegal(type){
-  const content=legalContent[type]; if(!content) return;
+  var content=legalContent[type]; if(!content) return;
   document.getElementById('legal-title').textContent=content.title;
   document.getElementById('legal-body').innerHTML=content.body;
   openModal('modal-legal');
 }
 
 function showLegalPage(type){
-  const c=document.getElementById('app-content');
-  const content=legalContent[type]; if(!content) return;
+  var c=document.getElementById('app-content');
+  var content=legalContent[type]; if(!content) return;
   scrollToTop();
   c.innerHTML=`<div class="page-header"><button class="back-btn" onclick="navTo('profil')">←</button><h2>${content.title}</h2></div><div class="legal-content">${content.body}</div>`;
 }
 
 
 // ══════════ ENREGISTREMENT AUDIO RÉEL ══════════
-let mediaRecorder = null;
-let audioChunks = [];
-let recCountdownInterval = null;
-let recProgressInterval = null;
-let audioBlob = null;
-const REC_DURATION = 15; // secondes max
+var mediaRecorder = null;
+var audioChunks = [];
+var recCountdownInterval = null;
+var recProgressInterval = null;
+var audioBlob = null;
+var REC_DURATION = 15; // secondes max
 
 async function toggleRecord(){
   if(state.recording){
@@ -1522,7 +1528,7 @@ async function toggleRecord(){
     return;
   }
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     startRecording(stream);
   } catch(err){
     if(err.name === 'NotAllowedError'){
@@ -1534,8 +1540,8 @@ async function toggleRecord(){
 }
 
 function getSupportedMimeType(){
-  const types = ['audio/mp4','audio/aac','audio/webm;codecs=opus','audio/webm','audio/ogg'];
-  for(const t of types){
+  var types = ['audio/mp4','audio/aac','audio/webm;codecs=opus','audio/webm','audio/ogg'];
+  for(var _ti=0;_ti<types.length;_ti++){ var t=types[_ti];
     if(MediaRecorder.isTypeSupported(t)) return t;
   }
   return '';
@@ -1547,19 +1553,19 @@ function startRecording(stream){
   audioBlob = null;
   state.audioRecorded = false;
 
-  const btn = document.getElementById('rec-btn');
-  const status = document.getElementById('rec-status');
-  const countdownWrap = document.getElementById('rec-countdown-wrap');
-  const countdownEl = document.getElementById('rec-countdown');
-  const progressBar = document.getElementById('rec-progress-bar');
+  var btn = document.getElementById('rec-btn');
+  var status = document.getElementById('rec-status');
+  var countdownWrap = document.getElementById('rec-countdown-wrap');
+  var countdownEl = document.getElementById('rec-countdown');
+  var progressBar = document.getElementById('rec-progress-bar');
 
   btn.classList.add('recording');
   btn.textContent = '⏹️';
   status.innerHTML = '<span style="color:var(--red)">● Enregistrement en cours... (⏹ pour terminer)</span>';
   countdownWrap.style.display = 'block';
 
-  const mimeType = getSupportedMimeType();
-  const options = mimeType ? { mimeType } : {};
+  var mimeType = getSupportedMimeType();
+  var options = mimeType ? { mimeType } : {};
 
   try {
     mediaRecorder = new MediaRecorder(stream, options);
@@ -1570,10 +1576,10 @@ function startRecording(stream){
   mediaRecorder.ondataavailable = function(e){ if(e.data && e.data.size > 0) audioChunks.push(e.data); };
   mediaRecorder.onstop = function(){
     stream.getTracks().forEach(function(t){ t.stop(); });
-    const type = mediaRecorder.mimeType || 'audio/webm';
+    var type = mediaRecorder.mimeType || 'audio/webm';
     audioBlob = new Blob(audioChunks, { type });
-    const url = URL.createObjectURL(audioBlob);
-    const audioEl = document.getElementById('rec-audio');
+    var url = URL.createObjectURL(audioBlob);
+    var audioEl = document.getElementById('rec-audio');
     if(audioEl){ audioEl.src = url; audioEl.load(); }
     document.getElementById('rec-playback').classList.remove('hidden');
     document.getElementById('rec-done').classList.remove('hidden');
@@ -1586,8 +1592,8 @@ function startRecording(stream){
 
   mediaRecorder.start(100); // collect data every 100ms
 
-  let secondsLeft = REC_DURATION;
-  let elapsed = 0;
+  var secondsLeft = REC_DURATION;
+  var elapsed = 0;
   countdownEl.textContent = secondsLeft;
   progressBar.style.width = '0%';
 
@@ -1606,9 +1612,9 @@ function stopRecording(){
   state.recording = false;
   clearInterval(recCountdownInterval);
 
-  const btn = document.getElementById('rec-btn');
-  const status = document.getElementById('rec-status');
-  const countdownWrap = document.getElementById('rec-countdown-wrap');
+  var btn = document.getElementById('rec-btn');
+  var status = document.getElementById('rec-status');
+  var countdownWrap = document.getElementById('rec-countdown-wrap');
 
   btn.classList.remove('recording');
   btn.textContent = '🎙️';
@@ -1625,11 +1631,11 @@ function reRecord(){
   // Réinitialiser pour recommencer
   state.audioRecorded = false;
   audioBlob = null;
-  const btn = document.getElementById('rec-btn');
-  const status = document.getElementById('rec-status');
-  const playback = document.getElementById('rec-playback');
-  const done = document.getElementById('rec-done');
-  const countdownWrap = document.getElementById('rec-countdown-wrap');
+  var btn = document.getElementById('rec-btn');
+  var status = document.getElementById('rec-status');
+  var playback = document.getElementById('rec-playback');
+  var done = document.getElementById('rec-done');
+  var countdownWrap = document.getElementById('rec-countdown-wrap');
 
   btn.style.display = 'flex';
   btn.textContent = '🎙️';
@@ -1642,10 +1648,10 @@ function reRecord(){
 }
 
 async function doRegister(){
-  const email=document.getElementById('reg-email').value.trim();
-  const pwd=document.getElementById('reg-pwd').value;
-  const pwd2=(document.getElementById('reg-pwd2')&&document.getElementById('reg-pwd2').value);
-  const cgu=(document.getElementById('reg-cgu')&&document.getElementById('reg-cgu').checked);
+  var email=document.getElementById('reg-email').value.trim();
+  var pwd=document.getElementById('reg-pwd').value;
+  var pwd2=(document.getElementById('reg-pwd2')&&document.getElementById('reg-pwd2').value);
+  var cgu=(document.getElementById('reg-cgu')&&document.getElementById('reg-cgu').checked);
   if(!email||!pwd) return showToast('⚠ Remplissez tous les champs','red');
   if(pwd.length<8) return showToast('⚠ Mot de passe trop court (8 caractères min)','red');
   if(pwd2 && pwd2!==pwd) return showToast('⚠ Les mots de passe ne correspondent pas','red');
@@ -1654,18 +1660,18 @@ async function doRegister(){
 
   showToast('⏳ Création du compte...','gold');
 
-  const sb = getSB();
+  var sb = getSB();
   if(!sb) return showToast('❌ Erreur de connexion, réessayez','red');
 
   // 1. Créer le compte auth Supabase
-  const { data, error } = await sb.auth.signUp({ email, password: pwd });
+  var { data, error } = await sb.auth.signUp({ email, password: pwd });
   if(error){ showToast('❌ '+error.message,'red'); return; }
   if(!data || !data.user) { showToast('❌ Erreur création compte','red'); return; }
 
-  const userId = data.user.id;
+  var userId = data.user.id;
 
   // 2. Créer le profil — colonnes de base uniquement (compatibles avec la table)
-  const profileData = {
+  var profileData = {
     user_id: userId,
     prenom: document.getElementById('reg-prenom').value.trim()||'Utilisateur',
     gender: state.gender,
@@ -1691,20 +1697,20 @@ async function doRegister(){
   };
 
   // Ajouter les colonnes optionnelles si elles existent
-  const minhajEl = document.getElementById('reg-minhaj');
-  const convertiEl = document.getElementById('reg-converti');
-  const rechercheEl = document.getElementById('reg-recherche');
+  var minhajEl = document.getElementById('reg-minhaj');
+  var convertiEl = document.getElementById('reg-converti');
+  var rechercheEl = document.getElementById('reg-recherche');
   if(minhajEl) profileData.minhaj = minhajEl.value||'Je ne sais pas';
   if(convertiEl) profileData.converti = convertiEl.value||'Non';
   if(rechercheEl) profileData.recherche = rechercheEl.value.trim()||'';
 
-  const { data: insertData, error: profileError } = await sb.from('profils').insert(profileData).select().single();
+  var { data: insertData, error: profileError } = await sb.from('profils').insert(profileData).select().single();
 
   if(profileError){
     console.log('Profil error:', profileError);
     // Si erreur sur colonnes inconnues, réessayer sans les colonnes optionnelles
     if(profileError.message && (profileError.message.includes('column') || profileError.message.includes('does not exist'))){
-      const profileDataBasic = {
+      var profileDataBasic = {
         user_id: userId,
         prenom: profileData.prenom,
         gender: profileData.gender,
@@ -1728,7 +1734,7 @@ async function doRegister(){
         is_online: true,
         last_seen: profileData.last_seen,
       };
-      const { data: insertData2, error: err2 } = await sb.from('profils').insert(profileDataBasic).select().single();
+      var { data: insertData2, error: err2 } = await sb.from('profils').insert(profileDataBasic).select().single();
       if(err2){ showToast('❌ Erreur: '+err2.message,'red'); return; }
       profileData.id = (insertData2&&insertData2.id);
     } else {
@@ -1742,9 +1748,9 @@ async function doRegister(){
   // 3. Upload audio attestation
   if(state.gender==='femme' && audioBlob && profileData.id){
     try {
-      const mimeType = audioBlob.type || 'audio/webm';
-      const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('aac') ? 'aac' : 'webm';
-      const fileName = 'attestation_'+profileData.id+'_'+Date.now()+'.'+ext;
+      var mimeType = audioBlob.type || 'audio/webm';
+      var ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('aac') ? 'aac' : 'webm';
+      var fileName = 'attestation_'+profileData.id+'_'+Date.now()+'.'+ext;
       await sb.storage.from('attestations').upload(fileName, audioBlob, {
         contentType: mimeType, upsert: false
       });
@@ -1777,9 +1783,9 @@ async function doRegister(){
 }
 
 async function doLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const pwd=document.getElementById('login-pwd').value;
-  const errEl=document.getElementById('login-error');
+  var email=document.getElementById('login-email').value.trim();
+  var pwd=document.getElementById('login-pwd').value;
+  var errEl=document.getElementById('login-error');
 
   // Admin check local
   if(ADMIN_EMAILS.map(function(e){return e.toLowerCase();}).includes(email.toLowerCase()) && pwd.toLowerCase()===ADMIN_PWD.toLowerCase()){
@@ -1800,7 +1806,7 @@ async function doLogin(){
   errEl.classList.add('hidden');
   showToast('⏳ Connexion...','gold');
 
-  const { data, error } = await getSB().auth.signInWithPassword({ email, password: pwd });
+  var { data, error } = await getSB().auth.signInWithPassword({ email, password: pwd });
   if(error){
     errEl.textContent = error.message.includes('Invalid') ? 'Email ou mot de passe incorrect.' : error.message;
     errEl.classList.remove('hidden');
@@ -1817,13 +1823,13 @@ async function doLogin(){
 }
 
 async function doForgotPwd(){
-  const email=document.getElementById('forgot-email').value.trim();
-  const errEl=document.getElementById('forgot-error');
-  const succEl=document.getElementById('forgot-success');
+  var email=document.getElementById('forgot-email').value.trim();
+  var errEl=document.getElementById('forgot-error');
+  var succEl=document.getElementById('forgot-success');
   if(!email){errEl.classList.remove('hidden');succEl.classList.add('hidden');return;}
   errEl.classList.add('hidden');
   var redirectUrl = window.location.origin || 'https://oumelia.com';
-  const { error } = await getSB().auth.resetPasswordForEmail(email, {
+  var { error } = await getSB().auth.resetPasswordForEmail(email, {
     redirectTo: redirectUrl
   });
   if(error){ errEl.textContent=error.message; errEl.classList.remove('hidden'); return; }
@@ -1872,45 +1878,62 @@ function loadUserMessages(){
 }
 
 function doLogout(){
-  // 1. Afficher le landing IMMÉDIATEMENT (pas d'await qui peut bloquer)
+  // Stopper les timers
   try{stopRealtime();}catch(e){}
   try{stopAdminRefresh();}catch(e){}
 
-  // Reset état immédiat
-  var prevUser = state.user;
-  state.user=null; state.isAdmin=false; state.profileActive=false;
-  state.profilePaused=false; state.gender=null; state.swipeIndex=0;
-  state.favorites=[]; state.seenProfiles=[]; state.filters={situation:[],pratique:[],voile:[],barbe:[],origine:[],ageMin:'',ageMax:'',online:false,enfants:'',veut_enfants:''};
-  userChatHistory={}; window._adminProfiles=[]; window._dbProfiles=[]; window._demandesEnvoyeesDB=[];
-  userNotifs=[]; // ← CRITIQUE: vider les notifs de l'utilisateur précédent
-  Object.keys(demandesEnvoyees).forEach(function(k){ delete demandesEnvoyees[k]; });
+  var prevSupabaseId = state.user && state.user.supabaseId;
 
-  // Afficher landing
-  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-  var landing=document.getElementById('screen-landing');
-  if(landing) landing.classList.add('active');
+  // Reset état JS
+  state.user = null;
+  state.isAdmin = false;
+  state.profileActive = false;
+  state.profilePaused = false;
+  state.gender = null;
+  state.swipeIndex = 0;
+  state.favorites = [];
+  state.seenProfiles = [];
+  try{ state.filters.situation=[]; state.filters.pratique=[]; state.filters.voile=[];
+    state.filters.barbe=[]; state.filters.origine=[]; state.filters.ageMin=null;
+    state.filters.ageMax=null; state.filters.online=false;
+    state.filters.enfants=''; state.filters.veut_enfants=''; }catch(e){}
+  userChatHistory = {};
+  userNotifs = [];
+  window._adminProfiles = [];
+  window._dbProfiles = [];
+  window._demandesEnvoyeesDB = [];
+  try{ Object.keys(demandesEnvoyees).forEach(function(k){ delete demandesEnvoyees[k]; }); }catch(e){}
+
+  // Vider tokens Supabase du localStorage
+  try{
+    var keys = [];
+    for(var i=0; i<localStorage.length; i++){ keys.push(localStorage.key(i)); }
+    keys.forEach(function(k){
+      if(k && (k.indexOf('sb-')===0 || k.indexOf('supabase')>=0)){ localStorage.removeItem(k); }
+    });
+  }catch(e){}
+
+  // Afficher landing immédiatement
+  showScreen('screen-landing');
   showToast('À bientôt !','gold');
 
-  // 2. Supabase en arrière-plan (non bloquant)
-  var sb=getSB();
-  if(sb){
-    if(prevUser&&prevUser.supabaseId){
-      fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+prevUser.supabaseId, {
-        method:'PATCH',
-        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
-        body:JSON.stringify({is_online:false, last_seen:new Date().toISOString()})
-      }).catch(function(){});
-    }
-    sb.auth.signOut().then(function(){}).catch(function(){});
+  // Actions Supabase en arrière-plan (non bloquantes)
+  if(prevSupabaseId){
+    fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+prevSupabaseId, {
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({is_online:false, last_seen:new Date().toISOString()})
+    }).catch(function(){});
   }
+  try{ getSB().auth.signOut().catch(function(){}); }catch(e){}
 }
 
 // ══════════ CHARGEMENT DONNÉES SUPABASE ══════════
 async function loadProfilesFromDB(){
   if(!state.user) return;
-  const oppositeGender = state.user.gender==='femme' ? 'homme' : 'femme';
-  const sb2 = getSB(); if(!sb2) return;
-  const { data, error } = await sb2
+  var oppositeGender = state.user.gender==='femme' ? 'homme' : 'femme';
+  var sb2 = getSB(); if(!sb2) return;
+  var { data, error } = await sb2
     .from('profils')
     .select('*')
     .eq('gender', oppositeGender)
@@ -2042,7 +2065,7 @@ function navTo(tab){
 }
 
 function renderTab(tab){
-  const c=document.getElementById('app-content');
+  var c=document.getElementById('app-content');
   switch(tab){
     case 'explorer': renderExplorer(c); break;
     case 'messages': renderMessages(c); break;
@@ -2061,15 +2084,15 @@ function renderTab(tab){
 // Remonte en haut du conteneur actif instantanément
 function scrollToTop(){
   window.scrollTo({top:0,behavior:'instant'});
-  const appC=document.getElementById('app-content');
+  var appC=document.getElementById('app-content');
   if(appC) appC.scrollTop=0;
-  const admC=document.getElementById('admin-content');
+  var admC=document.getElementById('admin-content');
   if(admC) admC.scrollTop=0;
 }
 
 // ══════════ EXPLORER ══════════
 function getVisibleProfiles(){
-  const opp=state.user.gender==='femme'?'homme':'femme';
+  var opp=state.user.gender==='femme'?'homme':'femme';
   // Fusionner profils locaux (test) + profils réels Supabase
   var dbProfs = (window._dbProfiles||[]).filter(function(p){ return p.gender===opp && p.status==='active'; });
   var localProfs = allProfiles.filter(function(p){ return p.gender===opp && p.status==='active'; });
@@ -2082,10 +2105,10 @@ function getVisibleProfiles(){
     list=list.filter(function(p){ return !state.seenProfiles.includes(String(p.id)); });
   }
   list.sort(function(a,b){ return (b.boosted?1:0)-(a.boosted?1:0); });
-  const f=state.filters;
+  var f=state.filters;
   // Recherche texte
   if(state.searchQuery){
-    const q=state.searchQuery.toLowerCase();
+    var q=state.searchQuery.toLowerCase();
     list=list.filter(function(p){return p.prenom.toLowerCase().includes(q)||p.ville.toLowerCase().includes(q)||p.origine.toLowerCase().includes(q)||p.pratique.toLowerCase().includes(q);}); 
   }
   // Filtres multi-critères
@@ -2111,8 +2134,8 @@ function getVisibleProfiles(){
 
 // Retourne la liste des filtres actifs pour les tags
 function getActiveFiltersList(){
-  const f=state.filters;
-  const tags=[];
+  var f=state.filters;
+  var tags=[];
   f.situation.forEach(function(v){tags.push({key:'situation',val:v,label:v});});
   f.pratique.forEach(function(v){tags.push({key:'pratique',val:v,label:v});});
   f.voile.forEach(function(v){tags.push({key:'voile',val:v,label:v});});
@@ -2126,7 +2149,7 @@ function getActiveFiltersList(){
 }
 
 function removeFilter(key, val){
-  const f=state.filters;
+  var f=state.filters;
   if(['situation','pratique','voile','barbe','origine'].includes(key)){
     f[key]=f[key].filter(function(v){return v!==val;});
   } else if(key==='age'){f.ageMin=null;f.ageMax=null;}
@@ -2144,12 +2167,12 @@ function resetFilters(){
 
 // Ouvre le panel avec les critères adaptés au genre de l'utilisateur
 function openFilterPanel(){
-  const isWoman=state.user.gender==='femme';
+  var isWoman=state.user.gender==='femme';
   // L'utilisateur est une femme → elle cherche des HOMMES → on filtre par critères hommes
   // L'utilisateur est un homme → il cherche des FEMMES → on filtre par critères femmes
-  const f=state.filters;
+  var f=state.filters;
 
-  let html='';
+  var html='';
 
   // Présence en ligne
   html+=`<div class="filter-section">
@@ -2259,8 +2282,8 @@ function closeFilterPanel(e){
 }
 
 function toggleFilterArr(key, val){
-  const arr=state.filters[key];
-  const idx=arr.indexOf(val);
+  var arr=state.filters[key];
+  var idx=arr.indexOf(val);
   if(idx===-1) arr.push(val);
   else arr.splice(idx,1);
   // Rafraîchir le panel
@@ -2279,8 +2302,8 @@ function setFilterVal(key, val){
 
 function applyFilters(){
   // Récupérer les valeurs d'âge depuis les inputs
-  const minEl=document.getElementById('fp-age-min');
-  const maxEl=document.getElementById('fp-age-max');
+  var minEl=document.getElementById('fp-age-min');
+  var maxEl=document.getElementById('fp-age-max');
   if(minEl) state.filters.ageMin=minEl.value||null;
   if(maxEl) state.filters.ageMax=maxEl.value||null;
   document.getElementById('filter-panel-overlay').classList.remove('open');
@@ -2288,16 +2311,16 @@ function applyFilters(){
 }
 
 function renderExplorer(c){
-  const oppLabel=state.user.gender==='femme'?'frères':'sœurs';
+  var oppLabel=state.user.gender==='femme'?'frères':'sœurs';
   // Section échanges en cours
-  const myExchangePartners=getExchangePartners((state.user&&state.user.id)||0);
-  let html='';
+  var myExchangePartners=getExchangePartners((state.user&&state.user.id)||0);
+  var html='';
   if(myExchangePartners.length>0){
     html+=`<div class="exchange-section">
       <h4>↔ Échanges en cours (${myExchangePartners.length})</h4>`;
     myExchangePartners.forEach(function(p){ 
-      const av=p.gender==='femme'?svgFemme(36):svgHomme(36);
-      const dot=onlineDot(p.id,9);
+      var av=p.gender==='femme'?svgFemme(36):svgHomme(36);
+      var dot=onlineDot(p.id,9);
       html+=`<div class="exchange-profile-row">
         <div style="position:relative;display:inline-block">${av}<span style="position:absolute;bottom:0;right:0">${dot}</span></div>
         <div style="flex:1">
@@ -2330,8 +2353,8 @@ function renderExplorer(c){
     </div>`;
 
   // Bouton filtre + tags actifs
-  const activeFilters=getActiveFiltersList();
-  const hasFilters=activeFilters.length>0;
+  var activeFilters=getActiveFiltersList();
+  var hasFilters=activeFilters.length>0;
   html+=`<div class="filter-bar">
     <button class="filter-trigger-btn ${hasFilters?'has-filters':''}" onclick="openFilterPanel()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
@@ -2350,16 +2373,16 @@ function renderExplorer(c){
     <div class="sort-chip ${currentSort==='active'?'active':''}" id="sort-active" onclick="setSortMode('active')">🟢 En ligne</div>
     <div class="sort-chip ${currentSort==='compatible'?'active':''}" id="sort-compatible" onclick="setSortMode('compatible')">💫 Compatibles</div>
   </div>`;
-  const profiles=getVisibleProfiles();
+  var profiles=getVisibleProfiles();
   if(state.viewMode==='liste'){
     if(!profiles.length) html+=`<div style="padding:40px;text-align:center;color:var(--muted)">Aucun profil trouvé</div>`;
     else{
       html+=`<div class="profiles-list">`;
       profiles.forEach(function(p){ 
-        const av=p.gender==='femme'?svgFemme(50):svgHomme(50);
-        const isFav=state.favorites.includes(p.id);
-        const dot=onlineDot(p.id,9);
-        const inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
+        var av=p.gender==='femme'?svgFemme(50):svgHomme(50);
+        var isFav=state.favorites.includes(p.id);
+        var dot=onlineDot(p.id,9);
+        var inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
         html+=`<div class="profile-card ${p.boosted?'boosted':''}" onclick="openProfile(${p.id})">
           ${p.boosted?'<span class="boost-badge">⚡ BOOST</span>':''}
           <div class="profile-avatar-box" style="position:relative">
@@ -2387,11 +2410,11 @@ function renderExplorer(c){
   } else {
     if(!profiles.length) html+=`<div style="padding:60px;text-align:center;color:var(--muted)">Aucun profil disponible</div>`;
     else{
-      const p=profiles[state.swipeIndex%profiles.length];
+      var p=profiles[state.swipeIndex%profiles.length];
       // Marquer ce profil comme vu dès l'affichage
       if(!state.seenProfiles) state.seenProfiles=[];
       if(p && !state.seenProfiles.includes(String(p.id))) state.seenProfiles.push(String(p.id));
-      const av=p.gender==='femme'?svgFemme(110):svgHomme(110);
+      var av=p.gender==='femme'?svgFemme(110):svgHomme(110);
       html+=`<div class="swipe-container">
         <button onclick="setView('liste')" style="position:absolute;top:8px;left:16px;background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:20px;padding:6px 14px;font-size:.8rem;cursor:pointer;z-index:10">← Liste</button>
         <div class="swipe-card" id="swipe-card" onclick="openSwipeProfile(${p.id})">
@@ -2459,7 +2482,7 @@ function setView(mode){
 }
 
 function swipeAction(action,prenom,pid){
-  const card=document.getElementById('swipe-card');
+  var card=document.getElementById('swipe-card');
   if(card){
     if(action==='pass'){card.style.transform='translateX(-120%) rotate(-15deg)';card.style.opacity='0';}
     else if(action==='like'){card.style.transform='translateX(120%) rotate(15deg)';card.style.opacity='0';}
@@ -2487,7 +2510,7 @@ function swipeAction(action,prenom,pid){
   setTimeout(function(){
     state.swipeIndex++;
     // Re-render sans scrollToTop pour le mode swipe
-    const c=document.getElementById('app-content');
+    var c=document.getElementById('app-content');
     if(c) renderExplorer(c);
     // Mettre à jour le nav sans scroll
     document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
@@ -2498,15 +2521,15 @@ function swipeAction(action,prenom,pid){
 
 // ══════════ TOUCH SWIPE ══════════
 function initSwipeTouch(){
-  const card=document.getElementById('swipe-card');
+  var card=document.getElementById('swipe-card');
   if(!card) return;
-  let startX=0, startY=0, currentX=0, isDragging=false;
-  const overlayL=document.getElementById('swipe-overlay-left');
-  const overlayR=document.getElementById('swipe-overlay-right');
-  const threshold=80;
+  var startX=0, startY=0, currentX=0, isDragging=false;
+  var overlayL=document.getElementById('swipe-overlay-left');
+  var overlayR=document.getElementById('swipe-overlay-right');
+  var threshold=80;
 
   function onStart(e){
-    const t=e.touches?e.touches[0]:e;
+    var t=e.touches?e.touches[0]:e;
     startX=t.clientX; startY=t.clientY;
     isDragging=true;
     window._isSwiping=false;
@@ -2516,12 +2539,12 @@ function initSwipeTouch(){
   function onMove(e){
     if(!isDragging) return;
     window._isSwiping=true;
-    const t=e.touches?e.touches[0]:e;
+    var t=e.touches?e.touches[0]:e;
     currentX=t.clientX-startX;
-    const currentY=t.clientY-startY;
-    const rotate=currentX*0.08;
+    var currentY=t.clientY-startY;
+    var rotate=currentX*0.08;
     card.style.transform=`translateX(${currentX}px) translateY(${currentY*0.3}px) rotate(${rotate}deg)`;
-    const progress=Math.abs(currentX)/threshold;
+    var progress=Math.abs(currentX)/threshold;
     if(currentX<0){
       overlayL.style.opacity=Math.min(progress,1);
       overlayR.style.opacity=0;
@@ -2545,12 +2568,12 @@ function initSwipeTouch(){
     if(currentX<-threshold){
       swipeAction('pass');
     } else if(currentX>threshold){
-      const profiles=getVisibleProfiles();
-      const p=profiles[state.swipeIndex%profiles.length];
+      var profiles=getVisibleProfiles();
+      var p=profiles[state.swipeIndex%profiles.length];
       swipeAction('like',(p&&p.prenom),(p&&p.id));
     } else if(currentY<-60){
-      const profiles=getVisibleProfiles();
-      const p=profiles[state.swipeIndex%profiles.length];
+      var profiles=getVisibleProfiles();
+      var p=profiles[state.swipeIndex%profiles.length];
       card.style.transition='transform .3s,opacity .3s';
       card.style.transform='';
       if(p) openDemandeModal(p.prenom);
@@ -2575,11 +2598,11 @@ function openProfile(id){
   var p = allProfiles.find(function(x){ return String(x.id)===String(id); })
        || (window._dbProfiles||[]).find(function(x){ return String(x.id)===String(id); });
   if(!p) return;
-  const av=p.gender==='femme'?svgFemme(80):svgHomme(80);
-  const isFav=state.favorites.includes(p.id);
-  const dot=onlineDot(p.id,11);
-  const inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
-  const c=document.getElementById('app-content');
+  var av=p.gender==='femme'?svgFemme(80):svgHomme(80);
+  var isFav=state.favorites.includes(p.id);
+  var dot=onlineDot(p.id,11);
+  var inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
+  var c=document.getElementById('app-content');
   scrollToTop();
   c.innerHTML=`
     <div class="page-header">
@@ -2683,7 +2706,7 @@ function toggleFav(id){
 // ══════════ DEMANDES ══════════
 // Le compteur ne diminue QUE si la demande est ACCEPTÉE
 // Envoi d'une demande ne diminue pas encore (elle est "en attente")
-let currentDemandeTarget='';
+var currentDemandeTarget='';
 function openDemandeModal(prenom){
   if(!state.profileActive){openModal('modal-paywall');return;}
   // Vérifier si déjà envoyé une demande à ce profil
@@ -2857,10 +2880,10 @@ function renderMessages(c){
 }
 
 function openChat(name, type){
-  const c=document.getElementById('app-content');
+  var c=document.getElementById('app-content');
   scrollToTop();
-  const msgs=userChatHistory[name]||[];
-  const iconHtml=`<div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);flex-shrink:0"></div>`;
+  var msgs=userChatHistory[name]||[];
+  var iconHtml=`<div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #f0e0a0, #C9A84C 40%, #8B6914 100%);flex-shrink:0"></div>`;
   c.innerHTML=`
     <div class="page-header">
       <button class="back-btn" onclick="navTo('messages')">←</button>
@@ -2876,7 +2899,7 @@ function openChat(name, type){
         <button class="chat-send" onclick="sendUserMsg('${name}')">➤</button>
       </div>
     </div>`;
-  const el=document.getElementById('chat-msgs');
+  var el=document.getElementById('chat-msgs');
   if(el) el.scrollTop=el.scrollHeight;
 }
 
@@ -2918,19 +2941,19 @@ function sendUserMsg(name){
 
 // ══════════ NOTIFICATIONS ══════════
 // type: 'demande_recue' | 'like' | 'systeme' | 'acceptee' | 'refusee'
-const userNotifs=[];
+var userNotifs=[];
 
 function renderNotifs(c){
   // Mettre à jour le badge avec le bon nombre
   var _unread=userNotifs.filter(function(n){return n.unread;}).length;
   var _badge=document.getElementById('notif-badge');
   if(_badge){ if(_unread>0){_badge.textContent=_unread;_badge.style.display='flex';}else{_badge.textContent='';_badge.style.display='none';} }
-  let html=`<div class="page-header"><h2>Notifications</h2></div><div class="notif-list">`;
+  var html=`<div class="page-header"><h2>Notifications</h2></div><div class="notif-list">`;
   userNotifs.forEach(function(n){ 
-    const isDemande = n.type==='demande_recue';
-    const accepted  = n.statut==='acceptee';
-    const refused   = n.statut==='refusee';
-    const pending   = n.statut==='en_attente';
+    var isDemande = n.type==='demande_recue';
+    var accepted  = n.statut==='acceptee';
+    var refused   = n.statut==='refusee';
+    var pending   = n.statut==='en_attente';
 
     html+=`<div class="notif-item ${n.unread?'unread':''} ${n.profileId&&!isDemande?'clickable':''}"
       ${n.profileId&&!isDemande?('onclick="openProfileFromNotif('+n.profileId+')"'):''}>
@@ -3090,95 +3113,72 @@ function openProfileFromNotifDemande(notifId, profileId){
   }
 }
 
-async function acceptDemande(notifId){
+function acceptDemande(notifId){
   var n = userNotifs.find(function(x){ return x.id===notifId; });
   if(!n){ console.log('Notif introuvable:', notifId); return; }
 
-  // Mise à jour locale immédiate
   n.statut='acceptee'; n.unread=false;
-
-  // Fermer popup et re-render IMMÉDIATEMENT (pas besoin d'attendre Supabase)
   var popup = document.getElementById('notif-profile-popup');
   if(popup) popup.remove();
   var appContent = document.getElementById('app-content');
   if(appContent) renderNotifs(appContent);
-  showToast('✅ Demande de ' + (n.fromPrenom||'ce profil') + ' acceptée !','green');
+  showToast('✅ Demande accept\u00e9e !','green');
 
-  var sb = getSB(); if(!sb) return;
   var myId = String(state.user&&state.user.id||'');
   var fromId = String(n.profileId||'');
+  if(!myId){ return; }
 
-  console.log('acceptDemande: myId='+myId+' fromId='+fromId+' dbId='+n.dbId+' type notif='+n.id);
+  // Chercher la demande (récupère aussi from_profile_id si fromId manquant)
+  var url = fromId
+    ? SUPABASE_URL+'/rest/v1/demandes?from_profile_id=eq.'+fromId+'&to_profile_id=eq.'+myId+'&order=created_at.desc&limit=1&select=id,from_profile_id'
+    : SUPABASE_URL+'/rest/v1/demandes?to_profile_id=eq.'+myId+'&statut=eq.en_attente&order=created_at.desc&limit=1&select=id,from_profile_id';
 
-  // Chercher la demande en DB
-  var demandeId = null;
-  if(n.dbId && !n.notifDbId){
-    // Notif locale (loadDemandesRecues) → dbId = id de la demande directement
-    demandeId = n.dbId;
-    console.log('Demande via dbId local:', demandeId);
-  } else {
-    // Notif depuis table notifications → chercher par from/to profils
-    console.log('Recherche demande: from='+fromId+' to='+myId);
-    // Chercher la demande (en_attente OU déjà acceptee)
-    var demandeRes = await sb.from('demandes')
-      .select('id,statut')
-      .eq('from_profile_id', fromId)
-      .eq('to_profile_id', myId)
-      .order('created_at', {ascending:false})
-      .limit(1);
-    if(demandeRes && demandeRes.data && demandeRes.data.length>0){
-      demandeId = demandeRes.data[0].id;
-      console.log('Demande trouvée:', demandeId, '| statut:', demandeRes.data[0].statut);
-    } else {
-      console.log('⚠ Aucune demande trouvée entre from='+fromId+' to='+myId, demandeRes&&demandeRes.error);
+  fetch(url, { headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON} })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    var row = rows && rows[0] ? rows[0] : null;
+    // Récupérer fromId depuis la DB si manquant
+    if(row && row.from_profile_id) fromId = String(row.from_profile_id);
+    console.log('acceptDemande: myId='+myId+' fromId='+fromId+' demandeId='+(row?row.id:'?'));
+
+    if(!fromId){ console.log('❌ fromId manquant'); return; }
+
+    // 1. Mettre à jour statut demande
+    if(row && row.id){
+      fetch(SUPABASE_URL+'/rest/v1/demandes?id=eq.'+row.id, {
+        method:'PATCH',
+        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({statut:'acceptee'})
+      }).catch(function(){});
     }
-  }
 
-  if(demandeId){
-    await sb.from('demandes').update({statut:'acceptee'}).eq('id', demandeId);
-    console.log('✅ Demande mise à jour:', demandeId);
-  } else {
-    console.log('⚠ Demande introuvable pour acceptation');
-  }
+    // 2. Créer l'échange
+    var femId = state.user.gender==='femme' ? myId : fromId;
+    var homId = state.user.gender==='homme' ? myId : fromId;
+    fetch(SUPABASE_URL+'/rest/v1/echanges', {
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({femme_profile_id:femId, homme_profile_id:homId, created_at:new Date().toISOString()})
+    }).catch(function(){});
 
-  // Créer l'échange (match) - déterminer femme/homme
-  var femId, homId;
-  if(state.user.gender==='femme'){
-    femId = myId; homId = fromId;
-  } else {
-    femId = fromId; homId = myId;
-  }
-  // Vérifier si un échange existe déjà
-  var existCheck = await sb.from('echanges')
-    .select('id')
-    .or('and(femme_profile_id.eq.'+femId+',homme_profile_id.eq.'+homId+'),and(femme_profile_id.eq.'+homId+',homme_profile_id.eq.'+femId+')')
-    .limit(1);
-  if(existCheck && existCheck.data && existCheck.data.length>0){
-    console.log('Échange déjà existant, skip insert');
-  } else {
-    console.log('Création échange: femme='+femId+' homme='+homId);
-  
-    var echangeRes = await sb.from('echanges').insert({
-      femme_profile_id: String(femId),
-      homme_profile_id: String(homId),
-      created_at: new Date().toISOString(),
-    }).select().single().catch(function(e){ return {error:{message:String(e)}}; });
-    if(echangeRes && echangeRes.error){
-      console.log('❌ Echange insert error:', echangeRes.error.message||JSON.stringify(echangeRes.error));
-    } else {
-      console.log('✅ Échange créé OK !');
-    }
-  } // fin du else existCheck
-
-  // Notifier le demandeur: "Celia a accepté votre demande"
-  var acceptMsg = (state.user.prenom||'Quelqu\'un') + ' a accepté votre demande de mise en relation. Un administrateur rentrera bientôt en contact avec vous.';
-  fetch(SUPABASE_URL+'/rest/v1/notifications', {
-    method:'POST',
-    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
-    body:JSON.stringify({profile_id:String(fromId),type:'demande_acceptee',content:acceptMsg,from_profile_id:String(myId),from_prenom:state.user.prenom||'',lu:false,created_at:new Date().toISOString()})
-  }).catch(function(e){ console.log('notif acceptee error:', e); });
-  
-  console.log('✅ Notif acceptation envoyée à profile_id='+fromId);
+    // 3. Notifier l'expéditeur (fromId = Saliha)
+    var msg = (state.user.prenom||'Quelqu\'un')+' a accept\u00e9 votre demande de mise en relation. Un administrateur vous contactera prochainement.';
+    fetch(SUPABASE_URL+'/rest/v1/notifications', {
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({
+        profile_id: fromId,
+        type: 'demande_acceptee',
+        content: msg,
+        from_profile_id: myId,
+        from_prenom: state.user.prenom||'',
+        lu: false,
+        created_at: new Date().toISOString()
+      })
+    }).then(function(r){ console.log('✅ Notif envoy\u00e9e \u00e0 '+fromId+' status='+r.status); })
+    .catch(function(e){ console.log('notif error:', e); });
+  })
+  .catch(function(e){ console.log('acceptDemande error:', e); });
 }
 
 function acceptDemandeFromModal(notifId){
@@ -3222,21 +3222,21 @@ function openProfileFromNotif(profileId){
   // Naviguer sur l'onglet explorer puis afficher le profil
   state.currentNav='explorer';
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
-  const el=document.getElementById('nav-explorer');
+  var el=document.getElementById('nav-explorer');
   if(el) el.classList.add('active');
   openProfile(profileId);
 }
 
 // ══════════ MON PROFIL ══════════
 function renderMyProfile(c){
-  const u=state.user||{};
+  var u=state.user||{};
   // Compteur: diminue à chaque ENVOI (pas seulement acceptée)
   var acceptedUsed=Object.values(demandesEnvoyees).filter(function(d){return d==='acceptee';}).length;
   var remaining=Math.max(0,3-acceptedUsed);
   var dots=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=remaining?'used':'')+'"></div>';}).join('');
-  const av=u.gender==='femme'?svgFemme(60):svgHomme(60);
-  const completion=getProfileCompletion(u);
-  const isVerified=u.audio_attested||u.status==='active';
+  var av=u.gender==='femme'?svgFemme(60):svgHomme(60);
+  var completion=getProfileCompletion(u);
+  var isVerified=u.audio_attested||u.status==='active';
 
   c.innerHTML=`
     <div class="my-profile-header">
@@ -3435,7 +3435,7 @@ async function resumeProfile(){
 }
 
 async function deleteAccount(){
-  const val=document.getElementById('delete-confirm-input').value;
+  var val=document.getElementById('delete-confirm-input').value;
   if(val!=='SUPPRIMER') return showToast('⚠ Tapez exactement "SUPPRIMER"','red');
   closeModal('modal-delete');
   showToast('🗑️ Suppression en cours...','red');
@@ -3476,12 +3476,12 @@ function renderBoost(c){
 // ADMIN
 // ══════════════════════════════
 function updateAdminBadges(){
-  const allP = getAllAdminProfiles();
-  const np = allP.filter(function(p){return p.status==='pending';}).length;
-  const pb = document.getElementById('pending-badge');
+  var allP = getAllAdminProfiles();
+  var np = allP.filter(function(p){return p.status==='pending';}).length;
+  var pb = document.getElementById('pending-badge');
   if(pb) pb.textContent = np || '';
-  const nw = waliResponses.filter(function(r){return !r.read;}).length;
-  const wb = document.getElementById('wali-badge');
+  var nw = waliResponses.filter(function(r){return !r.read;}).length;
+  var wb = document.getElementById('wali-badge');
   if(wb) wb.textContent = nw > 0 ? nw : '';
 }
 
@@ -3489,9 +3489,9 @@ function adminTab(tab){
   state.activeAdminTab=tab;
   if(tab==='dashboard') startAdminRefresh(); else stopAdminRefresh();
   document.querySelectorAll('.admin-tab').forEach(function(t){t.classList.remove('active');});
-  const el=document.getElementById('atab-'+tab);
+  var el=document.getElementById('atab-'+tab);
   if(el) el.classList.add('active');
-  const c=document.getElementById('admin-content');
+  var c=document.getElementById('admin-content');
   scrollToTop();
   switch(tab){
     case 'dashboard': renderAdminDashboard(c); break;
@@ -3505,23 +3505,23 @@ function adminTab(tab){
 }
 
 function renderAdminDashboard(c){
-  const allP=getAllAdminProfiles();
-  const active=allP.filter(function(p){return p.status==='active';}).length;
-  const pending=allP.filter(function(p){return p.status==='pending';}).length;
+  var allP=getAllAdminProfiles();
+  var active=allP.filter(function(p){return p.status==='active';}).length;
+  var pending=allP.filter(function(p){return p.status==='pending';}).length;
   // Revenus = seulement les profils qui ont PAYÉ (exclut les activations gratuites)
-  const paidReal=allP.filter(function(p){return p.paid===true && !p.free_activated;}).length;
-  const notPaid=allP.filter(function(p){return !p.paid && !p.free_activated;}).length;
-  const femmes=allP.filter(function(p){return p.gender==='femme';}).length;
-  const hommes=allP.filter(function(p){return p.gender==='homme';}).length;
-  const nwali=waliResponses.filter(function(r){return !r.read;}).length;
-  const nOnline=allP.filter(function(p){return onlineStatus[p.id]==='online';}).length;
-  const nExchanges=exchangesList.length;
-  const total=allP.length;
+  var paidReal=allP.filter(function(p){return p.paid===true && !p.free_activated;}).length;
+  var notPaid=allP.filter(function(p){return !p.paid && !p.free_activated;}).length;
+  var femmes=allP.filter(function(p){return p.gender==='femme';}).length;
+  var hommes=allP.filter(function(p){return p.gender==='homme';}).length;
+  var nwali=waliResponses.filter(function(r){return !r.read;}).length;
+  var nOnline=allP.filter(function(p){return onlineStatus[p.id]==='online';}).length;
+  var nExchanges=exchangesList.length;
+  var total=allP.length;
 
   // TOUS les profils non activés : pending + non payés + inactifs
-  const nonActives=allP.filter(function(p){return p.status==='pending'||(p.status==='inactive'&&!p.paid);});
+  var nonActives=allP.filter(function(p){return p.status==='pending'||(p.status==='inactive'&&!p.paid);});
 
-  let html=`<div style="padding:16px">
+  var html=`<div style="padding:16px">
     <div class="section-title">📊 Vue d'ensemble · ${total} inscrits</div>
     <div class="admin-stats">
       <div class="stat-card"><div class="stat-num gold-text">${active}</div><div class="stat-label">Actifs</div></div>
@@ -3547,8 +3547,8 @@ function renderAdminDashboard(c){
     html+=`<p style="color:var(--green);font-size:.82rem;text-align:center;padding:14px">✓ Aucun profil en attente</p>`;
   } else {
     nonActives.forEach(function(p){ 
-      const av=p.gender==='femme'?svgFemme(32):svgHomme(32);
-      const date=p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'';
+      var av=p.gender==='femme'?svgFemme(32):svgHomme(32);
+      var date=p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'';
       html+=`<div class="admin-user-row" style="margin-bottom:7px">
         <div class="admin-user-avatar">${av}</div>
         <div class="admin-user-info">
@@ -3583,11 +3583,11 @@ function renderAdminDashboard(c){
 }
 
 function renderAdminPending(c){
-  const pending=allProfiles.filter(function(p){return p.status==='pending';});
-  let html=`<div style="padding:16px"><div class="section-title">⏳ En attente <span class="sc">${pending.length}</span></div>`;
+  var pending=allProfiles.filter(function(p){return p.status==='pending';});
+  var html=`<div style="padding:16px"><div class="section-title">⏳ En attente <span class="sc">${pending.length}</span></div>`;
   if(!pending.length) html+=`<p style="color:var(--muted);text-align:center;padding:28px">Aucun profil en attente ✓</p>`;
   pending.forEach(function(p){ 
-    const av=p.gender==='femme'?svgFemme(34):svgHomme(34);
+    var av=p.gender==='femme'?svgFemme(34):svgHomme(34);
     html+=`<div class="admin-user-row">
       <div class="admin-user-avatar">${av}</div>
       <div class="admin-user-info">
@@ -3611,7 +3611,7 @@ function renderAdminPending(c){
 }
 
 function getAllAdminProfiles(){
-  const dbRaw = window._adminProfiles || [];
+  var dbRaw = window._adminProfiles || [];
 
   if(dbRaw.length > 0){
     // Convertir les données brutes Supabase en format unifié
@@ -3646,7 +3646,7 @@ function getAllAdminProfiles(){
 }
 
 function renderAdminUsers(c){
-  const allP=getAllAdminProfiles();
+  var allP=getAllAdminProfiles();
   c.innerHTML=`<div style="padding:16px">
     <div class="section-title">👥 Tous les membres <span class="sc">${allP.length}</span></div>
     <div style="margin-bottom:12px">
@@ -3664,7 +3664,7 @@ function renderAdminUsers(c){
   </div>`;
 }
 
-let adminStatusFilter='all';
+var adminStatusFilter='all';
 
 function filterByStatus(status){
   adminStatusFilter=status;
@@ -3672,14 +3672,14 @@ function filterByStatus(status){
 }
 
 function buildUserList(list){
-  const filtered=adminStatusFilter&&adminStatusFilter!=='all'?list.filter(function(p){return p.status===adminStatusFilter;}):list;
+  var filtered=adminStatusFilter&&adminStatusFilter!=='all'?list.filter(function(p){return p.status===adminStatusFilter;}):list;
   if(!filtered.length) return `<div style="text-align:center;color:var(--muted);padding:30px;font-size:.84rem">Aucun profil dans cette catégorie</div>`;
   return filtered.map(function(p){
-    const av=p.gender==='femme'?svgFemme(34):svgHomme(34);
-    const dot=onlineDot(p.id,8);
-    const inExch=exchangesList.some(function(e){return e.femmeId===p.id||e.hommeId===p.id;});
-    const statusColor=p.status==='active'?'badge-active':p.status==='pending'?'badge-pending':p.status==='paused'?'badge-paused':'badge-inactive';
-    const statusLabel=p.status==='active'?'✓ Actif':p.status==='pending'?'⏳ Attente':p.status==='paused'?'⏸ Pause':'✗ Inactif';
+    var av=p.gender==='femme'?svgFemme(34):svgHomme(34);
+    var dot=onlineDot(p.id,8);
+    var inExch=exchangesList.some(function(e){return e.femmeId===p.id||e.hommeId===p.id;});
+    var statusColor=p.status==='active'?'badge-active':p.status==='pending'?'badge-pending':p.status==='paused'?'badge-paused':'badge-inactive';
+    var statusLabel=p.status==='active'?'✓ Actif':p.status==='pending'?'⏳ Attente':p.status==='paused'?'⏸ Pause':'✗ Inactif';
     return`<div class="admin-user-row">
       <div class="admin-user-avatar" style="position:relative">${av}<span style="position:absolute;bottom:0;right:0">${dot}</span></div>
       <div class="admin-user-info">
@@ -3702,9 +3702,9 @@ function buildUserList(list){
 }
 
 function filterAdminUsers(q){
-  const allP=getAllAdminProfiles();
+  var allP=getAllAdminProfiles();
   var filtered=q?allP.filter(function(p){return (p.prenom||'').toLowerCase().includes(q.toLowerCase())||(p.ville||'').toLowerCase().includes(q.toLowerCase());}):allP;
-  const el=document.getElementById('admin-users-list');
+  var el=document.getElementById('admin-users-list');
   if(el) el.innerHTML=buildUserList(filtered);
 }
 
@@ -3772,13 +3772,13 @@ function openAdminConvoMatch(uid, prenom){
 
 
 function renderAdminWali(c){
-  let html=`<div style="padding:16px"><div class="section-title">🌸 Réponses Wali <span class="sc">${waliResponses.length}</span></div>`;
+  var html=`<div style="padding:16px"><div class="section-title">🌸 Réponses Wali <span class="sc">${waliResponses.length}</span></div>`;
   if(!waliResponses.length){
     html+=`<div style="padding:30px;text-align:center;color:var(--muted)"><div style="font-size:2rem;margin-bottom:10px">🌸</div><p>Aucune réponse reçue.</p></div>`;
   }
   waliResponses.forEach(function(wr){ 
-    const match=matchesData.find(function(m){return m.id===wr.matchId;});
-    const homme=match?allProfiles.find(function(p){return p.id===match.hommeId;}):null;
+    var match=matchesData.find(function(m){return m.id===wr.matchId;});
+    var homme=match?allProfiles.find(function(p){return p.id===match.hommeId;}):null;
     html+=`<div class="wali-response-item">
       <div class="wr-title">
         Réponse de ${wr.prenom} ${!wr.read?'· <span style="color:var(--gold);font-weight:700">NOUVEAU</span>':''} · ${wr.time}
@@ -3796,7 +3796,7 @@ function renderAdminWali(c){
   c.innerHTML=html;
 }
 
-function markWaliRead(matchId){const wr=waliResponses.find(function(r){return r.matchId===matchId;});if(wr)wr.read=true;updateAdminBadges();}
+function markWaliRead(matchId){var wr=waliResponses.find(function(r){return r.matchId===matchId;});if(wr)wr.read=true;updateAdminBadges();}
 
 function notifyHomme(hommePrenom,femmePrenom){
   if(!adminConvos[hommePrenom]) adminConvos[hommePrenom]=[];
@@ -3926,7 +3926,7 @@ function sendAdminChat(name,gender){
 
 // ══════════ ADMIN ACTIONS ══════════
 async function approveProfile(id){
-  const p=getAdminProfile(id); if(!p) return;
+  var p=getAdminProfile(id); if(!p) return;
   // ✓ Valider = activer le profil SANS toucher au paid
   // Le paid reste ce qu'il était (false si non payé, true si payé)
   p.status='active';
@@ -3939,7 +3939,7 @@ async function approveProfile(id){
 }
 
 async function freeActivate(id){
-  const p=getAdminProfile(id); if(!p) return;
+  var p=getAdminProfile(id); if(!p) return;
   p.status='active';
   p.free_activated=true; // marqué gratuit → ne compte PAS dans les revenus
   // paid reste false pour ne pas fausser le solde
@@ -3963,7 +3963,7 @@ async function approveProfileFromDash(id){
 }
 
 async function deactivateProfile(id){
-  const p=getAdminProfile(id); if(!p) return;
+  var p=getAdminProfile(id); if(!p) return;
   p.status='inactive';
   if(p.user_id) await getSB().from('profils').update({status:'inactive'}).eq('id',id);
   showToast(`⏸ ${p.prenom} désactivé`,'red');
@@ -3971,7 +3971,7 @@ async function deactivateProfile(id){
 }
 
 async function reactivateProfile(id){
-  const p=getAdminProfile(id); if(!p) return;
+  var p=getAdminProfile(id); if(!p) return;
   p.status='active';
   if(p.user_id) await getSB().from('profils').update({status:'active'}).eq('id',id);
   showToast(`▶ ${p.prenom} réactivé`,'green');
@@ -3985,7 +3985,7 @@ function getAdminProfile(id){
       || allProfiles.find(function(p){ return String(p.id)===sid; });
 }
 
-let rejectId=null;
+var rejectId=null;
 function openRejectModal(id,name){
   rejectId=id;
   document.getElementById('reject-target').textContent=name;
@@ -3994,16 +3994,16 @@ function openRejectModal(id,name){
 }
 
 async function confirmReject(){
-  const reason=document.getElementById('reject-reason').value;
+  var reason=document.getElementById('reject-reason').value;
   if(!reason.trim()) return showToast('⚠ Entrez une raison','red');
-  const p=getAdminProfile(rejectId); if(p) p.status='inactive';
+  var p=getAdminProfile(rejectId); if(p) p.status='inactive';
   if((p&&p.user_id)) await getSB().from('profils').update({status:'inactive', reject_reason:reason}).eq('id',rejectId);
   updateAdminBadges(); closeModal('modal-admin-reject');
   showToast(`✗ ${(p&&p.prenom)} notifié(e) du refus`,'red');
   adminTab(state.activeAdminTab);
 }
 
-let adminMsgTarget='';
+var adminMsgTarget='';
 function openAdminMsgModal(name){
   adminMsgTarget=name;
   document.getElementById('admin-msg-target').textContent=name;
@@ -4012,7 +4012,7 @@ function openAdminMsgModal(name){
 }
 
 function sendAdminMsg(){
-  const msg=document.getElementById('admin-msg-content').value;
+  var msg=document.getElementById('admin-msg-content').value;
   if(!msg.trim())return showToast('⚠ Écrivez un message','red');
   if(!adminConvos[adminMsgTarget]) adminConvos[adminMsgTarget]=[];
   adminConvos[adminMsgTarget].push({from:'admin',text:msg});
@@ -4023,13 +4023,13 @@ function sendAdminMsg(){
 // MATCH → envoi wali à la SŒUR seulement (par l'administratrice)
 // L'administrateur notifie le FRÈRE séparément
 function sendWaliFromMatch(idx){
-  const m=matchesData[idx];if(!m)return;
-  const femme=allProfiles.find(function(p){return p.id===m.femmeId;});
-  const homme=allProfiles.find(function(p){return p.id===m.hommeId;});
+  var m=matchesData[idx];if(!m)return;
+  var femme=allProfiles.find(function(p){return p.id===m.femmeId;});
+  var homme=allProfiles.find(function(p){return p.id===m.hommeId;});
   if(!femme||!homme)return;
 
   // Message de l'ADMINISTRATRICE → SŒUR uniquement
-  const waliTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh chère sœur ${femme.prenom},\n\nUne demande de mise en relation vous concernant a été acceptée sur Oumelia. Conformément aux valeurs islamiques et à la sunnah du Prophète ﷺ, nous souhaitons savoir si vous disposez d'un tuteur matrimonial (Wali) pour superviser cette démarche.\n\n• Si vous avez un Wali, merci de nous le confirmer et de nous transmettre ses coordonnées.\n• Si vous n'en avez pas, nous pouvons vous orienter inchallah.\n\nVeuillez répondre directement à ce message.\n\nBarak Allahu fikoum.\nL'Administratrice Oumelia`;
+  var waliTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh chère sœur ${femme.prenom},\n\nUne demande de mise en relation vous concernant a été acceptée sur Oumelia. Conformément aux valeurs islamiques et à la sunnah du Prophète ﷺ, nous souhaitons savoir si vous disposez d'un tuteur matrimonial (Wali) pour superviser cette démarche.\n\n• Si vous avez un Wali, merci de nous le confirmer et de nous transmettre ses coordonnées.\n• Si vous n'en avez pas, nous pouvons vous orienter inchallah.\n\nVeuillez répondre directement à ce message.\n\nBarak Allahu fikoum.\nL'Administratrice Oumelia`;
 
   if(!adminConvos[femme.prenom]) adminConvos[femme.prenom]=[];
   adminConvos[femme.prenom].push({from:'admin',text:waliTxt});
@@ -4040,12 +4040,12 @@ function sendWaliFromMatch(idx){
 
 // Notifier le FRÈRE séparément (par l'ADMINISTRATEUR)
 function notifyFrereFromMatch(idx){
-  const m=matchesData[idx];if(!m)return;
-  const femme=allProfiles.find(function(p){return p.id===m.femmeId;});
-  const homme=allProfiles.find(function(p){return p.id===m.hommeId;});
+  var m=matchesData[idx];if(!m)return;
+  var femme=allProfiles.find(function(p){return p.id===m.femmeId;});
+  var homme=allProfiles.find(function(p){return p.id===m.hommeId;});
   if(!femme||!homme)return;
 
-  const hommeTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh cher frère ${homme.prenom},\n\nAlhamdulillah ! La demande de mise en relation a été acceptée. Nous attendons actuellement la confirmation de la sœur ${femme.prenom} concernant son tuteur matrimonial (Wali).\n\nNous vous contacterons dès que nous aurons sa réponse inchallah.\n\nBarak Allahu fikoum.\nL'Administrateur Oumelia`;
+  var hommeTxt=`Assalamu Alaykum wa rahmatullahi wa barakatuh cher frère ${homme.prenom},\n\nAlhamdulillah ! La demande de mise en relation a été acceptée. Nous attendons actuellement la confirmation de la sœur ${femme.prenom} concernant son tuteur matrimonial (Wali).\n\nNous vous contacterons dès que nous aurons sa réponse inchallah.\n\nBarak Allahu fikoum.\nL'Administrateur Oumelia`;
 
   if(!adminConvos[homme.prenom]) adminConvos[homme.prenom]=[];
   adminConvos[homme.prenom].push({from:'admin',text:hommeTxt});
@@ -4054,7 +4054,7 @@ function notifyFrereFromMatch(idx){
   adminTab('matches');
 }
 
-let audioVerifId=null;
+var audioVerifId=null;
 function openAudioVerif(id,name){
   audioVerifId=id;
   document.getElementById('audio-target-name').textContent=name;
@@ -4062,7 +4062,7 @@ function openAudioVerif(id,name){
 }
 
 function audioValidate(){
-  const p=allProfiles.find(function(x){return x.id===audioVerifId;});if(p){p.status='active';p.paid=true;p.audioAttested=false;}
+  var p=allProfiles.find(function(x){return x.id===audioVerifId;});if(p){p.status='active';p.paid=true;p.audioAttested=false;}
   updateAdminBadges();closeModal('modal-audio');
   showToast(`✅ Audio validé — ${(p&&p.prenom)} approuvée`,'green');
   adminTab(state.activeAdminTab);
@@ -4070,7 +4070,7 @@ function audioValidate(){
 
 function audioRejectFn(){
   closeModal('modal-audio');
-  const p=allProfiles.find(function(x){return x.id===audioVerifId;});
+  var p=allProfiles.find(function(x){return x.id===audioVerifId;});
   openRejectModal(audioVerifId,(p&&p.prenom)||'');
 }
 
@@ -4079,7 +4079,7 @@ function buyBoost(){
   openStripePayment('boost', async function(){
     // Activer le boost dans Supabase — expire dans 7 jours
     if((state.user&&state.user.supabaseId)){
-      const boostUntil = new Date(Date.now() + 7*24*60*60*1000).toISOString();
+      var boostUntil = new Date(Date.now() + 7*24*60*60*1000).toISOString();
       await getSB().from('profils').update({
         boosted: true,
         boost_until: boostUntil,
@@ -4091,13 +4091,13 @@ function buyBoost(){
 }
 
 // ══════════ STRIPE PAIEMENT INTÉGRÉ ══════════
-const STRIPE_PK = 'pk_live_51RfjYzDBg3GyY5i7Ho8bJ2y526OdrCXNgtxvpQ11HM56BsdSj5UCyzlEK49AzbXR6IJTWmV0KC0APYX9BROSdEYG00TzfS1a3w';
-let stripeClient = null; // initialisé de façon lazy au premier paiement
-let stripeElements = null;
-let stripeCardElement = null;
-let stripeCurrentType = null;
-let stripeCallback = null;
-let stripeClientSecret = null;
+var STRIPE_PK = 'pk_live_51RfjYzDBg3GyY5i7Ho8bJ2y526OdrCXNgtxvpQ11HM56BsdSj5UCyzlEK49AzbXR6IJTWmV0KC0APYX9BROSdEYG00TzfS1a3w';
+var stripeClient = null; // initialisé de façon lazy au premier paiement
+var stripeElements = null;
+var stripeCardElement = null;
+var stripeCurrentType = null;
+var stripeCallback = null;
+var stripeClientSecret = null;
 
 function getStripe(){
   if(!stripeClient){
@@ -4110,18 +4110,18 @@ function getStripe(){
   return stripeClient;
 }
 
-const STRIPE_PRODUCTS = {
+var STRIPE_PRODUCTS = {
   profil:   { name: 'Activation profil Oumelia', price: '5,99 €', amount: 599 },
   demandes: { name: 'Pack 3 demandes',            price: '2,99 €', amount: 299 },
   boost:    { name: 'Boost 7 jours',              price: '2,99 €', amount: 299 },
 };
 
 async function openStripePayment(type, callbackFn){
-  const stripe = getStripe();
+  var stripe = getStripe();
   if(!stripe) return;
   stripeCurrentType = type;
   stripeCallback = callbackFn;
-  const product = STRIPE_PRODUCTS[type];
+  var product = STRIPE_PRODUCTS[type];
 
   // Afficher le modal
   document.getElementById('stripe-product-name').textContent = product.name;
@@ -4151,12 +4151,12 @@ async function openStripePayment(type, callbackFn){
 
   // Créer le PaymentIntent via Netlify Function
   try {
-    const res = await fetch('/.netlify/functions/create-payment-intent', {
+    var res = await fetch('/.netlify/functions/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type, email: (state.user&&state.user.email) || '' }),
     });
-    const data = await res.json();
+    var data = await res.json();
     if(data.error){ showStripeError(data.error); return; }
     stripeClientSecret = data.clientSecret;
   } catch(err){
@@ -4172,18 +4172,18 @@ function closeStripeModal(){
 
 async function confirmStripePayment(){
   if(!stripeClientSecret || !stripeCardElement) return;
-  const stripe = getStripe();
+  var stripe = getStripe();
   if(!stripe) return;
 
-  const btn = document.getElementById('stripe-pay-btn');
-  const spinner = document.getElementById('stripe-spinner');
-  const label = document.getElementById('stripe-pay-label');
+  var btn = document.getElementById('stripe-pay-btn');
+  var spinner = document.getElementById('stripe-spinner');
+  var label = document.getElementById('stripe-pay-label');
 
   btn.disabled = true;
   spinner.style.display = 'block';
   label.textContent = 'Traitement en cours...';
 
-  const { error, paymentIntent } = await stripe.confirmCardPayment(stripeClientSecret, {
+  var { error, paymentIntent } = await stripe.confirmCardPayment(stripeClientSecret, {
     payment_method: {
       card: stripeCardElement,
       billing_details: {
@@ -4208,13 +4208,13 @@ async function confirmStripePayment(){
 }
 
 function showStripeError(msg){
-  const el = document.getElementById('stripe-error-msg');
+  var el = document.getElementById('stripe-error-msg');
   el.textContent = msg;
   el.style.display = 'block';
 }
-let deferredPrompt=null;
+var deferredPrompt=null;
 
-const manifestData={
+var manifestData={
   name:"Oumelia",
   short_name:"Oumelia",
   description:"Mariage halal pour musulmans pratiquants sunnites",
@@ -4228,9 +4228,9 @@ const manifestData={
 
 function initPWAManifest(){
   try{
-    const b=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
-    const m=document.getElementById('pwa-manifest');
-    const a=document.getElementById('apple-icon');
+    var b=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
+    var m=document.getElementById('pwa-manifest');
+    var a=document.getElementById('apple-icon');
     if(m) m.href=URL.createObjectURL(b);
     if(a) a.href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23080808'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%23C9A84C'/%3E%3Ccircle cx='306' cy='216' r='154' fill='%23080808'/%3E%3Cpath d='M256 170L268 234L332 256L268 278L256 342L244 278L180 256L244 234Z' fill='white' opacity='0.95'/%3E%3C/svg%3E";
   }catch(e){}
@@ -4255,7 +4255,7 @@ function installPWA(){
       document.getElementById('pwa-install-btn').style.display='none';
     });
   } else {
-    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+    var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
     if(isIOS) showToast('Safari : appuyez ⬆ → "Sur l\'écran d\'accueil"','gold');
     else showToast('Chrome : menu ⋮ → "Installer l\'application"','gold');
   }
@@ -4270,7 +4270,7 @@ if('serviceWorker' in navigator){
 
 // Charger Supabase et Stripe dynamiquement après le chargement de la page
 function loadScript(src, onload, onerror){
-  const s = document.createElement('script');
+  var s = document.createElement('script');
   s.src = src;
   s.onload = onload || function(){};
   s.onerror = onerror || function(){};
@@ -4499,20 +4499,19 @@ function loadUserNotifications(){
     notifs.forEach(function(notif){
       var existId = 'db_notif_'+notif.id;
       var exists = userNotifs.find(function(n){ return n.id===existId; });
-      if(exists){
-        // Mettre à jour le statut si la demande a changé
-        if(notif.type==='demande_recue'){
-          var dem = demandes.find(function(d){ return String(d.from_profile_id)===String(notif.from_profile_id); });
-          if(dem) exists.statut = dem.statut;
-        }
-        return;
-      }
 
-      // Déterminer le vrai statut depuis la table demandes
+      // Calculer le vrai statut depuis la table demandes
       var realStatut = null;
       if(notif.type==='demande_recue'){
         var dem = demandes.find(function(d){ return String(d.from_profile_id)===String(notif.from_profile_id); });
         realStatut = dem ? dem.statut : 'en_attente';
+      }
+
+      if(exists){
+        // Toujours mettre à jour le statut avec la vraie valeur DB
+        if(notif.type==='demande_recue') exists.statut = realStatut;
+        exists.unread = !notif.lu;
+        return;
       }
 
       userNotifs.unshift({
