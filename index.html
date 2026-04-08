@@ -234,18 +234,18 @@ function go(){
 }
 
 function showLogin(){
-  document.getElementById('pg-main').classList.add('out');
-  setTimeout(()=>{
-    document.getElementById('pg-login').classList.add('in');
-    document.getElementById('pwd-input').focus();
-  }, 300);
+  var main = document.getElementById('pg-main');
+  var login = document.getElementById('pg-login');
+  main.style.display = 'none';
+  login.classList.add('in');
+  setTimeout(function(){ document.getElementById('pwd-input').focus(); }, 50);
 }
 
 function showMain(){
   document.getElementById('pg-login').classList.remove('in');
   document.getElementById('pwd-input').value='';
   document.getElementById('login-err').style.display='none';
-  setTimeout(()=> document.getElementById('pg-main').classList.remove('out'), 50);
+  document.getElementById('pg-main').style.display='flex';
 }
 
 function toggleEye(){
