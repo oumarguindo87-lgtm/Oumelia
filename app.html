@@ -534,7 +534,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 .dossier-card .d-name{font-weight:700;font-size:.92rem;color:var(--white);margin-bottom:4px;}
 .dossier-card .d-meta{font-size:.76rem;color:var(--muted);margin-bottom:10px;}
 .dossier-card .d-docs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
-.dossier-card .d-doc-btn{background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.74rem;color:var(--gold);text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.dossier-card .d-doc-btn{background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.74rem;color:var(--gold);text-decoration:none;display:inline-flex;align-items:center;gap:5px;cursor:pointer;}
 .validate-call-btn{background:linear-gradient(135deg,#1a6e2e,#2ecc71);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:.84rem;font-weight:700;cursor:pointer;width:100%;margin-bottom:8px;}
 .ban-form{background:var(--card);border:1px solid rgba(231,76,60,.3);border-radius:10px;padding:14px;margin-bottom:16px;}
 .ban-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:.82rem;}
@@ -542,7 +542,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 .unban-btn{background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:6px;padding:4px 10px;font-size:.72rem;cursor:pointer;}
 .step-banner{background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:14px 16px;margin-bottom:16px;}
 .step-progress{display:flex;gap:4px;margin-top:10px;}
-.step-dot{flex:1;height:4px;border-radius:2px;background:rgba(201,168,76,.2);transition:background .3s;}
+.step-dot{flex:1;height:4px;border-radius:2px;background:rgba(201,168,76,.2);}
 .step-dot.done{background:var(--gold);}
 
 </style>
@@ -775,11 +775,23 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       <div class="reg-progress">
         <div class="reg-progress-fill" id="reg-progress-fill" style="width:33%"></div>
       </div>
-      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:18px">
-        <div class="progress-dot active" id="pstep-1" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--dark);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--muted);transition:all .3s;z-index:1">1</div>
-        <div class="progress-dot" id="pstep-2" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--dark);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--muted);transition:all .3s;z-index:1">2</div>
-        <div class="progress-dot" id="pstep-3" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--dark);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--muted);transition:all .3s;z-index:1">3</div>
+      <!-- Barre interne au formulaire : 3 sous-étapes (infos / pratique / compte) -->
+      <div class="reg-progress" style="margin-bottom:8px">
+        <div class="reg-progress-fill" id="reg-progress-fill" style="width:33%"></div>
       </div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:5px;margin-bottom:5px">
+        <div class="progress-dot active" id="pstep-1" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--gold);background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;color:#1a0e00;transition:all .3s;flex-shrink:0">1</div>
+        <div style="flex:1;height:2px;background:rgba(201,168,76,.2);max-width:28px"></div>
+        <div class="progress-dot" id="pstep-2" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--dark);display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;color:var(--muted);transition:all .3s;flex-shrink:0">2</div>
+        <div style="flex:1;height:2px;background:rgba(201,168,76,.2);max-width:28px"></div>
+        <div class="progress-dot" id="pstep-3" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--dark);display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;color:var(--muted);transition:all .3s;flex-shrink:0">3</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-bottom:14px;max-width:180px;margin-left:auto;margin-right:auto;text-align:center">
+        <span style="color:var(--gold);font-weight:600">Mon profil</span>
+        <span>Ma pratique</span>
+        <span>Mon compte</span>
+      </div>
+      <p style="text-align:center;font-size:.72rem;color:var(--muted);margin-bottom:12px">Étape 1 sur 4 — Inscription (compte non encore créé)</p>
 
       <!-- ÉTAPE 1 : Identité -->
       <div id="reg-step1">
@@ -822,19 +834,55 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           <p id="err-age" style="color:var(--red);font-size:.75rem;margin-top:4px;display:none"></p>
         </div>
         <div class="form-group">
-          <label>Ville</label>
-          <select id="reg-ville">
-            <option value="">Sélectionnez votre ville</option>
-            <option>Paris</option><option>Lyon</option><option>Marseille</option><option>Toulouse</option>
-            <option>Nice</option><option>Nantes</option><option>Strasbourg</option><option>Bordeaux</option>
-            <option>Lille</option><option>Rennes</option><option>Reims</option><option>Saint-Étienne</option>
-            <option>Toulon</option><option>Grenoble</option><option>Dijon</option><option>Angers</option>
-            <option>Nîmes</option><option>Villeurbanne</option><option>Aix-en-Provence</option>
-            <option>Brest</option><option>Le Mans</option><option>Amiens</option><option>Tours</option>
-            <option>Limoges</option><option>Clermont-Ferrand</option><option>Montpellier</option>
-            <option>Bruxelles</option><option>Liège</option><option>Charleroi</option><option>Genève</option>
-            <option>Zurich</option><option>Lausanne</option><option>Montréal</option><option>Autre</option>
+          <label>Pays <span style="color:var(--red)">*</span></label>
+          <select id="reg-pays" onchange="updateVillesByPays(this.value)">
+            <option value="">Sélectionnez votre pays</option>
+            <optgroup label="Europe">
+              <option value="France">🇫🇷 France</option>
+              <option value="Belgique">🇧🇪 Belgique</option>
+              <option value="Suisse">🇨🇭 Suisse</option>
+              <option value="Allemagne">🇩🇪 Allemagne</option>
+              <option value="Pays-Bas">🇳🇱 Pays-Bas</option>
+              <option value="Espagne">🇪🇸 Espagne</option>
+              <option value="Italie">🇮🇹 Italie</option>
+              <option value="Royaume-Uni">🇬🇧 Royaume-Uni</option>
+            </optgroup>
+            <optgroup label="Maghreb">
+              <option value="Algérie">🇩🇿 Algérie</option>
+              <option value="Maroc">🇲🇦 Maroc</option>
+              <option value="Tunisie">🇹🇳 Tunisie</option>
+              <option value="Libye">🇱🇾 Libye</option>
+              <option value="Mauritanie">🇲🇷 Mauritanie</option>
+            </optgroup>
+            <optgroup label="Afrique de l'Ouest">
+              <option value="Sénégal">🇸🇳 Sénégal</option>
+              <option value="Mali">🇲🇱 Mali</option>
+              <option value="Guinée">🇬🇳 Guinée</option>
+              <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+              <option value="Niger">🇳🇪 Niger</option>
+              <option value="Burkina Faso">🇧🇫 Burkina Faso</option>
+              <option value="Cameroun">🇨🇲 Cameroun</option>
+            </optgroup>
+            <optgroup label="Moyen-Orient & Asie">
+              <option value="Turquie">🇹🇷 Turquie</option>
+              <option value="Égypte">🇪🇬 Égypte</option>
+              <option value="Syrie">🇸🇾 Syrie</option>
+              <option value="Liban">🇱🇧 Liban</option>
+              <option value="Pakistan">🇵🇰 Pakistan</option>
+              <option value="Bangladesh">🇧🇩 Bangladesh</option>
+              <option value="Somalie">🇸🇴 Somalie</option>
+            </optgroup>
+            <optgroup label="Amérique du Nord">
+              <option value="Canada">🇨🇦 Canada</option>
+              <option value="USA">🇺🇸 États-Unis</option>
+            </optgroup>
+            <option value="Autre">🌍 Autre</option>
           </select>
+          <p id="err-pays" style="color:var(--red);font-size:.75rem;margin-top:4px;display:none">Le pays est obligatoire</p>
+        </div>
+        <div class="form-group">
+          <label>Ville <span style="color:var(--muted);font-size:.75rem">(optionnel)</span></label>
+          <input type="text" id="reg-ville" placeholder="Votre ville" autocomplete="address-level2" style="font-size:.9rem">
         </div>
         <div class="form-group">
           <label>Origine</label>
@@ -1052,7 +1100,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
             <option value="">Sélectionnez</option>
             <option>Premier mariage</option>
             <option>Remariage</option>
-            <option>Second mariage (Polygamie / Deuxième épouse)</option>
+            <option>Polygamie</option>
           </select>
         </div>
         <button class="btn btn-gold" style="width:100%" onclick="regStep3()">Suivant →</button>
@@ -1135,6 +1183,31 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           <p id="rec-done" class="hidden" style="color:var(--green);font-size:.84rem;margin-top:8px;text-align:center">✓ Enregistrement sauvegardé</p>
         </div>
 
+        <!-- Attestation audio frères -->
+        <div id="reg-audio-homme-wrap" style="display:none;margin-bottom:18px">
+          <div style="background:linear-gradient(135deg,rgba(201,168,76,.07),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.3);border-radius:var(--radius-sm);padding:16px;margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+              <span style="font-size:1.25rem;flex-shrink:0">🛡️</span>
+              <span style="font-size:.88rem;font-weight:700;color:var(--gold)">Attestation vocale</span>
+            </div>
+            <p style="font-size:.8rem;color:var(--white2);line-height:1.65;margin-bottom:10px">Pour garantir la sincérité des démarches, veuillez enregistrer une courte attestation vocale.</p>
+          </div>
+          <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px;margin-bottom:14px">
+            <p style="font-size:.74rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Phrase à lire à voix haute :</p>
+            <p style="font-size:.84rem;color:var(--white2);line-height:1.65;font-style:italic">"J'atteste devant Allah de l'exactitude de mes informations."</p>
+          </div>
+          <button id="rec-btn-homme" class="btn btn-outline" style="width:100%;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="toggleRecordHomme()">
+            <span id="rec-btn-icon-homme">🎙</span>
+            <span id="rec-btn-label-homme">Démarrer l'enregistrement</span>
+          </button>
+          <p id="rec-status-homme" style="text-align:center;color:var(--muted);font-size:.8rem"></p>
+          <div id="rec-playback-homme" style="display:none;margin-top:10px">
+            <audio id="rec-audio-homme" controls style="width:100%;margin-bottom:8px"></audio>
+            <button class="btn btn-outline btn-sm" style="width:100%;color:var(--muted);font-family:'Cairo',sans-serif;font-size:.78rem;cursor:pointer" onclick="reRecordHomme()">🔄 Recommencer</button>
+          </div>
+          <p id="rec-done-homme" style="color:var(--green);font-size:.84rem;margin-top:8px;text-align:center;display:none">✓ Enregistrement sauvegardé</p>
+        </div>
+
         <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px">
           <input type="checkbox" id="reg-cgu" style="margin-top:3px;flex-shrink:0">
           <label for="reg-cgu" style="font-size:.8rem;color:var(--muted);line-height:1.5;cursor:pointer">J'accepte les <a onclick="showLegal('cgu')" style="color:var(--gold);cursor:pointer">conditions d'utilisation</a> et la <a onclick="showLegal('privacy')" style="color:var(--gold);cursor:pointer">politique de confidentialité</a> d'Oumélia.</label>
@@ -1191,6 +1264,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <div class="admin-tab" id="atab-matches" onclick="adminTab('matches')">💚 Matches</div>
     <div class="admin-tab" id="atab-wali" onclick="adminTab('wali')">🌸 Wali <span id="wali-badge" style="display:none;background:var(--gold);color:#000;border-radius:8px;padding:1px 5px;font-size:.6rem"></span></div>
     <div class="admin-tab" id="atab-messages" onclick="adminTab('messages')">✉️ Messages</div>
+    <div class="admin-tab" id="atab-paused" onclick="adminTab('paused')">⏸ En pause</div>
+    <div class="admin-tab" id="atab-rdv" onclick="adminTab('rdv')">📅 RDV</div>
     <div class="admin-tab" id="atab-dossiers" onclick="adminTab('dossiers')">📂 Dossiers <span id="dossiers-badge" style="background:var(--gold);color:#000;border-radius:8px;padding:1px 5px;font-size:.6rem;display:none"></span></div>
     <div class="admin-tab" id="atab-bans" onclick="adminTab('bans')">🚫 Bans</div>
   </div>
@@ -1207,7 +1282,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <p style="color:var(--muted);font-size:.84rem;margin-bottom:14px;line-height:1.65">Votre dossier a été validé par notre équipe. Finalisez votre inscription pour accéder à la plateforme.</p>
     <div style="background:var(--gold-soft);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:.78rem;color:var(--white2);line-height:1.7">
       <div style="font-weight:700;color:var(--gold);margin-bottom:6px">🗺 Votre parcours :</div>
-      <div>① Paiement unique 14,99 € · ② Documents · ③ Appel · ④ Accès + 3 demandes incluses</div>
+      <div>① Inscription · ② Documents · ③ Entretien · ④ Paiement 14,99 € → Accès + 3 demandes incluses</div>
     </div>
     <div class="price-tag">14,99 €<span style="font-size:.62rem;font-weight:500;display:block;margin-top:2px;color:var(--gold)">paiement unique · à vie</span></div>
     <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px;margin:12px 0">
@@ -1423,17 +1498,18 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     </div>
   </div>
   <div style="padding:20px 16px;max-width:420px;margin:0 auto">
+    <!-- Barre 4 étapes : Inscription > Documents > Entretien > Paiement -->
     <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px">
-      <div style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1a0e00;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem">✓</div>
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1a0e00;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem" title="Inscription">✓</div>
       <div style="flex:1;height:2px;background:var(--gold)"></div>
-      <div style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1a0e00;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem">✓</div>
-      <div style="flex:1;height:2px;background:rgba(201,168,76,.3)"></div>
-      <div style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,.15);border:2px solid var(--gold);color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem">3</div>
+      <div style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,.15);border:2px solid var(--gold);color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem" title="Documents">2</div>
       <div style="flex:1;height:2px;background:rgba(201,168,76,.15)"></div>
-      <div style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem">4</div>
+      <div style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem" title="Entretien">3</div>
+      <div style="flex:1;height:2px;background:rgba(201,168,76,.1)"></div>
+      <div style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem" title="Paiement">4</div>
     </div>
     <div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-bottom:22px;padding:0 4px">
-      <span>Inscription</span><span>Paiement</span><span style="color:var(--gold);font-weight:600">Documents</span><span>Validation</span>
+      <span>Inscription</span><span style="color:var(--gold);font-weight:600">Documents</span><span>Entretien</span><span>Paiement</span>
     </div>
     <h2 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);margin-bottom:6px">📂 Vos documents</h2>
     <p style="font-size:.82rem;color:var(--white2);line-height:1.65;margin-bottom:20px">Pour finaliser votre inscription, veuillez déposer les documents ci-dessous. Ils sont traités de façon confidentielle.</p>
@@ -1456,7 +1532,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       </label>
     </div>
     <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:13px 14px;margin-bottom:20px;font-size:.8rem;color:var(--white2);line-height:1.6">
-      📞 <strong style="color:var(--gold)">Appel de validation :</strong> Notre équipe vous contactera dans les 24–48h sur le numéro renseigné.
+      📅 <strong style="color:var(--gold)">Entretien de validation :</strong> Vous recevrez un lien dans votre messagerie pour planifier votre entretien avec notre équipe.
     </div>
     <button id="btn-submit-docs" class="btn btn-gold" style="width:100%;padding:13px" onclick="submitVerificationDocs()">✓ Envoyer mon dossier</button>
     <p style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:10px">🔒 Vos documents sont chiffrés et accessibles uniquement à notre équipe.</p>
@@ -1526,7 +1602,9 @@ function loadUserProfile(authUser){
       enfants:profile.enfants||'',veut_enfants:profile.veut_enfants||'',halal:profile.halal||'',
       bio:profile.bio||'',status:profile.status,paid:profile.paid||false,
       free_activated:profile.free_activated||false,boosted:profile.boosted||false,
-      minhaj:profile.minhaj||'',converti:profile.converti||false,recherche:profile.recherche||''};
+      minhaj:profile.minhaj||'',converti:profile.converti||false,recherche:profile.recherche||'',
+      photo_url:profile.photo_url||null,
+      photo_visible:profile.photo_visible===true};
     state.profileActive  = profile.status==='active';
     state.profilePaused  = profile.status==='paused';
     state.profileStatus  = profile.status || 'pending';  // statut brut complet
@@ -1707,16 +1785,20 @@ var state = {
 
 // ══ Helpers statut workflow ══
 var STATUS_STEPS = {
-  'pending':          {step:1, total:3, label:'Étape 1/3 : Envoyez vos documents'},
-  'en_attente_rdv':   {step:2, total:3, label:'Étape 2/3 : Planifiez votre entretien téléphonique'},
-  'valide_a_payer':   {step:3, total:3, label:'Étape 3/3 : Finalisez votre inscription'},
-  'active':           {step:3, total:3, label:'Profil actif ✓'},
-  'paused':           {step:3, total:3, label:'Profil en pause'},
-  'inactive':         {step:0, total:3, label:'Profil désactivé'},
+  'pending':          {step:1, total:4, label:'Étape 1/4 — Inscription'},
+  'en_attente_rdv':   {step:2, total:4, label:'Étape 2/4 — Documents envoyés'},
+  'rdv_planifie':     {step:3, total:4, label:'Étape 3/4 — Entretien planifié'},
+  'valide_a_payer':   {step:4, total:4, label:'Étape 4/4 — Validation & Paiement'},
+  'active':           {step:4, total:4, label:'Profil actif ✓'},
+  'paused':           {step:4, total:4, label:'Profil en pause'},
+  'inactive':         {step:0, total:4, label:'Profil désactivé'},
 };
+// en_attente_rdv couvre les étapes 2 ET 3 selon si le RDV est planifié
+// On distingue par docs_submitted seul (étape 2) vs appel effectué (étape 3)
 function getStatusInfo(status){ return STATUS_STEPS[status] || STATUS_STEPS['pending']; }
 function canAccessApp(status){ return ['active','paused'].indexOf(status)>=0; }
 function canPay(status){ return status==='valide_a_payer'; }
+function canShowPayment(){ return canPay(state.profileStatus||state.user&&state.user.status); }
 
 // Demandes envoyées (id profil → statut)
 
@@ -1878,6 +1960,17 @@ function selectGender(g){
   // Barbe : frères uniquement
   var barreEl=document.getElementById('field-barbe')||document.getElementById('reg-barbe-wrap');
   if(barreEl) barreEl.style.display=g==='homme'?'':'none';
+  // Situation : ajouter "Marié" pour les hommes, retirer pour les femmes
+  var sitSel=document.getElementById('reg-situation');
+  if(sitSel){
+    var exMarie=sitSel.querySelector('option[value="Marié"]');
+    if(exMarie) exMarie.remove();
+    if(g==='homme'){
+      var optMarie=document.createElement('option');
+      optMarie.value='Marié'; optMarie.textContent='Marié';
+      sitSel.appendChild(optMarie);
+    }
+  }
   // Type de recherche : différent selon genre
   var rechF=document.getElementById('reg-recherche');
   var rechH=document.getElementById('reg-recherche-homme');
@@ -1936,20 +2029,14 @@ function checkPwdMatch(){
 }
 
 function updateProgressBar(step){
-  var pcts={1:33,2:66,3:100};
   var fill=document.getElementById('reg-progress-fill');
-  if(fill) fill.style.width=pcts[step]+'%';
-  [1,2,3].forEach(function(i){
-    var el=document.getElementById('pstep-'+i);
-    if(!el) return;
-    if(i<step){
-      el.style.background='var(--gold)'; el.style.borderColor='var(--gold)'; el.style.color='#1a0e00';
-    } else if(i===step){
-      el.style.background='var(--gold-soft)'; el.style.borderColor='var(--gold)'; el.style.color='var(--gold)';
-    } else {
-      el.style.background='var(--dark)'; el.style.borderColor='var(--border)'; el.style.color='var(--muted)';
-    }
-  });
+  if(fill) fill.style.width=(step/4*100)+'%';
+  for(var i=1;i<=4;i++){
+    var dot=document.getElementById('pstep-'+i);
+    if(!dot) continue;
+    if(i<=step){ dot.style.background='var(--gold)'; dot.style.borderColor='var(--gold)'; dot.style.color='#1a0e00'; }
+    else { dot.style.background='var(--dark)'; dot.style.borderColor='var(--border)'; dot.style.color='var(--muted)'; }
+  }
 }
 
 function regStep2(){
@@ -1963,6 +2050,11 @@ function regStep2(){
   var rechH=document.getElementById('reg-recherche-homme');
   if(rechF) rechF.style.display=g==='femme'?'block':'none';
   if(rechH) rechH.style.display=g==='homme'?'block':'none';
+  // Audio
+  var audioF=document.getElementById('reg-audio-wrap');
+  var audioH=document.getElementById('reg-audio-homme-wrap');
+  if(audioF) audioF.style.display=g==='femme'?'block':'none';
+  if(audioH) audioH.style.display=g==='homme'?'block':'none';
   if(!state.gender) return showToast('⚠ Choisissez votre genre','red');
   if(!document.getElementById('reg-prenom').value.trim()) return showToast('⚠ Entrez votre prénom','red');
   var age=parseInt(document.getElementById('reg-age').value);
@@ -2317,6 +2409,7 @@ function reRecord(){
 async function doRegister(){
   var email=document.getElementById('reg-email').value.trim();
   var telephone=(document.getElementById('reg-telephone')&&document.getElementById('reg-telephone').value||'').trim();
+  var pays=(document.getElementById('reg-pays')&&document.getElementById('reg-pays').value||'').trim();
   var pwd=document.getElementById('reg-pwd').value;
   var pwd2=(document.getElementById('reg-pwd2')&&document.getElementById('reg-pwd2').value);
   var cgu=(document.getElementById('reg-cgu')&&document.getElementById('reg-cgu').checked);
@@ -2325,7 +2418,9 @@ async function doRegister(){
   if(pwd2 && pwd2!==pwd) return showToast('⚠ Les mots de passe ne correspondent pas','red');
   if(!cgu) return showToast('⚠ Acceptez les conditions d\'utilisation','red');
   if(!telephone){var errTel=document.getElementById('err-telephone');if(errTel)errTel.style.display='block';return showToast('⚠ Le numéro de téléphone est obligatoire','red');}
+  if(!pays){var errPays=document.getElementById('err-pays');if(errPays)errPays.style.display='block';return showToast('⚠ Le pays est obligatoire','red');}
   if(state.gender==='femme'&&!state.audioRecorded) return showToast('⚠ Enregistrez votre attestation audio','red');
+  if(state.gender==='homme'&&!state.audioRecordedHomme) return showToast('⚠ Enregistrez votre attestation vocale','red');
 
   showToast('⏳ Création du compte...','gold');
 
@@ -2345,7 +2440,8 @@ async function doRegister(){
     prenom: document.getElementById('reg-prenom').value.trim()||'Utilisateur',
     gender: state.gender,
     age: parseInt(document.getElementById('reg-age').value)||25,
-    ville: document.getElementById('reg-ville').value.trim()||'',
+    pays: pays||'',
+    ville: (document.getElementById('reg-ville')&&document.getElementById('reg-ville').value||'').trim()||pays||'',
     origine: document.getElementById('reg-origine').value||'',
     pratique: document.getElementById('reg-pratique').value||'Pratiquant(e)',
     voile: state.gender==='femme'?((document.getElementById('reg-voile')&&document.getElementById('reg-voile').value)||null):null,
@@ -2432,7 +2528,42 @@ async function doRegister(){
     } catch(e){ console.log('Audio upload:', e); }
   }
 
-  // 4. Mettre à jour le state
+  // 4. Upload photo d'inscription via REST (sans session requise)
+  if(window._regPhotoFile && profileData.id){
+    try{
+      var photoExt = window._regPhotoFile.name.split('.').pop().toLowerCase() || 'jpg';
+      var photoPath = userId+'/avatar.'+photoExt;
+      var STORAGE_BASE_REG = SUPABASE_URL.replace('/rest/v1','')+'/storage/v1';
+      var photoRes = await fetch(STORAGE_BASE_REG+'/object/photos/'+photoPath,{
+        method:'POST',
+        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'x-upsert':'true','Content-Type':window._regPhotoFile.type||'image/jpeg'},
+        body:window._regPhotoFile
+      });
+      if(!photoRes.ok){
+        // Essai PUT si objet existe
+        photoRes=await fetch(STORAGE_BASE_REG+'/object/photos/'+photoPath,{
+          method:'PUT',
+          headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'x-upsert':'true','Content-Type':window._regPhotoFile.type||'image/jpeg'},
+          body:window._regPhotoFile
+        });
+      }
+      if(photoRes.ok||photoRes.status===200){
+        var photoPublicUrl = SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/public/photos/'+photoPath;
+        await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+userId,{
+          method:'PATCH',
+          headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+          body:JSON.stringify({photo_url:photoPublicUrl,photo_visible:false})
+        }).catch(function(){});
+        profileData.photo_url = photoPublicUrl;
+        profileData.photo_visible = false;
+        console.log('Photo uploadée:', photoPublicUrl);
+      } else {
+        console.log('Photo upload status:', photoRes.status);
+      }
+    }catch(ePhoto){ console.log('Photo upload error:', ePhoto); }
+  }
+
+  // 5. Mettre à jour le state
   state.user = {
     id: profileData.id,
     supabaseId: userId,
@@ -2445,6 +2576,8 @@ async function doRegister(){
     pratique: profileData.pratique,
     bio: profileData.bio,
     status: 'pending',
+    photo_url: profileData.photo_url || null,
+    photo_visible: false,
   };
   state.profileActive = false;
   state.profilePaused = false;
@@ -2869,7 +3002,7 @@ async function loadDemandesRecues(){
 
 function loadAllProfilesForAdmin(){
   console.log('Admin: chargement profils...');
-  return fetch(SUPABASE_URL+'/rest/v1/profils?select=id,prenom,gender,age,ville,origine,pratique,voile,barbe,situation,madhhab,coran,halal,enfants,nb_enfants,veut_enfants,bio,status,paid,free_activated,boosted,audio_attested,created_at,user_id,telephone,email,converti,recherche,langues,docs_submitted,call_validated,pending_verification&order=created_at.desc', {
+  return fetch(SUPABASE_URL+'/rest/v1/profils?select=id,prenom,gender,age,ville,pays,origine,pratique,voile,barbe,situation,madhhab,coran,halal,enfants,nb_enfants,veut_enfants,bio,status,paid,free_activated,boosted,audio_attested,created_at,user_id,telephone,email,converti,recherche,langues,docs_submitted,call_validated,pending_verification,photo_url,photo_visible&order=created_at.desc', {
     headers: {
       'apikey': SUPABASE_ANON,
       'Authorization': 'Bearer '+SUPABASE_ANON,
@@ -2896,7 +3029,10 @@ function loadAllProfilesForAdmin(){
         status: p.status||'pending', paid: p.paid===true,
         free_activated: p.free_activated===true, boosted: p.boosted===true,
         audio_attested: p.audio_attested===true,
-        created_at: p.created_at||'', user_id: p.user_id||''
+        created_at: p.created_at||'', user_id: p.user_id||'',
+        photo_url: p.photo_url||null,
+        photo_visible: p.photo_visible===true,
+        pays: p.pays||''
       };
     });
     console.log('Admin: '+window._adminProfiles.length+' profils OK');
@@ -2922,6 +3058,7 @@ function renderTab(tab){
     case 'notifs':   renderNotifs(c);   break;
     case 'profil':   renderMyProfile(c);break;
     case 'boost':    renderBoost(c);    break;
+    case 'mise-en-avant': renderBoost(c); break;
     case 'favoris':      renderFavoris(c);     break;
     case 'mes-demandes': renderMesDemandes(c); break;
   }
@@ -2968,7 +3105,22 @@ function renderMyProfile(c){
       if(infoEl) infoEl.textContent=dbRemaining+' demande(s) disponible(s)';
     }).catch(function(){});
   }
-  var av=u.gender==='femme'?svgFemme(60):svgHomme(60);
+  // Avatar : photo réelle si disponible, sinon SVG
+  var av;
+  if(u.photo_url){
+    var _blurS=u.photo_visible?'':'filter:blur(12px)';
+    var _imgId='profil-photo-'+Date.now();
+    av='<div style="width:72px;height:72px;border-radius:50%;overflow:hidden;display:inline-block;border:2px solid rgba(201,168,76,.4)">'
+      +'<img id="'+_imgId+'" src="'+u.photo_url+'" style="width:100%;height:100%;object-fit:cover;'+_blurS+'" alt="">'
+      +'</div>';
+    // Fallback en cas d'erreur de chargement (via setTimeout pour laisser le DOM se créer)
+    setTimeout(function(){
+      var imgEl=document.getElementById(_imgId);
+      if(imgEl) imgEl.onerror=function(){this.parentElement.innerHTML=u.gender==='femme'?svgFemme(72):svgHomme(72);};
+    },0);
+  } else {
+    av=u.gender==='femme'?svgFemme(72):svgHomme(72);
+  }
   var completion=getProfileCompletion(u);
   var isVerified=u.audio_attested||u.status==='active';
 
@@ -2997,12 +3149,16 @@ function renderMyProfile(c){
         ${completion<100?'<p style="font-size:.72rem;color:var(--muted);margin-top:5px">💡 Complétez votre bio pour augmenter votre visibilité</p>':'<p style="font-size:.72rem;color:var(--green);margin-top:5px">✓ Profil complet !</p>'}
       </div>
 
-      ${!state.profileActive?`<div class="paywall-banner" style="margin:0 0 14px">
-        <h3>Finalisez votre inscription</h3>
-        <p>Pour accéder aux profils, souscrivez et faites vérifier votre identité.</p>
-        <div class="price-tag">14,99 €<span style="font-size:.65rem">/mois</span></div><br>
-        <button class="btn btn-gold btn-sm" onclick="openModal('modal-paywall')">Commencer la vérification</button>
-      </div>`:''}
+      ${(function(){
+        if(state.profileActive) return '';
+        var _s=state.user&&state.user.status||'pending';
+        var _l=typeof getStatusInfo==='function'?getStatusInfo(_s).label:'Inscription en cours';
+        // Si docs envoyés mais statut pas encore mis à jour (PATCH en cours / lag réseau)
+        var _docsOk=u.docs_submitted||_s==='en_attente_rdv'||_s==='rdv_planifie';
+        var _d=_s==='valide_a_payer'?'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.':(_s==='en_attente_rdv'||_docsOk)?'Vos documents sont en cours d examen. Planifiez votre entretien via votre messagerie.':'Envoyez vos documents pour continuer la verification.';
+        var _b=_s==='valide_a_payer'?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (14,99 €) →</button>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="navTo(\'messages\')">📅 Planifier mon entretien →</button>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
+        return '<div class="step-banner" style="margin:0 0 14px"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+_l+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:4px;line-height:1.5">'+_d+'</div>'+_b+'</div>';
+      })()}
 
       ${state.profilePaused?`<div style="background:var(--blue-soft);border:1px solid rgba(74,158,255,.3);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;text-align:center">
         <p style="color:var(--blue);font-size:.84rem;margin-bottom:10px">Votre profil est en pause — invisible pour les autres membres.</p>
@@ -3096,7 +3252,7 @@ function renderEditProfile(){
   // Pratique
   html+='<div class="gold-divider"></div>';
   html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Pratique religieuse</p>';
-  html+='<div class="form-group"><label>Niveau de pratique</label><select id="edit-pratique"><option value="'+(u.pratique||'')+'">'+( u.pratique||'Choisir')+'</option><option>Débutant(e)</option><option>Pratiquant(e)</option><option>Très pratiquant(e)</option><option>Salafi/Sunnah</option></select></div>';
+  html+='<div class="form-group"><label>Niveau de pratique</label><select id="edit-pratique"><option value="'+(u.pratique||'')+'">'+( u.pratique||'Choisir')+'</option><option>Débutant(e)</option><option>Pratiquant(e)</option><option>Très pratiquant(e)</option></select></div>';
   html+='<div class="form-group"><label>Madhhab</label><select id="edit-madhhab"><option value="'+(u.madhhab||'')+'">'+( u.madhhab||'Choisir')+'</option><option>Hanafite</option><option>Malékite</option><option>Chaféite</option><option>Hanbalite</option><option>Peu importe</option></select></div>';
   html+='<div class="form-group"><label>Coran</label><select id="edit-coran"><option value="'+(u.coran||'')+'">'+( u.coran||'Choisir')+'</option><option>Quotidiennement</option><option>Régulièrement</option><option>Parfois</option><option>En apprentissage</option></select></div>';
   if(isF){
@@ -3303,12 +3459,18 @@ function toggleRechBtn(btn){
 function togglePhotoVisibility(checkbox){
   if(!state.user || !state.user.supabaseId) return;
   var show = checkbox.checked;
+  // Mettre à jour l'état local immédiatement
+  state.user.photo_visible = show;
+  // Mettre à jour le track (fond doré/gris)
+  var track = document.getElementById('toggle-photo-track');
+  if(track) track.style.background = show ? 'var(--gold)' : 'var(--border)';
+  // Sauvegarder en DB
   fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+state.user.supabaseId,{
     method:'PATCH',
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
     body:JSON.stringify({photo_visible:show})
   }).then(function(){
-    showToast(show ? 'Photo visible après acceptation mutuelle' : 'Photo masquée','gold');
+    showToast(show ? '📷 Photo visible après acceptation mutuelle' : '📷 Photo masquée','gold');
   }).catch(function(){ showToast('Erreur de mise à jour','red'); });
 }
 
@@ -3547,7 +3709,7 @@ function openFilterPanel(){
     </div>
   </div>`;
 
-  // Niveau de pratique (sans Salafi/Sunnah)
+  // Minhaj (filtres)
   html+=`<div class="filter-section">
     <div class="filter-section-title">Niveau de pratique</div>
     <div class="filter-options">
@@ -3559,7 +3721,7 @@ function openFilterPanel(){
   html+=`<div class="filter-section">
     <div class="filter-section-title">Minhaj</div>
     <div class="filter-options">
-      ${['Salafi','Non salafi','Je ne sais pas'].map(function(v){return filterBtn('minhaj',v,f.minhaj||[]);}).join('')}
+
     </div>
   </div>`;
 
@@ -3686,12 +3848,18 @@ function renderExplorer(c){
       <button class="toggle-btn ${state.viewMode==='swipe'?'active':''}" onclick="setView('swipe')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M5 12h14M14 6l6 6-6 6"/></svg>Swipe</button>
     </div>`;
   if(!state.profileActive){
-    html+=`<div class="paywall-banner">
-      <h3>✦ Accès sécurisé requis</h3>
-      <p>Pour accéder aux profils, souscrivez et faites vérifier votre identité.</p>
-      <div class="price-tag">14,99 €<span style="font-size:.65rem">/mois</span></div><br>
-      <button class="btn btn-gold" onclick="openModal('modal-paywall')">Commencer la vérification</button>
-    </div>`;
+    var _s3=state.user&&state.user.status||'pending';
+    var _l3=typeof getStatusInfo==='function'?getStatusInfo(_s3).label:'Inscription en cours';
+    var _btnId='explorer-step-btn';
+    var _d3=_s3==='valide_a_payer'?'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.':_s3==='en_attente_rdv'?'Vos documents sont examines. Planifiez votre entretien via la messagerie.':'Envoyez vos documents pour continuer la verification.';
+    var _bTxt=_s3==='valide_a_payer'?'\uD83D\uDCB3 Finaliser (14,99 \u20AC) \u2192':_s3==='en_attente_rdv'?'\uD83D\uDCC5 Planifier mon entretien \u2192':'\uD83D\uDCC2 Envoyer mes documents \u2192';
+    html+='<div class="step-banner" style="margin-bottom:14px" id="explorer-step-banner"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+_l3+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:4px;line-height:1.5">'+_d3+'</div><button id="'+_btnId+'" class="btn btn-gold btn-sm" style="margin-top:10px">'+_bTxt+'</button></div>';
+    setTimeout(function(){
+      var _b=document.getElementById(_btnId);
+      if(!_b) return;
+      var _s4=state.user&&state.user.status||'pending';
+      _b.onclick=_s4==='valide_a_payer'?function(){openModal('modal-paywall');}:_s4==='en_attente_rdv'?function(){navTo('messages');}:function(){showScreen('screen-verification-docs');};
+    },50);
   }
   html+=`
     <div class="search-bar">
@@ -4930,13 +5098,13 @@ function renderBoost(c){
         <p>Votre profil apparaît en premier dans les résultats pendant 7 jours.</p>
         <div class="price-tag" style="font-size:1.15rem">2,99 €</div>
         <p style="font-size:.72rem;color:var(--muted);margin:6px 0 10px">7 jours de visibilité maximale</p>
-        <button class="btn btn-gold" onclick="buyBoost()">⚡ Mise en avant — 2,99 €</button>
+        <button class="btn btn-gold" onclick="buyBoost()" ${typeof canShowPayment==='function'&&!canShowPayment()?'disabled style="opacity:.4;cursor:not-allowed"':''}>⚡ Mise en avant — 2,99 €</button>
       </div>
       <div class="profile-section">
         <h4>Ce qu'inclut la mise en avant</h4>
         <div class="profile-detail-row"><span>Durée</span><span>7 jours</span></div>
         <div class="profile-detail-row"><span>Position</span><span>En tête de liste</span></div>
-        <div class="profile-detail-row"><span>Badge visible</span><span>⚡ BOOST</span></div>
+        <div class="profile-detail-row"><span>Badge visible</span><span>⚡ Mise en avant</span></div>
         <div class="profile-detail-row"><span>Prix</span><span>2,99 €</span></div>
       </div>
     </div>`;
@@ -4974,6 +5142,8 @@ function adminTab(tab){
     case 'messages':  renderAdminMsgs(c);      break;
     case 'dossiers':  renderAdminDossiers(c);  break;
     case 'bans':      renderAdminBans(c);      break;
+    case 'paused':    if(typeof renderAdminPause==='function') renderAdminPause(c); break;
+    case 'rdv':       if(typeof renderAdminRdv==='function')   renderAdminRdv(c);   break;
   }
 }
 
@@ -5562,6 +5732,7 @@ function audioRejectFn(){
 }
 
 function buyBoost(){
+  if(typeof canPay==='function'&&!state.profileActive){showToast('⚠ Acces non encore valide par l\'admin','red');return;}
   activateBoost();
   openStripePayment('boost', async function(){
     // Activer le boost dans Supabase — expire dans 7 jours
@@ -5583,78 +5754,151 @@ function buyBoost(){
 function openAdminProfileDetail(id){
   var p = getAdminProfile(id);
   if(!p){ showToast('Profil introuvable','red'); return; }
-
   var c = document.getElementById('admin-content');
-  var av = p.gender==='femme' ? svgFemme(56) : svgHomme(56);
-  var statusLabel = p.status==='active' ? '<span class="badge badge-active">✓ Actif</span>'
-    : p.status==='pending_verification' ? '<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">💳 Payé — vérification en cours</span>'
-    : p.status==='pending' ? '<span class="badge badge-pending">⏳ En attente</span>'
-    : p.status==='inactive' ? '<span class="badge badge-inactive">✗ Inactif</span>'
-    : '<span class="badge">' + p.status + '</span>';
-
+  state.activeAdminTab = state.activeAdminTab || 'pending';
+  var supaBase = SUPABASE_URL.replace('/rest/v1','');
+  var avatarHtml = p.photo_url
+    ? '<img src="'+p.photo_url+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid rgba(201,168,76,.4)" alt="">'
+    : (p.gender==='femme' ? svgFemme(64) : svgHomme(64));
+  var stepBadges = {
+    pending:        '<span class="badge badge-pending">⏳ Étape 1/4</span>',
+    en_attente_rdv: '<span class="badge" style="background:rgba(52,152,219,.12);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Étape 2/4 — Docs reçus</span>',
+    rdv_planifie:   '<span class="badge" style="background:rgba(155,89,182,.12);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">📅 Étape 3/4 — RDV planifié</span>',
+    valide_a_payer: '<span class="badge" style="background:rgba(46,204,113,.12);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ Étape 4/4 — Attente paiement</span>',
+    active:  '<span class="badge badge-active">✓ Actif</span>',
+    paused:  '<span class="badge badge-paused">⏸ En pause</span>',
+    inactive:'<span class="badge badge-inactive">✗ Inactif</span>'
+  };
+  var stepBadge = stepBadges[p.status] || '<span class="badge">'+p.status+'</span>';
   var row = function(label, val){ return val ? '<div class="profile-detail-row"><span>'+label+'</span><span style="font-weight:500;color:var(--white)">'+val+'</span></div>' : ''; };
+  // Lecteur audio
+  var audioSection = '';
+  if(p.user_id){
+    var audioUrl = supaBase+'/storage/v1/object/public/verification-docs/'+p.user_id+'/audio.webm';
+    audioSection = '<div class="profile-section"><h4>🎙 Attestation audio</h4>'
+      +((p.audio_attested||p.audioAttested)
+        ? '<audio src="'+audioUrl+'" controls style="width:100%;margin-top:8px"></audio>'
+        : '<p style="font-size:.82rem;color:var(--muted);margin-top:6px">Aucune attestation</p>')
+      +'</div>';
+  }
+  // Documents
+  var docsSection = '';
+  if(p.user_id){
+    var base = supaBase+'/storage/v1/object/public/verification-docs/'+p.user_id+'/';
+    docsSection = '<div class="profile-section"><h4>📂 Documents</h4>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'
+      +'<a href="'+base+'cni.jpg" target="_blank" class="d-doc-btn">🪪 CNI</a>'
+      +(p.gender==='homme'?'<a href="'+base+'work.jpg" target="_blank" class="d-doc-btn">💼 Justificatif</a>':'')
+      +'</div>'
+      +row('Documents envoyés', p.docs_submitted?'✅ Oui':'⏳ Pas encore')
+      +row('Entretien validé', p.call_validated?'✅ Oui':'Non encore')
+      +'</div>';
+  }
+  // Bouton validation
+  var validateBtn = '';
+  var canValidate = p.status==='en_attente_rdv'||p.status==='rdv_planifie'||p.status==='pending';
+  if(canValidate && p.status!=='active'){
+    var _pid=String(p.id),_pnom=String(p.prenom||'').replace(/['"]/g,'');
+    validateBtn = '<button class="validate-call-btn" data-id="'+_pid+'" data-name="'+_pnom+'" onclick="adminValidateAfterCall(this.dataset.id,this.dataset.name)">✓ Valider &amp; débloquer le paiement</button>';
+  }
+  c.innerHTML = '<div style="padding:16px">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'
+    +'<button onclick="adminTab(state.activeAdminTab||\"dossiers\")" style="background:none;border:none;color:var(--gold);font-size:1.1rem;cursor:pointer;padding:0">←</button>'
+    +'<div style="font-family:\"Playfair Display\",serif;font-size:1rem;color:var(--gold)">Fiche membre</div>'
+    +'</div>'
+    +'<div style="text-align:center;margin-bottom:18px">'
+    +avatarHtml
+    +'<div style="font-family:\"Playfair Display\",serif;font-size:1.15rem;margin-top:8px">'+(p.prenom||'—')+(p.age?' · '+p.age+' ans':'')+'</div>'
+    +'<div style="margin-top:6px">'+stepBadge+'</div>'
+    +(p.paid?'<div style="font-size:.74rem;color:var(--green);margin-top:4px">✓ Paiement confirmé</div>':'<div style="font-size:.74rem;color:var(--muted);margin-top:4px">Paiement non encore effectué</div>')
+    +'</div>'
+    +'<div class="profile-section"><h4>📋 Identité</h4>'
+    +row('Genre', p.gender==='femme'?'🌸 Sœur':'🕌 Frère')
+    +row('Pays', p.pays)
+    +row('Ville', p.ville)
+    +row('Origine', p.origine)
+    +row('Situation', p.situation)
+    +row('Enfants', p.enfants)
+    +(p.enfants==='oui'?row('Nombre d enfants', p.nb_enfants):'')
+    +row('Veut des enfants', p.veut_enfants)
+    +row('Converti(e)', p.converti===true||p.converti==='true'?'Oui':p.converti==='false'||p.converti===false?'Non':'')
+    +row('Téléphone', p.telephone)
+    +row('Email', p.email)
+    +row('Inscrit le', p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'—')
+    +'</div>'
+    +'<div class="profile-section"><h4>🕌 Pratique religieuse</h4>'
+    +row('Niveau de pratique', p.pratique)
+    +row('Madhhab', p.madhhab)
+    +row('Lecture du Coran', p.coran)
+    +row('Alimentation', p.halal)
+    +(p.gender==='femme'?row('Port du voile', p.voile):'')
+    +(p.gender==='homme'?row('Barbe', p.barbe):'')
+    +row('Langues', Array.isArray(p.langues)?p.langues.join(', '):p.langues)
+    +'</div>'
+    +'<div class="profile-section"><h4>✍️ Présentation</h4>'
+    +'<p style="font-size:.84rem;color:var(--white2);line-height:1.7;margin:8px 0 0">'+(p.bio||'<em style="color:var(--muted)">Aucune présentation</em>')+'</p>'
+    +'</div>'
+    +(p.recherche?'<div class="profile-section"><h4>💍 Type de mariage recherché</h4><p style="font-size:.84rem;color:var(--white2);margin:8px 0 0">'+p.recherche+'</p></div>':'')
+    +docsSection
+    +audioSection
+    +'<div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">'
+    +validateBtn
+    +'<button class="btn btn-outline" data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openAdminMsgModal(this.dataset.pid,this.dataset.pnom)" style="width:100%">✉️ Envoyer un message</button>'
+    +'<button data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openRejectModal(this.dataset.pid,this.dataset.pnom)" style="width:100%;background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer">✗ Refuser le profil</button>'
+    +(p.telephone?'<button data-phone="'+p.telephone+'" data-pnom="'+String(p.prenom||'')+'" onclick="banPhone(this.dataset.phone,this.dataset.pnom)" style="width:100%;background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:10px;font-size:.82rem;cursor:pointer">🚫 Bannir ce numéro</button>':'')
+    +'</div>'
+    +'</div>';
+}
 
-  c.innerHTML = `<div style="padding:16px">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
-      <button onclick="adminTab(state.activeAdminTab||'pending')" style="background:none;border:none;color:var(--gold);font-size:1.1rem;cursor:pointer;padding:0">←</button>
-      <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold)">Fiche complète</div>
-    </div>
 
-    <div style="text-align:center;margin-bottom:18px">
-      ${av}
-      <div style="font-family:'Playfair Display',serif;font-size:1.15rem;margin-top:8px">${p.prenom||'—'}${p.age?' · '+p.age+' ans':''}</div>
-      <div style="margin-top:6px">${statusLabel}</div>
-      ${p.paid?'<div style="font-size:.74rem;color:var(--green);margin-top:4px">✓ Paiement reçu</div>':'<div style="font-size:.74rem;color:var(--muted);margin-top:4px">Non payé</div>'}
-    </div>
+// ══ Section Pause ══
+async function renderAdminPause(c){
+  c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
+  var res=await fetch(SUPABASE_URL+'/rest/v1/profils?status=eq.paused&select=id,prenom,gender,age,ville,telephone,user_id,status,created_at&order=created_at.desc',{
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  }).then(function(r){return r.json();}).catch(function(){return[];});
+  var list=Array.isArray(res)?res:[];
+  if(!list.length){c.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">Aucun profil en pause</div>';return;}
+  var h='<div style="padding:16px"><div class="section-title">⏸ Profils en pause ('+list.length+')</div>';
+  list.forEach(function(p){
+    h+='<div class="dossier-card" onclick="openAdminProfileDetail(\''+p.id+'\')" style="cursor:pointer">'
+      +'<div class="d-name">'+(p.prenom||'—')+', '+(p.age||'—')+' ans · '+(p.gender==='femme'?'Sœur':'Frère')+'</div>'
+      +'<div class="d-meta">📍 '+(p.ville||'—')+' · 📱 '+(p.telephone||'—')+'</div>'
+      +'<button onclick="event.stopPropagation();reactivateProfile(\''+p.id+'\')" style="width:100%;margin-top:8px;background:linear-gradient(135deg,#1a6e2e,#2ecc71);color:#fff;border:none;border-radius:8px;padding:9px;font-size:.8rem;font-weight:700;cursor:pointer">▶ Réactiver le profil</button>'
+      +'</div>';
+  });
+  h+='</div>';
+  c.innerHTML=h;
+}
 
-    <div class="profile-section">
-      <h4>📋 Identité</h4>
-      ${row('Genre', p.gender==='femme'?'Sœur':'Frère')}
-      ${row('Ville', p.ville)}
-      ${row('Origine', p.origine)}
-      ${row('Situation', p.situation)}
-      ${row('Enfants', p.enfants)}
-      ${p.enfants==='oui'?row('Nombre d\'enfants', p.nb_enfants):''}
-      ${row('Veut des enfants', p.veut_enfants)}
-      ${row('Converti(e)', p.converti)}
-      ${row('Téléphone', p.telephone)}
-      ${row('Email', p.email)}
-      ${row('Inscrit le', p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR',''):'—')}
-    </div>
-
-    <div class="profile-section">
-      <h4>🕌 Pratique religieuse</h4>
-      ${row('Niveau de pratique', p.pratique)}
-      ${row('Madhhab', p.madhhab)}
-      ${row('Lecture du Coran', p.coran)}
-      ${row('Alimentation', p.halal)}
-      ${p.gender==='femme'?row('Port du voile', p.voile):''}
-      ${p.gender==='homme'?row('Barbe', p.barbe):''}
-      ${row('Langues', p.langues)}
-    </div>
-
-    <div class="profile-section">
-      <h4>✍️ Présentation</h4>
-      <p style="font-size:.84rem;color:var(--white2);line-height:1.7;margin:8px 0 0">${p.bio||'<em style="color:var(--muted)">Aucune présentation</em>'}</p>
-    </div>
-
-    ${p.recherche?`<div class="profile-section"><h4>💍 Recherche</h4><p style="font-size:.84rem;color:var(--white2);line-height:1.7;margin:8px 0 0">${p.recherche}</p></div>`:''}
-
-    <div class="profile-section">
-      <h4>📂 Vérification</h4>
-      ${row('Documents envoyés', p.docs_submitted?'✅ Oui':'⏳ Non')}
-      ${row('Appel validé', p.call_validated?'✅ Oui':'Non')}
-      ${row('Attestation audio', (p.audio_attested||p.audioAttested)?'✅ Oui':'Non')}
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">
-      ${p.status!=='active'?'<button class="btn btn-gold" onclick="approveProfile(\''+p.id+'\');adminTab(\'pending\')">✓ Valider le profil</button>':''}
-      ${p.status==='pending_verification'?'<button class="validate-call-btn" onclick="adminValidateAfterCall(\''+p.id+'\',\''+p.prenom+'\')">📞 Appel effectué &amp; Valider</button>':''}
-      <button class="btn btn-outline" onclick="openAdminMsgModal(\'${p.prenom||''}\')">✉️ Envoyer un message</button>
-      <button onclick="openRejectModal(\'${p.id}\',\'${p.prenom||''}\')" style="background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer">✗ Refuser le profil</button>
-      ${p.telephone?'<button onclick="banPhone(\''+p.telephone+'\',\''+p.prenom+'\')" style="background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:10px;font-size:.82rem;cursor:pointer">🚫 Bannir ce numéro</button>':''}
-    </div>
-  </div>`;
+// ══ Section RDV ══
+async function renderAdminRdv(c){
+  c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
+  var res=await fetch(SUPABASE_URL+'/rest/v1/profils?status=eq.en_attente_rdv&select=id,prenom,gender,age,ville,telephone,user_id,docs_submitted,created_at&order=created_at.desc',{
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  }).then(function(r){return r.json();}).catch(function(){return[];});
+  var list=Array.isArray(res)?res:[];
+  var hommes=list.filter(function(p){return p.gender==='homme';});
+  var femmes=list.filter(function(p){return p.gender==='femme';});
+  var CALENDLY_FRERES='https://calendly.com/oumélia/entretien-freres';
+  var CALENDLY_SOEURS='https://calendly.com/oumélia/entretien-soeurs';
+  function renderRdvSection(arr,genre){
+    if(!arr.length) return '<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:10px">Aucun '+genre+' en attente de RDV</p>';
+    return arr.map(function(p){
+      return '<div class="dossier-card" onclick="openAdminProfileDetail(\''+p.id+'\')" style="cursor:pointer">'
+        +'<div class="d-name">'+(p.prenom||'—')+', '+(p.age||'—')+' ans</div>'
+        +'<div class="d-meta">📍 '+(p.ville||'—')+' · 📱 '+(p.telephone||'—')+'</div>'
+        +'<a href="'+(p.gender==='homme'?CALENDLY_FRERES:CALENDLY_SOEURS)+'" target="_blank" onclick="event.stopPropagation()" style="display:block;width:100%;margin-top:8px;background:var(--gold-soft);border:1px solid rgba(201,168,76,.3);color:var(--gold);border-radius:8px;padding:9px;font-size:.8rem;font-weight:700;text-align:center;text-decoration:none">📅 Voir les créneaux Calendly</a>'
+        +'</div>';
+    }).join('');
+  }
+  var h='<div style="padding:16px">'
+    +'<div class="section-title" style="margin-bottom:8px">📅 RDV Frères ('+hommes.length+')</div>'
+    +renderRdvSection(hommes,'frère')
+    +'<div class="section-title" style="margin:16px 0 8px">📅 RDV Sœurs ('+femmes.length+')</div>'
+    +renderRdvSection(femmes,'sœur')
+    +'</div>';
+  c.innerHTML=h;
 }
 
 
@@ -6211,20 +6455,51 @@ function sendAutoEmail(type,email,data){
 
 
 // ===== PATCHES =====
+state.audioRecordedHomme = false;
+var _mediaRecorderHomme=null, _audioChunksHomme=[];
+
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');s.style.display='none';});
   var el=document.getElementById(id);
   if(el){el.classList.add('active');el.style.display='block';el.scrollTop=0;
     if(id==='screen-verification-docs'&&typeof initVerificationScreen==='function') initVerificationScreen();}
 }
-
-// ── submitVerificationDocs ──
-var _uploadedDocs={};
-function initVerificationScreen(){
-  var g=state.user&&state.user.gender;
-  var ws=document.getElementById('work-doc-section');
-  if(ws) ws.style.display=(g==='homme')?'block':'none';
+function canShowPayment(){
+  var s=state.profileStatus||(state.user&&state.user.status)||'pending';
+  return s==='valide_a_payer'||s==='active';
 }
+function updateVillesByPays(pays){var e=document.getElementById('err-pays');if(e)e.style.display='none';}
+async function toggleRecordHomme(){
+  if(_mediaRecorderHomme&&_mediaRecorderHomme.state==='recording'){_mediaRecorderHomme.stop();return;}
+  try{
+    var stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    _audioChunksHomme=[];_mediaRecorderHomme=new MediaRecorder(stream);
+    _mediaRecorderHomme.ondataavailable=function(e){if(e.data.size>0)_audioChunksHomme.push(e.data);};
+    _mediaRecorderHomme.onstop=function(){
+      var blob=new Blob(_audioChunksHomme,{type:'audio/webm'});
+      var url=URL.createObjectURL(blob);
+      var au=document.getElementById('rec-audio-homme');
+      if(au){au.src=url;document.getElementById('rec-playback-homme').style.display='block';}
+      document.getElementById('rec-btn-icon-homme').textContent='🎙';
+      document.getElementById('rec-btn-label-homme').textContent='Démarrer l\'enregistrement';
+      var done=document.getElementById('rec-done-homme');if(done)done.style.display='block';
+      var st=document.getElementById('rec-status-homme');if(st)st.textContent='';
+      state.audioRecordedHomme=true;state._audioBlobHomme=blob;
+      stream.getTracks().forEach(function(t){t.stop();});
+    };
+    _mediaRecorderHomme.start();
+    document.getElementById('rec-btn-icon-homme').textContent='⏹';
+    document.getElementById('rec-btn-label-homme').textContent='Arrêter l\'enregistrement';
+    var st=document.getElementById('rec-status-homme');if(st)st.textContent='⏺ Enregistrement en cours...';
+  }catch(e){showToast('⚠ Microphone non accessible','red');}
+}
+function reRecordHomme(){
+  state.audioRecordedHomme=false;state._audioBlobHomme=null;
+  var pb=document.getElementById('rec-playback-homme');if(pb)pb.style.display='none';
+  var done=document.getElementById('rec-done-homme');if(done)done.style.display='none';
+}
+var _uploadedDocs={};
+function initVerificationScreen(){var g=state.user&&state.user.gender;var ws=document.getElementById('work-doc-section');if(ws) ws.style.display=(g==='homme')?'block':'none';}
 function handleDocUpload(type,filenameId,labelId){
   var input=document.getElementById(type==='cni'?'cni-file':'work-file');
   if(!input||!input.files||!input.files[0]) return;
@@ -6234,145 +6509,257 @@ function handleDocUpload(type,filenameId,labelId){
   if(le) le.style.border='1.5px dashed rgba(201,168,76,.7)';
   _uploadedDocs[type]=file;
 }
+
 async function submitVerificationDocs(){
   var g=state.user&&state.user.gender;
   if(!_uploadedDocs['cni']){showToast('⚠ La pièce d\'identité est obligatoire','red');return;}
   if(g==='homme'&&!_uploadedDocs['work']){showToast('⚠ Le justificatif de travail est obligatoire','red');return;}
   var btn=document.getElementById('btn-submit-docs');
   if(btn){btn.disabled=true;btn.textContent='Envoi en cours...';}
-  var CALENDLY_FRERES='https://calendly.com/oumélia/entretien-freres';
-  var CALENDLY_SOEURS='https://calendly.com/oumélia/entretien-soeurs';
+  showToast('⏳ Envoi des documents...','gold');
+
+  var uid=state.user&&state.user.supabaseId;
+  var pid=state.user&&state.user.id;
+  var STORAGE_BASE=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1';
+  var AUTH_HDR={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+
+  if(!uid){
+    showToast('❌ Session invalide. Reconnectez-vous.','red');
+    if(btn){btn.disabled=false;btn.textContent='✓ Envoyer mon dossier';}
+    return;
+  }
+
   try{
-    var uid=state.user&&state.user.supabaseId;
-    var pid=state.user&&state.user.id;
-    if(uid){
-      var cniExt=_uploadedDocs['cni'].name.split('.').pop();
-      await getSB().storage.from('verification-docs').upload(uid+'/cni.'+cniExt,_uploadedDocs['cni'],{upsert:true});
-      if(g==='homme'&&_uploadedDocs['work']){
-        var wExt=_uploadedDocs['work'].name.split('.').pop();
-        await getSB().storage.from('verification-docs').upload(uid+'/work.'+wExt,_uploadedDocs['work'],{upsert:true});
-      }
-      // Forcer mise à jour DB
-      var updateData={status:'en_attente_rdv',docs_submitted:true};
-      if(g==='homme'&&_uploadedDocs['work']) updateData.work_doc_submitted=true;
-      await getSB().from('profils').update(updateData).eq('user_id',uid);
-      if(state.user){state.user.status='en_attente_rdv';state.profileStatus='en_attente_rdv';}
-      var lien=g==='homme'?CALENDLY_FRERES:CALENDLY_SOEURS;
-      var resp=g==='homme'?'notre responsable masculin':'la fondatrice';
-      var msgTexte='Barak\'Allahu fik. Vos documents ont bien été reçus et sont en cours d\'étude.\n\nPour accéder aux profils, vous devez planifier un entretien avec '+resp+'. Veuillez choisir votre créneau directement ici :\n\n'+lien+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
-      if(pid){
-        await getSB().from('messages').insert({from_id:'admin',to_id:String(pid),content:msgTexte,created_at:new Date().toISOString()}).catch(function(){});
-      }
+    // ── Upload CNI ──
+    var cniFile=_uploadedDocs['cni'];
+    var cniExt=cniFile.name.split('.').pop().toLowerCase()||'jpg';
+    var cniPath=uid+'/cni.'+cniExt;
+    var cniContentType=cniFile.type||'image/jpeg';
+
+    var cniRes=await fetch(STORAGE_BASE+'/object/verification-docs/'+cniPath,{
+      method:'POST',
+      headers:Object.assign({'x-upsert':'true','Content-Type':cniContentType},AUTH_HDR),
+      body:cniFile
+    });
+    // Si 400 (objet existe déjà), essayer PUT
+    if(!cniRes.ok){
+      console.log('CNI POST status:',cniRes.status,'— essai PUT');
+      cniRes=await fetch(STORAGE_BASE+'/object/verification-docs/'+cniPath,{
+        method:'PUT',
+        headers:Object.assign({'x-upsert':'true','Content-Type':cniContentType},AUTH_HDR),
+        body:cniFile
+      });
     }
-  }catch(e){console.log('upload:',e);}
-  showToast('✅ Documents envoyés ! Consultez votre messagerie pour planifier votre entretien.','green');
-  setTimeout(function(){showScreen('screen-app');navTo('messages');},1800);
+    console.log('CNI upload final status:',cniRes.status);
+
+    // ── Upload justificatif (hommes uniquement) ──
+    var workPath=null;
+    if(g==='homme'&&_uploadedDocs['work']){
+      var workFile=_uploadedDocs['work'];
+      var workExt=workFile.name.split('.').pop().toLowerCase()||'jpg';
+      workPath=uid+'/work.'+workExt;
+      var workRes=await fetch(STORAGE_BASE+'/object/verification-docs/'+workPath,{
+        method:'POST',
+        headers:Object.assign({'x-upsert':'true','Content-Type':workFile.type||'image/jpeg'},AUTH_HDR),
+        body:workFile
+      });
+      if(!workRes.ok){
+        workRes=await fetch(STORAGE_BASE+'/object/verification-docs/'+workPath,{
+          method:'PUT',
+          headers:Object.assign({'x-upsert':'true','Content-Type':workFile.type||'image/jpeg'},AUTH_HDR),
+          body:workFile
+        });
+      }
+      console.log('Work upload status:',workRes.status);
+    }
+
+    // ── Mettre à jour le profil avec statut + chemins exacts ──
+    var patchData={
+      status:'en_attente_rdv',
+      docs_submitted:true,
+      cni_path:cniPath
+    };
+    if(workPath) patchData.work_path=workPath;
+
+    var patchRes=await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
+      method:'PATCH',
+      headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},AUTH_HDR),
+      body:JSON.stringify(patchData)
+    });
+    console.log('Profil PATCH status:',patchRes.status);
+
+    // ── Mettre à jour state local ──
+    if(state.user){
+      state.user.status='en_attente_rdv';
+      state.profileStatus='en_attente_rdv';
+      state.user.cni_path=cniPath;
+      if(workPath) state.user.work_path=workPath;
+    }
+
+    // ── Message Calendly ──
+    var CF='https://calendly.com/oumélia/entretien-freres';
+    var CS='https://calendly.com/oumélia/entretien-soeurs';
+    var lien=g==='homme'?CF:CS;
+    var resp=g==='homme'?'notre administrateur':'notre administratrice';
+    var msgTexte='Barak\'Allahu fik.\n\nVos documents ont bien été reçus.\n\nPour accéder aux profils, planifiez votre entretien avec '+resp+' :\n\n'+lien+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+
+    if(pid){
+      await fetch(SUPABASE_URL+'/rest/v1/messages',{
+        method:'POST',
+        headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},AUTH_HDR),
+        body:JSON.stringify({from_id:'admin',to_id:String(pid),content:msgTexte,created_at:new Date().toISOString()})
+      }).catch(function(e){console.log('msg err:',e);});
+    }
+
+    showToast('✅ Documents envoyés avec succès !','green');
+    setTimeout(function(){showScreen('screen-app');navTo('messages');},1800);
+
+  }catch(e){
+    console.error('submitVerificationDocs error:',e);
+    showToast('❌ Erreur lors de l\'envoi. Réessayez.','red');
+    if(btn){btn.disabled=false;btn.textContent='✓ Envoyer mon dossier';}
+  }
 }
 
-// ── Bandeau étape ──
+
+async function openSignedDoc(path,label){
+  showToast('⏳ Ouverture...','gold');
+  try{
+    var res=await fetch(SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/sign/verification-docs/'+path,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({expiresIn:3600})
+    });
+    var data=await res.json();
+    if(data.signedURL){window.open(SUPABASE_URL.replace('/rest/v1','')+data.signedURL,'_blank');}
+    else{showToast('❌ Document non disponible','red');console.log('sign err:',data);}
+  }catch(e){showToast('❌ Erreur ouverture','red');}
+}
+
+async function playSignedAudio(path,btn){
+  var uid=path.split('/')[0];
+  var audioEl=document.getElementById('audio-'+uid);
+  if(!audioEl) return;
+  if(audioEl.style.display!=='none'&&audioEl.src){audioEl.style.display='none';return;}
+  try{
+    var res=await fetch(SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/sign/verification-docs/'+path,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({expiresIn:3600})
+    });
+    var data=await res.json();
+    if(data.signedURL){
+      audioEl.src=SUPABASE_URL.replace('/rest/v1','')+data.signedURL;
+      audioEl.style.display='block';
+      audioEl.play().catch(function(){});
+    }else{showToast('❌ Audio non disponible','red');}
+  }catch(e){showToast('❌ Erreur audio','red');}
+}
+
 function renderStepBanner(status){
   var info=typeof getStatusInfo==='function'?getStatusInfo(status):null;
   if(!info||status==='active'||status==='paused') return '';
-  var steps=['pending','en_attente_rdv','valide_a_payer'];
-  var idx=steps.indexOf(status);
+  var steps=['pending','en_attente_rdv','rdv_planifie','valide_a_payer'];
+  var idx=steps.indexOf(status);if(idx<0) idx=0;
   var dots=steps.map(function(_,i){return '<div class="step-dot '+(i<=idx?'done':'')+'"></div>';}).join('');
-  var descs=['Envoyez votre CNI et justificatif de travail (pour les frères).','Planifiez votre entretien avec notre administrateur ou administratrice.','Votre dossier est validé. Finalisez votre paiement pour accéder aux profils.'];
-  var actions=['<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>','<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="navTo(\'messages\')">📅 Voir le lien de rendez-vous →</button>','<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (14,99 €) →</button>'];
-  var stepIdx=Math.max(0,idx);
-  return '<div class="step-banner"><div style="font-size:.82rem;font-weight:700;color:var(--gold)">'+info.label+'</div><div style="font-size:.76rem;color:var(--muted);margin-top:3px">'+descs[stepIdx]+'</div><div class="step-progress">'+dots+'</div>'+actions[stepIdx]+'</div>';
+  var descs={pending:'Envoyez vos documents pour continuer.',en_attente_rdv:'Documents reçus. Planifiez votre entretien via votre messagerie.',rdv_planifie:'Entretien planifié. Notre équipe vous contactera bientôt.',valide_a_payer:'Dossier validé. Finalisez votre paiement pour accéder aux profils.'};
+  var acts={pending:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>',en_attente_rdv:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="navTo(\'messages\')">📅 Planifier mon entretien →</button>',rdv_planifie:'<div style="font-size:.76rem;color:var(--muted);margin-top:8px">⏳ En attente de validation.</div>',valide_a_payer:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser (14,99 €) →</button>'};
+  return '<div class="step-banner"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+info.label+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:3px;line-height:1.5">'+(descs[status]||descs.pending)+'</div><div class="step-progress">'+dots+'</div>'+(acts[status]||acts.pending)+'</div>';
 }
 function injectStepBannerIfNeeded(){
   var status=state.user&&state.user.status;
   if(!status||status==='active'||status==='paused') return;
-  var c=document.getElementById('app-content');
-  if(!c) return;
-  var existing=document.getElementById('step-banner-inject');
-  if(existing) existing.remove();
-  var banner=document.createElement('div');
-  banner.id='step-banner-inject';
-  banner.innerHTML=renderStepBanner(status);
-  c.insertBefore(banner,c.firstChild);
+  var c=document.getElementById('app-content');if(!c) return;
+  var ex=document.getElementById('step-banner-inject');if(ex) ex.remove();
+  var b=document.createElement('div');b.id='step-banner-inject';b.innerHTML=renderStepBanner(status);
+  c.insertBefore(b,c.firstChild);
 }
-
-// ── Bans ──
 var _bannedPhones=(function(){try{return JSON.parse(localStorage.getItem('oumelia_bans')||'[]');}catch(e){return[];}})();
 function saveBans(){try{localStorage.setItem('oumelia_bans',JSON.stringify(_bannedPhones));}catch(e){}}
 function isPhoneBanned(p){return _bannedPhones.some(function(b){return b.phone===p;});}
 
-// ── Admin dossiers ──
 async function renderAdminDossiers(c){
   c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
-  var res=await fetch(SUPABASE_URL+'/rest/v1/profils?status=in.(pending,en_attente_rdv,valide_a_payer,pending_verification)&select=id,prenom,gender,age,ville,telephone,user_id,docs_submitted,status,created_at,audio_attested&order=created_at.desc',{
-    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
-  }).then(function(r){return r.json();}).catch(function(){return[];});
+  var baseFields='id,prenom,gender,age,ville,telephone,user_id,docs_submitted,status,created_at,audio_attested,photo_url';
+  var res=null;
+  // Essai avec colonnes optionnelles
+  try{
+    var r1=await fetch(SUPABASE_URL+'/rest/v1/profils?status=in.(pending,en_attente_rdv,rdv_planifie,valide_a_payer,pending_verification)&select='+baseFields+',cni_path,work_path&order=created_at.desc',{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
+    var d1=await r1.json();
+    if(Array.isArray(d1)){res=d1;}
+  }catch(e){}
+  // Fallback sans colonnes optionnelles
+  if(!res){
+    try{
+      var r2=await fetch(SUPABASE_URL+'/rest/v1/profils?status=in.(pending,en_attente_rdv,rdv_planifie,valide_a_payer,pending_verification)&select='+baseFields+'&order=created_at.desc',{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
+      res=await r2.json();
+    }catch(e){res=[];}
+  }
   var dossiers=Array.isArray(res)?res:[];
-  var badge=document.getElementById('dossiers-badge');
-  if(badge){badge.textContent=dossiers.length||'';badge.style.display=dossiers.length?'':'none';}
+  var badge=document.getElementById('dossiers-badge');if(badge){badge.textContent=dossiers.length||'';badge.style.display=dossiers.length?'':'none';}
   if(!dossiers.length){c.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">✅ Aucun dossier en attente</div>';return;}
-  var supaBase=SUPABASE_URL.replace('/rest/v1','');
-  var statusBadge=function(s){
-    if(s==='en_attente_rdv') return '<span style="font-size:.7rem;background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3);border-radius:6px;padding:2px 7px">📂 Docs reçus</span>';
-    if(s==='valide_a_payer') return '<span style="font-size:.7rem;background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3);border-radius:6px;padding:2px 7px">✅ Validé</span>';
-    return '<span style="font-size:.7rem;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:2px 7px">⏳ En attente docs</span>';
+  var sB=function(s){
+    if(s==='en_attente_rdv') return '<span style="font-size:.7rem;background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3);border-radius:6px;padding:2px 7px">📂 Étape 2/4</span>';
+    if(s==='rdv_planifie')   return '<span style="font-size:.7rem;background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3);border-radius:6px;padding:2px 7px">📅 Étape 3/4</span>';
+    if(s==='valide_a_payer') return '<span style="font-size:.7rem;background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3);border-radius:6px;padding:2px 7px">💳 Étape 4/4</span>';
+    return '<span style="font-size:.7rem;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:2px 7px">⏳ Étape 1/4</span>';
   };
   var hommes=dossiers.filter(function(p){return p.gender==='homme';});
   var femmes=dossiers.filter(function(p){return p.gender==='femme';});
-  function renderSection(list,titre){
+  function rS(list){
     if(!list.length) return '<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:12px">Aucun dossier</p>';
     return list.map(function(p){
       var uid=p.user_id||'';
-      var banned=isPhoneBanned(p.telephone||'');
-      var canValidate=p.status==='en_attente_rdv';
-      var dateInscrit=p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'';
-      var audioUrl=uid?supaBase+'/storage/v1/object/public/verification-docs/'+uid+'/audio.webm':'';
-      return '<div class="dossier-card" onclick="openAdminProfileDetail(\''+p.id+'\')" style="cursor:pointer">'
-        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="d-name" style="margin:0">'+(p.prenom||'—')+', '+(p.age||'—')+' ans</div>'+statusBadge(p.status)+'</div>'
-        +'<div class="d-meta">📍 '+(p.ville||'—')+' · 📱 '+(p.telephone||'—')+(dateInscrit?' · Inscrit le '+dateInscrit:'')+'</div>'
-        +'<div class="d-docs">'
-          +(uid?('<a class="d-doc-btn" href="'+supaBase+'/storage/v1/object/public/verification-docs/'+uid+'/cni.jpg" target="_blank" onclick="event.stopPropagation()">🪪 CNI</a>'):'<span style="font-size:.74rem;color:var(--muted)">Pas de CNI</span>')
-          +(uid&&p.gender==='homme'?('<a class="d-doc-btn" href="'+supaBase+'/storage/v1/object/public/verification-docs/'+uid+'/work.jpg" target="_blank" onclick="event.stopPropagation()">💼 Justif.</a>'):'')
+      var canV=p.status==='en_attente_rdv'||p.status==='rdv_planifie'||p.status==='pending';
+      var d=p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'';
+      // Photo dans la liste
+      var avHtml=p.photo_url
+        ?'<img src="'+p.photo_url+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid rgba(201,168,76,.3);flex-shrink:0" alt="">'
+        :(p.gender==='femme'?'<div style="width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🌸</div>':'<div style="width:38px;height:38px;border-radius:50%;background:rgba(52,152,219,.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🕌</div>');
+      // Chemins documents
+      var cniPath=p.cni_path||(uid?uid+'/cni.jpg':null);
+      var workPath=p.work_path||(uid&&p.gender==='homme'?uid+'/work.jpg':null);
+      var cniBtn=cniPath?'<button class="d-doc-btn" data-path="'+cniPath+'" onclick="event.stopPropagation();openSignedDoc(this.dataset.path,\'CNI\')">🪪 CNI</button>':'';
+      var workBtn=workPath?'<button class="d-doc-btn" data-path="'+workPath+'" onclick="event.stopPropagation();openSignedDoc(this.dataset.path,\'Justificatif\')">💼 Justif.</button>':'';
+      // Audio
+      var audioHtml='';
+      if(p.audio_attested&&uid){
+        audioHtml='<div style="margin-bottom:8px"><button class="d-doc-btn" data-path="'+uid+'/audio.webm" onclick="event.stopPropagation();playSignedAudio(this.dataset.path,this)">🎙 Écouter attestation</button><audio id="audio-'+uid+'" style="width:100%;display:none;margin-top:4px" controls onclick="event.stopPropagation()"></audio></div>';
+      }
+      return '<div class="dossier-card" data-id="'+p.id+'" onclick="openAdminProfileDetail(this.dataset.id)" style="cursor:pointer">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+avHtml
+        +'<div style="flex:1;min-width:0"><div class="d-name" style="margin:0">'+(p.prenom||'—')+', '+(p.age||'—')+' ans</div>'
+        +'<div class="d-meta" style="margin:0">📍 '+(p.ville||'—')+' · 📱 '+(p.telephone||'—')+(d?' · '+d:'')+'</div></div>'
+        +sB(p.status)+'</div>'
+        +'<div class="d-docs">'+cniBtn+workBtn
+        +'<span class="d-doc-btn" style="cursor:default;'+(p.docs_submitted?'color:var(--green)':'color:var(--muted)')+'">Docs: '+(p.docs_submitted?'✅':'⏳')+'</span>'
         +'</div>'
-        +(p.audio_attested&&uid?('<div style="margin-bottom:10px"><div style="font-size:.72rem;color:var(--muted);margin-bottom:4px">🎙 Attestation audio</div><audio src="'+audioUrl+'" controls style="width:100%;height:32px" onclick="event.stopPropagation()"></audio></div>'):'')
-        +(banned?'<div style="color:var(--red);font-size:.8rem;margin-bottom:8px">⛔ Numéro banni</div>':'')
-        +(canValidate?'<button class="validate-call-btn" data-id="'+p.id+'" data-name="'+(p.prenom||'').replace(/"/g,'')+'" onclick="event.stopPropagation();adminValidateAfterCall(this.dataset.id,this.dataset.name)">✓ Valider le dossier &amp; envoyer le lien de paiement</button>':'')
+        +audioHtml
+        +(canV?'<button class="validate-call-btn" data-id="'+p.id+'" data-name="'+(p.prenom||'').replace(/"/g,'')+'" onclick="event.stopPropagation();adminValidateAfterCall(this.dataset.id,this.dataset.name)">✓ Valider &amp; débloquer le paiement</button>':'')
         +'<div style="display:flex;gap:8px;margin-top:8px">'
-          +'<button data-id="'+p.id+'" data-name="'+(p.prenom||'').replace(/"/g,'')+'" onclick="event.stopPropagation();openRejectModal(this.dataset.id,this.dataset.name)" style="flex:1;background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:8px;font-size:.8rem;cursor:pointer">✗ Refuser</button>'
-          +(p.telephone?('<button data-phone="'+p.telephone+'" data-name="'+(p.prenom||'')+'" onclick="event.stopPropagation();banPhone(this.dataset.phone,this.dataset.name)" style="background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer">🚫 Bannir</button>'):'')
+        +'<button data-id="'+p.id+'" data-name="'+(p.prenom||'').replace(/"/g,'')+'" onclick="event.stopPropagation();openRejectModal(this.dataset.id,this.dataset.name)" style="flex:1;background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:8px;font-size:.8rem;cursor:pointer">✗ Refuser</button>'
+        +(p.telephone?'<button data-phone="'+p.telephone+'" data-name="'+(p.prenom||'')+'" onclick="event.stopPropagation();banPhone(this.dataset.phone,this.dataset.name)" style="background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer">🚫</button>':'')
         +'</div></div>';
     }).join('');
   }
-  var h='<div style="padding:16px">'
-    +'<div class="section-title" style="margin-bottom:8px">📂 Dossiers Hommes ('+hommes.length+')</div>'
-    +renderSection(hommes,'hommes')
-    +'<div class="section-title" style="margin:16px 0 8px">📂 Dossiers Femmes ('+femmes.length+')</div>'
-    +renderSection(femmes,'femmes')
-    +'</div>';
-  c.innerHTML=h;
+  c.innerHTML='<div style="padding:16px"><div class="section-title" style="margin-bottom:8px">📂 Dossiers Frères ('+hommes.length+')</div>'+rS(hommes)+'<div class="section-title" style="margin:16px 0 8px">📂 Dossiers Sœurs ('+femmes.length+')</div>'+rS(femmes)+'</div>';
 }
 
 async function adminValidateAfterCall(id,prenom){
-  if(!confirm('Valider le dossier de '+prenom+' et lui envoyer le lien de paiement ?')) return;
+  if(!confirm('Valider le dossier de '+prenom+' et envoyer le lien de paiement ?')) return;
   if(window._adminProfiles){var f=window._adminProfiles.find(function(x){return String(x.id)===String(id);});if(f)f.status='valide_a_payer';}
-  await getSB().from('profils').update({status:'valide_a_payer',call_validated:true}).eq('id',id).catch(function(){});
-  var msg='🎉 Félicitations '+prenom+'\n\nVotre dossier a été validé par l\'équipe Oumélia. Pour activer votre compte et commencer vos rencontres, finalisez votre inscription (14,99 € — paiement unique à vie).\n\nConnectez-vous sur oumélia.com → cliquez sur "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
-  await getSB().from('messages').insert({from_id:'admin',to_id:String(id),content:msg,created_at:new Date().toISOString()}).catch(function(){});
-  showToast('✅ '+prenom+' validé(e) — lien paiement envoyé','green');
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({status:'valide_a_payer',call_validated:true})}).catch(function(){});
+  var msg='🎉 Félicitations '+prenom+'\n\nVotre profil a été validé par notre équipe.\n\nÉtape 4/4 — Finalisez votre paiement (14,99 €) pour accéder aux membres.\n\nConnectez-vous sur oumélia.com → "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  await fetch(SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({from_id:'admin',to_id:String(id),content:msg,created_at:new Date().toISOString()})}).catch(function(){});
+  showToast('✅ '+prenom+' validé — notification envoyée','green');
   adminTab('dossiers');
 }
-
 function renderAdminBans(c){var bans=_bannedPhones;var h='<div style="padding:16px"><div class="section-title">🚫 Numéros bannis ('+bans.length+')</div><div class="ban-form"><div style="font-weight:700;font-size:.88rem;margin-bottom:12px;color:var(--gold)">Bannir un numéro</div><div style="display:flex;gap:8px"><input type="tel" id="ban-phone-input" placeholder="+33 6 xx" style="flex:1;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--white);font-size:.88rem;font-family:\'Cairo\',sans-serif"><input type="text" id="ban-reason-input" placeholder="Raison" style="flex:1.5;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--white);font-size:.88rem;font-family:\'Cairo\',sans-serif"></div><button onclick="addBan()" style="width:100%;margin-top:10px;background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">🚫 Bannir définitivement</button></div>';if(!bans.length)h+='<p style="text-align:center;color:var(--muted);padding:20px">Aucun numéro banni</p>';else bans.forEach(function(b,i){h+='<div class="ban-row"><div><div style="font-weight:600;font-size:.86rem">'+b.phone+'</div><div style="font-size:.72rem;color:var(--muted)">'+(b.name||'')+(b.reason?' · '+b.reason:'')+(b.date?' · '+b.date:'')+'</div></div><button class="unban-btn" onclick="removeBan('+i+')">Débannir</button></div>';});h+='</div>';c.innerHTML=h;}
 function addBan(){var phone=((document.getElementById('ban-phone-input')&&document.getElementById('ban-phone-input').value)||'').trim();var reason=((document.getElementById('ban-reason-input')&&document.getElementById('ban-reason-input').value)||'').trim();if(!phone){showToast('⚠ Entrez un numéro','red');return;}if(_bannedPhones.some(function(b){return b.phone===phone;})){showToast('Déjà banni','red');return;}_bannedPhones.push({phone:phone,reason:reason,date:new Date().toLocaleDateString('fr-FR'),name:''});saveBans();showToast('🚫 '+phone+' banni','red');adminTab('bans');}
 function banPhone(phone,name){if(!phone)return;if(_bannedPhones.some(function(b){return b.phone===phone;})){showToast('Déjà banni','red');return;}_bannedPhones.push({phone:phone,reason:'Fraude',date:new Date().toLocaleDateString('fr-FR'),name:name||''});saveBans();showToast('🚫 '+phone+' banni','red');adminTab('dossiers');}
 function removeBan(i){var b=_bannedPhones[i];if(!b)return;if(!confirm('Débannir '+b.phone+' ?'))return;_bannedPhones.splice(i,1);saveBans();adminTab('bans');}
-
-// Injecter bandeau après navTo
-if(typeof navTo==='function'){
-  var _navToOrig=navTo;
-  navTo=function(tab){
-    _navToOrig(tab);
-    setTimeout(injectStepBannerIfNeeded,100);
-  };
-}
+if(typeof navTo==='function'){var _nO=navTo;navTo=function(t){_nO(t);setTimeout(injectStepBannerIfNeeded,100);};}
 
 </script>
 </body>
