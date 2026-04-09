@@ -533,7 +533,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 .dossier-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
 .dossier-card .d-name{font-weight:700;font-size:.92rem;color:var(--white);margin-bottom:4px;}
 .dossier-card .d-meta{font-size:.76rem;color:var(--muted);margin-bottom:10px;}
-.dossier-card .d-docs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.dossier-card .d-docs{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
 .dossier-card .d-doc-btn{background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.74rem;color:var(--gold);text-decoration:none;display:inline-flex;align-items:center;gap:5px;cursor:pointer;}
 .validate-call-btn{background:linear-gradient(135deg,#1a6e2e,#2ecc71);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:.84rem;font-weight:700;cursor:pointer;width:100%;margin-bottom:8px;}
 .ban-form{background:var(--card);border:1px solid rgba(231,76,60,.3);border-radius:10px;padding:14px;margin-bottom:16px;}
@@ -3002,40 +3002,61 @@ async function loadDemandesRecues(){
 
 function loadAllProfilesForAdmin(){
   console.log('Admin: chargement profils...');
-  return fetch(SUPABASE_URL+'/rest/v1/profils?select=id,prenom,gender,age,ville,pays,origine,pratique,voile,barbe,situation,madhhab,coran,halal,enfants,nb_enfants,veut_enfants,bio,status,paid,free_activated,boosted,audio_attested,created_at,user_id,telephone,email,converti,recherche,langues,docs_submitted,call_validated,pending_verification,photo_url,photo_visible&order=created_at.desc', {
-    headers: {
-      'apikey': SUPABASE_ANON,
-      'Authorization': 'Bearer '+SUPABASE_ANON,
-      'Content-Type': 'application/json'
-    }
-  })
+  // Champs de base fiables (toujours présents dans la table profils)
+  var BASE_FIELDS = 'id,prenom,gender,age,ville,pays,origine,pratique,voile,barbe,situation,madhhab,coran,halal,enfants,nb_enfants,veut_enfants,bio,status,paid,free_activated,boosted,audio_attested,created_at,user_id,telephone,converti,recherche,langues,docs_submitted,call_validated,photo_url,photo_visible';
+  // Champs optionnels (ajoutés manuellement — on les tente mais on fallback si absent)
+  var OPT_FIELDS = ',cni_path,work_path,pending_verification';
+
+  function mapProfile(p){
+    return {
+      id: String(p.id), prenom: p.prenom||'', gender: p.gender||'',
+      age: p.age||'', ville: p.ville||'', pays: p.pays||'',
+      origine: p.origine||'', pratique: p.pratique||'',
+      voile: p.voile||null, barbe: p.barbe||null,
+      situation: p.situation||'', madhhab: p.madhhab||'', bio: p.bio||'',
+      coran: p.coran||'', halal: p.halal||'',
+      enfants: p.enfants||'', nb_enfants: p.nb_enfants||'',
+      veut_enfants: p.veut_enfants||'',
+      telephone: p.telephone||'',
+      email: p.email||'',  // peut être absent (stocké dans auth.users)
+      converti: p.converti||'', recherche: p.recherche||'',
+      langues: p.langues||'',
+      docs_submitted: p.docs_submitted===true,
+      call_validated: p.call_validated===true,
+      status: p.status||'pending', paid: p.paid===true,
+      free_activated: p.free_activated===true, boosted: p.boosted===true,
+      audio_attested: p.audio_attested===true,
+      created_at: p.created_at||'', user_id: p.user_id||'',
+      photo_url: p.photo_url||null,
+      photo_visible: p.photo_visible===true,
+      cni_path: p.cni_path||null,
+      work_path: p.work_path||null
+    };
+  }
+
+  var HDR = {'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+
+  // Essai 1 : avec les champs optionnels
+  return fetch(SUPABASE_URL+'/rest/v1/profils?select='+BASE_FIELDS+OPT_FIELDS+'&order=created_at.desc', {headers:HDR})
   .then(function(r){ return r.json(); })
   .then(function(data){
-    if(!Array.isArray(data)){ console.log('Admin error:', JSON.stringify(data).slice(0,100)); return; }
-    window._adminProfiles = data.map(function(p){
-      return {
-        id: String(p.id), prenom: p.prenom||'', gender: p.gender||'',
-        age: p.age||'', ville: p.ville||'', origine: p.origine||'',
-        pratique: p.pratique||'', voile: p.voile||null, barbe: p.barbe||null,
-        situation: p.situation||'', madhhab: p.madhhab||'', bio: p.bio||'',
-        coran: p.coran||'', halal: p.halal||'',
-        enfants: p.enfants||'', nb_enfants: p.nb_enfants||'',
-        veut_enfants: p.veut_enfants||'',
-        telephone: p.telephone||'', email: p.email||'',
-        converti: p.converti||'', recherche: p.recherche||'',
-        langues: p.langues||'',
-        docs_submitted: p.docs_submitted===true,
-        call_validated: p.call_validated===true,
-        status: p.status||'pending', paid: p.paid===true,
-        free_activated: p.free_activated===true, boosted: p.boosted===true,
-        audio_attested: p.audio_attested===true,
-        created_at: p.created_at||'', user_id: p.user_id||'',
-        photo_url: p.photo_url||null,
-        photo_visible: p.photo_visible===true,
-        pays: p.pays||''
-      };
-    });
-    console.log('Admin: '+window._adminProfiles.length+' profils OK');
+    if(Array.isArray(data)){
+      window._adminProfiles = data.map(mapProfile);
+      console.log('Admin: '+window._adminProfiles.length+' profils OK (avec champs optionnels)');
+      return;
+    }
+    // Essai 2 : sans les champs optionnels (colonnes absentes de la table)
+    console.log('Admin: fallback sans champs optionnels. Erreur:', JSON.stringify(data).slice(0,120));
+    return fetch(SUPABASE_URL+'/rest/v1/profils?select='+BASE_FIELDS+'&order=created_at.desc', {headers:HDR})
+      .then(function(r2){ return r2.json(); })
+      .then(function(data2){
+        if(Array.isArray(data2)){
+          window._adminProfiles = data2.map(mapProfile);
+          console.log('Admin: '+window._adminProfiles.length+' profils OK (sans champs optionnels)');
+        } else {
+          console.log('Admin error fallback:', JSON.stringify(data2).slice(0,120));
+        }
+      });
   })
   .catch(function(e){ console.log('Admin exception:', e.message||e); });
 }
@@ -5162,7 +5183,8 @@ function renderAdminDashboard(c){
 
   // Tous les non-actifs à traiter (pending + pending_verification)
   var nonActives=allP.filter(function(p){
-    return ['pending','en_attente_rdv','valide_a_payer','pending_verification'].indexOf(p.status)>=0;
+    var statusMatch=['pending','en_attente_rdv','rdv_planifie','valide_a_payer','pending_verification'].indexOf(p.status)>=0;
+    return statusMatch||p.docs_submitted===true;
   });
 
   var html=`<div style="padding:16px">
@@ -5227,8 +5249,11 @@ function renderAdminDashboard(c){
 }
 
 function renderAdminPending(c){
+  // Inclure : tous les statuts non-actifs + tous ceux qui ont docs_submitted=true
   var pending=getAllAdminProfiles().filter(function(p){
-    return ['pending','en_attente_rdv','valide_a_payer','pending_verification'].indexOf(p.status)>=0;
+    var hasDocsOrPending=['pending','en_attente_rdv','rdv_planifie','valide_a_payer','pending_verification'].indexOf(p.status)>=0;
+    var docsEnvoyes=p.docs_submitted===true;
+    return hasDocsOrPending||docsEnvoyes;
   });
   var html=`<div style="padding:16px"><div class="section-title">⏳ En attente <span class="sc">${pending.length}</span></div>`;
   if(!pending.length) html+=`<p style="color:var(--muted);text-align:center;padding:28px">Aucun profil en attente ✓</p>`;
@@ -5781,16 +5806,28 @@ function openAdminProfileDetail(id){
         : '<p style="font-size:.82rem;color:var(--muted);margin-top:6px">Aucune attestation</p>')
       +'</div>';
   }
-  // Documents
+  // Documents — URL publique directe depuis le bucket public
   var docsSection = '';
   if(p.user_id){
-    var base = supaBase+'/storage/v1/object/public/verification-docs/'+p.user_id+'/';
+    var STORAGE_PUB = supaBase+'/storage/v1/object/public/verification-docs/';
+    // Utiliser cni_path exact (ex: UUID/cni.pdf) si disponible, sinon essayer toutes les extensions
+    var cniUrl = p.cni_path ? STORAGE_PUB+p.cni_path : null;
+    var workUrl = p.work_path ? STORAGE_PUB+p.work_path : null;
+    // Fallback : afficher plusieurs boutons pour les extensions courantes
+    var cniLinks = cniUrl
+      ? '<a href="'+cniUrl+'" target="_blank" class="d-doc-btn">🪪 CNI</a>'
+      : '<a href="'+STORAGE_PUB+p.user_id+'/cni.pdf" target="_blank" class="d-doc-btn">🪪 CNI (PDF)</a>'
+        +'<a href="'+STORAGE_PUB+p.user_id+'/cni.jpg" target="_blank" class="d-doc-btn">🪪 CNI (IMG)</a>';
+    var workLinks = p.gender==='homme'
+      ? (workUrl
+        ? '<a href="'+workUrl+'" target="_blank" class="d-doc-btn">💼 Justificatif</a>'
+        : '<a href="'+STORAGE_PUB+p.user_id+'/work.pdf" target="_blank" class="d-doc-btn">💼 Justif. (PDF)</a>'
+          +'<a href="'+STORAGE_PUB+p.user_id+'/work.jpg" target="_blank" class="d-doc-btn">💼 Justif. (IMG)</a>')
+      : '';
     docsSection = '<div class="profile-section"><h4>📂 Documents</h4>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'
-      +'<a href="'+base+'cni.jpg" target="_blank" class="d-doc-btn">🪪 CNI</a>'
-      +(p.gender==='homme'?'<a href="'+base+'work.jpg" target="_blank" class="d-doc-btn">💼 Justificatif</a>':'')
-      +'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+cniLinks+workLinks+'</div>'
       +row('Documents envoyés', p.docs_submitted?'✅ Oui':'⏳ Pas encore')
+      +row('Chemin CNI', p.cni_path||'—')
       +row('Entretien validé', p.call_validated?'✅ Oui':'Non encore')
       +'</div>';
   }
@@ -5823,7 +5860,7 @@ function openAdminProfileDetail(id){
     +row('Veut des enfants', p.veut_enfants)
     +row('Converti(e)', p.converti===true||p.converti==='true'?'Oui':p.converti==='false'||p.converti===false?'Non':'')
     +row('Téléphone', p.telephone)
-    +row('Email', p.email)
+    +row('Email', p.email||'(voir auth.users)')
     +row('Inscrit le', p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'—')
     +'</div>'
     +'<div class="profile-section"><h4>🕌 Pratique religieuse</h4>'
@@ -6622,38 +6659,22 @@ async function submitVerificationDocs(){
 }
 
 
-async function openSignedDoc(path,label){
-  showToast('⏳ Ouverture...','gold');
-  try{
-    var res=await fetch(SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/sign/verification-docs/'+path,{
-      method:'POST',
-      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
-      body:JSON.stringify({expiresIn:3600})
-    });
-    var data=await res.json();
-    if(data.signedURL){window.open(SUPABASE_URL.replace('/rest/v1','')+data.signedURL,'_blank');}
-    else{showToast('❌ Document non disponible','red');console.log('sign err:',data);}
-  }catch(e){showToast('❌ Erreur ouverture','red');}
+// ── Ouvrir doc (bucket public) ──
+function openPublicDoc(path,label){
+  if(!path){showToast('❌ Chemin document manquant','red');return;}
+  var url=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/public/verification-docs/'+path;
+  window.open(url,'_blank');
 }
 
-async function playSignedAudio(path,btn){
-  var uid=path.split('/')[0];
+// ── Lecture audio (bucket public) ──
+function playPublicAudio(uid){
   var audioEl=document.getElementById('audio-'+uid);
   if(!audioEl) return;
-  if(audioEl.style.display!=='none'&&audioEl.src){audioEl.style.display='none';return;}
-  try{
-    var res=await fetch(SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/sign/verification-docs/'+path,{
-      method:'POST',
-      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
-      body:JSON.stringify({expiresIn:3600})
-    });
-    var data=await res.json();
-    if(data.signedURL){
-      audioEl.src=SUPABASE_URL.replace('/rest/v1','')+data.signedURL;
-      audioEl.style.display='block';
-      audioEl.play().catch(function(){});
-    }else{showToast('❌ Audio non disponible','red');}
-  }catch(e){showToast('❌ Erreur audio','red');}
+  if(audioEl.style.display!=='none'){audioEl.style.display='none';return;}
+  var url=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/public/verification-docs/'+uid+'/audio.webm';
+  audioEl.src=url;
+  audioEl.style.display='block';
+  audioEl.play().catch(function(e){console.log('audio play:',e);});
 }
 
 function renderStepBanner(status){
@@ -6678,61 +6699,71 @@ var _bannedPhones=(function(){try{return JSON.parse(localStorage.getItem('oumeli
 function saveBans(){try{localStorage.setItem('oumelia_bans',JSON.stringify(_bannedPhones));}catch(e){}}
 function isPhoneBanned(p){return _bannedPhones.some(function(b){return b.phone===p;});}
 
+// ── Onglet Dossiers : query directe Supabase avec double-essai ──
 async function renderAdminDossiers(c){
   c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
-  var baseFields='id,prenom,gender,age,ville,telephone,user_id,docs_submitted,status,created_at,audio_attested,photo_url';
+  var HDR={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  var BASE='id,prenom,gender,age,ville,telephone,user_id,docs_submitted,status,created_at,audio_attested,photo_url';
   var res=null;
-  // Essai avec colonnes optionnelles
+  // Essai avec cni_path/work_path
   try{
-    var r1=await fetch(SUPABASE_URL+'/rest/v1/profils?status=in.(pending,en_attente_rdv,rdv_planifie,valide_a_payer,pending_verification)&select='+baseFields+',cni_path,work_path&order=created_at.desc',{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
+    var r1=await fetch(SUPABASE_URL+'/rest/v1/profils?docs_submitted=eq.true&select='+BASE+',cni_path,work_path&order=created_at.desc',{headers:HDR});
     var d1=await r1.json();
-    if(Array.isArray(d1)){res=d1;}
+    if(Array.isArray(d1)) res=d1;
   }catch(e){}
   // Fallback sans colonnes optionnelles
   if(!res){
     try{
-      var r2=await fetch(SUPABASE_URL+'/rest/v1/profils?status=in.(pending,en_attente_rdv,rdv_planifie,valide_a_payer,pending_verification)&select='+baseFields+'&order=created_at.desc',{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
+      var r2=await fetch(SUPABASE_URL+'/rest/v1/profils?docs_submitted=eq.true&select='+BASE+'&order=created_at.desc',{headers:HDR});
       res=await r2.json();
     }catch(e){res=[];}
   }
   var dossiers=Array.isArray(res)?res:[];
   var badge=document.getElementById('dossiers-badge');if(badge){badge.textContent=dossiers.length||'';badge.style.display=dossiers.length?'':'none';}
-  if(!dossiers.length){c.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">✅ Aucun dossier en attente</div>';return;}
+  if(!dossiers.length){c.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">✅ Aucun dossier soumis pour l\'instant</div>';return;}
+  var STORAGE_PUB=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/public/verification-docs/';
   var sB=function(s){
-    if(s==='en_attente_rdv') return '<span style="font-size:.7rem;background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3);border-radius:6px;padding:2px 7px">📂 Étape 2/4</span>';
-    if(s==='rdv_planifie')   return '<span style="font-size:.7rem;background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3);border-radius:6px;padding:2px 7px">📅 Étape 3/4</span>';
-    if(s==='valide_a_payer') return '<span style="font-size:.7rem;background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3);border-radius:6px;padding:2px 7px">💳 Étape 4/4</span>';
-    return '<span style="font-size:.7rem;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:2px 7px">⏳ Étape 1/4</span>';
+    if(s==='en_attente_rdv') return '<span style="font-size:.7rem;background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3);border-radius:6px;padding:2px 7px">📂 Étape 2</span>';
+    if(s==='rdv_planifie')   return '<span style="font-size:.7rem;background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3);border-radius:6px;padding:2px 7px">📅 Étape 3</span>';
+    if(s==='valide_a_payer') return '<span style="font-size:.7rem;background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3);border-radius:6px;padding:2px 7px">💳 Étape 4</span>';
+    return '<span style="font-size:.7rem;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:2px 7px">⏳ À valider</span>';
   };
   var hommes=dossiers.filter(function(p){return p.gender==='homme';});
   var femmes=dossiers.filter(function(p){return p.gender==='femme';});
+
   function rS(list){
     if(!list.length) return '<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:12px">Aucun dossier</p>';
     return list.map(function(p){
       var uid=p.user_id||'';
-      var canV=p.status==='en_attente_rdv'||p.status==='rdv_planifie'||p.status==='pending';
+      var canV=p.status!=='valide_a_payer'&&p.status!=='active';
       var d=p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'';
-      // Photo dans la liste
+      // Photo
       var avHtml=p.photo_url
-        ?'<img src="'+p.photo_url+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid rgba(201,168,76,.3);flex-shrink:0" alt="">'
-        :(p.gender==='femme'?'<div style="width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🌸</div>':'<div style="width:38px;height:38px;border-radius:50%;background:rgba(52,152,219,.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🕌</div>');
-      // Chemins documents
-      var cniPath=p.cni_path||(uid?uid+'/cni.jpg':null);
-      var workPath=p.work_path||(uid&&p.gender==='homme'?uid+'/work.jpg':null);
-      var cniBtn=cniPath?'<button class="d-doc-btn" data-path="'+cniPath+'" onclick="event.stopPropagation();openSignedDoc(this.dataset.path,\'CNI\')">🪪 CNI</button>':'';
-      var workBtn=workPath?'<button class="d-doc-btn" data-path="'+workPath+'" onclick="event.stopPropagation();openSignedDoc(this.dataset.path,\'Justificatif\')">💼 Justif.</button>':'';
+        ?'<img src="'+p.photo_url+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid rgba(201,168,76,.3);flex-shrink:0" alt="" onerror="this.style.display=\'none\'">'
+        :(p.gender==='femme'
+          ?'<div style="width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🌸</div>'
+          :'<div style="width:38px;height:38px;border-radius:50%;background:rgba(52,152,219,.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🕌</div>');
+      // Liens documents (URL publique directe)
+      var cniPath=p.cni_path||(uid?uid+'/cni.pdf':null);
+      var workPath=p.work_path||(uid&&p.gender==='homme'?uid+'/work.pdf':null);
+      var cniLinks=cniPath
+        ?'<a class="d-doc-btn" href="'+STORAGE_PUB+cniPath+'" target="_blank" onclick="event.stopPropagation()">🪪 CNI</a>'
+         +'<a class="d-doc-btn" href="'+STORAGE_PUB+uid+'/cni.jpg" target="_blank" onclick="event.stopPropagation()" style="font-size:.68rem;opacity:.6">IMG</a>'
+        :'';
+      var workLinks=workPath
+        ?'<a class="d-doc-btn" href="'+STORAGE_PUB+workPath+'" target="_blank" onclick="event.stopPropagation()">💼 Justif.</a>'
+        :'';
       // Audio
-      var audioHtml='';
-      if(p.audio_attested&&uid){
-        audioHtml='<div style="margin-bottom:8px"><button class="d-doc-btn" data-path="'+uid+'/audio.webm" onclick="event.stopPropagation();playSignedAudio(this.dataset.path,this)">🎙 Écouter attestation</button><audio id="audio-'+uid+'" style="width:100%;display:none;margin-top:4px" controls onclick="event.stopPropagation()"></audio></div>';
-      }
+      var audioHtml=p.audio_attested&&uid
+        ?'<div style="margin-bottom:8px"><button class="d-doc-btn" onclick="event.stopPropagation();playPublicAudio(\''+uid+'\')">🎙 Écouter</button><audio id="audio-'+uid+'" style="width:100%;display:none;margin-top:4px" controls onclick="event.stopPropagation()"></audio></div>'
+        :'';
       return '<div class="dossier-card" data-id="'+p.id+'" onclick="openAdminProfileDetail(this.dataset.id)" style="cursor:pointer">'
         +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+avHtml
         +'<div style="flex:1;min-width:0"><div class="d-name" style="margin:0">'+(p.prenom||'—')+', '+(p.age||'—')+' ans</div>'
-        +'<div class="d-meta" style="margin:0">📍 '+(p.ville||'—')+' · 📱 '+(p.telephone||'—')+(d?' · '+d:'')+'</div></div>'
+        +'<div class="d-meta" style="margin:2px 0 0">📍 '+(p.ville||'—')+' · 📱 '+(p.telephone||'—')+(d?' · '+d:'')+'</div></div>'
         +sB(p.status)+'</div>'
-        +'<div class="d-docs">'+cniBtn+workBtn
-        +'<span class="d-doc-btn" style="cursor:default;'+(p.docs_submitted?'color:var(--green)':'color:var(--muted)')+'">Docs: '+(p.docs_submitted?'✅':'⏳')+'</span>'
+        +'<div class="d-docs">'+cniLinks+workLinks
+        +'<span class="d-doc-btn" style="cursor:default;color:var(--green)">Docs ✅</span>'
         +'</div>'
         +audioHtml
         +(canV?'<button class="validate-call-btn" data-id="'+p.id+'" data-name="'+(p.prenom||'').replace(/"/g,'')+'" onclick="event.stopPropagation();adminValidateAfterCall(this.dataset.id,this.dataset.name)">✓ Valider &amp; débloquer le paiement</button>':'')
@@ -6742,7 +6773,10 @@ async function renderAdminDossiers(c){
         +'</div></div>';
     }).join('');
   }
-  c.innerHTML='<div style="padding:16px"><div class="section-title" style="margin-bottom:8px">📂 Dossiers Frères ('+hommes.length+')</div>'+rS(hommes)+'<div class="section-title" style="margin:16px 0 8px">📂 Dossiers Sœurs ('+femmes.length+')</div>'+rS(femmes)+'</div>';
+  c.innerHTML='<div style="padding:16px">'
+    +'<div class="section-title" style="margin-bottom:8px">📂 Dossiers Frères ('+hommes.length+')</div>'+rS(hommes)
+    +'<div class="section-title" style="margin:16px 0 8px">📂 Dossiers Sœurs ('+femmes.length+')</div>'+rS(femmes)
+    +'</div>';
 }
 
 async function adminValidateAfterCall(id,prenom){
