@@ -165,11 +165,36 @@ function toggleEye(){
   i.type=i.type==='password'?'text':'password';
 }
 
-function submitNotify(){
-  var e=document.getElementById('notify-email').value.trim();
-  if(!e||!e.includes('@')) return;
-  document.getElementById('notify-email').value='';
-  document.getElementById('notify-ok').style.display='block';
+async function submitNotify(){
+  var emailEl = document.getElementById('notify-email');
+  var okEl    = document.getElementById('notify-ok');
+  var email   = emailEl.value.trim();
+  if(!email || !email.includes('@')) return;
+
+  var SUPABASE_URL  = 'https://nmcvyukbyfnhtufbgqqp.supabase.co';
+  var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tY3Z5dWtieWZuaHR1ZmJncXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODc2NTUsImV4cCI6MjA4OTc2MzY1NX0.JaJuiWxxAXcGK38FT7DlOHve5pi2UDI1PZ5K1JR1qj4';
+
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/waitlist', {
+      method: 'POST',
+      headers: {
+        'apikey':        SUPABASE_ANON,
+        'Authorization': 'Bearer ' + SUPABASE_ANON,
+        'Content-Type':  'application/json',
+        'Prefer':        'return=minimal'
+      },
+      body: JSON.stringify({ email: email })
+    });
+    // 201 = créé, 409 = déjà inscrit (email unique) → les deux = OK côté UX
+    if(res.ok || res.status === 409) {
+      emailEl.value = '';
+      okEl.style.display = 'block';
+    }
+  } catch(err) {
+    // Fallback silencieux : afficher quand même le message de confirmation
+    emailEl.value = '';
+    okEl.style.display = 'block';
+  }
 }
 </script>
 </body>
