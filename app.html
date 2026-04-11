@@ -718,14 +718,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   <div class="auth-wrap">
     <div class="auth-card">
       <div class="auth-logo">
-        <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <defs><radialGradient id="lg1" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#f5e8a0"/><stop offset="45%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#7a5810"/></radialGradient><radialGradient id="lg2" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#d4a843"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#8B6914"/></radialGradient></defs>
-          <circle cx="50" cy="50" r="48" fill="white" opacity="0.9"/>
-          <circle cx="50" cy="50" r="42" fill="url(#lg1)"/>
-          <circle cx="62" cy="38" r="32" fill="url(#lg2)"/>
-          <path d="M50 28 L52.5 44 L68 50 L52.5 56 L50 72 L47.5 56 L32 50 L47.5 44 Z" fill="white" opacity="0.9"/>
-        </svg>
-        <span class="auth-logo-name gold-text">OUMÉLIA</span>
+        <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/photos/logo-oumelia.png" style="width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(201,168,76,.35))" alt="Oumélia">
       </div>
       <h2 class="auth-title">Connexion</h2>
       <div class="form-group">
@@ -1268,7 +1261,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 <div id="screen-app" class="screen">
   <!-- Header -->
   <div class="app-header">
-    <div class="logo-hdr gold-text">✦ OUMÉLIA</div>
+    <div class="logo-hdr" style="display:flex;align-items:center;gap:7px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/photos/logo-oumelia.png" style="width:24px;height:24px;object-fit:contain" alt=""><span class="gold-text" style="font-family:'Cinzel Decorative',serif;font-size:.82rem;letter-spacing:2px">OUMÉLIA</span></div>
     <div style="display:flex;align-items:center;gap:12px">
       <span id="header-user-name" style="font-size:.82rem;color:var(--white2)"></span>
       <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);font-size:.78rem;cursor:pointer;padding:4px 8px">Déco.</button>
@@ -1295,7 +1288,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 ============================== -->
 <div id="screen-admin" class="screen">
   <div class="admin-topbar">
-    <span class="atitle gold-text">✦ OUMÉLIA ADMIN</span>
+    <span class="atitle gold-text" style="display:flex;align-items:center;gap:6px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/photos/logo-oumelia.png" style="width:20px;height:20px;object-fit:contain" alt=""> OUMÉLIA ADMIN</span>
     <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer">Déconnexion</button>
   </div>
   <div class="admin-tabs">
@@ -4302,7 +4295,7 @@ function openChat(name, type){
   var c=document.getElementById('app-content');
   scrollToTop();
   var msgs=userChatHistory[name]||[];
-  var iconHtml='<div style="width:30px;height:30px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#0d0f14;display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="ogl30" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#f5e8a0"/><stop offset="45%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#7a5810"/></radialGradient><radialGradient id="ogl230" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#d4a843"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#8B6914"/></radialGradient></defs><circle cx="50" cy="50" r="48" fill="white" opacity="0.95"/><circle cx="50" cy="50" r="42" fill="url(#ogl30)"/><circle cx="62" cy="38" r="32" fill="url(#ogl230)"/><path d="M50 28 L52.5 44 L68 50 L52.5 56 L50 72 L47.5 56 L32 50 L47.5 44 Z" fill="white" opacity="0.95"/></svg></div>';
+  var iconHtml='<div style="width:30px;height:30px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#0d0f14;border:1px solid rgba(201,168,76,.35);display:flex;align-items:center;justify-content:center"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/photos/logo-oumelia.png" style="width:100%;height:100%;object-fit:cover" alt="Oumélia"></div>';
   c.innerHTML=`
     <div class="page-header">
       <button class="back-btn" onclick="navTo('messages')">←</button>
@@ -5645,15 +5638,28 @@ async function approveProfile(id){
 
 async function freeActivate(id){
   var p=getAdminProfile(id); if(!p) return;
+  if(!confirm('Activer gratuitement le profil de '+( p.prenom||'ce membre')+' sans paiement ?')) return;
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  // Mettre à jour en DB
+  await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id,{
+    method:'PATCH',
+    headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),
+    body:JSON.stringify({status:'active', free_activated:true, call_validated:true})
+  }).catch(function(){});
+  // Mettre à jour localement
   p.status='active';
-  p.free_activated=true; // marqué gratuit → ne compte PAS dans les revenus
-  // paid reste false pour ne pas fausser le solde
-  if(p.user_id){
-    await getSB().from('profils').update({status:'active', free_activated:true}).eq('id',id).catch(function(){});
-  }
+  p.free_activated=true;
+  p.call_validated=true;
+  // Notifier le membre
+  var msg='🎉 Barak\'Allahu fikoum '+(p.prenom||'')+'\n\nVotre profil Oumélia a été activé gratuitement par notre équipe.\n\nVous avez maintenant accès à la plateforme et à vos 3 demandes de mise en relation incluses.\n\nConnectez-vous sur oumelia.com pour commencer.\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  await fetch(SUPABASE_URL+'/rest/v1/messages',{
+    method:'POST',
+    headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),
+    body:JSON.stringify({from_id:'admin',to_id:String(id),content:msg,created_at:new Date().toISOString()})
+  }).catch(function(){});
   updateAdminBadges();
-  showToast(`🎁 ${p.prenom||'Profil'} activé gratuitement ✓`,'gold');
-  adminTab(state.activeAdminTab);
+  showToast('🎁 '+(p.prenom||'Profil')+' activé gratuitement — notification envoyée','gold');
+  adminTab(state.activeAdminTab||'dashboard');
 }
 
 // Activer depuis le Dashboard (même logique)
@@ -5774,8 +5780,9 @@ async function loadAdminAudio(audioElId, path){
       body:JSON.stringify({expiresIn:3600})
     });
     var data = await res.json();
-    if(data.signedURL){
-      audioEl.src = SUPABASE_URL.replace('/rest/v1','')+data.signedURL;
+    var sUrl=data.signedURL||data.signedUrl||'';
+    if(sUrl){
+      audioEl.src = sUrl.startsWith('http')?sUrl:(SUPABASE_URL.replace('/rest/v1','')+sUrl);
       audioEl.style.display = 'block';
       audioEl.play().catch(function(){});
     } else {
@@ -6727,7 +6734,6 @@ async function playPublicAudio(uid){
   var audioEl=document.getElementById('audio-'+uid);
   if(!audioEl) return;
   if(audioEl.style.display!=='none'&&audioEl.src){audioEl.style.display='none';return;}
-  // URL signée car bucket privé
   try{
     var res=await fetch(SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/sign/verification-docs/'+uid+'/audio.webm',{
       method:'POST',
@@ -6735,8 +6741,9 @@ async function playPublicAudio(uid){
       body:JSON.stringify({expiresIn:3600})
     });
     var data=await res.json();
-    if(data.signedURL){
-      audioEl.src=SUPABASE_URL.replace('/rest/v1','')+data.signedURL;
+    var sUrl=data.signedURL||data.signedUrl||'';
+    if(sUrl){
+      audioEl.src=sUrl.startsWith('http')?sUrl:(SUPABASE_URL.replace('/rest/v1','')+sUrl);
       audioEl.style.display='block';
       audioEl.play().catch(function(){});
     } else { showToast('❌ Audio non disponible','red'); }
@@ -6801,7 +6808,6 @@ async function renderAdminDossiers(c){
     var docLinks='';
     if(cniPath) docLinks+='<a class="d-doc-btn" href="'+DOCS+cniPath+'" target="_blank" onclick="event.stopPropagation()">🪪 CNI</a>'+((!p.cni_path&&uid)?'<a class="d-doc-btn" href="'+DOCS+uid+'/cni.jpg" target="_blank" onclick="event.stopPropagation()" style="opacity:.6;font-size:.68rem">JPG</a>':'');
     if(workPath) docLinks+='<a class="d-doc-btn" href="'+DOCS+workPath+'" target="_blank" onclick="event.stopPropagation()">💼 Justif.</a>';
-    // Audio avec URL signée
     var audioHtml='';
     if(p.audio_attested&&uid){
       var _aid='dossier-audio-'+uid;
@@ -6821,6 +6827,7 @@ async function renderAdminDossiers(c){
       +audioHtml
       +(canValidate?'<button class="validate-call-btn" data-id="'+String(p.id)+'" data-name="'+prenom_safe+'" onclick="event.stopPropagation();adminValidateAfterCall(this.dataset.id,this.dataset.name)">✓ Valider &amp; débloquer le paiement</button>':'')
       +'<div style="display:flex;gap:8px;margin-top:8px">'
+      +(p.status!=='active'?'<button data-id="'+String(p.id)+'" onclick="event.stopPropagation();freeActivate(this.dataset.id)" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer" title="Activer sans paiement">🎁</button>':'')
       +'<button data-id="'+String(p.id)+'" data-name="'+prenom_safe+'" onclick="event.stopPropagation();openRejectModal(this.dataset.id,this.dataset.name)" style="flex:1;background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:8px;font-size:.8rem;cursor:pointer">✗ Refuser</button>'
       +((p.telephone||'')?'<button data-phone="'+(p.telephone||'')+'" data-name="'+prenom_safe+'" onclick="event.stopPropagation();banPhone(this.dataset.phone,this.dataset.name)" style="background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer">🚫</button>':'')
       +'</div></div>';
