@@ -564,8 +564,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <div style="position:absolute;inset:0;background:url(&quot;data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M48 46v-6h-2v6h-6v2h6v6h2v-6h6v-2h-6zm0-40V0h-2v6h-6v2h6v6h2V8h6V6h-6zM8 46v-6H6v6H0v2h6v6h2v-6h6v-2H8zM8 6V0H6v6H0v2h6v6h2V8h6V6H8z'/%3E%3C/g%3E%3C/svg%3E&quot;);pointer-events:none;z-index:0"></div>
     <div style="position:relative;z-index:2;width:100%">
 
-      <!-- Bismillah -->
-      <div class="landing-bismillah">بسم الله الرحمن الرحيم</div>
+      <!-- Bismillah — police arabe dédiée -->
+      <div class="landing-bismillah" style="font-family:'Scheherazade New','Amiri',serif;">بسم الله الرحمن الرحيم</div>
 
       <!-- Logo -->
       <div style="margin:16px auto 14px">
@@ -574,7 +574,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 
       <!-- Nom + tagline -->
       <h1 class="landing-logo-name gold-text" style="margin-bottom:4px">OUMÉLIA</h1>
-      <p class="landing-tagline" style="margin-bottom:24px">Mariage halal · Vérification renforcée</p>
+      <p class="landing-tagline" style="margin-bottom:24px">Pour un mariage conforme au Coran et à la Sounnah</p>
 
       <!-- Divider -->
       <div class="landing-divider" style="margin:0 auto 22px"></div>
@@ -599,7 +599,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
             <div style="display:flex;gap:2px;margin-bottom:4px">
               <span style="color:#C9A84C;font-size:.75rem">★★★★★</span>
             </div>
-            <p style="font-size:.78rem;color:var(--white2);line-height:1.5;font-style:italic">"La vérification d'identité m'a rassurée. On sait qu'on parle à de vraies personnes."</p>
+            <p style="font-size:.78rem;color:var(--white2);line-height:1.5;font-style:italic">"La vérification d'identité m'a rassurée. La garantie d'une mise en relation sécurisée avec des profils vérifiés manuellement."</p>
             <p style="font-size:.7rem;color:var(--muted);margin-top:4px">— Fatima, 27 ans · Paris</p>
           </div>
           <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.12);border-radius:10px;padding:10px 13px;text-align:left">
@@ -645,7 +645,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       </div>
       <div style="display:flex;gap:16px;align-items:flex-start">
         <div style="width:36px;height:36px;border-radius:50%;background:var(--gold-soft);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;color:var(--gold);font-size:.88rem">3</div>
-        <div><div style="font-weight:600;font-size:.92rem;margin-bottom:4px">Rencontre ta moitié</div><div style="color:var(--muted);font-size:.82rem;line-height:1.6">Explore les profils et envoie des demandes de mise en relation, avec le Wali intégré au processus.</div></div>
+        <div><div style="font-weight:600;font-size:.92rem;margin-bottom:4px">Rencontre ton prétendant(e)</div><div style="color:var(--muted);font-size:.82rem;line-height:1.6">Explore les profils et envoie des demandes de mise en relation, avec le Wali intégré au processus.</div></div>
       </div>
     </div>
   </section>
@@ -668,11 +668,11 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <div style="max-width:360px;margin:0 auto" id="landing-faq">
       <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Comment sont vérifiés les profils ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
-        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">Chaque profil est examiné manuellement par notre équipe. Les sœurs fournissent également une attestation audio pour confirmer leur identité et leur démarche sincère.</div>
+        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">Chaque profil est examiné manuellement par notre équipe en trois étapes : une pièce d'identité est demandée pour confirmer l'identité réelle de chaque membre, un enregistrement audio d'attestation est requis pour confirmer que les informations renseignées sont exactes et la démarche sincère, et enfin chaque personne est appelée par notre équipe pour s'assurer de son sérieux et de sa capacité à s'engager dans un mariage.</div>
       </div>
       <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Est-ce que les photos sont visibles par tous ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
-        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">Non. Aucune photo n'est affichée publiquement. L'échange de photos ne peut intervenir qu'après accord mutuel dans le respect de la pudeur islamique.</div>
+        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">Non. Aucune photo n'est affichée publiquement. L'ajout de photos est FACULTATIF. L'échange de photos ne peut intervenir qu'après accord mutuel dans le respect de la pudeur islamique.</div>
       </div>
       <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Quel est le rôle du Wali sur la plateforme ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
@@ -691,7 +691,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 
   <!-- ══ CTA FINAL ══ -->
   <section style="padding:40px 20px;text-align:center;border-top:1px solid var(--border)">
-    <p style="font-family:'Playfair Display',serif;font-style:italic;color:var(--white2);font-size:.95rem;margin-bottom:20px">«&#8239;Et parmi Ses signes&#8239;: Il a créé pour vous, parmi vous-mêmes, des épouses…&#8239;» — Ar-Rûm, 21</p>
+    <p style="font-family:'Playfair Display',serif;font-style:italic;color:var(--white2);font-size:.95rem;margin-bottom:20px">«&#8239;Et parmi Ses signes&#8239;: Il a créé pour vous, de vous-mêmes, des épouses…&#8239;» — Ar-Rûm, 21</p>
     <div style="display:flex;flex-direction:column;gap:11px;max-width:280px;margin:0 auto">
       <button class="btn btn-gold" style="font-size:.95rem;padding:13px" onclick="showScreen('screen-register')">✦ Créer mon profil gratuitement</button>
     </div>
@@ -1076,7 +1076,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           <label>Alimentation</label>
           <select id="reg-halal">
             <option value="">Sélectionnez</option>
-            <option>Strictement halal</option><option>Halal</option><option>Végétarien/Végétalien</option>
+            <option>Halal</option><option>Végétarien/Végétalien</option><option>Pas halal</option>
           </select>
         </div>
         
@@ -1117,7 +1117,50 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
         </div>
         <div class="form-group">
           <label>Numéro de téléphone <span style="color:var(--red)">*</span></label>
-          <input type="tel" id="reg-telephone" placeholder="+33 6 xx xx xx xx" autocomplete="tel" style="font-size:.9rem">
+          <div style="display:flex;gap:6px;align-items:stretch">
+            <select id="reg-indicatif" style="flex-shrink:0;width:100px;background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 6px;color:var(--white);font-family:'Cairo',sans-serif;font-size:.82rem">
+              <option value="+33">🇫🇷 +33</option>
+              <option value="+32">🇧🇪 +32</option>
+              <option value="+41">🇨🇭 +41</option>
+              <option value="+1">🇨🇦 +1</option>
+              <option value="+212">🇲🇦 +212</option>
+              <option value="+213">🇩🇿 +213</option>
+              <option value="+216">🇹🇳 +216</option>
+              <option value="+221">🇸🇳 +221</option>
+              <option value="+225">🇨🇮 +225</option>
+              <option value="+227">🇳🇪 +227</option>
+              <option value="+228">🇹🇬 +228</option>
+              <option value="+229">🇧🇯 +229</option>
+              <option value="+223">🇲🇱 +223</option>
+              <option value="+226">🇧🇫 +226</option>
+              <option value="+222">🇲🇷 +222</option>
+              <option value="+224">🇬🇳 +224</option>
+              <option value="+245">🇬🇼 +245</option>
+              <option value="+238">🇨🇻 +238</option>
+              <option value="+269">🇰🇲 +269</option>
+              <option value="+20">🇪🇬 +20</option>
+              <option value="+218">🇱🇾 +218</option>
+              <option value="+249">🇸🇩 +249</option>
+              <option value="+252">🇸🇴 +252</option>
+              <option value="+253">🇩🇯 +253</option>
+              <option value="+966">🇸🇦 +966</option>
+              <option value="+971">🇦🇪 +971</option>
+              <option value="+974">🇶🇦 +974</option>
+              <option value="+965">🇰🇼 +965</option>
+              <option value="+962">🇯🇴 +962</option>
+              <option value="+961">🇱🇧 +961</option>
+              <option value="+963">🇸🇾 +963</option>
+              <option value="+964">🇮🇶 +964</option>
+              <option value="+90">🇹🇷 +90</option>
+              <option value="+49">🇩🇪 +49</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+31">🇳🇱 +31</option>
+              <option value="+34">🇪🇸 +34</option>
+              <option value="+351">🇵🇹 +351</option>
+              <option value="+39">🇮🇹 +39</option>
+            </select>
+            <input type="tel" id="reg-telephone" placeholder="6 xx xx xx xx" autocomplete="tel" style="flex:1;font-size:.9rem">
+          </div>
           <p id="err-telephone" style="color:var(--red);font-size:.75rem;margin-top:4px;display:none">Le numéro de téléphone est obligatoire</p>
         </div>
         <div class="form-group">
@@ -1143,7 +1186,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
               <span style="font-size:1.25rem;flex-shrink:0">🛡️</span>
               <span style="font-size:.88rem;font-weight:700;color:var(--gold)">Vérification manuelle</span>
             </div>
-            <p style="font-size:.8rem;color:var(--white2);line-height:1.65;margin-bottom:10px">Pour protéger les sœurs de notre communauté, chaque compte féminin est vérifié manuellement par notre équipe avant activation. Cet enregistrement nous permet de confirmer ton identité. <strong style="color:var(--white)">Il ne sera jamais partagé.</strong></p>
+            <p style="font-size:.8rem;color:var(--white2);line-height:1.65;margin-bottom:10px">Cet enregistrement te permet d'attester l'exactitude des informations que tu as renseignées et la sincérité de ta démarche. <strong style="color:var(--white)">Il ne sera jamais partagé.</strong></p>
             <div style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);border-radius:6px">
               <span style="font-size:.85rem">⏱</span>
               <span style="font-size:.76rem;color:var(--green)">Délai de validation : <strong>sous 24h</strong></span>
@@ -1153,7 +1196,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           <!-- Phrase à lire -->
           <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px;margin-bottom:14px">
             <p style="font-size:.74rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Phrase à lire à voix haute :</p>
-            <p style="font-size:.84rem;color:var(--white2);line-height:1.65;font-style:italic">"Je suis [prénom], je m'inscris sur Oumélia pour trouver un époux selon la voie d'Allah, avec l'accord de mon Wali."</p>
+            <p style="font-size:.84rem;color:var(--white2);line-height:1.65;font-style:italic">"J'atteste sur l'honneur que toutes les informations renseignées sur mon profil Oumélia sont exactes et sincères, et que ma démarche est sérieuse."</p>
           </div>
 
           <!-- Message d'aide iOS (caché par défaut, affiché par JS si nécessaire) -->
@@ -1798,7 +1841,7 @@ var STATUS_STEPS = {
 function getStatusInfo(status){ return STATUS_STEPS[status] || STATUS_STEPS['pending']; }
 function canAccessApp(status){ return ['active','paused'].indexOf(status)>=0; }
 function canPay(status){ return status==='valide_a_payer'; }
-function canShowPayment(){ return canPay(state.profileStatus||state.user&&state.user.status); }
+
 
 // Demandes envoyées (id profil → statut)
 
@@ -1834,13 +1877,7 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // Modal click-outside - initialisé après DOM ready dans window.load
 
 // ══════════ AUTH ══════════
-function selectGender(g){
-  state.gender=g;
-  document.getElementById('gb-femme').classList.toggle('selected',g==='femme');
-  document.getElementById('gb-homme').classList.toggle('selected',g==='homme');
-  document.getElementById('field-voile').style.display=g==='femme'?'':'none';
-  document.getElementById('field-barbe').style.display=g==='homme'?'':'none';
-}
+
 
 
 // ══════════════════════════════════════════════════════════
@@ -1849,88 +1886,21 @@ function selectGender(g){
 var currentLang = localStorage.getItem('oumelia_lang') || 'fr';
 
 // ══════════ VALIDATION INSCRIPTION ══════════
-function validateRegField(input, type){
-  var err = document.getElementById('err-'+type);
-  if(!err) return;
-  var msg = '';
-  if(type==='prenom' && input.value.trim().length < 2) msg = 'Prénom trop court';
-  if(type==='age'){ var v=parseInt(input.value); if(v<18) msg='Minimum 18 ans'; if(v>70) msg='Âge invalide'; }
-  if(type==='email' && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) msg='Email invalide';
-  err.textContent=msg; err.style.display=msg?'block':'none';
-  input.style.borderColor=msg?'var(--red)':'';
-}
 
-function checkPwdStrength(pwd){
-  var wrap=document.getElementById('pwd-strength-wrap');
-  var fill=document.getElementById('pwd-strength-fill');
-  var label=document.getElementById('pwd-strength-label');
-  if(!wrap) return;
-  wrap.style.display=pwd.length>0?'block':'none';
-  var score=0;
-  if(pwd.length>=8) score++;
-  if(/[A-Z]/.test(pwd)) score++;
-  if(/[0-9]/.test(pwd)) score++;
-  if(/[^A-Za-z0-9]/.test(pwd)) score++;
-  var levels=[{w:'25%',c:'var(--red)',t:'Trop faible'},{w:'50%',c:'#f39c12',t:'Moyen'},{w:'75%',c:'#f1c40f',t:'Bien'},{w:'100%',c:'var(--green)',t:'Excellent'}];
-  var l=levels[Math.max(0,score-1)];
-  fill.style.width=l.w; fill.style.background=l.c;
-  label.textContent=l.t; label.style.color=l.c;
-}
 
-function checkPwdMatch(){
-  var pwd=(document.getElementById('reg-pwd')&&document.getElementById('reg-pwd').value);
-  var pwd2=document.getElementById('reg-pwd2');
-  var err=document.getElementById('err-pwd2');
-  if(!pwd2||!err) return;
-  if(pwd2.value && pwd2.value!==pwd){ err.textContent='Les mots de passe ne correspondent pas'; err.style.display='block'; pwd2.style.borderColor='var(--red)'; }
-  else { err.style.display='none'; pwd2.style.borderColor=pwd2.value?'var(--green)':''; }
-}
 
-function updateProgressBar(step){
-  var pcts={1:33,2:66,3:100};
-  var fill=document.getElementById('reg-progress-fill');
-  if(fill) fill.style.width=pcts[step]+'%';
-  [1,2,3].forEach(function(i){
-    var el=document.getElementById('pstep-'+i);
-    if(!el) return;
-    el.classList.remove('active','done');
-    if(i<step) el.classList.add('done');
-    if(i===step) el.classList.add('active');
-  });
-}
 
-function regStep2(){
-  if(!state.gender) return showToast('⚠ Choisissez votre genre','red');
-  if(!document.getElementById('reg-prenom').value.trim()) return showToast('⚠ Entrez votre prénom','red');
-  var age=parseInt(document.getElementById('reg-age').value);
-  if(!age||age<18) return showToast('⚠ Âge invalide (minimum 18 ans)','red');
-  document.getElementById('reg-step-1').classList.add('hidden');
-  document.getElementById('reg-step-2').classList.remove('hidden');
-  updateProgressBar(2);
-  if(state.gender==='femme'){ document.getElementById('field-voile').style.display=''; document.getElementById('field-barbe').style.display='none'; }
-  else { document.getElementById('field-voile').style.display='none'; document.getElementById('field-barbe').style.display=''; }
-  scrollToTop();
-}
 
-function regStep3(){
-  document.getElementById('reg-step-2').classList.add('hidden');
-  document.getElementById('reg-step-3').classList.remove('hidden');
-  if(state.gender==='femme') document.getElementById('audio-attestation').classList.remove('hidden');
-  updateProgressBar(3);
-  scrollToTop();
-}
 
-function backToStep1(){
-  document.getElementById('reg-step-2').classList.add('hidden');
-  document.getElementById('reg-step-1').classList.remove('hidden');
-  updateProgressBar(1);
-}
 
-function backToStep2(){
-  document.getElementById('reg-step-3').classList.add('hidden');
-  document.getElementById('reg-step-2').classList.remove('hidden');
-  updateProgressBar(2);
-}
+
+
+
+
+
+
+
+
 
 
 // ===== auth.js =====
@@ -2090,75 +2060,18 @@ function backToStep2(){
 
 // ══════════ TRIS EXPLORER ══════════
 var currentSort='all';
-function setSortMode(mode){
-  currentSort=mode;
-  document.querySelectorAll('.sort-chip').forEach(function(chip){
-    chip.classList.remove('active');
-  });
-  var el=document.getElementById('sort-'+mode);
-  if(el) el.classList.add('active');
-  renderExplorerList();
-}
+
 
 // Re-render uniquement la liste sans perdre le focus de la recherche
-function renderExplorerList(){
-  var focused = document.activeElement;
-  var searchVal = state.searchQuery;
-  var appC=document.getElementById('app-content');
-  if(appC) renderExplorer(appC);
-  // Restaurer focus sur la barre de recherche si elle était active
-  if(focused && focused.id==='explorer-search'){
-    var newSearch=document.getElementById('explorer-search');
-    if(newSearch){ newSearch.focus(); newSearch.value=searchVal; newSearch.selectionStart=newSearch.selectionEnd=searchVal.length; }
-  }
-}
+
 
 // ══════════ COMPATIBILITÉ ══════════
-function getCompatibilityScore(profile){
-  var u=state.user; if(!u) return 0;
-  var score=0;
-  if(profile.pratique===u.pratique) score+=30;
-  if(profile.madhhab===u.madhhab||profile.madhhab==='Peu importe'||u.madhhab==='Peu importe') score+=20;
-  if(profile.veut_enfants===u.veut_enfants) score+=20;
-  // Compatibilité d'origine : même origine = 20pts, même groupe culturel = 10pts
-  if(profile.origine===u.origine){
-    score+=20;
-  } else {
-    var _groupes=[
-      ['Algérienne','Marocaine','Tunisienne','Libyenne','Mauritanienne'],
-      ['Française','Belge','Suisse','Canadienne'],
-      ['Sénégalaise','Malienne','Guinéenne','Ivoirienne','Burkinabé','Nigérienne'],
-      ['Turque','Albanaise','Bosniaque'],
-      ['Égyptienne','Syrienne','Libanaise','Jordanienne','Palestinienne','Irakienne'],
-      ['Pakistanaise','Bangladaise','Indienne'],
-      ['Somalienne','Djiboutienne','Érythréenne']
-    ];
-    var _myGrp=null,_profGrp=null;
-    _groupes.forEach(function(grp){
-      if(grp.indexOf(u.origine)>=0) _myGrp=grp;
-      if(grp.indexOf(profile.origine)>=0) _profGrp=grp;
-    });
-    if(_myGrp&&_profGrp&&_myGrp===_profGrp) score+=10;
-  }
-  if(profile.situation===u.situation) score+=10;
-  return score;
-}
 
-function getRegion(ville){
-  var r={'Paris':'Île-de-France','Lyon':'Auvergne-Rhône-Alpes','Marseille':'PACA','Toulouse':'Occitanie','Nice':'PACA','Nantes':'Pays de la Loire','Strasbourg':'Grand Est','Bordeaux':'Nouvelle-Aquitaine','Lille':'Hauts-de-France'};
-  return r[ville]||ville||'—';
-}
+
+
 
 // ══════════ COMPLÉTION PROFIL ══════════
-function getProfileCompletion(u){
-  if(!u) return 0;
-  // Uniquement les champs demandés à l'inscription
-  var allFields=['prenom','age','ville','origine','pratique','bio','madhhab','coran','situation','enfants'];
-  if(u.gender==='femme') allFields.push('voile');
-  if(u.gender==='homme') allFields.push('barbe');
-  var filled=allFields.filter(function(f){ return u[f]&&String(u[f])!==''&&String(u[f])!=='null'; }).length;
-  return Math.min(100, Math.round((filled/allFields.length)*100));
-}
+
 
 // ══════════ FAQ ══════════
 var faqData=[
@@ -2172,48 +2085,18 @@ var faqData=[
   {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumélia.contacthomme@gmail.com — ou via la messagerie avec l'Administratrice dans l'application."},
 ];
 
-function openFAQ(){
-  var list=document.getElementById('faq-list');
-  list.innerHTML=faqData.map(function(item,i){ return `
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFAQ(${i})">
-        <span>${item.q}</span><span id="faq-arrow-${i}" style="color:var(--gold);flex-shrink:0">▾</span>
-      </div>
-      <div class="faq-a" id="faq-a-${i}">${item.a}</div>
-    </div>`; }).join('');
-  openModal('modal-faq');
-}
 
-function toggleFAQ(i){
-  var a=document.getElementById('faq-a-'+i);
-  var arrow=document.getElementById('faq-arrow-'+i);
-  var isOpen=a.classList.contains('open');
-  document.querySelectorAll('.faq-a').forEach(function(el){el.classList.remove('open');});
-  document.querySelectorAll('[id^="faq-arrow-"]').forEach(function(el){el.textContent='▾';});
-  if(!isOpen){ a.classList.add('open'); arrow.textContent='▴'; }
-}
+
+
 
 // ══════════ SIGNALEMENT ══════════
 var selectedReport='', reportTargetId=null;
 
-function openReport(profileId){
-  reportTargetId=profileId; selectedReport='';
-  document.querySelectorAll('.report-reason').forEach(function(r){r.classList.remove('selected');});
-  var d=document.getElementById('report-details'); if(d) d.value='';
-  openModal('modal-report');
-}
 
-function selectReport(el,reason){
-  selectedReport=reason;
-  document.querySelectorAll('.report-reason').forEach(function(r){r.classList.remove('selected');});
-  el.classList.add('selected');
-}
 
-function submitReport(){
-  if(!selectedReport) return showToast('⚠ Choisissez une raison','red');
-  closeModal('modal-report');
-  showToast('✅ Signalement envoyé — merci pour votre vigilance','green');
-}
+
+
+
 
 // ══════════ PAGES LÉGALES ══════════
 var legalContent={
@@ -2221,19 +2104,9 @@ var legalContent={
   privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumélia.contacthomme@gmail.com</p>`}
 };
 
-function showLegal(type){
-  var content=legalContent[type]; if(!content) return;
-  document.getElementById('legal-title').textContent=content.title;
-  document.getElementById('legal-body').innerHTML=content.body;
-  openModal('modal-legal');
-}
 
-function showLegalPage(type){
-  var c=document.getElementById('app-content');
-  var content=legalContent[type]; if(!content) return;
-  scrollToTop();
-  c.innerHTML=`<div class="page-header"><button class="back-btn" onclick="navTo('profil')">←</button><h2>${content.title}</h2></div><div class="legal-content">${content.body}</div>`;
-}
+
+
 
 
 // ══════════ ENREGISTREMENT AUDIO RÉEL ══════════
@@ -2408,7 +2281,12 @@ function reRecord(){
 
 async function doRegister(){
   var email=document.getElementById('reg-email').value.trim();
-  var telephone=(document.getElementById('reg-telephone')&&document.getElementById('reg-telephone').value||'').trim();
+  var _indicatifEl=document.getElementById('reg-indicatif');
+  var _indicatif=_indicatifEl?(_indicatifEl.value||'+33'):'';
+  var _numBrut=(document.getElementById('reg-telephone')&&document.getElementById('reg-telephone').value||'').trim();
+  // Nettoyer le numéro (retirer le 0 initial si présent)
+  var _numClean=_numBrut.replace(/^0/,'');
+  var telephone=_numBrut?(_indicatif+' '+_numClean):'';
   var pays=(document.getElementById('reg-pays')&&document.getElementById('reg-pays').value||'').trim();
   var pwd=document.getElementById('reg-pwd').value;
   var pwd2=(document.getElementById('reg-pwd2')&&document.getElementById('reg-pwd2').value);
@@ -2429,7 +2307,15 @@ async function doRegister(){
 
   // 1. Créer le compte auth Supabase
   var { data, error } = await sb.auth.signUp({ email, password: pwd });
-  if(error){ showToast('❌ '+error.message,'red'); return; }
+  if(error){
+    var errMsg = error.message||'';
+    if(errMsg.toLowerCase().includes('already') || errMsg.toLowerCase().includes('registered') || errMsg.toLowerCase().includes('exists') || errMsg.includes('422')){
+      showToast('❌ Cette adresse email est déjà utilisée.','red');
+    } else {
+      showToast('❌ '+errMsg,'red');
+    }
+    return;
+  }
   if(!data || !data.user) { showToast('❌ Erreur création compte','red'); return; }
 
   var userId = data.user.id;
@@ -3132,18 +3018,12 @@ function renderMyProfile(c){
   // Avatar : photo réelle si disponible, sinon SVG
   var av;
   if(u.photo_url){
-    var _blurS=u.photo_visible?'':'filter:blur(12px)';
-    var _imgId='profil-photo-'+Date.now();
+    // Pas de flou sur son propre profil + id fixe pour le preview upload
     av='<div style="width:72px;height:72px;border-radius:50%;overflow:hidden;display:inline-block;border:2px solid rgba(201,168,76,.4)">'
-      +'<img id="'+_imgId+'" src="'+u.photo_url+'" style="width:100%;height:100%;object-fit:cover;'+_blurS+'" alt="">'
+      +'<img id="profil-photo-preview" src="'+u.photo_url+'" style="width:100%;height:100%;object-fit:cover" alt="">'
       +'</div>';
-    // Fallback en cas d'erreur de chargement (via setTimeout pour laisser le DOM se créer)
-    setTimeout(function(){
-      var imgEl=document.getElementById(_imgId);
-      if(imgEl) imgEl.onerror=function(){this.parentElement.innerHTML=u.gender==='femme'?svgFemme(72):svgHomme(72);};
-    },0);
   } else {
-    av=u.gender==='femme'?svgFemme(72):svgHomme(72);
+    av='<div id="profil-photo-preview-wrap">'+(u.gender==='femme'?svgFemme(72):svgHomme(72))+'</div>';
   }
   var completion=getProfileCompletion(u);
   var isVerified=u.audio_attested||u.status==='active';
@@ -3203,6 +3083,8 @@ function renderMyProfile(c){
         <div class="profile-detail-row"><span>Prénom</span><span>${u.prenom||'—'}</span></div>
         <div class="profile-detail-row"><span>Âge</span><span>${u.age||'—'}${u.age?' ans':''}</span></div>
         <div class="profile-detail-row"><span>Ville</span><span>${u.ville||'—'}</span></div>
+        <div class="profile-detail-row"><span>Pratique</span><span>${u.pratique||'—'}</span></div>
+        ${u.recherche?'<div class="profile-detail-row"><span>Ce que je cherche</span><span style="color:var(--white2)">'+u.recherche+'</span></div>':''}
         <div class="profile-detail-row"><span>Email</span><span style="color:var(--muted);font-size:.78rem">${u.email||'—'}</span></div>
         <div class="profile-detail-row"><span>Statut</span><span class="badge ${state.profileActive?'badge-active':'badge-pending'}">${state.profileActive?'✓ Validé':'⏳ En attente'}</span></div>
       </div>
@@ -3212,18 +3094,31 @@ function renderMyProfile(c){
         <button class="btn btn-outline btn-sm" onclick="navTo('mes-demandes')">💌 Mes demandes</button>
         <button class="btn btn-outline btn-sm" onclick="renderEditProfile()">✏️ Modifier mon profil</button>
         ${!state.profilePaused?'<button class="btn btn-sm" style="background:var(--blue-soft);border:1px solid rgba(74,158,255,.3);color:var(--blue)" onclick="openModal(\'modal-pause\')">⏸ Mettre en pause</button>':''}
-        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px">
-          <div>
-            <div style="font-size:.84rem;font-weight:600">📷 Afficher ma photo</div>
-            <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Visible uniquement après acceptation mutuelle</div>
+
+        <!-- Photo de profil -->
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px">
+          <div style="font-size:.84rem;font-weight:600;margin-bottom:8px">📷 Photo de profil</div>
+          ${(function(){
+            var _g=state.user&&state.user.gender;
+            var _isPublic=state.user&&state.user.photo_visible===true;
+            if(_g==='homme'){
+              return '<div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">Choisissez qui peut voir votre photo :</div>'
+                +'<div style="display:flex;gap:6px;margin-bottom:10px">'
+                +'<button id="photo-opt-public" onclick="setPhotoVisibility(true)" style="flex:1;padding:7px 6px;border-radius:8px;border:1.5px solid '+(_isPublic?'var(--gold)':'var(--border)')+';background:'+(_isPublic?'rgba(201,168,76,.1)':'transparent')+';color:'+(_isPublic?'var(--gold)':'var(--muted)')+';font-size:.74rem;cursor:pointer;font-family:\'Cairo\',sans-serif">🌐 Visible par toutes</button>'
+                +'<button id="photo-opt-mutual" onclick="setPhotoVisibility(false)" style="flex:1;padding:7px 6px;border-radius:8px;border:1.5px solid '+(!_isPublic?'var(--gold)':'var(--border)')+';background:'+(!_isPublic?'rgba(201,168,76,.1)':'transparent')+';color:'+(!_isPublic?'var(--gold)':'var(--muted)')+';font-size:.74rem;cursor:pointer;font-family:\'Cairo\',sans-serif">🔒 Après acceptation</button>'
+                +'</div>';
+            }
+            return '<div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">Votre photo n\'est visible qu\'après acceptation mutuelle, conformément aux valeurs d\'Oumélia.</div>';
+          })()}
+          <div style="display:flex;gap:8px">
+            <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;font-size:.78rem;color:var(--gold);cursor:pointer;font-family:'Cairo',sans-serif">
+              <input type="file" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this)">
+              📷 Modifier
+            </label>
+            ${(state.user&&state.user.photo_url)?'<button onclick="deleteProfilePhoto()" style="flex:1;background:var(--dark);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:9px;font-size:.78rem;color:var(--red);cursor:pointer;font-family:\'Cairo\',sans-serif">🗑 Supprimer</button>':''}
           </div>
-          <label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;cursor:pointer">
-            <input type="checkbox" id="toggle-photo-visible" ${(state.user&&state.user.photo_visible)?'checked':''} onchange="togglePhotoVisibility(this)" style="opacity:0;width:0;height:0;position:absolute">
-            <span id="toggle-photo-track" style="position:absolute;inset:0;background:${(state.user&&state.user.photo_visible)?'var(--gold)':'var(--border)'};border-radius:24px;transition:.25s"></span>
-            <span style="position:absolute;top:3px;left:${(state.user&&state.user.photo_visible)?'21px':'3px'};width:18px;height:18px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></span>
-          </label>
         </div>
-      </div>
+      </div>/div>
 
       <!-- Liens utiles -->
       <div class="profile-section" style="margin-top:12px">
@@ -3296,6 +3191,35 @@ function renderEditProfile(){
   // Bio
   html+='<div class="gold-divider"></div>';
   html+='<div class="form-group"><label>Présentation</label><textarea id="edit-bio" style="min-height:100px">'+(u.bio||'')+'</textarea></div>';
+
+  // Ce que je cherche (commun frères et sœurs)
+  html+='<div class="gold-divider"></div>';
+  html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Ce que je cherche</p>';
+  // Origine recherchée
+  var origineOpts2=['Peu importe','Algérienne','Marocaine','Tunisienne','Française','Sénégalaise','Malienne','Ivoirienne','Camerounaise','Turque','Égyptienne','Syrienne','Pakistanaise','Autre'];
+  var origineRechHtml='<div class="form-group"><label>Origine du prétendant(e)</label><select id="edit-origine-recherche">';
+  var curOrigineRech=u.origine_recherche||'';
+  if(!curOrigineRech) origineRechHtml+='<option value="">Peu importe</option>';
+  origineOpts2.forEach(function(v){ origineRechHtml+='<option value="'+v+'"'+(curOrigineRech===v?' selected':'')+'>'+v+'</option>'; });
+  html+=origineRechHtml+'</select></div>';
+  // Tranche d'âge recherchée
+  html+='<div class="form-row">';
+  html+='<div class="form-group"><label>Âge min</label><input type="number" id="edit-age-min" value="'+(u.age_min||18)+'" min="18" max="80"></div>';
+  html+='<div class="form-group"><label>Âge max</label><input type="number" id="edit-age-max" value="'+(u.age_max||60)+'" min="18" max="80"></div>';
+  html+='</div>';
+  // Situation matrimoniale recherchée
+  var sitRechOpts=isF
+    ? [['Peu importe','Peu importe'],['Jamais marié','Jamais marié'],['Divorcé','Divorcé'],['Veuf','Veuf'],['Marié (polygamie)','Marié (polygamie)']]
+    : [['Peu importe','Peu importe'],['Jamais mariée','Jamais mariée'],['Divorcée','Divorcée'],['Veuve','Veuve']];
+  var sitRechHtml='<div class="form-group"><label>Situation matrimoniale recherchée</label><select id="edit-situation-recherche">';
+  var curSitRech=u.situation_recherche||'';
+  if(!curSitRech) sitRechHtml+='<option value="">Peu importe</option>';
+  sitRechOpts.forEach(function(s){ sitRechHtml+='<option value="'+s[0]+'"'+(curSitRech===s[0]?' selected':'')+'>'+s[1]+'</option>'; });
+  html+=sitRechHtml+'</select></div>';
+  // Présentation du critère de recherche (texte libre)
+  html+='<div class="form-group"><label>Décris ce que tu recherches <span style="color:var(--muted);font-size:.75rem">(optionnel)</span></label>'
+    +'<textarea id="edit-recherche" style="min-height:70px">'+(u.recherche||'')+'</textarea></div>';
+
   // Mot de passe
   html+='<div class="gold-divider"></div>';
   html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Changer le mot de passe</p>';
@@ -3320,7 +3244,12 @@ async function submitEdit(){
     pratique: get('edit-pratique')||state.user.pratique,
     madhhab: get('edit-madhhab')||state.user.madhhab,
     coran: get('edit-coran')||state.user.coran,
+    recherche: get('edit-recherche')||'',
   };
+  var ageMin=parseInt(get('edit-age-min')); if(ageMin>0) updates.age_min=ageMin;
+  var ageMax=parseInt(get('edit-age-max')); if(ageMax>0) updates.age_max=ageMax;
+  var origRech=get('edit-origine-recherche'); if(origRech) updates.origine_recherche=origRech;
+  var sitRech=get('edit-situation-recherche'); if(sitRech) updates.situation_recherche=sitRech;
   var voile=get('edit-voile'), barbe=get('edit-barbe');
   if(voile) updates.voile=voile;
   if(barbe) updates.barbe=barbe;
@@ -3479,6 +3408,89 @@ function toggleRechBtn(btn){
 // ══════════════════════════════════════════════════
 // TOGGLE PHOTO DANS MES PARAMÈTRES
 // ══════════════════════════════════════════════════
+
+// ── Visibilité photo frères (2 options : public / mutuel) ──
+function setPhotoVisibility(isPublic){
+  if(!state.user||!state.user.supabaseId) return;
+  state.user.photo_visible=isPublic;
+  // Mettre à jour les boutons visuellement
+  var btnPub=document.getElementById('photo-opt-public');
+  var btnMut=document.getElementById('photo-opt-mutual');
+  if(btnPub){
+    btnPub.style.borderColor=isPublic?'var(--gold)':'var(--border)';
+    btnPub.style.background=isPublic?'rgba(201,168,76,.1)':'transparent';
+    btnPub.style.color=isPublic?'var(--gold)':'var(--muted)';
+  }
+  if(btnMut){
+    btnMut.style.borderColor=!isPublic?'var(--gold)':'var(--border)';
+    btnMut.style.background=!isPublic?'rgba(201,168,76,.1)':'transparent';
+    btnMut.style.color=!isPublic?'var(--gold)':'var(--muted)';
+  }
+  fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+state.user.supabaseId,{
+    method:'PATCH',
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({photo_visible:isPublic})
+  }).then(function(){
+    showToast(isPublic?'📷 Photo visible par toutes les sœurs':'🔒 Photo visible après acceptation mutuelle','gold');
+  }).catch(function(){ showToast('Erreur de mise à jour','red'); });
+}
+
+// ── Upload nouvelle photo de profil ──
+async function uploadProfilePhoto(input){
+  var file=input&&input.files&&input.files[0];
+  if(!file||!state.user||!state.user.supabaseId) return;
+  // Feedback immédiat : preview locale
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var avEl=document.getElementById('profil-photo-preview');
+    if(avEl) avEl.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+  showToast('⏳ Upload en cours...','gold');
+  try{
+    var ext=file.name.split('.').pop().toLowerCase()||'jpg';
+    var path=state.user.supabaseId+'/avatar.'+ext;
+    var SBASE=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1';
+    var res=await fetch(SBASE+'/object/photos/'+path,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'x-upsert':'true','Content-Type':file.type||'image/jpeg'},
+      body:file
+    });
+    if(!res.ok) res=await fetch(SBASE+'/object/photos/'+path,{
+      method:'PUT',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'x-upsert':'true','Content-Type':file.type||'image/jpeg'},
+      body:file
+    });
+    if(res.ok||res.status===200){
+      var url=SBASE+'/object/public/photos/'+path+'?t='+Date.now();
+      await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+state.user.supabaseId,{
+        method:'PATCH',
+        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({photo_url:url})
+      });
+      state.user.photo_url=url;
+      showToast('✅ Photo mise à jour !','green');
+      navTo('profil');
+    } else { showToast('❌ Erreur upload','red'); }
+  }catch(e){ showToast('❌ Erreur upload','red'); }
+}
+
+// ── Supprimer photo de profil ──
+async function deleteProfilePhoto(){
+  if(!confirm('Supprimer définitivement votre photo de profil ?')) return;
+  if(!state.user||!state.user.supabaseId) return;
+  try{
+    await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+state.user.supabaseId,{
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({photo_url:null,photo_visible:false})
+    });
+    state.user.photo_url=null;
+    state.user.photo_visible=false;
+    showToast('✅ Photo supprimée','green');
+    navTo('profil');
+  }catch(e){ showToast('❌ Erreur suppression','red'); }
+}
 
 function togglePhotoVisibility(checkbox){
   if(!state.user || !state.user.supabaseId) return;
@@ -4267,7 +4279,10 @@ function renderMessages(c){
   }catch(e){}
   var adminName=state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice';
   var adminMsgs=userChatHistory[adminName]||[];
-  var iconHtml2='<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#0d0f14;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="ogl36" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#f5e8a0"/><stop offset="45%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#7a5810"/></radialGradient><radialGradient id="ogl236" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#d4a843"/><stop offset="50%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#8B6914"/></radialGradient></defs><circle cx="50" cy="50" r="48" fill="white" opacity="0.95"/><circle cx="50" cy="50" r="42" fill="url(#ogl36)"/><circle cx="62" cy="38" r="32" fill="url(#ogl236)"/><path d="M50 28 L52.5 44 L68 50 L52.5 56 L50 72 L47.5 56 L32 50 L47.5 44 Z" fill="white" opacity="0.95"/></svg></div>';
+  // Logo Oumélia réel (même source que la page d'accueil)
+  var iconHtml2='<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#0d0f14;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(201,168,76,.4)">'
+    +'<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/photos/logo-oumelia.png" style="width:100%;height:100%;object-fit:cover" alt="Oumélia">'
+    +'</div>';
   var html2='<div class="page-header"><h2>Messages</h2></div><div class="conversations-list">';
   if(adminMsgs.length>0){
     html2+='<div class="convo-item" onclick="openChat(&quot;'+adminName+'&quot;,&quot;admin&quot;)">'+
@@ -6662,8 +6677,7 @@ async function submitVerificationDocs(){
 }
 
 
-// ── Lecture audio publique ──
-function playPublicAudio(uid){
+async function playPublicAudio(uid){
   var audioEl=document.getElementById('audio-'+uid);
   if(!audioEl) return;
   if(audioEl.style.display!=='none'&&audioEl.src){audioEl.style.display='none';return;}
@@ -6694,31 +6708,20 @@ var _bannedPhones=(function(){try{return JSON.parse(localStorage.getItem('oumeli
 function saveBans(){try{localStorage.setItem('oumelia_bans',JSON.stringify(_bannedPhones));}catch(e){}}
 function isPhoneBanned(p){return _bannedPhones.some(function(b){return b.phone===p;});}
 
-// ══ Onglet Dossiers : query directe docs_submitted=eq.true + select=* ══
 async function renderAdminDossiers(c){
   c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
   var HDR={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
   var res=null;
   try{
-    // Query directe : tous les profils avec docs_submitted=true, select=* pour éviter tout crash de colonne
     var r=await fetch(SUPABASE_URL+'/rest/v1/profils?docs_submitted=eq.true&select=*&order=created_at.desc',{headers:HDR});
     var d=await r.json();
     if(Array.isArray(d)) res=d;
-    else console.log('renderAdminDossiers error:',JSON.stringify(d).slice(0,200));
-  }catch(e){ console.log('renderAdminDossiers fetch error:',e); }
-
+  }catch(e){}
   var dossiers=Array.isArray(res)?res:[];
   var badge=document.getElementById('dossiers-badge');
   if(badge){badge.textContent=dossiers.length||'';badge.style.display=dossiers.length?'':'none';}
-  if(!dossiers.length){
-    c.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">Aucun dossier soumis pour l\'instant</div>';
-    return;
-  }
-
+  if(!dossiers.length){c.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">Aucun dossier soumis pour l\'instant</div>';return;}
   var PUB=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/public/';
-  var PHOTOS_PUB=PUB+'photos/';
-  var DOCS_PUB=PUB+'verification-docs/';
-
   var stepBadge=function(s){
     if(s==='en_attente_rdv') return '<span style="font-size:.7rem;background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3);border-radius:6px;padding:2px 6px">📂 Étape 2</span>';
     if(s==='rdv_planifie')   return '<span style="font-size:.7rem;background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3);border-radius:6px;padding:2px 6px">📅 Étape 3</span>';
@@ -6726,88 +6729,40 @@ async function renderAdminDossiers(c){
     if(s==='active')         return '<span style="font-size:.7rem;background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3);border-radius:6px;padding:2px 6px">✓ Actif</span>';
     return '<span style="font-size:.7rem;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:2px 6px">⏳ À valider</span>';
   };
-
   var hommes=dossiers.filter(function(p){return p.gender==='homme';});
   var femmes=dossiers.filter(function(p){return p.gender==='femme';});
-
   function buildCard(p){
     var uid=p.user_id||'';
     var canValidate=p.status!=='active'&&p.status!=='valide_a_payer';
     var dateInscrit=p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'';
-
-    // ── Photo (bucket photos, URL publique) ──
-    var photoHtml='';
-    if(p.photo_url){
-      photoHtml='<img src="'+p.photo_url+'" '
-        +'style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(201,168,76,.4);flex-shrink:0" '
-        +'alt="" onerror="this.style.display=\'none\'">';
-    } else {
-      photoHtml='<div style="width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">'
-        +(p.gender==='femme'?'🌸':'🕌')+'</div>';
-    }
-
-    // ── Documents (bucket verification-docs, URL publique) ──
-    // Utilise cni_path exact si disponible, sinon construit l'URL avec les extensions courantes
+    var photoHtml=p.photo_url
+      ?'<img src="'+p.photo_url+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(201,168,76,.4);flex-shrink:0" alt="" onerror="this.style.display=\'none\'">'
+      :'<div style="width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">'+(p.gender==='femme'?'🌸':'🕌')+'</div>';
+    var DOCS=PUB+'verification-docs/';
     var cniPath=p.cni_path||(uid?uid+'/cni.pdf':null);
     var workPath=p.work_path||(uid&&p.gender==='homme'?uid+'/work.pdf':null);
-
     var docLinks='';
-    if(cniPath){
-      // Lien principal (PDF ou chemin exact)
-      docLinks+='<a class="d-doc-btn" href="'+DOCS_PUB+cniPath+'" target="_blank" onclick="event.stopPropagation()">🪪 CNI</a>';
-      // Lien alternatif JPG si chemin exact non dispo
-      if(!p.cni_path && uid){
-        docLinks+='<a class="d-doc-btn" href="'+DOCS_PUB+uid+'/cni.jpg" target="_blank" onclick="event.stopPropagation()" style="opacity:.6;font-size:.68rem">JPG</a>';
-      }
-    }
-    if(workPath){
-      docLinks+='<a class="d-doc-btn" href="'+DOCS_PUB+workPath+'" target="_blank" onclick="event.stopPropagation()">💼 Justif.</a>';
-      if(!p.work_path && uid){
-        docLinks+='<a class="d-doc-btn" href="'+DOCS_PUB+uid+'/work.jpg" target="_blank" onclick="event.stopPropagation()" style="opacity:.6;font-size:.68rem">JPG</a>';
-      }
-    }
-
-    // ── Audio ──
-    var audioHtml='';
-    if(p.audio_attested&&uid){
-      audioHtml='<div style="margin:6px 0">'
-        +'<button class="d-doc-btn" onclick="event.stopPropagation();playPublicAudio(\''+uid+'\')">🎙 Écouter attestation</button>'
-        +'<audio id="audio-'+uid+'" style="width:100%;display:none;margin-top:4px;height:32px" controls onclick="event.stopPropagation()"></audio>'
-        +'</div>';
-    }
-
+    if(cniPath) docLinks+='<a class="d-doc-btn" href="'+DOCS+cniPath+'" target="_blank" onclick="event.stopPropagation()">🪪 CNI</a>'+((!p.cni_path&&uid)?'<a class="d-doc-btn" href="'+DOCS+uid+'/cni.jpg" target="_blank" onclick="event.stopPropagation()" style="opacity:.6;font-size:.68rem">JPG</a>':'');
+    if(workPath) docLinks+='<a class="d-doc-btn" href="'+DOCS+workPath+'" target="_blank" onclick="event.stopPropagation()">💼 Justif.</a>';
+    var audioHtml=p.audio_attested&&uid?'<div style="margin:6px 0"><button class="d-doc-btn" onclick="event.stopPropagation();playPublicAudio(\''+uid+'\')">🎙 Écouter attestation</button><audio id="audio-'+uid+'" style="width:100%;display:none;margin-top:4px;height:32px" controls onclick="event.stopPropagation()"></audio></div>':'';
     var prenom_safe=(p.prenom||'').replace(/"/g,'');
-    var tel_safe=(p.telephone||'');
-
     return '<div class="dossier-card" data-id="'+String(p.id)+'" onclick="openAdminProfileDetail(this.dataset.id)" style="cursor:pointer">'
-      // Header : photo + nom + badge
       +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+photoHtml
-      +'<div style="flex:1;min-width:0">'
-        +'<div class="d-name" style="margin:0">'+(p.prenom||'—')+', '+(p.age||'—')+' ans</div>'
-        +'<div class="d-meta" style="margin:2px 0 0">📍 '+(p.ville||'—')+(p.pays?' · '+p.pays:'')+(dateInscrit?' · '+dateInscrit:'')+'</div>'
-        +'<div class="d-meta" style="margin:2px 0 0">📱 '+(p.telephone||'—')+'</div>'
-      +'</div>'
+      +'<div style="flex:1;min-width:0"><div class="d-name" style="margin:0">'+(p.prenom||'—')+', '+(p.age||'—')+' ans</div>'
+      +'<div class="d-meta" style="margin:2px 0 0">📍 '+(p.ville||'—')+(p.pays?' · '+p.pays:'')+(dateInscrit?' · '+dateInscrit:'')+'</div>'
+      +'<div class="d-meta" style="margin:2px 0 0">📱 '+(p.telephone||'—')+'</div></div>'
       +stepBadge(p.status||'pending')+'</div>'
-      // Documents
       +(docLinks?'<div class="d-docs">'+docLinks+'</div>':'')
-      // Audio
       +audioHtml
-      // Bouton valider
       +(canValidate?'<button class="validate-call-btn" data-id="'+String(p.id)+'" data-name="'+prenom_safe+'" onclick="event.stopPropagation();adminValidateAfterCall(this.dataset.id,this.dataset.name)">✓ Valider &amp; débloquer le paiement</button>':'')
-      // Actions
       +'<div style="display:flex;gap:8px;margin-top:8px">'
       +'<button data-id="'+String(p.id)+'" data-name="'+prenom_safe+'" onclick="event.stopPropagation();openRejectModal(this.dataset.id,this.dataset.name)" style="flex:1;background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:8px;font-size:.8rem;cursor:pointer">✗ Refuser</button>'
-      +(tel_safe?'<button data-phone="'+tel_safe+'" data-name="'+prenom_safe+'" onclick="event.stopPropagation();banPhone(this.dataset.phone,this.dataset.name)" style="background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer">🚫</button>':'')
+      +((p.telephone||'')?'<button data-phone="'+(p.telephone||'')+'" data-name="'+prenom_safe+'" onclick="event.stopPropagation();banPhone(this.dataset.phone,this.dataset.name)" style="background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer">🚫</button>':'')
       +'</div></div>';
   }
-
   var hH=hommes.length?hommes.map(buildCard).join(''):'<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:12px">Aucun dossier frère</p>';
   var hF=femmes.length?femmes.map(buildCard).join(''):'<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:12px">Aucun dossier sœur</p>';
-
-  c.innerHTML='<div style="padding:16px">'
-    +'<div class="section-title" style="margin-bottom:8px">📂 Dossiers Frères ('+hommes.length+')</div>'+hH
-    +'<div class="section-title" style="margin:16px 0 8px">📂 Dossiers Sœurs ('+femmes.length+')</div>'+hF
-    +'</div>';
+  c.innerHTML='<div style="padding:16px"><div class="section-title" style="margin-bottom:8px">📂 Dossiers Frères ('+hommes.length+')</div>'+hH+'<div class="section-title" style="margin:16px 0 8px">📂 Dossiers Sœurs ('+femmes.length+')</div>'+hF+'</div>';
 }
 
 async function adminValidateAfterCall(id,prenom){
@@ -6815,7 +6770,7 @@ async function adminValidateAfterCall(id,prenom){
   if(window._adminProfiles){var f=window._adminProfiles.find(function(x){return String(x.id)===String(id);});if(f)f.status='valide_a_payer';}
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
   await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({status:'valide_a_payer',call_validated:true})}).catch(function(){});
-  var msg='🎉 Félicitations '+prenom+'\n\nVotre profil a été validé par notre équipe.\n\nÉtape 4/4 — Finalisez votre paiement (14,99 €) pour accéder aux membres.\n\nConnectez-vous sur oumélia.com → "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  var msg='🎉 Félicitations '+prenom+'\n\nVotre profil a été validé par notre équipe.\n\nÉtape 4/4 — Finalisez votre paiement (14,99 €) pour accéder aux membres.\n\nConnectez-vous sur oumelia.com → "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   await fetch(SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({from_id:'admin',to_id:String(id),content:msg,created_at:new Date().toISOString()})}).catch(function(){});
   showToast('✅ '+prenom+' validé — notification envoyée','green');
   adminTab('dossiers');
