@@ -5331,6 +5331,11 @@ function getAllAdminProfiles(){
         madhhab: p.madhhab || '',
         voile: p.voile || null,
         barbe: p.barbe || null,
+        recherche: p.recherche || '',
+        origine_recherche: p.origine_recherche || '',
+        age_min: p.age_min || null,
+        age_max: p.age_max || null,
+        situation_recherche: p.situation_recherche || '',
         isDB: true,
       };
     });
@@ -5754,6 +5759,31 @@ function notifyFrereFromMatch(idx){
   adminTab('matches');
 }
 
+// Charger l'audio admin avec URL signée (bucket privé)
+async function loadAdminAudio(audioElId, path){
+  var audioEl = document.getElementById(audioElId);
+  if(!audioEl) return;
+  if(audioEl.src && audioEl.style.display!=='none'){
+    audioEl.style.display='none'; return;
+  }
+  showToast('⏳ Chargement audio...','gold');
+  try{
+    var res = await fetch(SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/sign/verification-docs/'+path,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({expiresIn:3600})
+    });
+    var data = await res.json();
+    if(data.signedURL){
+      audioEl.src = SUPABASE_URL.replace('/rest/v1','')+data.signedURL;
+      audioEl.style.display = 'block';
+      audioEl.play().catch(function(){});
+    } else {
+      showToast('❌ Audio non disponible','red');
+    }
+  }catch(e){ showToast('❌ Erreur chargement audio','red'); }
+}
+
 var audioVerifId=null;
 function openAudioVerif(id,name){
   audioVerifId=id;
@@ -5814,15 +5844,22 @@ function openAdminProfileDetail(id){
   };
   var stepBadge = stepBadges[p.status] || '<span class="badge">'+p.status+'</span>';
   var row = function(label, val){ return val ? '<div class="profile-detail-row"><span>'+label+'</span><span style="font-weight:500;color:var(--white)">'+val+'</span></div>' : ''; };
-  // Lecteur audio
+  // Lecteur audio — URL signée (bucket privé)
   var audioSection = '';
   if(p.user_id){
-    var audioUrl = supaBase+'/storage/v1/object/public/verification-docs/'+p.user_id+'/audio.webm';
-    audioSection = '<div class="profile-section"><h4>🎙 Attestation audio</h4>'
-      +((p.audio_attested||p.audioAttested)
-        ? '<audio src="'+audioUrl+'" controls style="width:100%;margin-top:8px"></audio>'
-        : '<p style="font-size:.82rem;color:var(--muted);margin-top:6px">Aucune attestation</p>')
-      +'</div>';
+    var _audioPath = p.user_id+'/audio.webm';
+    var _audioId = 'admin-audio-'+p.id;
+    if(p.audio_attested||p.audioAttested){
+      audioSection = '<div class="profile-section"><h4>🎙 Attestation audio</h4>'
+        +'<button onclick="loadAdminAudio(\''+_audioId+'\',\''+_audioPath+'\')" '
+        +'style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--gold);font-size:.82rem;cursor:pointer;width:100%;margin-top:8px;font-family:\'Cairo\',sans-serif">▶ Charger et écouter l\'attestation</button>'
+        +'<audio id="'+_audioId+'" controls style="width:100%;margin-top:8px;display:none"></audio>'
+        +'</div>';
+    } else {
+      audioSection = '<div class="profile-section"><h4>🎙 Attestation audio</h4>'
+        +'<p style="font-size:.82rem;color:var(--muted);margin-top:6px">Aucune attestation enregistrée</p>'
+        +'</div>';
+    }
   }
   // Documents — URL publique directe depuis le bucket public
   var docsSection = '';
@@ -5893,7 +5930,16 @@ function openAdminProfileDetail(id){
     +'<div class="profile-section"><h4>✍️ Présentation</h4>'
     +'<p style="font-size:.84rem;color:var(--white2);line-height:1.7;margin:8px 0 0">'+(p.bio||'<em style="color:var(--muted)">Aucune présentation</em>')+'</p>'
     +'</div>'
-    +(p.recherche?'<div class="profile-section"><h4>💍 Type de mariage recherché</h4><p style="font-size:.84rem;color:var(--white2);margin:8px 0 0">'+p.recherche+'</p></div>':'')
+    +(function(){
+      var hasSearchCriteria = p.recherche||p.origine_recherche||p.age_min||p.age_max||p.situation_recherche;
+      if(!hasSearchCriteria) return '';
+      var s='<div class="profile-section"><h4>🔍 Ce que je cherche</h4>';
+      if(p.situation_recherche) s+=row('Situation recherchée', p.situation_recherche);
+      if(p.origine_recherche && p.origine_recherche!=='Peu importe') s+=row('Origine recherchée', p.origine_recherche);
+      if(p.age_min||p.age_max) s+=row('Tranche d\'âge', (p.age_min||'—')+' – '+(p.age_max||'—')+' ans');
+      if(p.recherche) s+='<p style="font-size:.84rem;color:var(--white2);line-height:1.6;margin:8px 0 0">'+p.recherche+'</p>';
+      return s+'</div>';
+    })()
     +docsSection
     +audioSection
     +'<div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">'
@@ -6681,9 +6727,20 @@ async function playPublicAudio(uid){
   var audioEl=document.getElementById('audio-'+uid);
   if(!audioEl) return;
   if(audioEl.style.display!=='none'&&audioEl.src){audioEl.style.display='none';return;}
-  var url=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/public/verification-docs/'+uid+'/audio.webm';
-  audioEl.src=url; audioEl.style.display='block';
-  audioEl.play().catch(function(){});
+  // URL signée car bucket privé
+  try{
+    var res=await fetch(SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/sign/verification-docs/'+uid+'/audio.webm',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({expiresIn:3600})
+    });
+    var data=await res.json();
+    if(data.signedURL){
+      audioEl.src=SUPABASE_URL.replace('/rest/v1','')+data.signedURL;
+      audioEl.style.display='block';
+      audioEl.play().catch(function(){});
+    } else { showToast('❌ Audio non disponible','red'); }
+  }catch(e){ showToast('❌ Erreur audio','red'); }
 }
 
 function renderStepBanner(status){
@@ -6744,7 +6801,15 @@ async function renderAdminDossiers(c){
     var docLinks='';
     if(cniPath) docLinks+='<a class="d-doc-btn" href="'+DOCS+cniPath+'" target="_blank" onclick="event.stopPropagation()">🪪 CNI</a>'+((!p.cni_path&&uid)?'<a class="d-doc-btn" href="'+DOCS+uid+'/cni.jpg" target="_blank" onclick="event.stopPropagation()" style="opacity:.6;font-size:.68rem">JPG</a>':'');
     if(workPath) docLinks+='<a class="d-doc-btn" href="'+DOCS+workPath+'" target="_blank" onclick="event.stopPropagation()">💼 Justif.</a>';
-    var audioHtml=p.audio_attested&&uid?'<div style="margin:6px 0"><button class="d-doc-btn" onclick="event.stopPropagation();playPublicAudio(\''+uid+'\')">🎙 Écouter attestation</button><audio id="audio-'+uid+'" style="width:100%;display:none;margin-top:4px;height:32px" controls onclick="event.stopPropagation()"></audio></div>':'';
+    // Audio avec URL signée
+    var audioHtml='';
+    if(p.audio_attested&&uid){
+      var _aid='dossier-audio-'+uid;
+      audioHtml='<div style="margin:6px 0">'
+        +'<button class="d-doc-btn" data-uid="'+uid+'" data-aid="'+_aid+'" onclick="event.stopPropagation();loadAdminAudio(this.dataset.aid,this.dataset.uid+\'/audio.webm\')">🎙 Écouter attestation</button>'
+        +'<audio id="'+_aid+'" style="width:100%;display:none;margin-top:4px;height:32px" controls onclick="event.stopPropagation()"></audio>'
+        +'</div>';
+    }
     var prenom_safe=(p.prenom||'').replace(/"/g,'');
     return '<div class="dossier-card" data-id="'+String(p.id)+'" onclick="openAdminProfileDetail(this.dataset.id)" style="cursor:pointer">'
       +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+photoHtml
