@@ -570,7 +570,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 
       <!-- Logo -->
       <div style="margin:16px auto 14px">
-        <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" width="72" height="83" alt="Oumélia" style="display:block;margin:0 auto;filter:drop-shadow(0 0 20px rgba(201,168,76,.3))" />
+        <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" width="72" height="83" alt="Oumélia" style="mix-blend-mode:lighten;display:block;margin:0 auto;background:transparent;isolation:isolate" />
       </div>
 
       <!-- Nom + tagline -->
@@ -719,7 +719,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   <div class="auth-wrap">
     <div class="auth-card">
       <div class="auth-logo">
-        <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="width:52px;height:52px;object-fit:contain;background:none" alt="Oumélia">
+        <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:52px;height:52px;object-fit:contain;background:none" alt="Oumélia">
       </div>
       <h2 class="auth-title">Connexion</h2>
       <div class="form-group">
@@ -1021,6 +1021,84 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
             </div>
             <input type="hidden" id="rech-enfants" value="Peu importe">
           </div>
+
+          <!-- Critères spécifiques genre -->
+          <div id="rech-genre-soeur" style="display:none">
+            <div style="height:1px;background:var(--border);margin:12px 0"></div>
+            <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px">✦ Critères supplémentaires</p>
+
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:.8rem">Barbe souhaitée</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+              <button type="button" class="rech-btn" data-field="barbe_recherche" data-val="Peu importe" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--gold-soft);color:var(--gold)">Peu importe</button>
+              <button type="button" class="rech-btn" data-field="barbe_recherche" data-val="Oui" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Oui</button>
+              <button type="button" class="rech-btn" data-field="barbe_recherche" data-val="Non" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Non</button>
+            </div>
+            <input type="hidden" id="rech-barbe_recherche" value="Peu importe">
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:.8rem">Port du qamis</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+              <button type="button" class="rech-btn" data-field="qamis_recherche" data-val="Peu importe" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--gold-soft);color:var(--gold)">Peu importe</button>
+              <button type="button" class="rech-btn" data-field="qamis_recherche" data-val="Oui" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Oui</button>
+              <button type="button" class="rech-btn" data-field="qamis_recherche" data-val="Non" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Non</button>
+            </div>
+            <input type="hidden" id="rech-qamis_recherche" value="Peu importe">
+            </div>
+
+            <div class="form-group" style="margin-bottom:0">
+              <label style="font-size:.8rem">Madhhab souhaité</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Peu importe" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--gold-soft);color:var(--gold)">Peu importe</button>
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Hanafite" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Hanafite</button>
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Malékite" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Malékite</button>
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Chaféite" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Chaféite</button>
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Hanbalite" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Hanbalite</button>
+            </div>
+            <input type="hidden" id="rech-madhhab_recherche" value="Peu importe">
+            </div>
+          </div>
+
+          <div id="rech-genre-frere" style="display:none">
+            <div style="height:1px;background:var(--border);margin:12px 0"></div>
+            <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px">✦ Critères supplémentaires</p>
+
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:.8rem">Voile souhaité</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Peu importe" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--gold-soft);color:var(--gold)">Peu importe</button>
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Hijab" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Hijab</button>
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Jilbab" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Jilbab</button>
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Niqab" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Niqab</button>
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Khimar" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Khimar</button>
+            </div>
+            <input type="hidden" id="rech-voile_recherche" value="Peu importe">
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:.8rem">Polygamie acceptée</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+              <button type="button" class="rech-btn" data-field="polygamie_recherche" data-val="Peu importe" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--gold-soft);color:var(--gold)">Peu importe</button>
+              <button type="button" class="rech-btn" data-field="polygamie_recherche" data-val="Oui" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Oui</button>
+              <button type="button" class="rech-btn" data-field="polygamie_recherche" data-val="Non" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Non</button>
+            </div>
+            <input type="hidden" id="rech-polygamie_recherche" value="Peu importe">
+            </div>
+
+            <div class="form-group" style="margin-bottom:0">
+              <label style="font-size:.8rem">Madhhab souhaité</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Peu importe" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--gold-soft);color:var(--gold)">Peu importe</button>
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Hanafite" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Hanafite</button>
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Malékite" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Malékite</button>
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Chaféite" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Chaféite</button>
+              <button type="button" class="rech-btn" data-field="madhhab_recherche" data-val="Hanbalite" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Hanbalite</button>
+            </div>
+            <input type="hidden" id="rech-madhhab_recherche" value="Peu importe">
+            </div>
+          </div>
+
         </div>
         <button class="btn btn-gold" style="width:100%" onclick="regStep2()">Suivant →</button>
         <div class="auth-link"><a onclick="showScreen('screen-login')">Déjà un compte ? Se connecter</a></div>
@@ -1271,7 +1349,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 <div id="screen-app" class="screen">
   <!-- Header -->
   <div class="app-header">
-    <div class="logo-hdr" style="display:flex;align-items:center;gap:7px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="width:24px;height:24px;object-fit:contain;background:none" alt=""><span class="gold-text" style="font-family:'Cinzel Decorative',serif;font-size:.82rem;letter-spacing:2px">OUMÉLIA</span></div>
+    <div class="logo-hdr" style="display:flex;align-items:center;gap:7px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:24px;height:24px;object-fit:contain;background:none" alt=""><span class="gold-text" style="font-family:'Cinzel Decorative',serif;font-size:.82rem;letter-spacing:2px">OUMÉLIA</span></div>
     <div style="display:flex;align-items:center;gap:12px">
       <span id="header-user-name" style="font-size:.82rem;color:var(--white2)"></span>
       <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);font-size:.78rem;cursor:pointer;padding:4px 8px">Déco.</button>
@@ -1298,7 +1376,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 ============================== -->
 <div id="screen-admin" class="screen">
   <div class="admin-topbar">
-    <span class="atitle gold-text" style="display:flex;align-items:center;gap:6px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="width:20px;height:20px;object-fit:contain" alt=""> OUMÉLIA ADMIN</span>
+    <span class="atitle gold-text" style="display:flex;align-items:center;gap:6px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:20px;height:20px;object-fit:contain" alt=""> OUMÉLIA ADMIN</span>
     <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer">Déconnexion</button>
   </div>
   <div class="admin-tabs">
@@ -1590,7 +1668,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 <div class="modal-overlay" id="modal-audio" onclick="if(event.target===this)closeModal('modal-audio')">
   <div class="modal-card">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="width:28px;height:28px;object-fit:contain" alt="">
+      <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:28px;height:28px;object-fit:contain" alt="">
       <h3 style="margin:0;font-size:1rem;color:var(--gold)">Attestation audio</h3>
     </div>
     <p style="font-size:.86rem;color:var(--white2);margin-bottom:14px">Profil : <strong id="audio-target-name" style="color:var(--white)"></strong></p>
@@ -1968,6 +2046,11 @@ function selectGender(g){
   // Barbe : frères uniquement
   var barreEl=document.getElementById('field-barbe')||document.getElementById('reg-barbe-wrap');
   if(barreEl) barreEl.style.display=g==='homme'?'':'none';
+  // Critères recherche spécifiques au genre
+  var rechSoeur=document.getElementById('rech-genre-soeur');
+  var rechFrere=document.getElementById('rech-genre-frere');
+  if(rechSoeur) rechSoeur.style.display=g==='femme'?'block':'none';
+  if(rechFrere) rechFrere.style.display=g==='homme'?'block':'none';
   // Situation : ajouter "Marié" pour les hommes, retirer pour les femmes
   var sitSel=document.getElementById('reg-situation');
   if(sitSel){
@@ -2398,6 +2481,23 @@ async function doRegister(){
   } else if(rechercheEl){
     profileData.recherche=rechercheEl.value.trim()||'';
   }
+  // Critères recherche structurés
+  var gv=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  profileData.age_min=parseInt(gv('rech-age-min'))||18;
+  profileData.age_max=parseInt(gv('rech-age-max'))||60;
+  profileData.origine_recherche=gv('rech-origine')||'Peu importe';
+  profileData.pratique_recherche=gv('rech-pratique')||'Peu importe';
+  profileData.situation_recherche=gv('rech-situation')||'Peu importe';
+  profileData.enfants_recherche=gv('rech-enfants')||'Peu importe';
+  profileData.madhhab_recherche=gv('rech-madhhab_recherche')||'Peu importe';
+  if(state.gender==='femme'){
+    profileData.barbe_recherche=gv('rech-barbe_recherche')||'Peu importe';
+    profileData.qamis_recherche=gv('rech-qamis_recherche')||'Peu importe';
+  }
+  if(state.gender==='homme'){
+    profileData.voile_recherche=gv('rech-voile_recherche')||'Peu importe';
+    profileData.polygamie_recherche=gv('rech-polygamie_recherche')||'Peu importe';
+  }
 
   var { data: insertData, error: profileError } = await sb.from('profils').insert(profileData).select().single();
 
@@ -2779,11 +2879,24 @@ function getRegion(ville){
 // ══════════ COMPLÉTION PROFIL ══════════
 function getProfileCompletion(u){
   if(!u) return 0;
-  // Uniquement les champs demandés à l'inscription
-  var allFields=['prenom','age','ville','origine','pratique','bio','madhhab','coran','situation','enfants'];
-  if(u.gender==='femme') allFields.push('voile');
-  if(u.gender==='homme') allFields.push('barbe');
-  var filled=allFields.filter(function(f){ return u[f]&&String(u[f])!==''&&String(u[f])!=='null'; }).length;
+  // Champs profil de base (inscription)
+  var baseFields=['prenom','age','ville','origine','pratique','bio','madhhab','coran','situation','enfants'];
+  if(u.gender==='femme') baseFields.push('voile');
+  if(u.gender==='homme') baseFields.push('barbe');
+  // Champs recherche (modifier mon profil)
+  var rechFields=['origine_recherche','situation_recherche','age_min','age_max'];
+  if(u.gender==='femme'){
+    rechFields.push('barbe_recherche');
+    rechFields.push('qamis_recherche');
+  } else {
+    rechFields.push('voile_recherche');
+    rechFields.push('polygamie_recherche');
+  }
+  var allFields=baseFields.concat(rechFields);
+  var filled=allFields.filter(function(f){
+    var v=u[f];
+    return v!==null&&v!==undefined&&String(v)!==''&&String(v)!=='null'&&String(v)!=='0'&&String(v)!=='Peu importe';
+  }).length;
   return Math.min(100, Math.round((filled/allFields.length)*100));
 }
 
@@ -3117,7 +3230,15 @@ function renderMyProfile(c){
         <div class="completion-bar-track">
           <div class="completion-bar-fill" style="width:${completion}%"></div>
         </div>
-        ${completion<100?'<p style="font-size:.72rem;color:var(--muted);margin-top:5px">💡 Complétez votre bio pour augmenter votre visibilité</p>':'<p style="font-size:.72rem;color:var(--green);margin-top:5px">✓ Profil complet !</p>'}
+        ${(function(){
+  if(completion===100) return '<p style="font-size:.72rem;color:var(--green);margin-top:5px">✓ Profil complet !</p>';
+  var missing=[];
+  if(!u.bio||u.bio==='') missing.push('bio');
+  if(!u.origine_recherche||u.origine_recherche==='Peu importe') missing.push('critères de recherche');
+  else if(!u.age_min||!u.age_max) missing.push('tranche d\u2019\u00e2ge recherch\u00e9e');
+  if(missing.length) return '<p style="font-size:.72rem;color:var(--muted);margin-top:5px">💡 Manque : '+missing.slice(0,2).join(', ')+'</p>';
+  return '<p style="font-size:.72rem;color:var(--muted);margin-top:5px">💡 Complétez vos critères de recherche</p>';
+})()}
       </div>
 
       ${(function(){
@@ -3126,7 +3247,7 @@ function renderMyProfile(c){
         var _l=typeof getStatusInfo==='function'?getStatusInfo(_s).label:'Inscription en cours';
         // Si docs envoyés mais statut pas encore mis à jour (PATCH en cours / lag réseau)
         var _docsOk=u.docs_submitted||_s==='en_attente_rdv'||_s==='rdv_planifie';
-        var _d=_s==='valide_a_payer'?'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.':(_s==='en_attente_rdv'||_docsOk)?'Vos documents sont en cours d examen. Planifiez votre entretien via votre messagerie.':'Envoyez vos documents pour continuer la verification.';
+        var _d=_s==='valide_a_payer'?'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.':_s==='rdv_planifie'?'Entretien planifié. En attente de validation par notre équipe.':_s==='en_attente_rdv'?'Vos documents ont été reçus. Planifiez votre entretien.':'Envoyez vos documents pour continuer la verification.';
         var _b=_s==='valide_a_payer'?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (14,99 €) →</button>':_s==='rdv_planifie'?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button><button onclick="confirmRdvPris()" style="background:none;border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer;font-family:\'Cairo\',sans-serif">✅ J\'ai planifié mon entretien</button></div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
         return '<div class="step-banner" style="margin:0 0 14px"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+_l+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:4px;line-height:1.5">'+_d+'</div>'+_b+'</div>';
       })()}
@@ -3259,31 +3380,39 @@ function renderEditProfile(){
   html+='<div class="gold-divider"></div>';
   html+='<div class="form-group"><label>Présentation</label><textarea id="edit-bio" style="min-height:100px">'+(u.bio||'')+'</textarea></div>';
 
-  // Ce que je cherche (commun frères et sœurs)
+  // Ce que je cherche
   html+='<div class="gold-divider"></div>';
   html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Ce que je cherche</p>';
-  // Origine recherchée
-  var origineOpts2=['Peu importe','Algérienne','Marocaine','Tunisienne','Française','Sénégalaise','Malienne','Ivoirienne','Camerounaise','Turque','Égyptienne','Syrienne','Pakistanaise','Autre'];
-  var origineRechHtml='<div class="form-group"><label>Origine du prétendant(e)</label><select id="edit-origine-recherche">';
-  var curOrigineRech=u.origine_recherche||'';
-  if(!curOrigineRech) origineRechHtml+='<option value="">Peu importe</option>';
-  origineOpts2.forEach(function(v){ origineRechHtml+='<option value="'+v+'"'+(curOrigineRech===v?' selected':'')+'>'+v+'</option>'; });
-  html+=origineRechHtml+'</select></div>';
-  // Tranche d'âge recherchée
-  html+='<div class="form-row">';
-  html+='<div class="form-group"><label>Âge min</label><input type="number" id="edit-age-min" value="'+(u.age_min||18)+'" min="18" max="80"></div>';
-  html+='<div class="form-group"><label>Âge max</label><input type="number" id="edit-age-max" value="'+(u.age_max||60)+'" min="18" max="80"></div>';
-  html+='</div>';
-  // Situation matrimoniale recherchée
-  var sitRechOpts=isF
-    ? [['Peu importe','Peu importe'],['Jamais marié','Jamais marié'],['Divorcé','Divorcé'],['Veuf','Veuf'],['Marié (polygamie)','Marié (polygamie)']]
-    : [['Peu importe','Peu importe'],['Jamais mariée','Jamais mariée'],['Divorcée','Divorcée'],['Veuve','Veuve']];
-  var sitRechHtml='<div class="form-group"><label>Situation matrimoniale recherchée</label><select id="edit-situation-recherche">';
-  var curSitRech=u.situation_recherche||'';
-  if(!curSitRech) sitRechHtml+='<option value="">Peu importe</option>';
-  sitRechOpts.forEach(function(s){ sitRechHtml+='<option value="'+s[0]+'"'+(curSitRech===s[0]?' selected':'')+'>'+s[1]+'</option>'; });
-  html+=sitRechHtml+'</select></div>';
-  // Présentation du critère de recherche (texte libre)
+
+  var OPTS_S='width:100%;background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px;color:var(--white);font-family:\'Cairo\',sans-serif;font-size:.85rem;margin-top:4px';
+  function mkSel(id,lbl,opts,cur){
+    var h='<div class="form-group"><label>'+lbl+'</label><select id="'+id+'" style="'+OPTS_S+'">';
+    opts.forEach(function(o){ h+='<option value="'+o+'"'+(cur===o?' selected':'')+'>'+o+'</option>'; });
+    return h+'</select></div>';
+  }
+
+  var ORIGINES=['Peu importe','Algérienne','Marocaine','Tunisienne','Française','Belge','Sénégalaise','Malienne','Guinéenne','Ivoirienne','Turque','Pakistanaise','Égyptienne','Autre'];
+  html+=mkSel('edit-origine-recherche','Origine souhaitée',ORIGINES,u.origine_recherche||'Peu importe');
+  html+='<div class="form-row"><div class="form-group"><label>Âge min</label><input type="number" id="edit-age-min" value="'+(u.age_min||18)+'" min="18" max="80"></div>'
+      +'<div class="form-group"><label>Âge max</label><input type="number" id="edit-age-max" value="'+(u.age_max||60)+'" min="18" max="80"></div></div>';
+  html+=mkSel('edit-pratique-recherche','Niveau pratique souhaité',['Peu importe','Débutant(e)','Pratiquant(e)','Très pratiquant(e)'],u.pratique_recherche||'Peu importe');
+  html+=mkSel('edit-madhhab-recherche','Madhhab souhaité',['Peu importe','Hanafite','Malékite','Chaféite','Hanbalite'],u.madhhab_recherche||'Peu importe');
+  var sitRechOpts=isF?['Peu importe','Jamais marié','Divorcé','Veuf','Marié (polygamie)']:['Peu importe','Jamais mariée','Divorcée','Veuve'];
+  html+=mkSel('edit-situation-recherche','Situation souhaitée',sitRechOpts,u.situation_recherche||'Peu importe');
+  html+=mkSel('edit-enfants-recherche','Enfants acceptés',['Peu importe','Non','Oui'],u.enfants_recherche||'Peu importe');
+
+  if(isF){
+    html+='<div class="gold-divider"></div>';
+    html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Critères spécifiques</p>';
+    html+=mkSel('edit-barbe-recherche','Barbe souhaitée',['Peu importe','Oui','Non'],u.barbe_recherche||'Peu importe');
+    html+=mkSel('edit-qamis-recherche','Port du qamis',['Peu importe','Oui','Non'],u.qamis_recherche||'Peu importe');
+  } else {
+    html+='<div class="gold-divider"></div>';
+    html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Critères spécifiques</p>';
+    html+=mkSel('edit-voile-recherche','Voile souhaité',['Peu importe','Hijab','Jilbab','Niqab','Khimar'],u.voile_recherche||'Peu importe');
+    html+=mkSel('edit-polygamie-recherche','Polygamie',['Peu importe','Accepte','Refuse'],u.polygamie_recherche||'Peu importe');
+  }
+
   html+='<div class="form-group"><label>Décris ce que tu recherches <span style="color:var(--muted);font-size:.75rem">(optionnel)</span></label>'
     +'<textarea id="edit-recherche" style="min-height:70px">'+(u.recherche||'')+'</textarea></div>';
 
@@ -3317,29 +3446,85 @@ async function submitEdit(){
   var ageMax=parseInt(get('edit-age-max')); if(ageMax>0) updates.age_max=ageMax;
   var origRech=get('edit-origine-recherche'); if(origRech) updates.origine_recherche=origRech;
   var sitRech=get('edit-situation-recherche'); if(sitRech) updates.situation_recherche=sitRech;
+  var pratRech=get('edit-pratique-recherche'); if(pratRech) updates.pratique_recherche=pratRech;
+  var madRech=get('edit-madhhab-recherche'); if(madRech) updates.madhhab_recherche=madRech;
+  var enfRech=get('edit-enfants-recherche'); if(enfRech) updates.enfants_recherche=enfRech;
   var voile=get('edit-voile'), barbe=get('edit-barbe');
   if(voile) updates.voile=voile;
   if(barbe) updates.barbe=barbe;
+  if(state.user&&state.user.gender==='femme'){
+    var barRech=get('edit-barbe-recherche'); if(barRech) updates.barbe_recherche=barRech;
+    var qamRech=get('edit-qamis-recherche'); if(qamRech) updates.qamis_recherche=qamRech;
+  } else {
+    var voiRech=get('edit-voile-recherche'); if(voiRech) updates.voile_recherche=voiRech;
+    var polRech=get('edit-polygamie-recherche'); if(polRech) updates.polygamie_recherche=polRech;
+  }
 
   showToast('⏳ Enregistrement...','gold');
-  console.log('submitEdit, supabaseId:', state.user&&state.user.supabaseId, 'updates:', JSON.stringify(updates).slice(0,100));
-  
-  if(state.user&&state.user.supabaseId){
-    var res = await sb.from('profils').update(updates).eq('user_id', state.user.supabaseId);
-    if(res && res.error) { showToast('❌ Erreur: '+res.error.message,'red'); return; }
-    // Mettre à jour state.user localement
-    var keys = Object.keys(updates);
-    for(var i=0;i<keys.length;i++) state.user[keys[i]]=updates[keys[i]];
-    var newPwd=get('edit-pwd-new');
-    if(newPwd && newPwd.length>=8){
-      var pwdRes = await sb.auth.updateUser({password: newPwd});
-      if(pwdRes.error) showToast('⚠ Mot de passe: '+pwdRes.error.message,'red');
+
+  // Récupérer le JWT depuis localStorage (Supabase le stocke automatiquement)
+  var uid = (state.user&&state.user.supabaseId)||null;
+  var userJwt = null;
+  try{
+    // Chercher le token dans localStorage — clé Supabase standard
+    var lsKeys=Object.keys(localStorage);
+    for(var lki=0;lki<lsKeys.length;lki++){
+      if(lsKeys[lki].indexOf('sb-')===0&&lsKeys[lki].indexOf('auth-token')>0){
+        var lsVal=JSON.parse(localStorage.getItem(lsKeys[lki])||'{}');
+        if(lsVal.access_token){ userJwt=lsVal.access_token; if(!uid&&lsVal.user) uid=lsVal.user.id; break; }
+        // Format alternatif
+        if(lsVal.session&&lsVal.session.access_token){ userJwt=lsVal.session.access_token; if(!uid&&lsVal.session.user) uid=lsVal.session.user.id; break; }
+      }
     }
-    showToast('✅ Votre profil a bien été modifié !','green');
-    setTimeout(function(){ navTo('profil'); }, 1500);
-  } else {
-    console.log('Pas de supabaseId, user:', JSON.stringify(state.user).slice(0,200));
-    showToast('❌ Non connecté — reconnectez-vous','red');
+  }catch(e){}
+  // Fallback SDK
+  if(!userJwt){
+    try{
+      var sess=await sb.auth.getSession();
+      var session=sess&&sess.data&&sess.data.session;
+      if(session){ userJwt=session.access_token||null; if(!uid) uid=session.user&&session.user.id; }
+    }catch(e){}
+  }
+  if(!uid){ showToast('❌ Session expirée — reconnectez-vous','red'); return; }
+
+  var authToken=userJwt||SUPABASE_ANON;
+
+  try{
+    var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+authToken,'Content-Type':'application/json','Prefer':'return=minimal'};
+    var patchRes=await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
+      method:'PATCH',
+      headers:H,
+      body:JSON.stringify(updates)
+    });
+    if(!patchRes.ok){
+      var errTxt=await patchRes.text().catch(function(){return '';});
+      showToast('❌ Erreur: '+patchRes.status+' — '+errTxt.slice(0,80),'red');
+      console.error('PATCH profils error:',patchRes.status,errTxt);
+      return;
+    }
+    // Mettre à jour state.user localement
+    var keys=Object.keys(updates);
+    for(var ki=0;ki<keys.length;ki++) state.user[keys[ki]]=updates[keys[ki]];
+    // Mot de passe
+    var newPwd=get('edit-pwd-new');
+    if(newPwd&&newPwd.length>=8){
+      try{
+        var pwdRes=await sb.auth.updateUser({password:newPwd});
+        if(pwdRes.error) showToast('⚠ Mot de passe: '+pwdRes.error.message,'red');
+      }catch(e){}
+    }
+    // Bannière de confirmation
+    var confirmBanner=document.createElement('div');
+    confirmBanner.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#0d2010,#0a1800);border:1px solid rgba(46,204,113,.4);border-radius:10px;padding:12px 20px;font-size:.86rem;color:#2ecc71;font-weight:600;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);white-space:nowrap';
+    confirmBanner.textContent='✅ Modifications bien enregistrées !';
+    document.body.appendChild(confirmBanner);
+    setTimeout(function(){
+      if(confirmBanner.parentNode) confirmBanner.parentNode.removeChild(confirmBanner);
+      navTo('profil');
+    },2000);
+  }catch(e){
+    showToast('❌ Erreur réseau — réessayez','red');
+    console.error('submitEdit exception:',e);
   }
 }
 
@@ -3950,20 +4135,7 @@ function renderExplorer(c){
       <button class="toggle-btn ${state.viewMode==='liste'?'active':''}" onclick="setView('liste')">📋 Liste</button>
       <button class="toggle-btn ${state.viewMode==='swipe'?'active':''}" onclick="setView('swipe')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M5 12h14M14 6l6 6-6 6"/></svg>Swipe</button>
     </div>`;
-  if(!state.profileActive){
-    var _s3=state.user&&state.user.status||'pending';
-    var _l3=typeof getStatusInfo==='function'?getStatusInfo(_s3).label:'Inscription en cours';
-    var _btnId='explorer-step-btn';
-    var _d3=_s3==='valide_a_payer'?'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.':_s3==='en_attente_rdv'?'Vos documents sont examines. Planifiez votre entretien via la messagerie.':'Envoyez vos documents pour continuer la verification.';
-    var _bTxt=_s3==='valide_a_payer'?'\uD83D\uDCB3 Finaliser (14,99 \u20AC) \u2192':_s3==='en_attente_rdv'?'\uD83D\uDCC5 Planifier mon entretien \u2192':'\uD83D\uDCC2 Envoyer mes documents \u2192';
-    html+='<div class="step-banner" style="margin-bottom:14px" id="explorer-step-banner"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+_l3+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:4px;line-height:1.5">'+_d3+'</div><button id="'+_btnId+'" class="btn btn-gold btn-sm" style="margin-top:10px">'+_bTxt+'</button></div>';
-    setTimeout(function(){
-      var _b=document.getElementById(_btnId);
-      if(!_b) return;
-      var _s4=state.user&&state.user.status||'pending';
-      _b.onclick=_s4==='valide_a_payer'?function(){openModal('modal-paywall');}:_s4==='en_attente_rdv'?function(){navTo('messages');}:function(){showScreen('screen-verification-docs');};
-    },50);
-  }
+
   html+=`
     <div class="search-bar">
       <div class="search-input-wrap">
@@ -4222,7 +4394,30 @@ function initSwipeTouch(){
 }
 
 function openProfile(id){
-  if(!state.profileActive){openModal('modal-paywall');return;}
+  if(!state.profileActive){
+    var _st=state.user&&state.user.status||'pending';
+    // Peut payer seulement si valide_a_payer ou active
+    if(_st==='valide_a_payer'){
+      openModal('modal-paywall');
+    } else {
+      // Pas encore validé par admin — message d'info
+      (function(){
+      var _infoProfil=document.createElement('div');
+      _infoProfil.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px';
+      _infoProfil.onclick=function(e){if(e.target===this) this.remove();};
+      var _inner=document.createElement('div');
+      _inner.style.cssText='background:#1a1106;border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:24px;max-width:300px;text-align:center';
+      _inner.innerHTML='<div style="font-size:1.8rem;margin-bottom:10px">&#9203;</div>'
+        +'<div style="font-weight:700;font-size:.94rem;color:#C9A84C;margin-bottom:10px">Acc&#232;s en cours de validation</div>'
+        +'<div style="font-size:.82rem;color:#ccc;line-height:1.6;margin-bottom:16px">Vous pourrez acc&#233;der aux profils une fois votre entretien valid&#233; par l&#x27;&#233;quipe Oum&#233;lia.</div>'
+        +'<button style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#C9A84C;border-radius:8px;padding:10px 24px;font-size:.84rem;cursor:pointer;font-family:inherit">OK</button>';
+      _inner.querySelector('button').onclick=function(){_infoProfil.remove();};
+      _infoProfil.appendChild(_inner);
+      document.body.appendChild(_infoProfil);
+    })();
+    }
+    return;
+  }
   // Chercher dans les profils locaux ET les vrais profils Supabase
   var p = allProfiles.find(function(x){ return String(x.id)===String(id); })
        || (window._dbProfiles||[]).find(function(x){ return String(x.id)===String(id); });
@@ -4269,24 +4464,34 @@ function openProfile(id){
       <div class="profile-section">
         <h4>Informations générales</h4>
         <div class="profile-detail-row"><span>Âge</span><span>${p.age} ans</span></div>
-        <div class="profile-detail-row"><span>Ville</span><span>${p.ville}</span></div>
-        <div class="profile-detail-row"><span>Origine</span><span>${p.origine}</span></div>
-        <div class="profile-detail-row"><span>Situation</span><span>${p.situation}</span></div>
-        <div class="profile-detail-row"><span>A des enfants</span><span>${p.enfants}</span></div>
-        <div class="profile-detail-row"><span>Veut des enfants</span><span>${p.veut_enfants}</span></div>
+        <div class="profile-detail-row"><span>Ville</span><span>${p.ville||'—'}</span></div>
+        ${p.pays?'<div class="profile-detail-row"><span>Pays</span><span>'+p.pays+'</span></div>':''}
+        <div class="profile-detail-row"><span>Origine</span><span>${p.origine||'—'}</span></div>
+        <div class="profile-detail-row"><span>Situation</span><span>${p.situation||'—'}</span></div>
+        <div class="profile-detail-row"><span>A des enfants</span><span>${p.enfants||'—'}</span></div>
+        <div class="profile-detail-row"><span>Veut des enfants</span><span>${p.veut_enfants||'—'}</span></div>
+        ${p.profession?'<div class="profile-detail-row"><span>Profession</span><span>'+p.profession+'</span></div>':''}
+        ${p.niveau_etudes?'<div class="profile-detail-row"><span>Études</span><span>'+p.niveau_etudes+'</span></div>':''}
+        ${p.taille?'<div class="profile-detail-row"><span>Taille</span><span>'+p.taille+' cm</span></div>':''}
       </div>
       <div class="profile-section">
         <h4>Pratique religieuse</h4>
-        <div class="profile-detail-row"><span>Niveau</span><span>${p.pratique}</span></div>
+        <div class="profile-detail-row"><span>Niveau</span><span>${p.pratique||'—'}</span></div>
         ${p.voile?('<div class="profile-detail-row"><span>Voile</span><span>'+p.voile+'</span></div>'):''}
         ${p.barbe?('<div class="profile-detail-row"><span>Barbe</span><span>'+p.barbe+'</span></div>'):''}
-        <div class="profile-detail-row"><span>École juridique</span><span>${p.madhhab}</span></div>
-        <div class="profile-detail-row"><span>Lecture Coran</span><span>${p.coran}</span></div>
-        <div class="profile-detail-row"><span>Halal</span><span>${p.halal}</span></div>
+        ${p.madhhab?'<div class="profile-detail-row"><span>École juridique</span><span>'+p.madhhab+'</span></div>':''}
+        ${p.coran?'<div class="profile-detail-row"><span>Lecture Coran</span><span>'+p.coran+'</span></div>':''}
+        ${p.halal?'<div class="profile-detail-row"><span>Alimentation</span><span>'+p.halal+'</span></div>':''}
+        ${p.converti?'<div class="profile-detail-row"><span>Converti(e)</span><span>'+p.converti+'</span></div>':''}
       </div>
-      <div class="profile-section">
-        <h4>Présentation</h4>
-        <p style="font-size:.86rem;line-height:1.7">${p.bio}</p>
+      ${p.bio?'<div class="profile-section"><h4>Présentation</h4><p style="font-size:.86rem;line-height:1.7">'+p.bio+'</p></div>':''}
+      <div class="profile-section" style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:14px;margin-top:4px">
+        <h4 style="color:var(--gold);margin:0 0 12px">🔍 Ce que je recherche</h4>
+        ${p.situation_recherche?'<div class="profile-detail-row"><span>Situation souhaitée</span><span>'+p.situation_recherche+'</span></div>':''}
+        ${p.origine_recherche?'<div class="profile-detail-row"><span>Origine souhaitée</span><span>'+p.origine_recherche+'</span></div>':''}
+        ${(p.age_min||p.age_max)?'<div class="profile-detail-row"><span>Tranche d\'âge</span><span>'+(p.age_min||'—')+' – '+(p.age_max||'—')+' ans</span></div>':''}
+        ${p.recherche?'<div style="margin-top:10px;font-size:.84rem;color:var(--white2);line-height:1.6">'+p.recherche+'</div>':''}
+        ${(!p.situation_recherche&&!p.origine_recherche&&!p.age_min&&!p.age_max&&!p.recherche)?'<p style="color:var(--muted);font-size:.8rem;margin:0">Non renseigné</p>':''}
       </div>
     </div>`;
 }
@@ -4347,7 +4552,7 @@ function renderMessages(c){
   var adminName=state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice';
   var adminMsgs=userChatHistory[adminName]||[];
   // Logo Oumélia réel (même source que la page d'accueil)
-  var iconHtml2='<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="width:36px;height:36px;object-fit:contain;flex-shrink:0" alt="Oumélia">';
+  var iconHtml2='<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:36px;height:36px;object-fit:contain;flex-shrink:0" alt="Oumélia">';
   var html2='<div class="page-header"><h2>Messages</h2></div><div class="conversations-list">';
   if(adminMsgs.length>0){
     html2+='<div class="convo-item" onclick="openChat(&quot;'+adminName+'&quot;,&quot;admin&quot;)">'+
@@ -4367,7 +4572,7 @@ function openChat(name, type){
   var c=document.getElementById('app-content');
   scrollToTop();
   var msgs=userChatHistory[name]||[];
-  var iconHtml='<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="width:30px;height:30px;object-fit:contain;flex-shrink:0" alt="Oumélia">';
+  var iconHtml='<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:30px;height:30px;object-fit:contain;flex-shrink:0" alt="Oumélia">';
   c.innerHTML=`
     <div class="page-header">
       <button class="back-btn" onclick="navTo('messages')">←</button>
@@ -6083,14 +6288,17 @@ async function renderAdminRdv(c){
   c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
 
-  // Charger en parallèle : profils en attente RDV + RDVs planifiés depuis table 'rdv'
-  var results=await Promise.all([
-    fetch(SUPABASE_URL+'/rest/v1/profils?status=in.(en_attente_rdv,rdv_planifie)&select=id,prenom,gender,age,ville,telephone,user_id&order=created_at.desc',{headers:H}).then(function(r){return r.json();}).catch(function(){return[];}),
-    fetch(SUPABASE_URL+'/rest/v1/rdv?select=*&order=rdv_date.asc',{headers:H}).then(function(r){return r.json();}).catch(function(){return[];})
-  ]);
+  // Charger en parallèle
+  var r1=await fetch(SUPABASE_URL+'/rest/v1/profils?status=in.(en_attente_rdv,rdv_planifie)&select=id,prenom,gender,age,ville,telephone,user_id&order=created_at.desc',{headers:H});
+  var r2=await fetch(SUPABASE_URL+'/rest/v1/rdv?select=*&order=rdv_date.asc',{headers:H});
+  var profils=await r1.json().catch(function(){return[];});
+  var rdvList=await r2.json().catch(function(){return[];});
 
-  var profils=Array.isArray(results[0])?results[0]:[];
-  var rdvList=Array.isArray(results[1])?results[1]:[];
+  // Debug — afficher brièvement ce qu'on a reçu
+  var debugInfo='Profils en attente : '+(Array.isArray(profils)?profils.length:'ERR('+JSON.stringify(profils).slice(0,80)+')')+' | RDVs table : '+(Array.isArray(rdvList)?rdvList.length:'ERR('+JSON.stringify(rdvList).slice(0,120)+')');
+
+  if(!Array.isArray(profils)) profils=[];
+  if(!Array.isArray(rdvList)) rdvList=[];
 
   // Indexer les RDVs par user_id
   var rdvByUid={};
@@ -6178,6 +6386,12 @@ function filterBtn(key,val,arr){
 
 function openSwipeProfile(id){
   if(window._isSwiping) return;
+  if(!state.profileActive){
+    var _sst=state.user&&state.user.status||'pending';
+    if(_sst==='valide_a_payer'){ openModal('modal-paywall'); }
+    else { (function(){var _m=document.createElement('div');_m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px';_m.onclick=function(e){if(e.target===this)this.remove();};var _i=document.createElement('div');_i.style.cssText='background:#1a1106;border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:24px;max-width:300px;text-align:center';_i.innerHTML='<div style="font-size:1.8rem;margin-bottom:10px">&#9203;</div><div style="font-weight:700;font-size:.94rem;color:#C9A84C;margin-bottom:10px">Acc&#232;s en cours de validation</div><div style="font-size:.82rem;color:#ccc;line-height:1.6;margin-bottom:16px">Vous pourrez acc&#233;der aux profils une fois votre entretien valid&#233; par l&#x27;&#233;quipe Oum&#233;lia.</div><button style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#C9A84C;border-radius:8px;padding:10px 24px;font-size:.84rem;cursor:pointer;font-family:inherit">OK</button>';_i.querySelector('button').onclick=function(){_m.remove();};_m.appendChild(_i);document.body.appendChild(_m);})(); }
+    return;
+  }
   var sid = String(id);
   var p = (window._dbProfiles||[]).find(function(x){ return String(x.id)===sid; })
        || allProfiles.find(function(x){ return String(x.id)===sid; });
