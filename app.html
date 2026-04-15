@@ -1277,7 +1277,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           <!-- Phrase à lire -->
           <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px;margin-bottom:14px">
             <p style="font-size:.74rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Phrase à lire à voix haute :</p>
-            <p style="font-size:.84rem;color:var(--white2);line-height:1.65;font-style:italic">"J'atteste sur l'honneur que toutes les informations renseignées sur mon profil Oumélia sont exactes et sincères, et que ma démarche est sérieuse."</p>
+            <p style="font-size:.84rem;color:var(--white2);line-height:1.65;font-style:italic">"J'atteste devant Allah de l'exactitude de mes informations."</p>
           </div>
 
           <!-- Message d'aide iOS (caché par défaut, affiché par JS si nécessaire) -->
@@ -3427,20 +3427,20 @@ function renderEditProfile(){
 }
 
 async function submitEdit(){
-  var sb=getSB(); if(!sb) return;
-  var get=function(id){ var el=document.getElementById(id); return el?el.value:''; };
+  var get=function(id){ var el=document.getElementById(id); return el?el.value.trim():''; };
+
   var updates={
     prenom: get('edit-prenom')||state.user.prenom,
     age: parseInt(get('edit-age'))||state.user.age,
     ville: get('edit-ville')||state.user.ville,
-    bio: get('edit-bio')||state.user.bio,
+    bio: get('edit-bio'),
     origine: get('edit-origine')||state.user.origine,
     situation: get('edit-situation')||state.user.situation,
     enfants: get('edit-enfants')||state.user.enfants,
     pratique: get('edit-pratique')||state.user.pratique,
     madhhab: get('edit-madhhab')||state.user.madhhab,
     coran: get('edit-coran')||state.user.coran,
-    recherche: get('edit-recherche')||'',
+    recherche: get('edit-recherche'),
   };
   var ageMin=parseInt(get('edit-age-min')); if(ageMin>0) updates.age_min=ageMin;
   var ageMax=parseInt(get('edit-age-max')); if(ageMax>0) updates.age_max=ageMax;
@@ -3449,9 +3449,8 @@ async function submitEdit(){
   var pratRech=get('edit-pratique-recherche'); if(pratRech) updates.pratique_recherche=pratRech;
   var madRech=get('edit-madhhab-recherche'); if(madRech) updates.madhhab_recherche=madRech;
   var enfRech=get('edit-enfants-recherche'); if(enfRech) updates.enfants_recherche=enfRech;
-  var voile=get('edit-voile'), barbe=get('edit-barbe');
-  if(voile) updates.voile=voile;
-  if(barbe) updates.barbe=barbe;
+  var voile=get('edit-voile'); if(voile) updates.voile=voile;
+  var barbe=get('edit-barbe'); if(barbe) updates.barbe=barbe;
   if(state.user&&state.user.gender==='femme'){
     var barRech=get('edit-barbe-recherche'); if(barRech) updates.barbe_recherche=barRech;
     var qamRech=get('edit-qamis-recherche'); if(qamRech) updates.qamis_recherche=qamRech;
@@ -3462,71 +3461,82 @@ async function submitEdit(){
 
   showToast('⏳ Enregistrement...','gold');
 
-  // Récupérer le JWT depuis localStorage (Supabase le stocke automatiquement)
-  var uid = (state.user&&state.user.supabaseId)||null;
-  var userJwt = null;
+  // Récupérer uid — plusieurs sources
+  var uid=(state.user&&state.user.supabaseId)||null;
+
+  // Lire le JWT depuis localStorage (Supabase y stocke le token automatiquement)
+  var jwt=null;
   try{
-    // Chercher le token dans localStorage — clé Supabase standard
     var lsKeys=Object.keys(localStorage);
     for(var lki=0;lki<lsKeys.length;lki++){
-      if(lsKeys[lki].indexOf('sb-')===0&&lsKeys[lki].indexOf('auth-token')>0){
-        var lsVal=JSON.parse(localStorage.getItem(lsKeys[lki])||'{}');
-        if(lsVal.access_token){ userJwt=lsVal.access_token; if(!uid&&lsVal.user) uid=lsVal.user.id; break; }
-        // Format alternatif
-        if(lsVal.session&&lsVal.session.access_token){ userJwt=lsVal.session.access_token; if(!uid&&lsVal.session.user) uid=lsVal.session.user.id; break; }
+      var k=lsKeys[lki];
+      if(k.indexOf('sb-')===0&&k.indexOf('auth-token')>0){
+        var v=JSON.parse(localStorage.getItem(k)||'null');
+        if(v&&v.access_token){ jwt=v.access_token; if(!uid&&v.user&&v.user.id) uid=v.user.id; break; }
+        if(v&&v.session&&v.session.access_token){ jwt=v.session.access_token; if(!uid&&v.session.user) uid=v.session.user.id; break; }
       }
     }
-  }catch(e){}
-  // Fallback SDK
-  if(!userJwt){
-    try{
-      var sess=await sb.auth.getSession();
-      var session=sess&&sess.data&&sess.data.session;
-      if(session){ userJwt=session.access_token||null; if(!uid) uid=session.user&&session.user.id; }
-    }catch(e){}
-  }
-  if(!uid){ showToast('❌ Session expirée — reconnectez-vous','red'); return; }
+  }catch(ex){}
 
-  var authToken=userJwt||SUPABASE_ANON;
+  // Fallback — essayer getSB()
+  if(!jwt||!uid){
+    try{
+      var sb2=getSB();
+      if(sb2){
+        var s2=await sb2.auth.getSession();
+        var ses2=s2&&s2.data&&s2.data.session;
+        if(ses2){ if(!jwt) jwt=ses2.access_token; if(!uid) uid=ses2.user&&ses2.user.id; }
+      }
+    }catch(ex2){}
+  }
+
+  if(!uid){
+    showToast('❌ Impossible de trouver votre compte. Reconnectez-vous.','red');
+    return;
+  }
+
+  var token=jwt||SUPABASE_ANON;
 
   try{
-    var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+authToken,'Content-Type':'application/json','Prefer':'return=minimal'};
-    var patchRes=await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
+    var resp=await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
       method:'PATCH',
-      headers:H,
+      headers:{
+        'apikey':SUPABASE_ANON,
+        'Authorization':'Bearer '+token,
+        'Content-Type':'application/json',
+        'Prefer':'return=minimal'
+      },
       body:JSON.stringify(updates)
     });
-    if(!patchRes.ok){
-      var errTxt=await patchRes.text().catch(function(){return '';});
-      showToast('❌ Erreur: '+patchRes.status+' — '+errTxt.slice(0,80),'red');
-      console.error('PATCH profils error:',patchRes.status,errTxt);
+
+    if(!resp.ok){
+      var txt=await resp.text().catch(function(){return '';});
+      showToast('❌ Erreur '+resp.status,'red');
       return;
     }
+
     // Mettre à jour state.user localement
-    var keys=Object.keys(updates);
-    for(var ki=0;ki<keys.length;ki++) state.user[keys[ki]]=updates[keys[ki]];
+    var ks=Object.keys(updates);
+    for(var ki2=0;ki2<ks.length;ki2++) state.user[ks[ki2]]=updates[ks[ki2]];
+
     // Mot de passe
     var newPwd=get('edit-pwd-new');
     if(newPwd&&newPwd.length>=8){
-      try{
-        var pwdRes=await sb.auth.updateUser({password:newPwd});
-        if(pwdRes.error) showToast('⚠ Mot de passe: '+pwdRes.error.message,'red');
-      }catch(e){}
+      try{ var sb3=getSB(); if(sb3) await sb3.auth.updateUser({password:newPwd}); }catch(ex3){}
     }
-    // Bannière de confirmation
-    var confirmBanner=document.createElement('div');
-    confirmBanner.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#0d2010,#0a1800);border:1px solid rgba(46,204,113,.4);border-radius:10px;padding:12px 20px;font-size:.86rem;color:#2ecc71;font-weight:600;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);white-space:nowrap';
-    confirmBanner.textContent='✅ Modifications bien enregistrées !';
-    document.body.appendChild(confirmBanner);
-    setTimeout(function(){
-      if(confirmBanner.parentNode) confirmBanner.parentNode.removeChild(confirmBanner);
-      navTo('profil');
-    },2000);
-  }catch(e){
-    showToast('❌ Erreur réseau — réessayez','red');
-    console.error('submitEdit exception:',e);
+
+    // Confirmation visible
+    var cb=document.createElement('div');
+    cb.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#0d2010,#0a1800);border:1px solid rgba(46,204,113,.4);border-radius:10px;padding:12px 20px;font-size:.86rem;color:#2ecc71;font-weight:600;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);white-space:nowrap';
+    cb.textContent='✅ Modifications bien enregistrées !';
+    document.body.appendChild(cb);
+    setTimeout(function(){ if(cb.parentNode) cb.parentNode.removeChild(cb); navTo('profil'); },2000);
+
+  }catch(ex4){
+    showToast('❌ Erreur réseau','red');
   }
 }
+
 
 async function pauseProfile(){
   closeModal('modal-pause');
