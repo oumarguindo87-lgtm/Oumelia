@@ -2948,6 +2948,7 @@ function toggleFAQ(i){
 var selectedReport='', reportTargetId=null;
 
 function openReport(profileId){
+  window._reportedProfileId=profileId;
   reportTargetId=profileId; selectedReport='';
   document.querySelectorAll('.report-reason').forEach(function(r){r.classList.remove('selected');});
   var d=document.getElementById('report-details'); if(d) d.value='';
@@ -2962,8 +2963,21 @@ function selectReport(el,reason){
 
 function submitReport(){
   if(!selectedReport) return showToast('⚠ Choisissez une raison','red');
+  var reason=document.getElementById('report-other-text')&&document.getElementById('report-other-text').value||'';
+  var reportedId=window._reportedProfileId||null;
   closeModal('modal-report');
-  showToast('✅ Signalement envoyé — merci pour votre vigilance','green');
+  showToast('✅ Signalement envoyé — merci','green');
+  // Sauvegarder en DB
+  if(reportedId&&state.user&&state.user.id){
+    fetch(SUPABASE_URL+'/rest/v1/signalements',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({from_profile_id:String(state.user.id),reported_profile_id:String(reportedId),
+        reason:selectedReport+(reason?' — '+reason:''),created_at:new Date().toISOString()})
+    }).catch(function(){});
+  }
+  selectedReport=null;
+  window._reportedProfileId=null;
 }
 
 // ══════════ PAGES LÉGALES ══════════
@@ -3182,20 +3196,24 @@ function scrollToTop(){
 // ══════════ MON PROFIL ══════════
 function renderMyProfile(c){
   var u=state.user||{};
-  // Compteur basé sur les demandes acceptées en DB
-  var _acceptedLocal=Object.keys(demandesEnvoyees).filter(function(k){
-    return k.indexOf('_id_')!==0 && demandesEnvoyees[k]==='acceptee';
+  // Compteur = 3 - (demandes en_attente + acceptées)
+  // En attente bloque le slot, acceptée le consomme définitivement
+  var _usedLocal=Object.keys(demandesEnvoyees).filter(function(k){
+    return k.indexOf('_id_')===0; // compter seulement par ID pour éviter doublons
   }).length;
-  var remaining=Math.max(0,3-_acceptedLocal);
+  var remaining=Math.max(0,3-_usedLocal);
   var dots=[0,1,2].map(function(i){return '<div class="demand-dot '+(i>=remaining?'used':'')+'"></div>';}).join('');
-  // Recharger depuis DB en arrière-plan et mettre à jour les dots
+  // Recharger depuis DB en arrière-plan (en_attente + acceptee)
   if(state.user&&state.user.id){
-    fetch(SUPABASE_URL+'/rest/v1/demandes?from_profile_id=eq.'+String(state.user.id)+'&statut=eq.acceptee&select=id',{
+    fetch(SUPABASE_URL+'/rest/v1/demandes?from_profile_id=eq.'+String(state.user.id)+'&statut=in.(en_attente,acceptee)&select=id,statut',{
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
     }).then(function(r){return r.json();}).then(function(rows){
       if(!Array.isArray(rows)) return;
-      var dbAccepted=rows.length;
-      var dbRemaining=Math.max(0,3-dbAccepted);
+      var dbUsed=rows.length; // en_attente + acceptee bloquent le slot
+      var dbAccepted=rows.filter(function(r){return r.statut==='acceptee';}).length;
+      var dbRemaining=Math.max(0,3-dbAccepted); // affichage : libre seulement si acceptée
+      // Mettre à jour state
+      state.demandesLeft=dbRemaining;
       var dotsEl=document.getElementById('demand-dots-live');
       if(dotsEl){
         dotsEl.innerHTML=[0,1,2].map(function(i){
@@ -4546,17 +4564,15 @@ function toggleFav(id){
     state.favorites.push(id);
     if(btn){btn.innerHTML='♥ Favori';btn.classList.add('active');}
     showToast('♥ Ajouté aux favoris','gold');
-    // Notifier le profil liké
-    var sb=getSB();
-    if(sb && state.user && state.user.id){
-      sb.from('notifications').insert({
-        profile_id: String(id),
-        type: 'like',
-        content: (state.user.prenom||'Quelqu un') + ' a aimé votre profil',
-        from_profile_id: String(state.user.id),
-        from_prenom: state.user.prenom||'',
-        lu: false,
-        created_at: new Date().toISOString(),
+    // Notifier via REST direct
+    if(state.user&&state.user.id){
+      fetch(SUPABASE_URL+'/rest/v1/notifications',{
+        method:'POST',
+        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({profile_id:String(id),type:'like',
+          content:(state.user.prenom||'Quelqu\'un')+' a aimé votre profil',
+          from_profile_id:String(state.user.id),from_prenom:state.user.prenom||'',
+          lu:false,created_at:new Date().toISOString()})
       }).catch(function(){});
     }
   } else {
@@ -4741,12 +4757,34 @@ function openDemandeModal(prenom){
 }
 
 function sendDemande(){
+  // Vérifier le nombre de demandes en_attente + acceptées
+  var _totalUsed=Object.keys(demandesEnvoyees).filter(function(k){return k.indexOf('_id_')===0;}).length;
+  if(_totalUsed>=3){
+    closeModal('modal-demande');
+    showToast('⚠ Vous avez déjà 3 demandes en cours','red');
+    return;
+  }
   var msg=(document.getElementById('demande-msg')&&document.getElementById('demande-msg').value)||'';
   demandesEnvoyees[currentDemandeTarget]='en_attente';
   var _allPsend=allProfiles.concat(window._dbProfiles||[]);
   var _tpsend=_allPsend.find(function(p){return p.prenom===currentDemandeTarget;});
   if(_tpsend) demandesEnvoyees['_id_'+String(_tpsend.id)]='en_attente';
-  // Stocker aussi par ID pour persistance
+
+  // Décrémenter le compteur
+  if(state.demandesLeft>0) state.demandesLeft--;
+  // Mettre à jour les dots dans l'UI immédiatement
+  var dotsEl=document.getElementById('demand-dots-live');
+  if(dotsEl){
+    var d='';
+    for(var di=0;di<3;di++) d+='<div class="demand-dot'+(di<state.demandesLeft?' active':'')+'"></div>';
+    dotsEl.innerHTML=d;
+  }
+  var modalDots=document.getElementById('modal-dots');
+  if(modalDots){
+    var md='';
+    for(var mi=0;mi<3;mi++) md+='<div class="demand-dot'+(mi<state.demandesLeft?' active':'')+'"></div>';
+    modalDots.innerHTML=md;
+  }
 
 
 
