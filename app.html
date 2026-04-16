@@ -1392,6 +1392,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <div class="admin-tab" id="atab-rdv" onclick="adminTab('rdv')">📅 RDV</div>
     <div class="admin-tab" id="atab-dossiers" onclick="adminTab('dossiers')">📂 Dossiers <span id="dossiers-badge" style="background:var(--gold);color:#000;border-radius:8px;padding:1px 5px;font-size:.6rem;display:none"></span></div>
     <div class="admin-tab" id="atab-bans" onclick="adminTab('bans')">🚫 Bans</div>
+    <div class="admin-tab" id="atab-signalements" onclick="adminTab('signalements')">🚨 Signalements <span id="signal-badge" style="background:var(--red);color:#fff;border-radius:8px;padding:1px 5px;font-size:.6rem;display:none"></span></div>
   </div>
   <div id="admin-content" style="padding-bottom:20px;overflow-y:auto;height:calc(100% - 100px)"></div>
 </div>
@@ -2955,10 +2956,18 @@ function openReport(profileId){
   openModal('modal-report');
 }
 
-function selectReport(el,reason){
+function selectReport(reason,el){
   selectedReport=reason;
   document.querySelectorAll('.report-reason').forEach(function(r){r.classList.remove('selected');});
-  el.classList.add('selected');
+  // el peut etre l'element cliqué (si passé) ou on cherche par data
+  if(el&&el.classList){ el.classList.add('selected'); }
+  else {
+    // Trouver le bon bouton par son onclick
+    document.querySelectorAll('.report-reason').forEach(function(r){
+      var oc=r.getAttribute('onclick')||'';
+      if(oc.indexOf("'"+reason+"'")>-1||oc.indexOf('"'+reason+'"')>-1) r.classList.add('selected');
+    });
+  }
 }
 
 function submitReport(){
@@ -4233,7 +4242,7 @@ function renderExplorer(c){
       html+=`<div class="profiles-list">`;
       profiles.forEach(function(p){ 
         var av=p.gender==='femme'?svgFemme(50):svgHomme(50);
-        var isFav=state.favorites.includes(p.id);
+        var isFav=state.favorites.includes(String(p.id))||state.favorites.includes(p.id);
         var dot=onlineDot(p.id,9);
         var _st=onlineStatus[String(p.id)]||onlineStatus[p.id]||'offline';
         var lastSeen=_st==='online'?'En ligne':_st==='recent'?'Vu récemment':'Hors ligne';
@@ -4351,6 +4360,21 @@ function swipeAction(action,prenom,pid){
     else{card.style.transform='translateY(-110%)';card.style.opacity='0';}
   }
   if(action==='ask'){
+    // Vérifier si déjà une demande pour ce profil
+    var _alreadySent = prenom && (demandesEnvoyees[prenom]==='en_attente'||demandesEnvoyees[prenom]==='acceptee');
+    if(!_alreadySent && pid) _alreadySent = demandesEnvoyees['_id_'+String(pid)]==='en_attente'||demandesEnvoyees['_id_'+String(pid)]==='acceptee';
+    if(_alreadySent){
+      showToast('Vous avez déjà envoyé une demande à ce profil','red');
+      setTimeout(function(){ var c2=document.getElementById('app-content'); if(c2&&state.viewMode==='swipe') renderExplorer(c2); },400);
+      return;
+    }
+    // Vérifier si plus de slots disponibles (3 demandes actives)
+    var _totalActive=Object.keys(demandesEnvoyees).filter(function(k){return k.indexOf('_id_')===0;}).length;
+    if(_totalActive>=3){
+      showToast('Vous avez utilisé vos 3 demandes — attendez qu\'un profil accepte ou refuse avant d\'en envoyer une nouvelle','red');
+      setTimeout(function(){ var c2=document.getElementById('app-content'); if(c2&&state.viewMode==='swipe') renderExplorer(c2); },400);
+      return;
+    }
     // Marquer comme vu
     var curProfiles = getVisibleProfiles();
     var curP = curProfiles[state.swipeIndex % (curProfiles.length||1)];
@@ -4364,7 +4388,17 @@ function swipeAction(action,prenom,pid){
     return;
   }
   if(action==='like'&&pid){
-    if(!state.favorites.includes(pid)) state.favorites.push(pid);
+    if(!state.favorites.includes(pid)){
+      state.favorites.push(pid);
+      // Sauvegarder en DB
+      if(state.user&&state.user.id){
+        var _H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+        fetch(SUPABASE_URL+'/rest/v1/likes',{
+          method:'POST',headers:_H,
+          body:JSON.stringify({profile_id:String(state.user.id),liked_profile_id:String(pid),created_at:new Date().toISOString()})
+        }).catch(function(){});
+      }
+    }
     showToast('💛 Ajouté à vos favoris !','gold');
   }
   // Marquer ce profil comme vu
@@ -4484,7 +4518,9 @@ function openProfile(id){
        || (window._dbProfiles||[]).find(function(x){ return String(x.id)===String(id); });
   if(!p) return;
   var av=p.gender==='femme'?svgFemme(80):svgHomme(80);
-  var isFav=state.favorites.includes(p.id);
+  var isFav=state.favorites.includes(String(p.id))||state.favorites.includes(p.id);
+  // Rafraîchir les favoris depuis DB si besoin
+  if(state.user&&state.user.id&&typeof loadUserFavoris==='function') loadUserFavoris();
   var dot=onlineDot(p.id,11);
   var _st2=onlineStatus[String(p.id)]||onlineStatus[p.id]||'offline';
   var lastSeen=_st2==='online'?'En ligne':_st2==='recent'?'Vu récemment':'Hors ligne';
@@ -4558,17 +4594,24 @@ function openProfile(id){
 }
 
 function toggleFav(id){
-  var idx=state.favorites.indexOf(id);
+  var idx=state.favorites.indexOf(String(id)); if(idx===-1) idx=state.favorites.indexOf(id);
   var btn=document.getElementById('fav-btn-'+id);
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
   if(idx===-1){
-    state.favorites.push(id);
+    state.favorites.push(String(id));
     if(btn){btn.innerHTML='♥ Favori';btn.classList.add('active');}
     showToast('♥ Ajouté aux favoris','gold');
-    // Notifier via REST direct
     if(state.user&&state.user.id){
+      // Sauvegarder dans la table likes
+      fetch(SUPABASE_URL+'/rest/v1/likes',{
+        method:'POST',
+        headers:H,
+        body:JSON.stringify({profile_id:String(state.user.id),liked_profile_id:String(id),created_at:new Date().toISOString()})
+      }).catch(function(){});
+      // Notifier le profil liké
       fetch(SUPABASE_URL+'/rest/v1/notifications',{
         method:'POST',
-        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+        headers:H,
         body:JSON.stringify({profile_id:String(id),type:'like',
           content:(state.user.prenom||'Quelqu\'un')+' a aimé votre profil',
           from_profile_id:String(state.user.id),from_prenom:state.user.prenom||'',
@@ -4579,6 +4622,13 @@ function toggleFav(id){
     state.favorites.splice(idx,1);
     if(btn){btn.innerHTML='♡ Favori';btn.classList.remove('active');}
     showToast('Retiré des favoris','gold');
+    // Supprimer de la table likes
+    if(state.user&&state.user.id){
+      fetch(SUPABASE_URL+'/rest/v1/likes?profile_id=eq.'+String(state.user.id)+'&liked_profile_id=eq.'+String(id),{
+        method:'DELETE',
+        headers:H
+      }).catch(function(){});
+    }
   }
 }
 
@@ -5532,6 +5582,7 @@ function adminTab(tab){
     case 'messages':  renderAdminMsgs(c);      break;
     case 'dossiers':  renderAdminDossiers(c);  break;
     case 'bans':      renderAdminBans(c);      break;
+    case 'signalements': renderAdminSignalements(c); break;
     case 'paused':    if(typeof renderAdminPause==='function') renderAdminPause(c); break;
     case 'rdv':       if(typeof renderAdminRdv==='function')   renderAdminRdv(c);   break;
   }
@@ -7323,6 +7374,45 @@ function renderAdminBans(c){var bans=_bannedPhones;var h='<div style="padding:16
 function addBan(){var phone=((document.getElementById('ban-phone-input')&&document.getElementById('ban-phone-input').value)||'').trim();var reason=((document.getElementById('ban-reason-input')&&document.getElementById('ban-reason-input').value)||'').trim();if(!phone){showToast('⚠ Entrez un numéro','red');return;}if(_bannedPhones.some(function(b){return b.phone===phone;})){showToast('Déjà banni','red');return;}_bannedPhones.push({phone:phone,reason:reason,date:new Date().toLocaleDateString('fr-FR'),name:''});saveBans();showToast('🚫 '+phone+' banni','red');adminTab('bans');}
 function banPhone(phone,name){if(!phone)return;if(_bannedPhones.some(function(b){return b.phone===phone;})){showToast('Déjà banni','red');return;}_bannedPhones.push({phone:phone,reason:'Fraude',date:new Date().toLocaleDateString('fr-FR'),name:name||''});saveBans();showToast('🚫 '+phone+' banni','red');adminTab('dossiers');}
 function removeBan(i){var b=_bannedPhones[i];if(!b)return;if(!confirm('Débannir '+b.phone+' ?'))return;_bannedPhones.splice(i,1);saveBans();adminTab('bans');}
+async function renderAdminSignalements(c){
+  c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  var res=await fetch(SUPABASE_URL+'/rest/v1/signalements?select=*&order=created_at.desc',{headers:H})
+    .then(function(r){return r.json();}).catch(function(){return[];});
+  var list=Array.isArray(res)?res:[];
+  var badge=document.getElementById('signal-badge');
+  if(badge){badge.textContent=list.length||'';badge.style.display=list.length?'':'none';}
+  if(!list.length){c.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">Aucun signalement</div>';return;}
+  var h='<div style="padding:16px"><div class="section-title" style="margin-bottom:12px">🚨 Signalements ('+list.length+')</div>';
+  list.forEach(function(s){
+    var dt=s.created_at?new Date(s.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+    h+='<div class="dossier-card">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
+      +'<div style="font-size:.84rem;font-weight:700;color:var(--red)">🚨 Signalement</div>'
+      +'<div style="font-size:.7rem;color:var(--muted)">'+dt+'</div>'
+      +'</div>'
+      +'<div class="d-meta">👤 Signalé par profil ID : <strong>'+(s.from_profile_id||'—')+'</strong></div>'
+      +'<div class="d-meta">🎯 Profil signalé ID : <strong style="color:var(--gold)">'+(s.reported_profile_id||'—')+'</strong></div>'
+      +'<div style="margin-top:8px;background:rgba(231,76,60,.06);border:1px solid rgba(231,76,60,.2);border-radius:8px;padding:9px;font-size:.82rem;color:var(--white2)">'+(s.reason||'—')+'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:10px">'
+      +'<button data-rid="'+String(s.reported_profile_id||'')+'" onclick="openAdminProfileDetail(this.dataset.rid)" style="flex:1;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer">👤 Voir profil signalé</button>'
+      +'<button data-sid="'+String(s.id||'')+'" onclick="deleteSignalement(this.dataset.sid,this)" style="background:none;border:1px solid rgba(231,76,60,.3);color:var(--muted);border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer">🗑 Traité</button>'
+      +'</div>'
+      +'</div>';
+  });
+  h+='</div>';
+  c.innerHTML=h;
+}
+
+async function deleteSignalement(id,btn){
+  if(!id) return;
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Prefer':'return=minimal'};
+  await fetch(SUPABASE_URL+'/rest/v1/signalements?id=eq.'+id,{method:'DELETE',headers:H}).catch(function(){});
+  var card=btn&&btn.closest('.dossier-card');
+  if(card) card.remove();
+  showToast('✓ Signalement traité','green');
+}
+
 if(typeof navTo==='function'){var _nO=navTo;navTo=function(t){_nO(t);setTimeout(injectStepBannerIfNeeded,100);};}
 
 </script>
