@@ -3498,21 +3498,39 @@ async function submitEdit(){
   var token=jwt||SUPABASE_ANON;
 
   try{
-    var resp=await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
-      method:'PATCH',
-      headers:{
-        'apikey':SUPABASE_ANON,
-        'Authorization':'Bearer '+token,
-        'Content-Type':'application/json',
-        'Prefer':'return=minimal'
-      },
-      body:JSON.stringify(updates)
-    });
+    // Colonnes de base — toujours présentes en DB
+    var baseUpdates={
+      prenom:updates.prenom, age:updates.age, ville:updates.ville,
+      bio:updates.bio, origine:updates.origine, situation:updates.situation,
+      enfants:updates.enfants, pratique:updates.pratique,
+      madhhab:updates.madhhab, coran:updates.coran, recherche:updates.recherche,
+    };
+    if(updates.age_min) baseUpdates.age_min=updates.age_min;
+    if(updates.age_max) baseUpdates.age_max=updates.age_max;
+    if(updates.origine_recherche) baseUpdates.origine_recherche=updates.origine_recherche;
+    if(updates.situation_recherche) baseUpdates.situation_recherche=updates.situation_recherche;
+    if(updates.voile) baseUpdates.voile=updates.voile;
+    if(updates.barbe) baseUpdates.barbe=updates.barbe;
 
+    // Nouvelles colonnes — PATCH séparé, erreur ignorée si colonnes absentes
+    var newCols={};
+    var newColNames=['pratique_recherche','madhhab_recherche','enfants_recherche',
+                     'barbe_recherche','qamis_recherche','voile_recherche','polygamie_recherche'];
+    newColNames.forEach(function(c){ if(updates[c]) newCols[c]=updates[c]; });
+
+    var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'return=minimal'};
+    var url=SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid;
+
+    var resp=await fetch(url,{method:'PATCH',headers:H,body:JSON.stringify(baseUpdates)});
     if(!resp.ok){
       var txt=await resp.text().catch(function(){return '';});
-      showToast('❌ Erreur '+resp.status,'red');
+      showToast('❌ Erreur '+resp.status+' — '+txt.slice(0,60),'red');
       return;
+    }
+
+    // Nouvelles colonnes — silencieux si elles n'existent pas encore
+    if(Object.keys(newCols).length>0){
+      fetch(url,{method:'PATCH',headers:H,body:JSON.stringify(newCols)}).catch(function(){});
     }
 
     // Mettre à jour state.user localement
