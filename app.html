@@ -1763,7 +1763,18 @@ function loadUserProfile(authUser){
       free_activated:profile.free_activated||false,boosted:profile.boosted||false,
       minhaj:profile.minhaj||'',converti:profile.converti||false,recherche:profile.recherche||'',
       photo_url:profile.photo_url||null,
-      photo_visible:profile.photo_visible===true};
+      photo_visible:profile.photo_visible===true,
+      origine_recherche:profile.origine_recherche||'',
+      situation_recherche:profile.situation_recherche||'',
+      age_min:profile.age_min||null,
+      age_max:profile.age_max||null,
+      pratique_recherche:profile.pratique_recherche||'',
+      madhhab_recherche:profile.madhhab_recherche||'',
+      enfants_recherche:profile.enfants_recherche||'',
+      barbe_recherche:profile.barbe_recherche||'',
+      voile_recherche:profile.voile_recherche||'',
+      qamis_recherche:profile.qamis_recherche||'',
+      polygamie_recherche:profile.polygamie_recherche||''};
     state.profileActive  = profile.status==='active';
     state.profilePaused  = profile.status==='paused';
     state.profileStatus  = profile.status || 'pending';  // statut brut complet
@@ -3466,26 +3477,32 @@ async function submitEdit(){
 
   // Lire le JWT depuis localStorage (Supabase y stocke le token automatiquement)
   var jwt=null;
+
+  // Source 1 : getSB().auth.getSession() — la plus fiable
   try{
-    var lsKeys=Object.keys(localStorage);
-    for(var lki=0;lki<lsKeys.length;lki++){
-      var k=lsKeys[lki];
-      if(k.indexOf('sb-')===0&&k.indexOf('auth-token')>0){
-        var v=JSON.parse(localStorage.getItem(k)||'null');
-        if(v&&v.access_token){ jwt=v.access_token; if(!uid&&v.user&&v.user.id) uid=v.user.id; break; }
-        if(v&&v.session&&v.session.access_token){ jwt=v.session.access_token; if(!uid&&v.session.user) uid=v.session.user.id; break; }
-      }
+    var sb2=getSB();
+    if(sb2){
+      var s2=await sb2.auth.getSession();
+      var ses2=s2&&s2.data&&s2.data.session;
+      if(ses2){ jwt=ses2.access_token||null; if(!uid) uid=(ses2.user&&ses2.user.id)||null; }
     }
   }catch(ex){}
 
-  // Fallback — essayer getSB()
-  if(!jwt||!uid){
+  // Source 2 : localStorage si getSession a echoue
+  if(!jwt){
     try{
-      var sb2=getSB();
-      if(sb2){
-        var s2=await sb2.auth.getSession();
-        var ses2=s2&&s2.data&&s2.data.session;
-        if(ses2){ if(!jwt) jwt=ses2.access_token; if(!uid) uid=ses2.user&&ses2.user.id; }
+      var lsKey='sb-nmcvyukbyfnhtufbgqqp-auth-token';
+      var lsRaw=localStorage.getItem(lsKey);
+      if(!lsRaw){
+        var lsKeys=Object.keys(localStorage);
+        for(var lki=0;lki<lsKeys.length;lki++){
+          if(lsKeys[lki].indexOf('sb-')===0){ lsRaw=localStorage.getItem(lsKeys[lki]); break; }
+        }
+      }
+      if(lsRaw){
+        var lsVal=JSON.parse(lsRaw);
+        if(lsVal&&lsVal.access_token){ jwt=lsVal.access_token; if(!uid&&lsVal.user) uid=lsVal.user.id; }
+        else if(lsVal&&lsVal.session&&lsVal.session.access_token){ jwt=lsVal.session.access_token; if(!uid&&lsVal.session.user) uid=lsVal.session.user.id; }
       }
     }catch(ex2){}
   }
@@ -3505,16 +3522,14 @@ async function submitEdit(){
       enfants:updates.enfants, pratique:updates.pratique,
       madhhab:updates.madhhab, coran:updates.coran, recherche:updates.recherche,
     };
-    if(updates.age_min) baseUpdates.age_min=updates.age_min;
-    if(updates.age_max) baseUpdates.age_max=updates.age_max;
     if(updates.origine_recherche) baseUpdates.origine_recherche=updates.origine_recherche;
     if(updates.situation_recherche) baseUpdates.situation_recherche=updates.situation_recherche;
     if(updates.voile) baseUpdates.voile=updates.voile;
     if(updates.barbe) baseUpdates.barbe=updates.barbe;
 
-    // Nouvelles colonnes — PATCH séparé, erreur ignorée si colonnes absentes
+    // Nouvelles colonnes — PATCH séparé, silencieux si colonnes absentes
     var newCols={};
-    var newColNames=['pratique_recherche','madhhab_recherche','enfants_recherche',
+    var newColNames=['age_min','age_max','pratique_recherche','madhhab_recherche','enfants_recherche',
                      'barbe_recherche','qamis_recherche','voile_recherche','polygamie_recherche'];
     newColNames.forEach(function(c){ if(updates[c]) newCols[c]=updates[c]; });
 
