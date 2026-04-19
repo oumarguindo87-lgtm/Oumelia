@@ -1067,11 +1067,11 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
             <div class="form-group" style="margin-bottom:12px">
               <label style="font-size:.8rem">Voile souhaité</label>
               <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
-              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Peu importe" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--gold-soft);color:var(--gold)">Peu importe</button>
-              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Hijab" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Hijab</button>
-              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Jilbab" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Jilbab</button>
-              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Niqab" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Niqab</button>
-              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Khimar" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Khimar</button>
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Peu importe" onclick="toggleRechBtnMulti(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--gold-soft);color:var(--gold)">Peu importe</button>
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Hijab" onclick="toggleRechBtnMulti(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Hijab</button>
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Jilbab" onclick="toggleRechBtnMulti(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Jilbab</button>
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Niqab" onclick="toggleRechBtnMulti(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Niqab</button>
+              <button type="button" class="rech-btn" data-field="voile_recherche" data-val="Khimar" onclick="toggleRechBtnMulti(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer;background:var(--card);color:var(--muted)">Khimar</button>
             </div>
             <input type="hidden" id="rech-voile_recherche" value="Peu importe">
             </div>
@@ -3725,6 +3725,63 @@ function toggleRechBtn(btn){
   // Mettre à jour l'input caché correspondant
   var inp = document.getElementById('rech-'+field);
   if(inp) inp.value = btn.dataset.val;
+}
+
+function toggleRechBtnMulti(btn){
+  var field = btn.dataset.field;
+  var val = btn.dataset.val;
+  var inp = document.getElementById('rech-'+field);
+  // Si "Peu importe" cliqué → reset tout, sélectionner uniquement lui
+  if(val === 'Peu importe'){
+    document.querySelectorAll('.rech-btn[data-field="'+field+'"]').forEach(function(b){
+      b.style.background  = 'var(--card)';
+      b.style.color       = 'var(--muted)';
+      b.style.borderColor = 'var(--border)';
+    });
+    btn.style.background  = 'var(--gold-soft)';
+    btn.style.color       = 'var(--gold)';
+    btn.style.borderColor = 'rgba(201,168,76,.5)';
+    if(inp) inp.value = 'Peu importe';
+    return;
+  }
+  // Clic sur un vrai choix : désélectionner "Peu importe"
+  var peuImporte = document.querySelector('.rech-btn[data-field="'+field+'"][data-val="Peu importe"]');
+  if(peuImporte){
+    peuImporte.style.background  = 'var(--card)';
+    peuImporte.style.color       = 'var(--muted)';
+    peuImporte.style.borderColor = 'var(--border)';
+  }
+  // Toggle le bouton cliqué
+  var isSelected = btn.style.background === 'var(--gold-soft)' || btn.getAttribute('data-selected') === '1';
+  if(isSelected){
+    btn.style.background  = 'var(--card)';
+    btn.style.color       = 'var(--muted)';
+    btn.style.borderColor = 'var(--border)';
+    btn.setAttribute('data-selected','0');
+  } else {
+    btn.style.background  = 'var(--gold-soft)';
+    btn.style.color       = 'var(--gold)';
+    btn.style.borderColor = 'rgba(201,168,76,.5)';
+    btn.setAttribute('data-selected','1');
+  }
+  // Recalculer la valeur de l'input caché à partir de tous les boutons actifs
+  var selected = [];
+  document.querySelectorAll('.rech-btn[data-field="'+field+'"]').forEach(function(b){
+    if(b.dataset.val !== 'Peu importe' && (b.style.background === 'var(--gold-soft)' || b.getAttribute('data-selected') === '1')){
+      selected.push(b.dataset.val);
+    }
+  });
+  // Si aucun sélectionné → revenir à "Peu importe"
+  if(selected.length === 0){
+    if(peuImporte){
+      peuImporte.style.background  = 'var(--gold-soft)';
+      peuImporte.style.color       = 'var(--gold)';
+      peuImporte.style.borderColor = 'rgba(201,168,76,.5)';
+    }
+    if(inp) inp.value = 'Peu importe';
+  } else {
+    if(inp) inp.value = selected.join(',');
+  }
 }
 
 // ══════════════════════════════════════════════════
