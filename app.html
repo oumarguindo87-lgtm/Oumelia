@@ -1648,7 +1648,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       </label>
     </div>
     <div id="work-doc-section" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;display:none">
-      <div style="font-weight:700;font-size:.88rem;margin-bottom:5px">💼 Justificatif de travail <span style="color:var(--red);font-size:.75rem">*</span></div>
+      <div style="font-weight:700;font-size:.88rem;margin-bottom:5px">💼 Justificatif de travail <span style="color:var(--muted);font-size:.75rem">(facultatif)</span></div>
       <div style="font-size:.76rem;color:var(--muted);margin-bottom:12px">Bulletin de salaire, contrat ou attestation employeur.</div>
       <label id="work-label" style="display:flex;align-items:center;gap:10px;background:var(--dark);border:1.5px dashed rgba(201,168,76,.35);border-radius:8px;padding:12px;cursor:pointer">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -7147,7 +7147,6 @@ function handleDocUpload(type,filenameId,labelId){
 async function submitVerificationDocs(){
   var g=state.user&&state.user.gender;
   if(!_uploadedDocs['cni']){showToast('⚠ La pièce d\'identité est obligatoire','red');return;}
-  if(g==='homme'&&!_uploadedDocs['work']){showToast('⚠ Le justificatif de travail est obligatoire','red');return;}
   var btn=document.getElementById('btn-submit-docs');
   if(btn){btn.disabled=true;btn.textContent='Envoi en cours...';}
   showToast('⏳ Envoi des documents...','gold');
