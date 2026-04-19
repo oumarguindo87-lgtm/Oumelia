@@ -2231,7 +2231,7 @@ var faqData=[
   {q:"Mes données sont-elles sécurisées ?",a:"Oui. Toutes vos données sont stockées sur des serveurs certifiés (Supabase). Nous ne vendons jamais vos données à des tiers."},
   {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 24 heures."},
   {q:"Puis-je supprimer mon compte ?",a:"Oui, à tout moment depuis Profil → Zone de danger → Supprimer mon compte. Toutes vos données seront effacées définitivement."},
-  {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumélia.contacthomme@gmail.com — ou via la messagerie avec l'Administratrice dans l'application."},
+  {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumélia.contacthomme@gmail.com (frères) ou oumélia.contactfemme@gmail.com (sœurs) — ou via la messagerie dans l'application."},
 ];
 
 
@@ -2249,8 +2249,8 @@ var selectedReport='', reportTargetId=null;
 
 // ══════════ PAGES LÉGALES ══════════
 var legalContent={
-  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumélia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>oumélia.contacthomme@gmail.com</p>`},
-  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumélia.contacthomme@gmail.com</p>`}
+  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumélia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>Frères : oumélia.contacthomme@gmail.com<br>Sœurs : oumélia.contactfemme@gmail.com</p>`},
+  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumélia.contacthomme@gmail.com (frères) / oumélia.contactfemme@gmail.com (sœurs)</p>`}
 };
 
 
@@ -2939,7 +2939,7 @@ var faqData=[
   {q:"Mes données sont-elles sécurisées ?",a:"Oui. Toutes vos données sont stockées sur des serveurs certifiés (Supabase). Nous ne vendons jamais vos données à des tiers."},
   {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 24 heures."},
   {q:"Puis-je supprimer mon compte ?",a:"Oui, à tout moment depuis Profil → Zone de danger → Supprimer mon compte. Toutes vos données seront effacées définitivement."},
-  {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumélia.contacthomme@gmail.com — ou via la messagerie avec l'Administratrice dans l'application."},
+  {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumélia.contacthomme@gmail.com (frères) ou oumélia.contactfemme@gmail.com (sœurs) — ou via la messagerie dans l'application."},
 ];
 
 function openFAQ(){
@@ -3009,8 +3009,8 @@ function submitReport(){
 
 // ══════════ PAGES LÉGALES ══════════
 var legalContent={
-  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumélia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>oumélia.contacthomme@gmail.com</p>`},
-  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumélia.contacthomme@gmail.com</p>`}
+  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumélia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>Frères : oumélia.contacthomme@gmail.com<br>Sœurs : oumélia.contactfemme@gmail.com</p>`},
+  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumélia.contacthomme@gmail.com (frères) / oumélia.contactfemme@gmail.com (sœurs)</p>`}
 };
 
 function showLegal(type){
@@ -3412,7 +3412,7 @@ function renderMyProfile(c){
           <span>🔒 Politique de confidentialité</span><span style="color:var(--gold)">›</span>
         </div>
         <div class="profile-detail-row">
-          <span>📧 Contact</span><span style="color:var(--muted);font-size:.78rem">oumélia.contacthomme@gmail.com</span>
+          <span>📧 Contact</span><span style="color:var(--muted);font-size:.78rem">${(state.user&&state.user.gender)==='femme'?'oumélia.contactfemme@gmail.com':'oumélia.contacthomme@gmail.com'}</span>
         </div>
         <div class="profile-detail-row">
           <span>📱 Version</span><span style="color:var(--muted);font-size:.78rem">1.0.0</span>
@@ -4013,7 +4013,7 @@ function renderVerificationPage(container){
     '<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">'+
       '<h4 style="font-size:.86rem;color:var(--gold);margin-bottom:10px">Un problème avec ta validation ?</h4>'+
       '<p style="font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:10px">Contacte-nous directement par messagerie depuis l\'onglet Messages, ou par email :</p>'+
-      '<a href="mailto:oumélia.contacthomme@gmail.com" style="font-size:.82rem;color:var(--gold);text-decoration:none">oumélia.contacthomme@gmail.com</a>'+
+      '<a href="mailto:'+(state.user&&state.user.gender==='femme'?'oumélia.contactfemme@gmail.com':'oumélia.contacthomme@gmail.com')+'" style="font-size:.82rem;color:var(--gold);text-decoration:none">'+(state.user&&state.user.gender==='femme'?'oumélia.contactfemme@gmail.com':'oumélia.contacthomme@gmail.com')+'</a>'+
     '</div>'+
 
     '</div>';
@@ -7242,7 +7242,9 @@ function openCalEmbed(){
   overlay.appendChild(header);
   // iframe
   var iframe=document.createElement('iframe');
-  iframe.src='https://cal.com/oumelia-zawaj/15min?theme=dark&embed=true';
+  var _calGender = state.user && state.user.gender;
+  var _calUrl = _calGender==='femme' ? 'https://cal.eu/oumeliazawaj/femme15min?theme=dark&embed=true' : 'https://cal.com/oumelia-zawaj/15min?theme=dark&embed=true';
+  iframe.src=_calUrl;
   iframe.style.cssText='flex:1;width:100%;border:none;background:#0d0f14';
   iframe.setAttribute('frameborder','0');
   iframe.setAttribute('allow','camera;microphone');
