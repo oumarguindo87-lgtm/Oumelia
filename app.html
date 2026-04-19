@@ -3052,6 +3052,21 @@ async function loadProfilesFromDB(){
       halal: p.halal||'', enfants: p.enfants||'', veut_enfants: p.veut_enfants||'',
       bio: p.bio||'', boosted: p.boosted===true, status: p.status||'active',
       paid: p.paid===true, isDB: true,
+      profession:          p.profession||null,
+      pays:                p.pays||'',
+      converti:            p.converti||'',
+      recherche:           p.recherche||'',
+      origine_recherche:   p.origine_recherche||'',
+      situation_recherche: p.situation_recherche||'',
+      pratique_recherche:  p.pratique_recherche||'',
+      madhhab_recherche:   p.madhhab_recherche||'',
+      enfants_recherche:   p.enfants_recherche||'',
+      barbe_recherche:     p.barbe_recherche||'',
+      qamis_recherche:     p.qamis_recherche||'',
+      voile_recherche:     p.voile_recherche||'',
+      polygamie_recherche: p.polygamie_recherche||'',
+      age_min:             p.age_min||null,
+      age_max:             p.age_max||null,
     };
   });
   // Mettre à jour statut en ligne
@@ -3169,6 +3184,19 @@ function loadAllProfilesForAdmin(){
         photo_visible:   p.photo_visible===true,
         cni_path:        p.cni_path||null,
         work_path:       p.work_path||null,
+        // Critères recherche
+        profession:           p.profession||null,
+        origine_recherche:    p.origine_recherche||'',
+        situation_recherche:  p.situation_recherche||'',
+        pratique_recherche:   p.pratique_recherche||'',
+        madhhab_recherche:    p.madhhab_recherche||'',
+        enfants_recherche:    p.enfants_recherche||'',
+        barbe_recherche:      p.barbe_recherche||'',
+        qamis_recherche:      p.qamis_recherche||'',
+        voile_recherche:      p.voile_recherche||'',
+        polygamie_recherche:  p.polygamie_recherche||'',
+        age_min:              p.age_min||null,
+        age_max:              p.age_max||null,
         // Compat anciens champs
         audioAttested:   p.audio_attested===true,
         pending_verification: p.pending_verification||null
@@ -4666,11 +4694,18 @@ function openProfile(id){
       ${p.bio?'<div class="profile-section"><h4>Présentation</h4><p style="font-size:.86rem;line-height:1.7">'+p.bio+'</p></div>':''}
       <div class="profile-section" style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:14px;margin-top:4px">
         <h4 style="color:var(--gold);margin:0 0 12px">🔍 Ce que je recherche</h4>
-        ${p.situation_recherche?'<div class="profile-detail-row"><span>Situation souhaitée</span><span>'+p.situation_recherche+'</span></div>':''}
-        ${p.origine_recherche?'<div class="profile-detail-row"><span>Origine souhaitée</span><span>'+p.origine_recherche+'</span></div>':''}
+        ${p.situation_recherche&&p.situation_recherche!=='Peu importe'?'<div class="profile-detail-row"><span>Situation souhaitée</span><span>'+p.situation_recherche+'</span></div>':''}
+        ${p.origine_recherche&&p.origine_recherche!=='Peu importe'?'<div class="profile-detail-row"><span>Origine souhaitée</span><span>'+p.origine_recherche+'</span></div>':''}
         ${(p.age_min||p.age_max)?'<div class="profile-detail-row"><span>Tranche d\'âge</span><span>'+(p.age_min||'—')+' – '+(p.age_max||'—')+' ans</span></div>':''}
+        ${p.pratique_recherche&&p.pratique_recherche!=='Peu importe'?'<div class="profile-detail-row"><span>Pratique souhaitée</span><span>'+p.pratique_recherche+'</span></div>':''}
+        ${p.madhhab_recherche&&p.madhhab_recherche!=='Peu importe'?'<div class="profile-detail-row"><span>Madhhab souhaité</span><span>'+p.madhhab_recherche+'</span></div>':''}
+        ${p.enfants_recherche&&p.enfants_recherche!=='Peu importe'?'<div class="profile-detail-row"><span>Enfants</span><span>'+p.enfants_recherche+'</span></div>':''}
+        ${p.gender==='homme'&&p.voile_recherche&&p.voile_recherche!=='Peu importe'?'<div class="profile-detail-row"><span>Voile souhaité</span><span>'+p.voile_recherche+'</span></div>':''}
+        ${p.gender==='homme'&&p.polygamie_recherche&&p.polygamie_recherche!=='Peu importe'?'<div class="profile-detail-row"><span>Polygamie</span><span>'+p.polygamie_recherche+'</span></div>':''}
+        ${p.gender==='femme'&&p.barbe_recherche&&p.barbe_recherche!=='Peu importe'?'<div class="profile-detail-row"><span>Barbe souhaitée</span><span>'+p.barbe_recherche+'</span></div>':''}
+        ${p.gender==='femme'&&p.qamis_recherche&&p.qamis_recherche!=='Peu importe'?'<div class="profile-detail-row"><span>Port du qamis</span><span>'+p.qamis_recherche+'</span></div>':''}
         ${p.recherche?'<div style="margin-top:10px;font-size:.84rem;color:var(--white2);line-height:1.6">'+p.recherche+'</div>':''}
-        ${(!p.situation_recherche&&!p.origine_recherche&&!p.age_min&&!p.age_max&&!p.recherche)?'<p style="color:var(--muted);font-size:.8rem;margin:0">Non renseigné</p>':''}
+        ${(!p.situation_recherche&&!p.origine_recherche&&!p.age_min&&!p.age_max&&!p.pratique_recherche&&!p.madhhab_recherche&&!p.enfants_recherche&&!p.voile_recherche&&!p.polygamie_recherche&&!p.barbe_recherche&&!p.qamis_recherche&&!p.recherche)?'<p style="color:var(--muted);font-size:.8rem;margin:0">Non renseigné</p>':''}
       </div>
     </div>`;
 }
@@ -6456,13 +6491,24 @@ function openAdminProfileDetail(id){
     +'<p style="font-size:.84rem;color:var(--white2);line-height:1.7;margin:8px 0 0">'+(p.bio||'<em style="color:var(--muted)">Aucune présentation</em>')+'</p>'
     +'</div>'
     +(function(){
-      var hasSearchCriteria = p.recherche||p.origine_recherche||p.age_min||p.age_max||p.situation_recherche;
-      if(!hasSearchCriteria) return '';
       var s='<div class="profile-section"><h4>🔍 Ce que je cherche</h4>';
+      if(p.profession) s+=row('Profession', p.profession);
       if(p.situation_recherche) s+=row('Situation recherchée', p.situation_recherche);
       if(p.origine_recherche && p.origine_recherche!=='Peu importe') s+=row('Origine recherchée', p.origine_recherche);
       if(p.age_min||p.age_max) s+=row('Tranche d\'âge', (p.age_min||'—')+' – '+(p.age_max||'—')+' ans');
+      if(p.pratique_recherche && p.pratique_recherche!=='Peu importe') s+=row('Pratique souhaitée', p.pratique_recherche);
+      if(p.madhhab_recherche && p.madhhab_recherche!=='Peu importe') s+=row('Madhhab souhaité', p.madhhab_recherche);
+      if(p.enfants_recherche && p.enfants_recherche!=='Peu importe') s+=row('Enfants acceptés', p.enfants_recherche);
+      if(p.gender==='homme'){
+        if(p.voile_recherche && p.voile_recherche!=='Peu importe') s+=row('Voile souhaité', p.voile_recherche);
+        if(p.polygamie_recherche && p.polygamie_recherche!=='Peu importe') s+=row('Polygamie', p.polygamie_recherche);
+      }
+      if(p.gender==='femme'){
+        if(p.barbe_recherche && p.barbe_recherche!=='Peu importe') s+=row('Barbe souhaitée', p.barbe_recherche);
+        if(p.qamis_recherche && p.qamis_recherche!=='Peu importe') s+=row('Port du qamis', p.qamis_recherche);
+      }
       if(p.recherche) s+='<p style="font-size:.84rem;color:var(--white2);line-height:1.6;margin:8px 0 0">'+p.recherche+'</p>';
+      if(!p.profession&&!p.situation_recherche&&!p.origine_recherche&&!p.age_min&&!p.age_max&&!p.pratique_recherche&&!p.madhhab_recherche&&!p.enfants_recherche&&!p.voile_recherche&&!p.polygamie_recherche&&!p.barbe_recherche&&!p.qamis_recherche&&!p.recherche) s+='<p style="color:var(--muted);font-size:.8rem;margin:0">Non renseigné</p>';
       return s+'</div>';
     })()
     +docsSection
@@ -6675,7 +6721,27 @@ function _renderSwipePopup(p){
   html += '<div class="profile-detail-row"><span>Situation</span><span>'+(p.situation||'&#8212;')+'</span></div>';
   html += '<div class="profile-detail-row"><span>A des enfants</span><span>'+(p.enfants==='oui'?'Oui':p.enfants==='non'?'Non':p.enfants||'&#8212;')+'</span></div>';
   html += '<div class="profile-detail-row"><span>Veut des enfants</span><span>'+(p.veut_enfants||'&#8212;')+'</span></div>';
+  if(p.profession) html += '<div class="profile-detail-row"><span>Profession</span><span>'+p.profession+'</span></div>';
   html += '</div>';
+
+  // Ce que je recherche
+  var _hasRech = (p.situation_recherche&&p.situation_recherche!=='Peu importe')||(p.origine_recherche&&p.origine_recherche!=='Peu importe')||p.age_min||p.age_max||(p.pratique_recherche&&p.pratique_recherche!=='Peu importe')||(p.madhhab_recherche&&p.madhhab_recherche!=='Peu importe')||(p.enfants_recherche&&p.enfants_recherche!=='Peu importe')||p.voile_recherche||p.barbe_recherche||p.qamis_recherche||p.polygamie_recherche||p.recherche;
+  if(_hasRech){
+    html += '<div class="profile-section" style="margin-bottom:12px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15)">';
+    html += '<h4 style="font-size:.78rem;color:var(--gold);margin-bottom:6px">🔍 Ce que je recherche</h4>';
+    if(p.situation_recherche&&p.situation_recherche!=='Peu importe') html += '<div class="profile-detail-row"><span>Situation souhaitée</span><span>'+p.situation_recherche+'</span></div>';
+    if(p.origine_recherche&&p.origine_recherche!=='Peu importe') html += '<div class="profile-detail-row"><span>Origine souhaitée</span><span>'+p.origine_recherche+'</span></div>';
+    if(p.age_min||p.age_max) html += '<div class="profile-detail-row"><span>Tranche d\'âge</span><span>'+(p.age_min||'—')+' – '+(p.age_max||'—')+' ans</span></div>';
+    if(p.pratique_recherche&&p.pratique_recherche!=='Peu importe') html += '<div class="profile-detail-row"><span>Pratique souhaitée</span><span>'+p.pratique_recherche+'</span></div>';
+    if(p.madhhab_recherche&&p.madhhab_recherche!=='Peu importe') html += '<div class="profile-detail-row"><span>Madhhab souhaité</span><span>'+p.madhhab_recherche+'</span></div>';
+    if(p.enfants_recherche&&p.enfants_recherche!=='Peu importe') html += '<div class="profile-detail-row"><span>Enfants</span><span>'+p.enfants_recherche+'</span></div>';
+    if(p.gender==='homme'&&p.voile_recherche&&p.voile_recherche!=='Peu importe') html += '<div class="profile-detail-row"><span>Voile souhaité</span><span>'+p.voile_recherche+'</span></div>';
+    if(p.gender==='homme'&&p.polygamie_recherche&&p.polygamie_recherche!=='Peu importe') html += '<div class="profile-detail-row"><span>Polygamie</span><span>'+p.polygamie_recherche+'</span></div>';
+    if(p.gender==='femme'&&p.barbe_recherche&&p.barbe_recherche!=='Peu importe') html += '<div class="profile-detail-row"><span>Barbe souhaitée</span><span>'+p.barbe_recherche+'</span></div>';
+    if(p.gender==='femme'&&p.qamis_recherche&&p.qamis_recherche!=='Peu importe') html += '<div class="profile-detail-row"><span>Port du qamis</span><span>'+p.qamis_recherche+'</span></div>';
+    if(p.recherche) html += '<p style="font-size:.82rem;color:var(--white2);line-height:1.6;margin:8px 0 0">'+p.recherche+'</p>';
+    html += '</div>';
+  }
 
   // Pratique religieuse
   html += '<div class="profile-section" style="margin-bottom:14px">';
