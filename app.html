@@ -936,6 +936,21 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           </select>
         </div>
         <div class="form-group">
+          <label>Profession / Situation professionnelle <span style="color:var(--muted);font-size:.75rem">(optionnel)</span></label>
+          <select id="reg-profession">
+            <option value="">Sélectionnez</option>
+            <option>Étudiant(e)</option>
+            <option>Salarié(e)</option>
+            <option>Libéral(e) / Indépendant(e)</option>
+            <option>Fonctionnaire</option>
+            <option>Chef d'entreprise</option>
+            <option>En recherche d'emploi</option>
+            <option>Retraité(e)</option>
+            <option>Au foyer</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>A des enfants</label>
           <select id="reg-enfants" onchange="toggleNbEnfants(this.value)">
             <option value="">Sélectionnez</option>
@@ -1765,6 +1780,7 @@ function loadUserProfile(authUser){
       minhaj:profile.minhaj||'',converti:profile.converti||false,recherche:profile.recherche||'',
       photo_url:profile.photo_url||null,
       photo_visible:profile.photo_visible===true,
+      profession:profile.profession||null,
       origine_recherche:profile.origine_recherche||'',
       situation_recherche:profile.situation_recherche||'',
       age_min:profile.age_min||null,
@@ -2473,6 +2489,7 @@ async function doRegister(){
     nb_enfants: (document.getElementById('reg-nb-enfants')&&document.getElementById('reg-nb-enfants').value)||null,
     veut_enfants: (document.getElementById('reg-veut-enfants')&&document.getElementById('reg-veut-enfants').value)||'Oui',
     bio: (document.getElementById('reg-bio')&&document.getElementById('reg-bio').value).trim()||'',
+    profession: (document.getElementById('reg-profession')&&document.getElementById('reg-profession').value)||null,
     telephone: telephone||'',
     status: 'pending',
     paid: false,
@@ -2534,6 +2551,7 @@ async function doRegister(){
         enfants: profileData.enfants,
         veut_enfants: profileData.veut_enfants,
         bio: profileData.bio,
+        profession: profileData.profession||null,
         status: 'pending',
         paid: false,
         boosted: false,
@@ -3310,6 +3328,7 @@ function renderMyProfile(c){
         <div class="profile-detail-row"><span>Âge</span><span>${u.age||'—'}${u.age?' ans':''}</span></div>
         <div class="profile-detail-row"><span>Ville</span><span>${u.ville||'—'}</span></div>
         <div class="profile-detail-row"><span>Pratique</span><span>${u.pratique||'—'}</span></div>
+        ${u.profession?'<div class="profile-detail-row"><span>Profession</span><span>'+u.profession+'</span></div>':''}
         ${u.recherche?'<div class="profile-detail-row"><span>Ce que je cherche</span><span style="color:var(--white2)">'+u.recherche+'</span></div>':''}
         <div class="profile-detail-row"><span>Email</span><span style="color:var(--muted);font-size:.78rem">${u.email||'—'}</span></div>
         <div class="profile-detail-row"><span>Statut</span><span class="badge ${state.profileActive?'badge-active':'badge-pending'}">${state.profileActive?'✓ Validé':'⏳ En attente'}</span></div>
@@ -3394,6 +3413,10 @@ function renderEditProfile(){
   html+='<div class="form-group"><label>Origine</label><select id="edit-origine"><option value="'+(u.origine||'')+'">'+( u.origine||'Choisir')+'</option><option>Algérienne</option><option>Marocaine</option><option>Tunisienne</option><option>Française</option><option>Sénégalaise</option><option>Malienne</option><option>Ivoirienne</option><option>Camerounaise</option><option>Turque</option><option>Égyptienne</option><option>Syrienne</option><option>Pakistanaise</option><option>Autre</option></select></div>';
   html+='<div class="form-group"><label>Situation</label><select id="edit-situation"><option value="'+(u.situation||'')+'">'+( u.situation||'Choisir')+'</option><option>Jamais marié(e)</option><option>Divorcé(e)</option><option>Veuf(ve)</option></select></div>';
   html+='<div class="form-group"><label>Enfants</label><select id="edit-enfants"><option value="'+(u.enfants||'non')+'">'+( u.enfants==='oui'?'Oui':'Non')+'</option><option value="non">Non</option><option value="oui">Oui</option></select></div>';
+  var _profOpts=['\u00c9tudiant(e)','Salari\u00e9(e)','Lib\u00e9ral(e) / Ind\u00e9pendant(e)','Fonctionnaire','Chef d\'entreprise','En recherche d\'emploi','Retrait\u00e9(e)','Au foyer','Autre'];
+  var _profHtml='<div class="form-group"><label>Profession / Situation professionnelle</label><select id="edit-profession"><option value="'+(u.profession||'')+'">'+( u.profession||'S\u00e9lectionnez')+'</option>';
+  _profOpts.forEach(function(o){ if(o!==(u.profession||'')) _profHtml+='<option>'+o+'<\/option>'; });
+  html+=_profHtml+'</select></div>';
   // Pratique
   html+='<div class="gold-divider"></div>';
   html+='<p style="color:var(--gold);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Pratique religieuse</p>';
@@ -3479,6 +3502,7 @@ async function submitEdit(){
     madhhab: get('edit-madhhab')||state.user.madhhab,
     coran: get('edit-coran')||state.user.coran,
     recherche: get('edit-recherche'),
+    profession: get('edit-profession')||state.user.profession||null,
   };
   var ageMin=parseInt(get('edit-age-min')); if(ageMin>0) updates.age_min=ageMin;
   var ageMax=parseInt(get('edit-age-max')); if(ageMax>0) updates.age_max=ageMax;
@@ -3548,6 +3572,7 @@ async function submitEdit(){
       bio:updates.bio, origine:updates.origine, situation:updates.situation,
       enfants:updates.enfants, pratique:updates.pratique,
       madhhab:updates.madhhab, coran:updates.coran, recherche:updates.recherche,
+      profession:updates.profession||null,
     };
     if(updates.origine_recherche) baseUpdates.origine_recherche=updates.origine_recherche;
     if(updates.situation_recherche) baseUpdates.situation_recherche=updates.situation_recherche;
