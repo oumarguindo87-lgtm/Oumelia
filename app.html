@@ -1017,12 +1017,12 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           </div>
 
           <div class="form-group" style="margin-bottom:12px">
-            <label style="font-size:.8rem">Situation acceptée</label>
+            <label style="font-size:.8rem">Situation acceptée <span style="color:var(--muted);font-size:.75rem">(plusieurs choix possibles)</span></label>
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
-              <button type="button" class="rech-btn" data-field="situation" data-val="Peu importe" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--gold-soft);color:var(--gold);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Peu importe</button>
-              <button type="button" class="rech-btn" data-field="situation" data-val="Jamais marié(e)" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Jamais marié(e)</button>
-              <button type="button" class="rech-btn" data-field="situation" data-val="Divorcé(e)" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Divorcé(e)</button>
-              <button type="button" class="rech-btn" data-field="situation" data-val="Veuf(ve)" onclick="toggleRechBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Veuf(ve)</button>
+              <button type="button" class="rech-btn" data-field="situation" data-val="Peu importe"    onclick="toggleRechBtnMulti(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--gold-soft);color:var(--gold);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Peu importe</button>
+              <button type="button" class="rech-btn" data-field="situation" data-val="Jamais marié(e)" onclick="toggleRechBtnMulti(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Jamais marié(e)</button>
+              <button type="button" class="rech-btn" data-field="situation" data-val="Divorcé(e)"      onclick="toggleRechBtnMulti(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Divorcé(e)</button>
+              <button type="button" class="rech-btn" data-field="situation" data-val="Veuf(ve)"        onclick="toggleRechBtnMulti(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Veuf(ve)</button>
             </div>
             <input type="hidden" id="rech-situation" value="Peu importe">
           </div>
@@ -1133,12 +1133,15 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           </select>
         </div>
         <div class="form-group" id="reg-voile-wrap">
-          <label>Port du voile</label>
-          <select id="reg-voile">
-            <option value="">Sélectionnez</option>
-            <option>Hijab</option><option>Khimar</option><option>Jilbab</option><option>Niqab</option>
-            <option>Sans voile</option><option>En progression</option><option>Peu importe</option>
-          </select>
+          <label>Port du voile <span style="color:var(--muted);font-size:.75rem">(plusieurs choix possibles)</span></label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+            <button type="button" class="voile-btn" data-val="Hijab"         onclick="toggleVoileBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Hijab</button>
+            <button type="button" class="voile-btn" data-val="Khimar"        onclick="toggleVoileBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Khimar</button>
+            <button type="button" class="voile-btn" data-val="Jilbab"        onclick="toggleVoileBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Jilbab</button>
+            <button type="button" class="voile-btn" data-val="Niqab"         onclick="toggleVoileBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Niqab</button>
+            <button type="button" class="voile-btn" data-val="Sans voile"    onclick="toggleVoileBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.76rem;cursor:pointer">Sans voile</button>
+          </div>
+          <input type="hidden" id="reg-voile" value="">
         </div>
         <div class="form-group" id="reg-barbe-wrap" style="display:none">
           <label>Barbe</label>
@@ -3452,11 +3455,18 @@ function renderEditProfile(){
   html+='<div class="form-group"><label>Madhhab</label><select id="edit-madhhab"><option value="'+(u.madhhab||'')+'">'+( u.madhhab||'Choisir')+'</option><option>Hanafite</option><option>Malékite</option><option>Chaféite</option><option>Hanbalite</option><option>Peu importe</option></select></div>';
   html+='<div class="form-group"><label>Coran</label><select id="edit-coran"><option value="'+(u.coran||'')+'">'+( u.coran||'Choisir')+'</option><option>Quotidiennement</option><option>Régulièrement</option><option>Parfois</option><option>En apprentissage</option></select></div>';
   if(isF){
-    var voileOpts=['Hijab','Niqab','Jilbab','Sans voile','En progression'];
-    var voileHtml='<div class="form-group"><label>Voile</label><select id="edit-voile">';
-    if(!u.voile) voileHtml+='<option value="">Choisir</option>';
-    voileOpts.forEach(function(v){ voileHtml+='<option value="'+v+'"'+(u.voile===v?' selected':'')+'>'+v+'</option>'; });
-    html+=voileHtml+'</select></div>';
+    var voileOpts=['Hijab','Khimar','Jilbab','Niqab','Sans voile'];
+    var _curVoiles=(u.voile||'').split(',').map(function(v){return v.trim();}).filter(Boolean);
+    var voileHtml='<div class="form-group"><label>Voile <span style="color:var(--muted);font-size:.75rem">(plusieurs choix possibles)</span></label>';
+    voileHtml+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">';
+    voileOpts.forEach(function(v){
+      var isSel=_curVoiles.indexOf(v)>=0;
+      voileHtml+='<button type="button" class="edit-voile-btn" data-val="'+v+'" data-selected="'+(isSel?'1':'0')+'" onclick="toggleEditVoileBtn(this)" style="padding:6px 12px;border-radius:16px;border:1px solid var(--border);font-family:\'Cairo\',sans-serif;font-size:.76rem;cursor:pointer;background:'+(isSel?'var(--gold-soft)':'var(--card)')+';color:'+(isSel?'var(--gold)':'var(--muted)')+'">'+v+'</button>';
+    });
+    voileHtml+='</div>';
+    voileHtml+='<input type="hidden" id="edit-voile" value="'+(u.voile||'')+'">';
+    voileHtml+='</div>';
+    html+=voileHtml;
   }
   if(!isF){
     var barbeOpts=['Oui (sunnah)','Non','En progression'];
@@ -3837,11 +3847,48 @@ function toggleRechBtnMulti(btn){
   }
 }
 
-// ══════════════════════════════════════════════════
-// TOGGLE PHOTO DANS MES PARAMÈTRES
-// ══════════════════════════════════════════════════
+function toggleVoileBtn(btn){
+  var val = btn.dataset.val;
+  var inp = document.getElementById('reg-voile');
+  var isSelected = btn.getAttribute('data-selected') === '1';
+  if(isSelected){
+    btn.style.background  = 'var(--card)';
+    btn.style.color       = 'var(--muted)';
+    btn.style.borderColor = 'var(--border)';
+    btn.setAttribute('data-selected','0');
+  } else {
+    btn.style.background  = 'var(--gold-soft)';
+    btn.style.color       = 'var(--gold)';
+    btn.style.borderColor = 'rgba(201,168,76,.5)';
+    btn.setAttribute('data-selected','1');
+  }
+  var selected = [];
+  document.querySelectorAll('.voile-btn').forEach(function(b){
+    if(b.getAttribute('data-selected') === '1') selected.push(b.dataset.val);
+  });
+  if(inp) inp.value = selected.join(', ');
+}
 
-// ── Visibilité photo frères (2 options : public / mutuel) ──
+function toggleEditVoileBtn(btn){
+  var isSelected = btn.getAttribute('data-selected') === '1';
+  if(isSelected){
+    btn.style.background  = 'var(--card)';
+    btn.style.color       = 'var(--muted)';
+    btn.style.borderColor = 'var(--border)';
+    btn.setAttribute('data-selected','0');
+  } else {
+    btn.style.background  = 'var(--gold-soft)';
+    btn.style.color       = 'var(--gold)';
+    btn.style.borderColor = 'rgba(201,168,76,.5)';
+    btn.setAttribute('data-selected','1');
+  }
+  var selected = [];
+  document.querySelectorAll('.edit-voile-btn').forEach(function(b){
+    if(b.getAttribute('data-selected') === '1') selected.push(b.dataset.val);
+  });
+  var inp = document.getElementById('edit-voile');
+  if(inp) inp.value = selected.join(', ');
+}
 function setPhotoVisibility(isPublic){
   if(!state.user||!state.user.supabaseId) return;
   state.user.photo_visible=isPublic;
