@@ -681,7 +681,15 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       </div>
       <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Combien ça coûte ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
-        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">L'accès à la plateforme coûte 14,99 € en paiement unique et définitif. Vous disposez ensuite de 3 demandes de mise en relation incluses. Une fois épuisées, vous pouvez obtenir 3 nouvelles demandes pour 2,99 €.</div>
+        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">L'accès à la plateforme coûte 29,90 € en paiement unique (3 demandes incluses). Une fois épuisées, vous pouvez obtenir 3 nouvelles demandes pour 4,99 €, ou 10 demandes pour 12,99 €. Offert pour les 50 premiers inscrits (25 sœurs · 25 frères).</div>
+      </div>
+      <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
+        <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Qu'est-ce qu'une demande de mise en relation ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
+        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">Une demande de mise en relation, c'est l'action d'exprimer votre intérêt pour un profil. Lorsqu'elle est envoyée, l'autre membre en est informé et peut accepter ou refuser. Si elle est acceptée, notre équipe vous met en contact de manière encadrée et pudique. Important : votre compteur ne diminue QUE si la demande est acceptée — un refus ou une absence de réponse ne vous coûte aucune demande.</div>
+      </div>
+      <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
+        <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Je n'ai pas de wali, puis-je m'inscrire ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
+        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">Oui, vous pouvez vous inscrire. Nous comprenons que certaines sœurs se trouvent dans cette situation (famille non-musulmane, isolement, etc.). Dans ce cas, signalez-le à notre équipe lors de l'entretien. Nous ferons de notre mieux pour vous accompagner dans le respect des préceptes islamiques, et pourrons si nécessaire vous orienter vers des solutions adaptées (wali de substitution via l'imam de votre mosquée, etc.).</div>
       </div>
       <div class="faq-item" style="padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">La plateforme est-elle réservée aux francophones ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
@@ -1425,16 +1433,19 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <p style="color:var(--muted);font-size:.84rem;margin-bottom:14px;line-height:1.65">Votre dossier a été validé par notre équipe. Finalisez votre inscription pour accéder à la plateforme.</p>
     <div style="background:var(--gold-soft);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:.78rem;color:var(--white2);line-height:1.7">
       <div style="font-weight:700;color:var(--gold);margin-bottom:6px">🗺 Votre parcours :</div>
-      <div>① Inscription · ② Documents · ③ Entretien · ④ Paiement 14,99 € → Accès + 3 demandes incluses</div>
+      <div>① Inscription · ② Documents · ③ Entretien · ④ Paiement 29,90 € → Accès + 3 demandes incluses</div>
     </div>
-    <div class="price-tag">14,99 €<span style="font-size:.62rem;font-weight:500;display:block;margin-top:2px;color:var(--gold)">paiement unique · à vie</span></div>
+    <div style="background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:8px;padding:8px 12px;margin-bottom:12px;text-align:center">
+      <span style="color:#2ecc71;font-size:.78rem;font-weight:700">🎁 OFFERT pour les 50 premiers inscrits (25 sœurs · 25 frères)</span>
+    </div>
+    <div class="price-tag">29,90 €<span style="font-size:.62rem;font-weight:500;display:block;margin-top:2px;color:var(--gold)">paiement unique · 3 demandes incluses</span></div>
     <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px;margin:12px 0">
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.78rem;color:var(--white2);line-height:1.6">
         <input type="checkbox" id="serment-check" style="margin-top:3px;accent-color:var(--gold);flex-shrink:0">
         <span>Je prends Allah comme témoin que mes informations sont exactes.</span>
       </label>
     </div>
-    <button class="btn btn-gold" style="width:100%" onclick="activateProfile()">💳 Payer 14,99 € — accès à vie</button>
+    <button class="btn btn-gold" style="width:100%" onclick="activateProfile()">💳 Payer 29,90 € — accès + 3 demandes</button>
     <button class="btn btn-outline" style="width:100%;margin-top:10px" onclick="closeModal('modal-paywall')">Plus tard</button>
   </div>
 </div>
@@ -1443,10 +1454,31 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 <div class="modal-overlay" id="modal-plus-demandes" onclick="if(event.target===this)closeModal('modal-plus-demandes')">
   <div class="modal">
     <h3>💌 Plus de demandes</h3>
-    <p style="color:var(--muted);font-size:.88rem;margin-bottom:16px;line-height:1.6">Vous avez utilisé vos 3 demandes initiales. Obtenez 3 demandes supplémentaires.</p>
-    <div class="price-tag">2,99 €</div>
-    <button class="btn btn-gold" style="width:100%;margin-top:16px" onclick="buyDemandes()">Obtenir 3 demandes — 2,99 €</button>
-    <button class="btn btn-outline" style="width:100%;margin-top:10px" onclick="closeModal('modal-plus-demandes')">Annuler</button>
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:16px;line-height:1.6">Vous avez utilisé vos demandes. Choisissez un pack :</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+      <div style="background:var(--gold-soft);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--white2)">Pack 3 demandes</div>
+          <div style="font-size:.74rem;color:var(--muted);margin-top:2px">Idéal pour continuer</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:1.1rem;font-weight:800;color:var(--gold)">4,99 €</div>
+          <button class="btn btn-gold" style="padding:5px 12px;font-size:.76rem;margin-top:4px" onclick="buyDemandes(3)">Choisir</button>
+        </div>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;position:relative">
+        <div style="position:absolute;top:-9px;left:12px;background:var(--gold);color:#1a0e00;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:10px">MEILLEURE OFFRE</div>
+        <div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--white2)">Pack 10 demandes</div>
+          <div style="font-size:.74rem;color:var(--muted);margin-top:2px">Économisez 36%</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:1.1rem;font-weight:800;color:var(--gold)">12,99 €</div>
+          <button class="btn btn-gold" style="padding:5px 12px;font-size:.76rem;margin-top:4px" onclick="buyDemandes(10)">Choisir</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-outline" style="width:100%" onclick="closeModal('modal-plus-demandes')">Annuler</button>
   </div>
 </div>
 
@@ -2234,6 +2266,8 @@ var faqData=[
   {q:"Mes données sont-elles sécurisées ?",a:"Oui. Toutes vos données sont stockées sur des serveurs certifiés (Supabase). Nous ne vendons jamais vos données à des tiers."},
   {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 24 heures."},
   {q:"Puis-je supprimer mon compte ?",a:"Oui, à tout moment depuis Profil → Zone de danger → Supprimer mon compte. Toutes vos données seront effacées définitivement."},
+  {q:"Qu'est-ce qu'une demande de mise en relation ?",a:"Une demande de mise en relation, c'est l'action d'exprimer votre intérêt pour un profil. Lorsqu'elle est envoyée, l'autre membre en est informé et peut accepter ou refuser. Si elle est acceptée, notre équipe vous met en contact de manière encadrée et pudique. Important : votre compteur ne diminue QUE si la demande est acceptée — un refus ou une absence de réponse ne vous coûte aucune demande."},
+  {q:"Je n'ai pas de wali, puis-je quand même m'inscrire ?",a:"Oui, vous pouvez vous inscrire. Nous comprenons que certaines sœurs se trouvent dans cette situation (famille non-musulmane, isolement, etc.). Dans ce cas, signalez-le à notre équipe lors de l'entretien. Nous ferons de notre mieux pour vous accompagner dans le respect des préceptes islamiques, et pourrons, si nécessaire, vous orienter vers des solutions adaptées (wali de substitution via l'imam de votre mosquée, etc.)."},
   {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumélia.contacthomme@gmail.com (frères) ou oumélia.contactfemme@gmail.com (sœurs) — ou via la messagerie dans l'application."},
 ];
 
@@ -2942,6 +2976,8 @@ var faqData=[
   {q:"Mes données sont-elles sécurisées ?",a:"Oui. Toutes vos données sont stockées sur des serveurs certifiés (Supabase). Nous ne vendons jamais vos données à des tiers."},
   {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 24 heures."},
   {q:"Puis-je supprimer mon compte ?",a:"Oui, à tout moment depuis Profil → Zone de danger → Supprimer mon compte. Toutes vos données seront effacées définitivement."},
+  {q:"Qu'est-ce qu'une demande de mise en relation ?",a:"Une demande de mise en relation, c'est l'action d'exprimer votre intérêt pour un profil. Lorsqu'elle est envoyée, l'autre membre en est informé et peut accepter ou refuser. Si elle est acceptée, notre équipe vous met en contact de manière encadrée et pudique. Important : votre compteur ne diminue QUE si la demande est acceptée — un refus ou une absence de réponse ne vous coûte aucune demande."},
+  {q:"Je n'ai pas de wali, puis-je quand même m'inscrire ?",a:"Oui, vous pouvez vous inscrire. Nous comprenons que certaines sœurs se trouvent dans cette situation (famille non-musulmane, isolement, etc.). Dans ce cas, signalez-le à notre équipe lors de l'entretien. Nous ferons de notre mieux pour vous accompagner dans le respect des préceptes islamiques, et pourrons, si nécessaire, vous orienter vers des solutions adaptées (wali de substitution via l'imam de votre mosquée, etc.)."},
   {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumélia.contacthomme@gmail.com (frères) ou oumélia.contactfemme@gmail.com (sœurs) — ou via la messagerie dans l'application."},
 ];
 
@@ -3335,7 +3371,7 @@ function renderMyProfile(c){
         // Si docs envoyés mais statut pas encore mis à jour (PATCH en cours / lag réseau)
         var _docsOk=u.docs_submitted||_s==='en_attente_rdv'||_s==='rdv_planifie';
         var _d=_s==='valide_a_payer'?'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.':_s==='rdv_planifie'?'Entretien planifié. En attente de validation par notre équipe.':_s==='en_attente_rdv'?'Vos documents ont été reçus. Planifiez votre entretien.':'Envoyez vos documents pour continuer la verification.';
-        var _b=_s==='valide_a_payer'?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (14,99 €) →</button>':_s==='rdv_planifie'?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button><button onclick="confirmRdvPris()" style="background:none;border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer;font-family:\'Cairo\',sans-serif">✅ J\'ai planifié mon entretien</button></div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
+        var _b=_s==='valide_a_payer'?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (29,90 €) →</button>':_s==='rdv_planifie'?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button><button onclick="confirmRdvPris()" style="background:none;border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer;font-family:\'Cairo\',sans-serif">✅ J\'ai planifié mon entretien</button></div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
         return '<div class="step-banner" style="margin:0 0 14px"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+_l+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:4px;line-height:1.5">'+_d+'</div>'+_b+'</div>';
       })()}
 
@@ -3641,6 +3677,20 @@ async function submitEdit(){
     // Mettre à jour state.user localement
     var ks=Object.keys(updates);
     for(var ki2=0;ki2<ks.length;ki2++) state.user[ks[ki2]]=updates[ks[ki2]];
+
+    // Mettre à jour le cache admin (_adminProfiles) avec la dernière version
+    if(window._adminProfiles && state.user && state.user.id){
+      var _aIdx = -1;
+      for(var _ai=0;_ai<window._adminProfiles.length;_ai++){
+        if(String(window._adminProfiles[_ai].id)===String(state.user.id)){ _aIdx=_ai; break; }
+      }
+      if(_aIdx>=0){
+        var _aKs=Object.keys(updates);
+        for(var _aki=0;_aki<_aKs.length;_aki++){
+          window._adminProfiles[_aIdx][_aKs[_aki]]=updates[_aKs[_aki]];
+        }
+      }
+    }
 
     // Mot de passe
     var newPwd=get('edit-pwd-new');
@@ -5042,21 +5092,25 @@ function simulateAccept(prenom){
   }
 }
 
-function buyDemandes(){
+function buyDemandes(nb){
+  var _nb = nb || 3;
+  var _type = _nb === 10 ? 'demandes10' : 'demandes';
+  var _montant = _nb === 10 ? 12.99 : 4.99;
+  var _label = _nb === 10 ? '10' : '3';
   closeModal('modal-plus-demandes');
-  openStripePayment('demandes', async function(){
+  openStripePayment(_type, async function(){
     // Réinitialiser les demandes acceptées
     Object.keys(demandesEnvoyees).forEach(function(k){ if(demandesEnvoyees[k]==='acceptee') delete demandesEnvoyees[k];});
     // Enregistrer le paiement dans Supabase
     if((state.user&&state.user.id)){
       await getSB().from('paiements').insert({
         profile_id: state.user.id,
-        type: 'demandes',
-        montant: 2.99,
+        type: _type,
+        montant: _montant,
         created_at: new Date().toISOString(),
       }).catch(function(){}); // table optionnelle
     }
-    showToast('✅ 3 nouvelles demandes débloquées !','green');
+    showToast('✅ '+_label+' nouvelles demandes débloquées !','green');
     renderTab(state.currentNav);
   });
 }
@@ -5468,9 +5522,10 @@ function getStripe(){
 }
 
 var STRIPE_PRODUCTS = {
-  profil:   { name: 'Accès Oumélia — paiement unique', price: '14,99 €', amount: 1499 },
-  demandes: { name: 'Pack 3 demandes',            price: '2,99 €', amount: 299 },
-  boost:    { name: 'Mise en avant 7 jours',       price: '2,99 €', amount: 299 },
+  profil:     { name: 'Accès Oumélia — paiement unique', price: '29,90 €', amount: 2990 },
+  demandes:   { name: 'Pack 3 demandes',                price: '4,99 €',  amount: 499  },
+  demandes10: { name: 'Pack 10 demandes',               price: '12,99 €', amount: 1299 },
+  boost:      { name: 'Mise en avant 7 jours',          price: '2,99 €',  amount: 299  },
 };
 
 async function openStripePayment(type, callbackFn){
@@ -6198,7 +6253,7 @@ async function approveProfile(id){
   if(p.user_id){
     await getSB().from('profils').update({status:'valide_a_payer'}).eq('id',id);
     // Envoyer message interne avec lien paiement
-    var msgPaiement = '🎉 Félicitations '+( p.prenom||'')+'\n\nVotre dossier a été validé par l\'équipe Oumélia. Pour activer votre compte et commencer vos rencontres, veuillez finaliser votre inscription en procédant au paiement (14,99 € — paiement unique à vie). Connectez-vous sur oumelia.com puis cliquez sur "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+    var msgPaiement = '🎉 Félicitations '+( p.prenom||'')+'\n\nVotre dossier a été validé par l\'équipe Oumélia. Pour activer votre compte et commencer vos rencontres, veuillez finaliser votre inscription en procédant au paiement (29,90 € — paiement unique, 3 demandes incluses). Connectez-vous sur oumelia.com puis cliquez sur "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
     await getSB().from('messages').insert({
       from_id:'admin', to_id:String(p.id),
       content:msgPaiement, created_at:new Date().toISOString()
@@ -7476,7 +7531,7 @@ function renderStepBanner(status){
   var idx=steps.indexOf(status);if(idx<0) idx=0;
   var dots=steps.map(function(_,i){return '<div class="step-dot '+(i<=idx?'done':'')+'"></div>';}).join('');
   var descs={pending:'Envoyez vos documents.',en_attente_rdv:'Documents reçus. Planifiez votre entretien.',rdv_planifie:'Entretien planifié. En attente de validation.',valide_a_payer:'Dossier validé. Finalisez votre paiement.'};
-  var acts={pending:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>',en_attente_rdv:'<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button><button onclick="confirmRdvPris()" style="background:none;border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer;font-family:\'Cairo\',sans-serif">✅ J\'ai planifié mon entretien</button></div>',rdv_planifie:'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>',valide_a_payer:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser (14,99 €) →</button>'};
+  var acts={pending:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>',en_attente_rdv:'<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button><button onclick="confirmRdvPris()" style="background:none;border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer;font-family:\'Cairo\',sans-serif">✅ J\'ai planifié mon entretien</button></div>',rdv_planifie:'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>',valide_a_payer:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser (29,90 €) →</button>'};
   return '<div class="step-banner"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+info.label+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:3px;line-height:1.5">'+(descs[status]||descs.pending)+'</div><div class="step-progress">'+dots+'</div>'+(acts[status]||acts.pending)+'</div>';
 }
 function injectStepBannerIfNeeded(){
@@ -7561,7 +7616,7 @@ async function adminValidateAfterCall(id,prenom){
   if(window._adminProfiles){var f=window._adminProfiles.find(function(x){return String(x.id)===String(id);});if(f)f.status='valide_a_payer';}
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
   await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({status:'valide_a_payer',call_validated:true})}).catch(function(){});
-  var msg='🎉 Félicitations '+prenom+'\n\nVotre profil a été validé par notre équipe.\n\nÉtape 4/4 — Finalisez votre paiement (14,99 €) pour accéder aux membres.\n\nConnectez-vous sur oumelia.com → "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  var msg='🎉 Félicitations '+prenom+'\n\nVotre profil a été validé par notre équipe.\n\nÉtape 4/4 — Finalisez votre paiement (29,90 €) pour accéder aux membres.\n\nConnectez-vous sur oumelia.com → "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   await fetch(SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({from_id:'admin',to_id:String(id),content:msg,created_at:new Date().toISOString()})}).catch(function(){});
   showToast('✅ '+prenom+' validé — notification envoyée','green');
   adminTab('dossiers');
