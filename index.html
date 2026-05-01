@@ -1564,7 +1564,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 <div class="modal-overlay" id="modal-admin-msg" onclick="if(event.target===this)closeModal('modal-admin-msg')">
   <div class="modal">
     <h3>✉️ Envoyer un message</h3>
-    <p id="admin-msg-target-label" style="color:var(--muted);font-size:.84rem;margin-bottom:12px"></p>
+    <p id="admin-msg-target" style="color:var(--muted);font-size:.84rem;margin-bottom:12px"></p>
     <div class="form-group">
       <textarea id="admin-msg-content" rows="4" placeholder="Votre message..." style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--white);font-family:'Cairo',sans-serif;font-size:.88rem;resize:vertical"></textarea>
     </div>
@@ -2686,19 +2686,44 @@ async function doRegister(){
 
   // 5. Mettre à jour le state
   state.user = {
-    id: profileData.id,
-    supabaseId: userId,
-    prenom: profileData.prenom,
-    gender: profileData.gender,
-    email: email,
-    age: profileData.age,
-    ville: profileData.ville,
-    origine: profileData.origine,
-    pratique: profileData.pratique,
-    bio: profileData.bio,
-    status: 'pending',
-    photo_url: profileData.photo_url || null,
-    photo_visible: false,
+    id:                  profileData.id,
+    supabaseId:          userId,
+    prenom:              profileData.prenom,
+    gender:              profileData.gender,
+    email:               email,
+    age:                 profileData.age,
+    pays:                profileData.pays||'',
+    ville:               profileData.ville,
+    origine:             profileData.origine,
+    pratique:            profileData.pratique,
+    voile:               profileData.voile||null,
+    barbe:               profileData.barbe||null,
+    madhhab:             profileData.madhhab||'',
+    coran:               profileData.coran||'',
+    halal:               profileData.halal||'',
+    situation:           profileData.situation||'',
+    enfants:             profileData.enfants||'',
+    nb_enfants:          profileData.nb_enfants||null,
+    veut_enfants:        profileData.veut_enfants||'',
+    bio:                 profileData.bio||'',
+    profession:          profileData.profession||null,
+    converti:            profileData.converti||'Non',
+    telephone:           profileData.telephone||'',
+    recherche:           profileData.recherche||'',
+    origine_recherche:   profileData.origine_recherche||'Peu importe',
+    situation_recherche: profileData.situation_recherche||'Peu importe',
+    pratique_recherche:  profileData.pratique_recherche||'Peu importe',
+    madhhab_recherche:   profileData.madhhab_recherche||'Peu importe',
+    enfants_recherche:   profileData.enfants_recherche||'Peu importe',
+    barbe_recherche:     profileData.barbe_recherche||'Peu importe',
+    qamis_recherche:     profileData.qamis_recherche||'Peu importe',
+    voile_recherche:     profileData.voile_recherche||'Peu importe',
+    polygamie_recherche: profileData.polygamie_recherche||'Peu importe',
+    age_min:             profileData.age_min||null,
+    age_max:             profileData.age_max||null,
+    status:              'pending',
+    photo_url:           profileData.photo_url||null,
+    photo_visible:       false,
   };
   state.profileActive = false;
   state.profilePaused = false;
@@ -5927,7 +5952,7 @@ function renderAdminPending(c){
         ${(p.audioAttested||p.audio_attested)?('<button class="btn-tiny audio" onclick="openAudioVerif(\''+p.user_id+'\',\''+p.prenom+'\')" >🎙</button>'):''}
         <button class="btn-tiny approve" onclick="approveProfile('${p.id}')">✓</button>
         <button class="btn-tiny reject"  onclick="openRejectModal('${p.id}','${p.prenom}')">✗</button>
-        <button class="btn-tiny msg"     onclick="openAdminMsgModal('${p.prenom}')">✉</button>
+        <button class="btn-tiny msg"     onclick="openAdminMsgModal('${p.id}','${p.prenom}')">✉</button>
         ${(!p.paid&&!p.free_activated)?('<button class="btn-tiny free" onclick="freeActivate(\''+p.id+'\')" >🎁</button>'):''}
       </div>
     </div>`;
@@ -6026,7 +6051,7 @@ function buildUserList(list){
         ${p.status==='active'?('<button class="btn-tiny deact" onclick="deactivateProfile(\''+p.id+'\')" title="Désactiver">⏸</button>'):''}
         ${(p.status==='inactive'||p.status==='paused')?('<button class="btn-tiny react" onclick="reactivateProfile(\''+p.id+'\')" title="Réactiver">▶ Réactiver</button>'):''}
         ${(!p.paid&&!p.free_activated)?('<button class="btn-tiny free" onclick="freeActivate(\''+p.id+'\')" title="Activer gratuitement">🎁 Gratuit</button>'):''}
-        <button class="btn-tiny msg" onclick="openAdminMsgModal('${p.prenom}')">✉</button>
+        <button class="btn-tiny msg" onclick="openAdminMsgModal('${p.id}','${p.prenom}')">✉</button>
       </div>
     </div>`;
   }).join('');
@@ -6353,20 +6378,42 @@ async function confirmReject(){
 }
 
 var adminMsgTarget='';
-function openAdminMsgModal(name){
-  adminMsgTarget=name;
-  document.getElementById('admin-msg-target').textContent=name;
-  document.getElementById('admin-msg-content').value='';
+var adminMsgTargetId='';
+function openAdminMsgModal(idOrName, name){
+  // Accepte (id, name) depuis la fiche détail ou (name) depuis la liste
+  if(name !== undefined){
+    adminMsgTargetId = String(idOrName);
+    adminMsgTarget   = String(name);
+  } else {
+    // Appelé avec juste le prénom — chercher l'id dans _adminProfiles
+    adminMsgTarget   = String(idOrName);
+    var _found = (window._adminProfiles||[]).find(function(p){ return p.prenom===idOrName; });
+    adminMsgTargetId = _found ? String(_found.id) : '';
+  }
+  document.getElementById('admin-msg-target').textContent = 'À : ' + adminMsgTarget;
+  document.getElementById('admin-msg-content').value = '';
   openModal('modal-admin-msg');
 }
 
-function sendAdminMsg(){
-  var msg=document.getElementById('admin-msg-content').value;
-  if(!msg.trim())return showToast('⚠ Écrivez un message','red');
-  if(!adminConvos[adminMsgTarget]) adminConvos[adminMsgTarget]=[];
-  adminConvos[adminMsgTarget].push({from:'admin',text:msg});
-  closeModal('modal-admin-msg');
-  showToast(`✉️ Message envoyé à ${adminMsgTarget}`,'green');
+async function sendAdminMsg(){
+  var msg = document.getElementById('admin-msg-content').value;
+  if(!msg.trim()) return showToast('⚠ Écrivez un message','red');
+  if(!adminMsgTargetId) return showToast('⚠ Destinataire introuvable','red');
+  var H = {'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer '+SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal'};
+  try {
+    var resp = await fetch(SUPABASE_URL+'/rest/v1/messages', {
+      method: 'POST',
+      headers: H,
+      body: JSON.stringify({from_id:'admin', to_id: adminMsgTargetId, content: msg, created_at: new Date().toISOString()})
+    });
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    if(!adminConvos[adminMsgTarget]) adminConvos[adminMsgTarget]=[];
+    adminConvos[adminMsgTarget].push({from:'admin', text:msg});
+    closeModal('modal-admin-msg');
+    showToast('✉️ Message envoyé à '+adminMsgTarget,'green');
+  } catch(e) {
+    showToast('❌ Erreur envoi message','red');
+  }
 }
 
 // MATCH → envoi wali à la SŒUR seulement (par l'administratrice)
