@@ -6240,27 +6240,35 @@ function openAdminConvo(uid, prenom){
   });
 }
 
-async function sendAdminReply(toId, prenom){
+function sendAdminReply(toId, prenom){
   var inp=document.getElementById('admin-chat-input');
   if(!inp||!inp.value.trim()) return;
   var txt=inp.value.trim();
-  var sb=getSB(); if(!sb) return showToast('❌ Erreur connexion','red');
   var msgData={from_id:'admin', to_id:String(toId), from_prenom:'Oumélia', content:txt, lu:false};
-  console.log('Admin send msg:', JSON.stringify(msgData));
-  sb.from('messages').insert(msgData)
-  .then(function(r){
-    if(r && r.error){
-      console.log('ERREUR admin msg:', r.error.message, r.error.code, r.error.details);
-      showToast('❌ '+r.error.message,'red');
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  inp.value='';
+  fetch(SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:H,body:JSON.stringify(msgData)})
+  .then(function(res){
+    if(!res.ok){
+      res.text().then(function(t){ showToast('❌ Erreur: '+t,'red'); });
+      inp.value=txt;
       return;
     }
-    console.log('✅ Admin message envoyé');
-    inp.value='';
-    if(!adminConvos[prenom]) adminConvos[prenom]=[];
-    adminConvos[prenom].push({from:'admin', text:txt});
-    openAdminConvo(toId, prenom);
+    var chatMsgs=document.getElementById('admin-chat-msgs');
+    if(chatMsgs){
+      var div=document.createElement('div');
+      div.className='msg mine';
+      div.textContent=txt;
+      chatMsgs.appendChild(div);
+      chatMsgs.scrollTop=chatMsgs.scrollHeight;
+    }
     showToast('✉️ Message envoyé à '+prenom,'green');
-  }).catch(function(e){ console.log('Admin msg exception:', e.message||e); showToast('❌ Erreur réseau','red'); });
+  })
+  .catch(function(e){
+    console.log('sendAdminReply error:',e);
+    inp.value=txt;
+    showToast('❌ Erreur réseau','red');
+  });
 }
 
 function renderAdminChatView(c,name,gender){
