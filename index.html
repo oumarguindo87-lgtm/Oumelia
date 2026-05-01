@@ -6126,6 +6126,13 @@ function openAdminConvoMatch(uid, prenom){
   adminTab('msgs');
 }
 
+function openAdminConvoFromDetail(btn){
+  var pid  = btn.getAttribute('data-pid');
+  var pnom = btn.getAttribute('data-pnom');
+  adminTab('msgs');
+  openAdminConvo(pid, pnom);
+}
+
 
 function renderAdminWali(c){
   var html=`<div style="padding:16px"><div class="section-title">🌸 Réponses Wali <span class="sc">${waliResponses.length}</span></div>`;
@@ -6233,24 +6240,25 @@ function openAdminConvo(uid, prenom){
   });
 }
 
-function sendAdminReply(toId, prenom){
+async function sendAdminReply(toId, prenom){
   var inp=document.getElementById('admin-chat-input');
   if(!inp||!inp.value.trim()) return;
   var txt=inp.value.trim();
-  var sb=getSB(); if(!sb) return;
-  sb.from('messages').insert({
-    from_id: 'admin',
-    to_id: toId,
-    from_prenom: 'Admin',
-    content: txt,
-    lu: false
-  }).then(function(){
+  var sb=getSB(); if(!sb) return showToast('❌ Erreur connexion','red');
+  inp.value='';
+  try {
+    var H={'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json','Prefer':'return=minimal'};
+    var res=await fetch(SUPABASE_URL+'/rest/v1/messages',{
+      method:'POST',
+      headers:H,
+      body:JSON.stringify({from_id:'admin',to_id:String(toId),from_prenom:'Oumélia',content:txt,lu:false,created_at:new Date().toISOString()})
+    });
+    if(!res.ok){ var errText=await res.text(); showToast('❌ Erreur: '+errText,'red'); return; }
     if(!adminConvos[prenom]) adminConvos[prenom]=[];
-    adminConvos[prenom].push({from:'admin', text:txt});
-    inp.value='';
-    openAdminConvo(toId, prenom);
-    showToast('✉️ Réponse envoyée à '+prenom,'green');
-  }).catch(function(e){ showToast('Erreur: '+e,'red'); });
+    adminConvos[prenom].push({from:'admin',text:txt});
+    openAdminConvo(toId,prenom);
+    showToast('✉️ Message envoyé à '+prenom,'green');
+  } catch(e){ showToast('❌ Erreur réseau','red'); }
 }
 
 function renderAdminChatView(c,name,gender){
@@ -6674,7 +6682,7 @@ function openAdminProfileDetail(id){
     +audioSection
     +'<div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">'
     +validateBtn
-    +'<button class="btn btn-outline" data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openAdminMsgModal(this.dataset.pid,this.dataset.pnom)" style="width:100%">✉️ Envoyer un message</button>'
+    +'<button class="btn btn-outline" data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openAdminConvoFromDetail(this)" style="width:100%">✉️ Envoyer un message</button>'
     +'<button data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openRejectModal(this.dataset.pid,this.dataset.pnom)" style="width:100%;background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer">✗ Refuser le profil</button>'
     +(p.telephone?'<button data-phone="'+p.telephone+'" data-pnom="'+String(p.prenom||'')+'" onclick="banPhone(this.dataset.phone,this.dataset.pnom)" style="width:100%;background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:10px;font-size:.82rem;cursor:pointer">🚫 Bannir ce numéro</button>':'')
     +'</div>'
