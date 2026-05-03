@@ -2599,6 +2599,7 @@ async function doRegister(){
         veut_enfants: profileData.veut_enfants,
         bio: profileData.bio,
         profession: profileData.profession||null,
+        telephone: profileData.telephone||'',
         status: 'pending',
         paid: false,
         boosted: false,
@@ -6653,6 +6654,7 @@ function openAdminProfileDetail(id){
     +(p.enfants==='oui'?row('Nombre d enfants', p.nb_enfants):'')
     +row('Veut des enfants', p.veut_enfants)
     +row('Converti(e)', p.converti===true||p.converti==='true'?'Oui':p.converti==='false'||p.converti===false?'Non':'')
+    +(p.profession?row('Profession', p.profession):'')
     +row('Téléphone', p.telephone)
     +row('Email', p.email||'(voir auth.users)')
     +row('Inscrit le', p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'—')
@@ -6671,7 +6673,6 @@ function openAdminProfileDetail(id){
     +'</div>'
     +(function(){
       var s='<div class="profile-section"><h4>🔍 Ce que je cherche</h4>';
-      if(p.profession) s+=row('Profession', p.profession);
       if(p.situation_recherche) s+=row('Situation recherchée', p.situation_recherche);
       if(p.origine_recherche && p.origine_recherche!=='Peu importe') s+=row('Origine recherchée', p.origine_recherche);
       if(p.age_min||p.age_max) s+=row('Tranche d\'âge', (p.age_min||'—')+' – '+(p.age_max||'—')+' ans');
@@ -7557,24 +7558,30 @@ async function submitVerificationDocs(){
     };
     if(workPath) patchData.work_path=workPath;
 
-    var patchRes=await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
-      method:'PATCH',
-      headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},AUTH_HDR),
-      body:JSON.stringify(patchData)
-    });
-    console.log('Profil PATCH status:',patchRes.status);
-    if(!patchRes.ok){
-      var patchErr=await patchRes.text();
-      console.log('Profil PATCH ERROR:',patchErr);
-      // Retry avec anon key au cas où
+    // Essai 1 : PATCH par id (plus fiable avec RLS)
+    var patchOk=false;
+    if(pid){
+      var patchRes=await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+pid,{
+        method:'PATCH',
+        headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},AUTH_HDR),
+        body:JSON.stringify(patchData)
+      });
+      console.log('Profil PATCH by id status:',patchRes.status);
+      if(patchRes.ok) patchOk=true;
+      else{ var patchErr=await patchRes.text(); console.log('PATCH by id ERROR:',patchErr); }
+    }
+    // Essai 2 : PATCH par user_id
+    if(!patchOk){
       var patchRes2=await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
         method:'PATCH',
         headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
         body:JSON.stringify(patchData)
       });
-      console.log('Profil PATCH retry status:',patchRes2.status);
-      if(!patchRes2.ok){ var e2=await patchRes2.text(); console.log('Profil PATCH retry ERROR:',e2); }
+      console.log('Profil PATCH by user_id status:',patchRes2.status);
+      if(!patchRes2.ok){ var e2=await patchRes2.text(); console.log('PATCH by user_id ERROR:',e2); }
+      else patchOk=true;
     }
+    console.log('PATCH final result:',patchOk?'✅ OK':'❌ FAILED');
 
     // ── Mettre à jour state local ──
     if(state.user){
