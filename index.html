@@ -1551,6 +1551,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 <div class="modal-overlay" id="modal-reject" onclick="if(event.target===this)closeModal('modal-reject')">
   <div class="modal">
     <h3>✗ Refuser le profil</h3>
+    <p id="reject-target" style="color:var(--muted);font-size:.84rem;margin-bottom:12px"></p>
     <div class="form-group" style="margin-top:12px">
       <label>Raison du refus</label>
       <textarea id="reject-reason" rows="3" placeholder="Expliquez la raison du refus..." style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--white);font-family:'Cairo',sans-serif;font-size:.88rem;resize:vertical"></textarea>
@@ -2557,10 +2558,10 @@ async function doRegister(){
   } else if(rechercheEl){
     profileData.recherche=rechercheEl.value.trim()||'';
   }
-  // Critères recherche structurés
+  // Critères recherche structurés — inclus directement dans l'insert
   var gv=function(id){var e=document.getElementById(id);return e?e.value:'';};
-  profileData.age_min=parseInt(gv('rech-age-min'))||18;
-  profileData.age_max=parseInt(gv('rech-age-max'))||60;
+  profileData.age_min=parseInt(gv('rech-age-min'))||null;
+  profileData.age_max=parseInt(gv('rech-age-max'))||null;
   profileData.origine_recherche=gv('rech-origine')||'Peu importe';
   profileData.pratique_recherche=gv('rech-pratique')||'Peu importe';
   profileData.situation_recherche=gv('rech-situation')||'Peu importe';
@@ -2600,6 +2601,18 @@ async function doRegister(){
         bio: profileData.bio,
         profession: profileData.profession||null,
         telephone: profileData.telephone||'',
+        origine_recherche:   profileData.origine_recherche||'Peu importe',
+        situation_recherche: profileData.situation_recherche||'Peu importe',
+        pratique_recherche:  profileData.pratique_recherche||'Peu importe',
+        madhhab_recherche:   profileData.madhhab_recherche||'Peu importe',
+        enfants_recherche:   profileData.enfants_recherche||'Peu importe',
+        barbe_recherche:     profileData.barbe_recherche||'Peu importe',
+        qamis_recherche:     profileData.qamis_recherche||'Peu importe',
+        voile_recherche:     profileData.voile_recherche||'Peu importe',
+        polygamie_recherche: profileData.polygamie_recherche||'Peu importe',
+        age_min:             profileData.age_min||null,
+        age_max:             profileData.age_max||null,
+        recherche:           profileData.recherche||'',
         status: 'pending',
         paid: false,
         boosted: false,
@@ -6415,7 +6428,7 @@ function openRejectModal(id,name){
   rejectId=id;
   document.getElementById('reject-target').textContent=name;
   document.getElementById('reject-reason').value='';
-  openModal('modal-admin-reject');
+  openModal('modal-reject');
 }
 
 function confirmReject(){
@@ -6439,7 +6452,7 @@ function confirmReject(){
       }).catch(function(){});
     }
     updateAdminBadges();
-    closeModal('modal-admin-reject');
+    closeModal('modal-reject');
     showToast('✗ '+(p&&p.prenom||'Profil')+' refusé(e)','red');
     adminTab(state.activeAdminTab);
   }).catch(function(e){ showToast('❌ Erreur réseau','red'); console.log('Reject error:',e); });
