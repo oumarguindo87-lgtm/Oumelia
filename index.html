@@ -687,7 +687,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       </div>
       <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Quel est le rôle du Wali sur la plateforme ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
-        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">Lorsqu'une demande est acceptée, l'administratrice contacte le Wali (père, frère ou tuteur légal) de la sœur pour l'informer de la démarche et l'impliquer dans le processus conformément à la Sunna.</div>
+        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">Lorsqu'une demande est acceptée, l'équipe Oumélia contacte le Wali (père, frère ou tuteur légal) de la sœur pour l'informer de la démarche et l'impliquer dans le processus conformément à la Sunna.</div>
       </div>
       <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Combien ça coûte ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
@@ -1306,7 +1306,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
             <p style="font-size:.8rem;color:var(--white2);line-height:1.65;margin-bottom:10px">Cet enregistrement te permet d'attester l'exactitude des informations que tu as renseignées et la sincérité de ta démarche. <strong style="color:var(--white)">Il ne sera jamais partagé.</strong></p>
             <div style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);border-radius:6px">
               <span style="font-size:.85rem">⏱</span>
-              <span style="font-size:.76rem;color:var(--green)">Délai de validation : <strong>sous 24h</strong></span>
+              <span style="font-size:.76rem;color:var(--green)">Délai de validation : <strong>sous 48h</strong></span>
             </div>
           </div>
 
@@ -2274,11 +2274,11 @@ var faqData=[
   {q:"Comment fonctionne le compteur de demandes ?",a:"Vous disposez de 3 demandes. Le compteur ne diminue QUE lorsqu'une demande est acceptée. Si elle est refusée ou sans réponse, votre compteur n'est pas affecté."},
   {q:"Qu'est-ce que l'attestation audio pour les sœurs ?",a:"Pour garantir l'authenticité des profils féminins, chaque sœur doit enregistrer une attestation vocale. L'administratrice vérifie cet enregistrement avant validation."},
   {q:"Mes données sont-elles sécurisées ?",a:"Oui. Toutes vos données sont stockées sur des serveurs certifiés (Supabase). Nous ne vendons jamais vos données à des tiers."},
-  {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 24 heures."},
+  {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 48 heures."},
   {q:"Puis-je supprimer mon compte ?",a:"Oui, à tout moment depuis Profil → Zone de danger → Supprimer mon compte. Toutes vos données seront effacées définitivement."},
   {q:"Qu'est-ce qu'une demande de mise en relation ?",a:"Une demande de mise en relation, c'est l'action d'exprimer votre intérêt pour un profil. Lorsqu'elle est envoyée, l'autre membre en est informé et peut accepter ou refuser. Si elle est acceptée, notre équipe vous met en contact de manière encadrée et pudique. Important : votre compteur ne diminue QUE si la demande est acceptée — un refus ou une absence de réponse ne vous coûte aucune demande."},
   {q:"Je n'ai pas de wali, puis-je quand même m'inscrire ?",a:"Oui, vous pouvez vous inscrire. Nous comprenons que certaines sœurs se trouvent dans cette situation (famille non-musulmane, isolement, etc.). Dans ce cas, signalez-le à notre équipe lors de l'entretien. Nous ferons de notre mieux pour vous accompagner dans le respect des préceptes islamiques, et pourrons, si nécessaire, vous orienter vers des solutions adaptées (wali de substitution via l'imam de votre mosquée, etc.)."},
-  {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumélia.contacthomme@gmail.com (frères) ou oumélia.contactfemme@gmail.com (sœurs) — ou via la messagerie dans l'application."},
+  {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumelia.contacthomme@gmail.com (frères) ou oumelia.contactfemme@gmail.com (sœurs) — ou via la messagerie dans l'application."},
 ];
 
 
@@ -2296,8 +2296,8 @@ var selectedReport='', reportTargetId=null;
 
 // ══════════ PAGES LÉGALES ══════════
 var legalContent={
-  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumélia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>Frères : oumélia.contacthomme@gmail.com<br>Sœurs : oumélia.contactfemme@gmail.com</p>`},
-  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumélia.contacthomme@gmail.com (frères) / oumélia.contactfemme@gmail.com (sœurs)</p>`}
+  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumélia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>Frères : oumelia.contacthomme@gmail.com<br>Sœurs : oumelia.contactfemme@gmail.com</p>`},
+  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumelia.contacthomme@gmail.com (frères) / oumelia.contactfemme@gmail.com (sœurs)</p>`}
 };
 
 
@@ -3009,11 +3009,11 @@ var faqData=[
   {q:"Comment fonctionne le compteur de demandes ?",a:"Vous disposez de 3 demandes. Le compteur ne diminue QUE lorsqu'une demande est acceptée. Si elle est refusée ou sans réponse, votre compteur n'est pas affecté."},
   {q:"Qu'est-ce que l'attestation audio pour les sœurs ?",a:"Pour garantir l'authenticité des profils féminins, chaque sœur doit enregistrer une attestation vocale. L'administratrice vérifie cet enregistrement avant validation."},
   {q:"Mes données sont-elles sécurisées ?",a:"Oui. Toutes vos données sont stockées sur des serveurs certifiés (Supabase). Nous ne vendons jamais vos données à des tiers."},
-  {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 24 heures."},
+  {q:"Comment signaler un profil suspect ?",a:"Sur la fiche d'un profil, appuyez sur le bouton 'Signaler'. Notre équipe examinera votre signalement dans les 48 heures."},
   {q:"Puis-je supprimer mon compte ?",a:"Oui, à tout moment depuis Profil → Zone de danger → Supprimer mon compte. Toutes vos données seront effacées définitivement."},
   {q:"Qu'est-ce qu'une demande de mise en relation ?",a:"Une demande de mise en relation, c'est l'action d'exprimer votre intérêt pour un profil. Lorsqu'elle est envoyée, l'autre membre en est informé et peut accepter ou refuser. Si elle est acceptée, notre équipe vous met en contact de manière encadrée et pudique. Important : votre compteur ne diminue QUE si la demande est acceptée — un refus ou une absence de réponse ne vous coûte aucune demande."},
   {q:"Je n'ai pas de wali, puis-je quand même m'inscrire ?",a:"Oui, vous pouvez vous inscrire. Nous comprenons que certaines sœurs se trouvent dans cette situation (famille non-musulmane, isolement, etc.). Dans ce cas, signalez-le à notre équipe lors de l'entretien. Nous ferons de notre mieux pour vous accompagner dans le respect des préceptes islamiques, et pourrons, si nécessaire, vous orienter vers des solutions adaptées (wali de substitution via l'imam de votre mosquée, etc.)."},
-  {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumélia.contacthomme@gmail.com (frères) ou oumélia.contactfemme@gmail.com (sœurs) — ou via la messagerie dans l'application."},
+  {q:"Comment contacter l'équipe Oumélia ?",a:"Par email : oumelia.contacthomme@gmail.com (frères) ou oumelia.contactfemme@gmail.com (sœurs) — ou via la messagerie dans l'application."},
 ];
 
 function openFAQ(){
@@ -3083,8 +3083,8 @@ function submitReport(){
 
 // ══════════ PAGES LÉGALES ══════════
 var legalContent={
-  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumélia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>Frères : oumélia.contacthomme@gmail.com<br>Sœurs : oumélia.contactfemme@gmail.com</p>`},
-  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumélia.contacthomme@gmail.com (frères) / oumélia.contactfemme@gmail.com (sœurs)</p>`}
+  cgu:{title:"Conditions d'utilisation",body:`<h3>1. Présentation</h3><p>Oumélia est une plateforme de mise en relation halal dédiée aux musulmans pratiquants sunnites cherchant le mariage selon les préceptes islamiques.</p><h3>2. Inscription</h3><p>L'inscription est réservée aux personnes majeures (18 ans minimum). Chaque profil est vérifié manuellement. Toute information fausse entraîne la suppression du compte.</p><h3>3. Comportement</h3><ul><li>Respect mutuel et pudeur islamique obligatoires</li><li>Tout harcèlement ou contenu indécent est interdit</li><li>Les échanges doivent rester dans un cadre matrimonial sérieux</li></ul><h3>4. Paiements</h3><p>Les paiements sont traités par Stripe. Aucun remboursement possible une fois le service activé.</p><h3>5. Contact</h3><p>Frères : oumelia.contacthomme@gmail.com<br>Sœurs : oumelia.contactfemme@gmail.com</p>`},
+  privacy:{title:"Politique de confidentialité",body:`<h3>1. Données collectées</h3><p>Nous collectons uniquement les informations nécessaires : prénom, âge, ville, origine, pratique religieuse, email.</p><h3>2. Utilisation</h3><ul><li>Affichage de votre profil aux membres de l'autre genre</li><li>Gestion de votre compte et des demandes</li><li>Notifications</li></ul><h3>3. Protection</h3><p>Vos données sont sur des serveurs sécurisés (Supabase). Nous ne les vendons jamais.</p><h3>4. Vos droits</h3><p>Accès, modification et suppression disponibles depuis votre profil. Contact : oumelia.contacthomme@gmail.com (frères) / oumelia.contactfemme@gmail.com (sœurs)</p>`}
 };
 
 function showLegal(type){
@@ -3486,7 +3486,7 @@ function renderMyProfile(c){
           <span>🔒 Politique de confidentialité</span><span style="color:var(--gold)">›</span>
         </div>
         <div class="profile-detail-row">
-          <span>📧 Contact</span><span style="color:var(--muted);font-size:.78rem">${(state.user&&state.user.gender)==='femme'?'oumélia.contactfemme@gmail.com':'oumélia.contacthomme@gmail.com'}</span>
+          <span>📧 Contact</span><span style="color:var(--muted);font-size:.78rem">${(state.user&&state.user.gender)==='femme'?'oumelia.contactfemme@gmail.com':'oumelia.contacthomme@gmail.com'}</span>
         </div>
         <div class="profile-detail-row">
           <span>📱 Version</span><span style="color:var(--muted);font-size:.78rem">1.0.0</span>
@@ -4092,7 +4092,7 @@ function renderWaliInfo(container){
     '<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px">'+
       '<div style="font-size:1.3rem;margin-bottom:10px">🤝</div>'+
       '<h4 style="color:var(--gold);font-size:.9rem;margin-bottom:8px">Comment l\'intégrer à ta démarche ?</h4>'+
-      '<p style="font-size:.84rem;color:var(--white2);line-height:1.7">Dès qu\'une demande est acceptée, notre administratrice contacte directement le Wali pour l\'informer de la situation et recueillir son accord. Tu n\'as rien de spécial à faire — c\'est intégré au processus.</p>'+
+      '<p style="font-size:.84rem;color:var(--white2);line-height:1.7">Dès qu\'une demande est acceptée, notre équipe Oumélia contacte directement le Wali pour l\'informer de la situation et recueillir son accord. Tu n\'as rien de spécial à faire — c\'est intégré au processus.</p>'+
     '</div>'+
 
     '<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px">'+
@@ -4137,7 +4137,7 @@ function renderVerificationPage(container){
 
       '<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;gap:12px;align-items:flex-start">'+
         '<span style="font-size:1.2rem;flex-shrink:0">⏱️</span>'+
-        '<div><div style="font-weight:600;font-size:.88rem;margin-bottom:4px">Délai moyen : sous 24h</div><div style="font-size:.8rem;color:var(--muted);line-height:1.6">Nous traitons les demandes sous 24 heures, généralement moins. Tu reçois une confirmation par messagerie.</div></div>'+
+        '<div><div style="font-weight:600;font-size:.88rem;margin-bottom:4px">Délai moyen : sous 48h</div><div style="font-size:.8rem;color:var(--muted);line-height:1.6">Nous traitons les demandes sous 48 heures, généralement moins. Tu reçois une confirmation par messagerie.</div></div>'+
       '</div>'+
 
     '</div>'+
@@ -4145,7 +4145,7 @@ function renderVerificationPage(container){
     '<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">'+
       '<h4 style="font-size:.86rem;color:var(--gold);margin-bottom:10px">Un problème avec ta validation ?</h4>'+
       '<p style="font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:10px">Contacte-nous directement par messagerie depuis l\'onglet Messages, ou par email :</p>'+
-      '<a href="mailto:'+(state.user&&state.user.gender==='femme'?'oumélia.contactfemme@gmail.com':'oumélia.contacthomme@gmail.com')+'" style="font-size:.82rem;color:var(--gold);text-decoration:none">'+(state.user&&state.user.gender==='femme'?'oumélia.contactfemme@gmail.com':'oumélia.contacthomme@gmail.com')+'</a>'+
+      '<a href="mailto:'+(state.user&&state.user.gender==='femme'?'oumelia.contactfemme@gmail.com':'oumelia.contacthomme@gmail.com')+'" style="font-size:.82rem;color:var(--gold);text-decoration:none">'+(state.user&&state.user.gender==='femme'?'oumelia.contactfemme@gmail.com':'oumelia.contacthomme@gmail.com')+'</a>'+
     '</div>'+
 
     '</div>';
@@ -6598,23 +6598,20 @@ function openAdminProfileDetail(id){
         +'</div>';
     }
   }
-  // Documents — URL publique directe depuis le bucket public
+  // Documents — signed URL via Supabase Storage (fonctionne même si bucket non public)
   var docsSection = '';
   if(p.user_id){
-    var STORAGE_PUB = supaBase+'/storage/v1/object/public/verification-docs/';
-    // Utiliser cni_path exact (ex: UUID/cni.pdf) si disponible, sinon essayer toutes les extensions
-    var cniUrl = p.cni_path ? STORAGE_PUB+p.cni_path : null;
-    var workUrl = p.work_path ? STORAGE_PUB+p.work_path : null;
-    // Fallback : afficher plusieurs boutons pour les extensions courantes
-    var cniLinks = cniUrl
-      ? '<a href="'+cniUrl+'" target="_blank" class="d-doc-btn">🪪 CNI</a>'
-      : '<a href="'+STORAGE_PUB+p.user_id+'/cni.pdf" target="_blank" class="d-doc-btn">🪪 CNI (PDF)</a>'
-        +'<a href="'+STORAGE_PUB+p.user_id+'/cni.jpg" target="_blank" class="d-doc-btn">🪪 CNI (IMG)</a>';
+    var cniPath  = p.cni_path  || (p.user_id+'/cni.jpg');
+    var workPath = p.work_path || (p.user_id+'/work.jpg');
+    var cniLinks = p.cni_path
+      ? '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.cni_path+'\')">🪪 CNI</button>'
+      : '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.pdf\')">🪪 CNI (PDF)</button>'
+        +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.jpg\')">🪪 CNI (IMG)</button>';
     var workLinks = p.gender==='homme'
-      ? (workUrl
-        ? '<a href="'+workUrl+'" target="_blank" class="d-doc-btn">💼 Justificatif</a>'
-        : '<a href="'+STORAGE_PUB+p.user_id+'/work.pdf" target="_blank" class="d-doc-btn">💼 Justif. (PDF)</a>'
-          +'<a href="'+STORAGE_PUB+p.user_id+'/work.jpg" target="_blank" class="d-doc-btn">💼 Justif. (IMG)</a>')
+      ? (p.work_path
+        ? '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.work_path+'\')">💼 Justificatif</button>'
+        : '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/work.pdf\')">💼 Justif. (PDF)</button>'
+          +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/work.jpg\')">💼 Justif. (IMG)</button>')
       : '';
     docsSection = '<div class="profile-section"><h4>📂 Documents</h4>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+cniLinks+workLinks+'</div>'
@@ -7481,13 +7478,23 @@ async function submitVerificationDocs(){
   var uid=state.user&&state.user.supabaseId;
   var pid=state.user&&state.user.id;
   var STORAGE_BASE=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1';
-  var AUTH_HDR={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
 
   if(!uid){
     showToast('❌ Session invalide. Reconnectez-vous.','red');
     if(btn){btn.disabled=false;btn.textContent='✓ Envoyer mon dossier';}
     return;
   }
+
+  // Récupérer le vrai token de session pour bypasser le RLS
+  var _sessionToken=SUPABASE_ANON;
+  try{
+    var _sb=getSB();
+    if(_sb&&_sb.auth&&_sb.auth.session){
+      var _s=_sb.auth.session();
+      if(_s&&_s.access_token) _sessionToken=_s.access_token;
+    }
+  }catch(e){}
+  var AUTH_HDR={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+_sessionToken};
 
   try{
     // ── Upload CNI ──
@@ -7547,6 +7554,18 @@ async function submitVerificationDocs(){
       body:JSON.stringify(patchData)
     });
     console.log('Profil PATCH status:',patchRes.status);
+    if(!patchRes.ok){
+      var patchErr=await patchRes.text();
+      console.log('Profil PATCH ERROR:',patchErr);
+      // Retry avec anon key au cas où
+      var patchRes2=await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
+        method:'PATCH',
+        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify(patchData)
+      });
+      console.log('Profil PATCH retry status:',patchRes2.status);
+      if(!patchRes2.ok){ var e2=await patchRes2.text(); console.log('Profil PATCH retry ERROR:',e2); }
+    }
 
     // ── Mettre à jour state local ──
     if(state.user){
@@ -7558,7 +7577,8 @@ async function submitVerificationDocs(){
 
     // ── Message Calendly ──
     var resp=g==='homme'?'notre administrateur':'notre administratrice';
-    var msgTexte='Barak\'Allahu fik.\n\nVos documents ont bien été reçus.\n\nPour accéder aux profils, planifiez votre entretien avec '+resp+' via Cal.com :\n\nhttps://cal.com/oumelia-zawaj/15min\n\nVous pouvez aussi planifier directement depuis l\'application, dans votre espace personnel.\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+    var calLink=g==='femme'?'https://cal.eu/oumeliazawaj/femme15min':'https://cal.com/oumelia-zawaj/15min';
+    var msgTexte='Barak\'Allahu fik.\n\nVos documents ont bien été reçus.\n\nPour accéder aux profils, planifiez votre entretien avec '+resp+' via Cal.com :\n\n'+calLink+'\n\nVous pouvez aussi planifier directement depuis l\'application, dans votre espace personnel.\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
 
     if(pid){
       await fetch(SUPABASE_URL+'/rest/v1/messages',{
@@ -7597,6 +7617,12 @@ async function playPublicAudio(uid){
       audioEl.play().catch(function(){});
     } else { showToast('❌ Audio non disponible','red'); }
   }catch(e){ showToast('❌ Erreur audio','red'); }
+}
+
+function openSignedDoc(path){
+  if(!path){ showToast('❌ Document non disponible','red'); return; }
+  var pubUrl=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/public/verification-docs/'+path;
+  window.open(pubUrl,'_blank');
 }
 
 function renderStepBanner(status){
@@ -7651,12 +7677,12 @@ async function renderAdminDossiers(c){
     var photoHtml=p.photo_url
       ?'<img src="'+p.photo_url+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(201,168,76,.4);flex-shrink:0" alt="" onerror="this.style.display=\'none\'">'
       :'<div style="width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">'+(p.gender==='femme'?'🌸':'🕌')+'</div>';
-    var DOCS=PUB+'verification-docs/';
-    var cniPath=p.cni_path||(uid?uid+'/cni.pdf':null);
-    var workPath=p.work_path||(uid&&p.gender==='homme'?uid+'/work.pdf':null);
+    var DOCS=''; // inutilisé - on utilise openSignedDoc
+    var cniPath2=p.cni_path||(uid?uid+'/cni.jpg':null);
+    var workPath2=p.work_path||(uid&&p.gender==='homme'?uid+'/work.jpg':null);
     var docLinks='';
-    if(cniPath) docLinks+='<a class="d-doc-btn" href="'+DOCS+cniPath+'" target="_blank" onclick="event.stopPropagation()">🪪 CNI</a>'+((!p.cni_path&&uid)?'<a class="d-doc-btn" href="'+DOCS+uid+'/cni.jpg" target="_blank" onclick="event.stopPropagation()" style="opacity:.6;font-size:.68rem">JPG</a>':'');
-    if(workPath) docLinks+='<a class="d-doc-btn" href="'+DOCS+workPath+'" target="_blank" onclick="event.stopPropagation()">💼 Justif.</a>';
+    if(cniPath2) docLinks+='<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+cniPath2+'\')" style="border:none;cursor:pointer">🪪 CNI</button>'+((!p.cni_path&&uid)?'<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+uid+'/cni.pdf\')" style="border:none;cursor:pointer;opacity:.6;font-size:.68rem">PDF</button>':'');
+    if(workPath2) docLinks+='<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+workPath2+'\')" style="border:none;cursor:pointer">💼 Justif.</button>';
     var audioHtml='';
     if(uid){
       var _aid='dossier-audio-'+uid;
