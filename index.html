@@ -2618,7 +2618,34 @@ async function doRegister(){
     profileData.id = (insertData&&insertData.id);
   }
 
-  // 3. Upload audio attestation (sœurs + frères) — nommé userId.mp4 pour accès admin
+  // 2b. PATCH séparé pour les critères recherche (au cas où l'insert principal les aurait ignorés)
+  if(profileData.id){
+    var _rechPatch={
+      origine_recherche:   profileData.origine_recherche||'Peu importe',
+      situation_recherche: profileData.situation_recherche||'Peu importe',
+      pratique_recherche:  profileData.pratique_recherche||'Peu importe',
+      madhhab_recherche:   profileData.madhhab_recherche||'Peu importe',
+      enfants_recherche:   profileData.enfants_recherche||'Peu importe',
+      age_min:             profileData.age_min||null,
+      age_max:             profileData.age_max||null,
+      recherche:           profileData.recherche||'',
+      profession:          profileData.profession||null,
+      telephone:           profileData.telephone||'',
+    };
+    if(state.gender==='femme'){
+      _rechPatch.barbe_recherche=profileData.barbe_recherche||'Peu importe';
+      _rechPatch.qamis_recherche=profileData.qamis_recherche||'Peu importe';
+    }
+    if(state.gender==='homme'){
+      _rechPatch.voile_recherche=profileData.voile_recherche||'Peu importe';
+      _rechPatch.polygamie_recherche=profileData.polygamie_recherche||'Peu importe';
+    }
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+profileData.id,{
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(_rechPatch)
+    }).then(function(r){ console.log('Recherche PATCH:',r.status); }).catch(function(e){ console.log('Recherche PATCH err:',e); });
+  }
   var _uploadAudioBlob = (state.gender==='femme') ? audioBlob : (state._audioBlobHomme || null);
   if(_uploadAudioBlob && userId){
     try {
@@ -6391,14 +6418,31 @@ function openRejectModal(id,name){
   openModal('modal-admin-reject');
 }
 
-async function confirmReject(){
+function confirmReject(){
   var reason=document.getElementById('reject-reason').value;
   if(!reason.trim()) return showToast('⚠ Entrez une raison','red');
-  var p=getAdminProfile(rejectId); if(p) p.status='inactive';
-  if((p&&p.user_id)) await getSB().from('profils').update({status:'inactive', reject_reason:reason}).eq('id',rejectId);
-  updateAdminBadges(); closeModal('modal-admin-reject');
-  showToast(`✗ ${(p&&p.prenom)} notifié(e) du refus`,'red');
-  adminTab(state.activeAdminTab);
+  var p=getAdminProfile(rejectId);
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  // PATCH statut profil
+  fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+rejectId,{
+    method:'PATCH', headers:H,
+    body:JSON.stringify({status:'inactive', reject_reason:reason})
+  }).then(function(r){
+    console.log('Reject PATCH:',r.status);
+    if(!r.ok){ r.text().then(function(t){ showToast('❌ Erreur: '+t,'red'); }); return; }
+    if(p) p.status='inactive';
+    // Envoyer message de notification à l'inscrit
+    if(p&&p.id){
+      fetch(SUPABASE_URL+'/rest/v1/messages',{
+        method:'POST', headers:H,
+        body:JSON.stringify({from_id:'admin',to_id:String(p.id),from_prenom:'Oumélia',content:'Votre profil a été refusé pour la raison suivante : '+reason+'\n\nSi vous pensez qu\'il s\'agit d\'une erreur, contactez notre équipe.',lu:false})
+      }).catch(function(){});
+    }
+    updateAdminBadges();
+    closeModal('modal-admin-reject');
+    showToast('✗ '+(p&&p.prenom||'Profil')+' refusé(e)','red');
+    adminTab(state.activeAdminTab);
+  }).catch(function(e){ showToast('❌ Erreur réseau','red'); console.log('Reject error:',e); });
 }
 
 var adminMsgTarget='';
