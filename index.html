@@ -6129,7 +6129,12 @@ function openAdminConvoMatch(uid, prenom){
 function openAdminConvoFromDetail(btn){
   var pid  = btn.getAttribute('data-pid');
   var pnom = btn.getAttribute('data-pnom');
-  adminTab('msgs');
+  // Mettre à jour l'onglet actif visuellement sans déclencher renderAdminMsgs
+  document.querySelectorAll('.admin-tab').forEach(function(t){ t.classList.remove('active'); });
+  var msgTab = document.getElementById('atab-messages')||document.getElementById('atab-msgs');
+  if(msgTab) msgTab.classList.add('active');
+  state.activeAdminTab = 'msgs';
+  // Ouvrir directement la conversation dans admin-content
   openAdminConvo(pid, pnom);
 }
 
@@ -6565,7 +6570,7 @@ function openAdminProfileDetail(id){
   var p = getAdminProfile(id);
   if(!p){ showToast('Profil introuvable','red'); return; }
   var c = document.getElementById('admin-content');
-  state.activeAdminTab = state.activeAdminTab || 'pending';
+  state.activeAdminTab = 'detail'; // bloque l'auto-refresh pendant la lecture
   var supaBase = SUPABASE_URL.replace('/rest/v1','');
   var avatarHtml = p.photo_url
     ? '<img src="'+p.photo_url+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid rgba(201,168,76,.4)" alt="">'
@@ -7322,9 +7327,13 @@ function startAdminRefresh(){
   },30000);
 }
 function adminAutoRefreshTick(){
+  // Ne pas rafraîchir si une fiche détail est ouverte (admin-content contient un back-btn vers un profil)
+  var el=document.getElementById('admin-content');
+  if(!el) return;
+  if(el.querySelector('.back-btn')) return; // fiche détail ou convo ouverte — ne pas écraser
   loadAllProfilesForAdmin().then(function(){
-    var el=document.getElementById('admin-content');
-    if(el) renderAdminDashboard(el);
+    var el2=document.getElementById('admin-content');
+    if(el2 && !el2.querySelector('.back-btn')) renderAdminDashboard(el2);
     updateAdminBadges();
   }).catch(function(e){ console.log('refresh:', e); });
 }
