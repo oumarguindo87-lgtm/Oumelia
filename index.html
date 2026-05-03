@@ -6583,25 +6583,34 @@ async function openAudioVerif(id,name){
 }
 
 async function audioValidate(){
-  var p=allProfiles.find(function(x){return x.id===audioVerifId||String(x.id)===String(audioVerifId);});
-  if(p){ p.status='active'; p.paid=true; p.audioAttested=false; }
-  // Mettre à jour en DB via REST
-  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
-  await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+String(audioVerifId),{
-    method:'PATCH',
-    headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),
-    body:JSON.stringify({status:'active',paid:true})
-  }).catch(function(){});
-  updateAdminBadges();
+  var p=(window._adminProfiles||allProfiles).find(function(x){return x.id===audioVerifId||String(x.id)===String(audioVerifId)||x.user_id===audioVerifId;});
+  var pid=p?String(p.id):null;
+  if(!pid){ showToast('❌ Profil introuvable','red'); return; }
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  // Envoyer un message à l'inscrit
+  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nNous avons bien reçu votre dossier et votre attestation. Notre équipe va maintenant étudier votre profil et reviendra vers vous très prochainement.\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  fetch(SUPABASE_URL+'/rest/v1/messages',{
+    method:'POST', headers:H,
+    body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
+  }).then(function(r){ console.log('audioValidate msg:',r.status); }).catch(function(){});
   closeModal('modal-audio');
-  showToast('✅ Audio validé — '+(p&&p.prenom||'profil')+' approuvé(e)','green');
+  showToast('✅ Message envoyé à '+(p&&p.prenom||'l\'inscrit(e)'),'green');
   adminTab(state.activeAdminTab||'pending');
 }
 
 function audioRejectFn(){
+  var p=(window._adminProfiles||allProfiles).find(function(x){return x.id===audioVerifId||String(x.id)===String(audioVerifId)||x.user_id===audioVerifId;});
+  var pid=p?String(p.id):null;
+  if(!pid){ closeModal('modal-audio'); return; }
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio n\'a malheureusement pas pu être validée.\n\nMerci d\'en enregistrer une nouvelle depuis votre espace personnel (onglet Documents).\n\nVeillez à :\n- Énoncer clairement votre prénom\n- Confirmer que vous êtes musulman(e) sunnite pratiquant(e)\n- Vous engager à respecter les conditions d\'Oumélia\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  fetch(SUPABASE_URL+'/rest/v1/messages',{
+    method:'POST', headers:H,
+    body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
+  }).then(function(r){ console.log('audioReject msg:',r.status); }).catch(function(){});
   closeModal('modal-audio');
-  var p=allProfiles.find(function(x){return x.id===audioVerifId;});
-  openRejectModal(audioVerifId,(p&&p.prenom)||'');
+  showToast('✗ Message de refus envoyé à '+(p&&p.prenom||'l\'inscrit(e)'),'red');
+  adminTab(state.activeAdminTab||'pending');
 }
 
 function buyBoost(){
@@ -6668,8 +6677,10 @@ function openAdminProfileDetail(id){
     var workPath = p.work_path || (p.user_id+'/work.jpg');
     var cniLinks = p.cni_path
       ? '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.cni_path+'\')">🪪 CNI</button>'
-      : '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.pdf\')">🪪 CNI (PDF)</button>'
-        +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.jpg\')">🪪 CNI (IMG)</button>';
+      : '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.jpg\')">🪪 JPG</button>'
+        +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.jpeg\')">🪪 JPEG</button>'
+        +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.png\')">🪪 PNG</button>'
+        +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.pdf\')">🪪 PDF</button>';
     var workLinks = p.gender==='homme'
       ? (p.work_path
         ? '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.work_path+'\')">💼 Justificatif</button>'
@@ -7615,30 +7626,40 @@ async function submitVerificationDocs(){
     };
     if(workPath) patchData.work_path=workPath;
 
-    // Essai 1 : PATCH par id (plus fiable avec RLS)
+    // Essai 1 : SDK Supabase (session authentifiée — meilleur pour RLS)
     var patchOk=false;
-    if(pid){
+    try{
+      var sbPatch=getSB();
+      if(sbPatch&&pid){
+        var sdkRes=await sbPatch.from('profils').update(patchData).eq('id',pid);
+        if(!sdkRes.error){ patchOk=true; console.log('PATCH SDK by id: OK'); }
+        else{ console.log('PATCH SDK error:',sdkRes.error.message); }
+      }
+    }catch(e){ console.log('PATCH SDK exception:',e); }
+
+    // Essai 2 : fetch par id
+    if(!patchOk&&pid){
       var patchRes=await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+pid,{
         method:'PATCH',
         headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},AUTH_HDR),
         body:JSON.stringify(patchData)
       });
-      console.log('Profil PATCH by id status:',patchRes.status);
+      console.log('PATCH fetch by id:',patchRes.status);
       if(patchRes.ok) patchOk=true;
       else{ var patchErr=await patchRes.text(); console.log('PATCH by id ERROR:',patchErr); }
     }
-    // Essai 2 : PATCH par user_id
+    // Essai 3 : fetch par user_id
     if(!patchOk){
       var patchRes2=await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
         method:'PATCH',
         headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
         body:JSON.stringify(patchData)
       });
-      console.log('Profil PATCH by user_id status:',patchRes2.status);
+      console.log('PATCH fetch by user_id:',patchRes2.status);
       if(!patchRes2.ok){ var e2=await patchRes2.text(); console.log('PATCH by user_id ERROR:',e2); }
       else patchOk=true;
     }
-    console.log('PATCH final result:',patchOk?'✅ OK':'❌ FAILED');
+    console.log('PATCH final:',patchOk?'✅ OK':'❌ FAILED');
 
     // ── Mettre à jour state local ──
     if(state.user){
@@ -7694,8 +7715,25 @@ async function playPublicAudio(uid){
 
 function openSignedDoc(path){
   if(!path){ showToast('❌ Document non disponible','red'); return; }
-  var pubUrl=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/public/verification-docs/'+path;
-  window.open(pubUrl,'_blank');
+  var base=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1/object/public/verification-docs/';
+  // Si le chemin a déjà une extension connue, ouvrir directement
+  if(path.match(/\.(jpg|jpeg|png|pdf|webp)$/i)){
+    window.open(base+path,'_blank');
+    return;
+  }
+  // Sinon essayer toutes les extensions dans l'ordre
+  var exts=['jpg','jpeg','png','pdf'];
+  var idx=0;
+  function tryNext(){
+    if(idx>=exts.length){ showToast('❌ Document introuvable','red'); return; }
+    var url=base+path+'.'+exts[idx];
+    idx++;
+    fetch(url,{method:'HEAD'}).then(function(r){
+      if(r.ok) window.open(url,'_blank');
+      else tryNext();
+    }).catch(function(){ tryNext(); });
+  }
+  tryNext();
 }
 
 function renderStepBanner(status){
@@ -7754,7 +7792,12 @@ async function renderAdminDossiers(c){
     var cniPath2=p.cni_path||(uid?uid+'/cni.jpg':null);
     var workPath2=p.work_path||(uid&&p.gender==='homme'?uid+'/work.jpg':null);
     var docLinks='';
-    if(cniPath2) docLinks+='<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+cniPath2+'\')" style="border:none;cursor:pointer">🪪 CNI</button>'+((!p.cni_path&&uid)?'<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+uid+'/cni.pdf\')" style="border:none;cursor:pointer;opacity:.6;font-size:.68rem">PDF</button>':'');
+    if(cniPath2) docLinks+='<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+cniPath2+'\')" style="border:none;cursor:pointer">🪪 CNI</button>';
+    else if(uid){
+      docLinks+='<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+uid+'/cni.jpg\')" style="border:none;cursor:pointer;font-size:.68rem">JPG</button>';
+      docLinks+='<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+uid+'/cni.jpeg\')" style="border:none;cursor:pointer;font-size:.68rem">JPEG</button>';
+      docLinks+='<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+uid+'/cni.pdf\')" style="border:none;cursor:pointer;font-size:.68rem">PDF</button>';
+    }
     if(workPath2) docLinks+='<button class="d-doc-btn" onclick="event.stopPropagation();openSignedDoc(\''+workPath2+'\')" style="border:none;cursor:pointer">💼 Justif.</button>';
     var audioHtml='';
     if(uid){
