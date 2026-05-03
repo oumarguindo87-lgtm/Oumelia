@@ -7563,15 +7563,16 @@ async function submitVerificationDocs(){
     return;
   }
 
-  // Récupérer le vrai token de session pour bypasser le RLS
-  var _sessionToken=SUPABASE_ANON;
-  try{
-    var _sb=getSB();
-    if(_sb&&_sb.auth&&_sb.auth.session){
-      var _s=_sb.auth.session();
-      if(_s&&_s.access_token) _sessionToken=_s.access_token;
+  // Récupérer le vrai token de session (authenticated role — bypass RLS proprement)
+  var _sessionToken = SUPABASE_ANON;
+  try {
+    var _sbAuth = getSB();
+    if(_sbAuth){
+      var _sessData = _sbAuth.auth.session ? _sbAuth.auth.session() : null;
+      if(!_sessData){ var _sr = await _sbAuth.auth.getSession(); _sessData = _sr&&_sr.data&&_sr.data.session; }
+      if(_sessData&&_sessData.access_token) _sessionToken = _sessData.access_token;
     }
-  }catch(e){}
+  } catch(e){ console.log('session token err:',e); }
   var AUTH_HDR={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+_sessionToken};
 
   try{
@@ -7596,6 +7597,14 @@ async function submitVerificationDocs(){
       });
     }
     console.log('CNI upload final status:',cniRes.status);
+    if(!cniRes.ok){
+      var cniErr=await cniRes.text();
+      console.log('CNI upload ERROR:',cniErr);
+      showToast('❌ Erreur upload CNI ('+cniRes.status+'): '+cniErr.slice(0,80),'red');
+      if(btn){btn.disabled=false;btn.textContent='✓ Envoyer mon dossier';}
+      return;
+    }
+    showToast('✅ CNI uploadé','green');
 
     // ── Upload justificatif (hommes uniquement) ──
     var workPath=null;
