@@ -1733,6 +1733,16 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     </div>
     <button id="btn-submit-docs" class="btn btn-gold" style="width:100%;padding:13px" onclick="submitVerificationDocs()">✓ Envoyer mon dossier</button>
     <p style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:10px">🔒 Vos documents sont chiffrés et accessibles uniquement à notre équipe.</p>
+
+    <!-- Re-enregistrement audio -->
+    <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px">
+      <h3 style="font-size:.9rem;color:var(--gold);margin-bottom:8px">🎙 Attestation audio</h3>
+      <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:14px">Si votre attestation audio a été refusée ou n'a pas été enregistrée, vous pouvez en enregistrer une nouvelle ici.</p>
+      <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:.78rem;color:var(--white2);line-height:1.7;font-style:italic;text-align:center">
+        « J'atteste devant Allah de l'exactitude de mes informations. »
+      </div>
+      <div id="rerecord-audio-section"></div>
+    </div>
   </div>
 </div>
 
@@ -5924,6 +5934,7 @@ function adminTab(tab){
   var c=document.getElementById('admin-content');
   scrollToTop();
   switch(tab){
+    case 'active':    renderAdminActive(c);    break;
     case 'dashboard': renderAdminDashboard(c); break;
     case 'demandes':  renderAdminDemandes(c);  break;
     case 'pending':   renderAdminPending(c);   break;
@@ -5938,6 +5949,18 @@ function adminTab(tab){
     case 'paused':    if(typeof renderAdminPause==='function') renderAdminPause(c); break;
     case 'rdv':       if(typeof renderAdminRdv==='function')   renderAdminRdv(c);   break;
   }
+}
+
+function renderAdminActive(c){
+  var allP=getAllAdminProfiles().filter(function(p){ return p.status==='active'; });
+  var html='<div style="padding:16px"><div class="section-title">✓ Profils actifs ('+allP.length+')</div>';
+  if(!allP.length){
+    html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucun profil actif</p>';
+  } else {
+    html+=buildUserList(allP);
+  }
+  html+='</div>';
+  c.innerHTML=html;
 }
 
 function renderAdminOnlineView(){
@@ -6355,7 +6378,11 @@ function renderAdminMsgs(c){
       }
     });
     var html='<div style="padding:16px"><div class="section-title">✉️ Conversations ('+Object.keys(convos).length+')</div>';
-    var keys=Object.keys(convos);
+    var keys=Object.keys(convos).sort(function(a,b){
+      var ta=convos[a].lastTime?new Date(convos[a].lastTime).getTime():0;
+      var tb=convos[b].lastTime?new Date(convos[b].lastTime).getTime():0;
+      return tb-ta;
+    });
     if(!keys.length){
       html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucune conversation</p>';
     } else {
@@ -7737,7 +7764,99 @@ function reRecordHomme(){
   var done=document.getElementById('rec-done-homme');if(done)done.style.display='none';
 }
 var _uploadedDocs={};
-function initVerificationScreen(){var g=state.user&&state.user.gender;var ws=document.getElementById('work-doc-section');if(ws) ws.style.display=(g==='homme')?'block':'none';}
+var _rerecordStream=null;
+var _rerecordRecorder=null;
+var _rerecordBlob=null;
+var _rerecordRecording=false;
+
+function toggleRerecordAudio(){
+  if(_rerecordRecording){
+    // Arrêter
+    if(_rerecordRecorder&&_rerecordRecorder.state!=='inactive') _rerecordRecorder.stop();
+    if(_rerecordStream) _rerecordStream.getTracks().forEach(function(t){t.stop();});
+    _rerecordRecording=false;
+    var btn=document.getElementById('rec-btn-rerecord');
+    var status=document.getElementById('rec-status-rerecord');
+    if(btn) btn.textContent='🎙 Ré-enregistrer';
+    if(status) status.textContent='Enregistrement terminé';
+    return;
+  }
+  // Démarrer
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    _rerecordStream=stream;
+    _rerecordRecording=true;
+    var chunks=[];
+    var btn=document.getElementById('rec-btn-rerecord');
+    var status=document.getElementById('rec-status-rerecord');
+    if(btn) btn.textContent='⏹ Arrêter l\'enregistrement';
+    if(status) status.textContent='● Enregistrement en cours...';
+    _rerecordRecorder=new MediaRecorder(stream);
+    _rerecordRecorder.ondataavailable=function(e){ if(e.data.size>0) chunks.push(e.data); };
+    _rerecordRecorder.onstop=function(){
+      _rerecordBlob=new Blob(chunks,{type:'audio/mp4'});
+      var url=URL.createObjectURL(_rerecordBlob);
+      var audio=document.getElementById('rec-audio-rerecord');
+      var preview=document.getElementById('rec-preview-rerecord');
+      if(audio) audio.src=url;
+      if(preview) preview.style.display='block';
+    };
+    _rerecordRecorder.start();
+  }).catch(function(e){ showToast('❌ Microphone inaccessible','red'); });
+}
+
+function submitRerecordAudio(){
+  if(!_rerecordBlob){ showToast('⚠ Enregistrez d\'abord votre attestation','red'); return; }
+  var uid=state.user&&state.user.supabaseId;
+  if(!uid){ showToast('❌ Session invalide','red'); return; }
+  showToast('⏳ Envoi de l\'attestation...','gold');
+  var STORAGE_BASE=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1';
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'x-upsert':'true','Content-Type':'audio/mp4'};
+  fetch(STORAGE_BASE+'/object/attestations/'+uid+'.mp4',{method:'POST',headers:H,body:_rerecordBlob})
+  .then(function(r){
+    if(r.ok){
+      // Marquer audio_attested = true
+      fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
+        method:'PATCH',
+        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({audio_attested:true})
+      }).catch(function(){});
+      showToast('✅ Attestation envoyée — notre équipe va la vérifier','green');
+      var btn=document.getElementById('rec-btn-rerecord');
+      var preview=document.getElementById('rec-preview-rerecord');
+      var status=document.getElementById('rec-status-rerecord');
+      if(btn) btn.textContent='✅ Attestation envoyée';
+      if(btn) btn.disabled=true;
+      if(preview) preview.style.display='none';
+      if(status) status.textContent='✅ En attente de vérification par notre équipe';
+    } else { showToast('❌ Erreur envoi audio','red'); }
+  }).catch(function(){ showToast('❌ Erreur réseau','red'); });
+}
+
+function initVerificationScreen(){
+  var g=state.user&&state.user.gender;
+  var ws=document.getElementById('work-doc-section');
+  if(ws) ws.style.display=(g==='homme')?'block':'none';
+  // Injecter les contrôles audio selon le genre
+  var audioSection=document.getElementById('rerecord-audio-section');
+  if(!audioSection) return;
+  if(g==='femme'){
+    audioSection.innerHTML=
+      '<div id="rec-status-rerecord" style="font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:10px"></div>'+
+      '<button id="rec-btn-rerecord" class="btn btn-gold" style="width:100%" onclick="toggleRerecordAudio()">🎙 Démarrer l\'enregistrement</button>'+
+      '<div id="rec-preview-rerecord" style="display:none;margin-top:10px">'+
+        '<audio id="rec-audio-rerecord" controls style="width:100%;margin-bottom:8px"></audio>'+
+        '<button class="btn btn-gold" style="width:100%" onclick="submitRerecordAudio()">✅ Envoyer cette attestation</button>'+
+      '</div>';
+  } else {
+    audioSection.innerHTML=
+      '<div id="rec-status-rerecord" style="font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:10px"></div>'+
+      '<button id="rec-btn-rerecord" class="btn btn-gold" style="width:100%" onclick="toggleRerecordAudio()">🎙 Démarrer l\'enregistrement</button>'+
+      '<div id="rec-preview-rerecord" style="display:none;margin-top:10px">'+
+        '<audio id="rec-audio-rerecord" controls style="width:100%;margin-bottom:8px"></audio>'+
+        '<button class="btn btn-gold" style="width:100%" onclick="submitRerecordAudio()">✅ Envoyer cette attestation</button>'+
+      '</div>';
+  }
+}
 function handleDocUpload(type,filenameId,labelId){
   var input=document.getElementById(type==='cni'?'cni-file':'work-file');
   if(!input||!input.files||!input.files[0]) return;
