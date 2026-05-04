@@ -1698,7 +1698,18 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       <span>Inscription</span><span style="color:var(--gold);font-weight:600">Documents</span><span>Entretien</span><span>Paiement</span>
     </div>
     <h2 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);margin-bottom:6px">📂 Vos documents</h2>
-    <p style="font-size:.82rem;color:var(--white2);line-height:1.65;margin-bottom:20px">Pour finaliser votre inscription, veuillez déposer les documents ci-dessous. Ils sont traités de façon confidentielle.</p>
+    <p style="font-size:.82rem;color:var(--white2);line-height:1.65;margin-bottom:14px">Pour finaliser votre inscription, veuillez déposer les documents ci-dessous. Ils sont traités de façon confidentielle.</p>
+
+    <!-- Message rassurant confidentialité -->
+    <div style="background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.2);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.78rem;color:var(--white2);line-height:1.6">
+      🔒 <strong style="color:#2ecc71">Vos documents sont en sécurité.</strong><br>
+      Ils sont chiffrés et accessibles <strong>uniquement à notre équipe</strong> de vérification. Ils ne sont jamais partagés, vendus ou utilisés à d'autres fins. Nous respectons votre vie privée conformément au RGPD.
+    </div>
+
+    <!-- Limite de taille -->
+    <div style="background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:9px 12px;margin-bottom:16px;font-size:.75rem;color:var(--muted);line-height:1.5">
+      ⚠️ <strong style="color:var(--gold)">Taille maximale : 10 Mo</strong> par fichier. Si votre photo est trop lourde, compressez-la avant l'envoi (ex: réduire la résolution dans vos paramètres appareil photo).
+    </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
       <div style="font-weight:700;font-size:.88rem;margin-bottom:5px">🪪 Pièce d'identité <span style="color:var(--red);font-size:.75rem">*</span></div>
       <div style="font-size:.76rem;color:var(--muted);margin-bottom:12px">CNI ou passeport en cours de validité.</div>
@@ -5936,7 +5947,7 @@ function renderAdminDashboard(c){
           <div class="admin-user-name" style="font-size:.83rem">${p.prenom||'—'}, ${p.age||'—'} ans · ${p.ville||'—'}</div>
           <div class="admin-user-sub">
             ${p.gender==='femme'?'Sœur':'Frère'} · ${p.origine||'—'} ·
-            ${p.status==='en_attente_rdv'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Docs reçus</span>':p.status==='valide_a_payer'?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ À payer</span>':'<span class="badge badge-pending">⏳ En attente</span>'}
+            ${p.status==='en_attente_rdv'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Docs reçus</span>':p.status==='rdv_planifie'?'<span class="badge" style="background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">📅 RDV planifié</span>':p.status==='valide_a_payer'?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ À payer</span>':'<span class="badge badge-pending">⏳ En attente</span>'}
             ${date?'· <span style="font-size:.64rem;color:var(--muted)">'+date+'</span>':''}
             ${(p.audioAttested||p.audio_attested)?' · <span style="color:var(--gold);font-size:.64rem">🎙️ Audio</span>':''}
           </div>
@@ -5976,6 +5987,7 @@ function renderAdminPending(c){
     var av=p.gender==='femme'?svgFemme(34):svgHomme(34);
     var statusLabel=
       p.status==='en_attente_rdv'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Docs reçus — RDV à planifier</span>':
+      p.status==='rdv_planifie'?'<span class="badge" style="background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">📅 RDV planifié</span>':
       p.status==='valide_a_payer'?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ Validé — attend paiement</span>':
       p.status==='pending_verification'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">💳 Ancien flow</span>':
       '<span class="badge badge-pending">⏳ Inscription</span>';
@@ -7417,7 +7429,35 @@ function adminAutoRefreshTick(){
     var el2=document.getElementById('admin-content');
     if(el2 && !el2.querySelector('.back-btn')) renderAdminDashboard(el2);
     updateAdminBadges();
+    // Envoyer rappels automatiques aux profils pending > 48h sans docs
+    sendPendingReminders();
   }).catch(function(e){ console.log('refresh:', e); });
+}
+
+function sendPendingReminders(){
+  var now=Date.now();
+  var _sent=JSON.parse(localStorage.getItem('_remindersSent')||'{}');
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  (window._adminProfiles||[]).forEach(function(p){
+    if(p.status!=='pending') return;
+    if(p.docs_submitted) return;
+    if(!p.created_at) return;
+    var age=now-new Date(p.created_at).getTime();
+    if(age < 48*60*60*1000) return; // moins de 48h
+    if(_sent[p.id]) return; // déjà envoyé
+    // Envoyer le rappel
+    var msg='Barak\'Allahu fik.\n\nNous avons remarqué que votre inscription sur Oumélia n\'est pas encore complète 🌙\n\nIl vous reste une étape : envoyer vos documents (pièce d\'identité) depuis votre espace personnel.\n\nVos documents sont 100% sécurisés et accessibles uniquement à notre équipe.\n\nRejoignez la communauté Oumélia dès maintenant !\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+    fetch(SUPABASE_URL+'/rest/v1/messages',{
+      method:'POST', headers:H,
+      body:JSON.stringify({from_id:'admin',to_id:String(p.id),from_prenom:'Oumélia',content:msg,lu:false})
+    }).then(function(r){
+      if(r.ok){
+        _sent[p.id]=now;
+        localStorage.setItem('_remindersSent',JSON.stringify(_sent));
+        console.log('Rappel envoyé à',p.prenom);
+      }
+    }).catch(function(){});
+  });
 }
 function stopAdminRefresh(){
   if(admTimer){ clearInterval(admTimer); admTimer=null; }
@@ -7553,8 +7593,14 @@ function handleDocUpload(type,filenameId,labelId){
   var input=document.getElementById(type==='cni'?'cni-file':'work-file');
   if(!input||!input.files||!input.files[0]) return;
   var file=input.files[0];
+  // Vérification taille max 10 Mo
+  if(file.size > 10 * 1024 * 1024){
+    showToast('❌ Fichier trop lourd (max 10 Mo). Compressez votre image avant l\'envoi.','red');
+    input.value='';
+    return;
+  }
   var ne=document.getElementById(filenameId);var le=document.getElementById(labelId);
-  if(ne){ne.textContent=file.name;ne.style.color='var(--gold)';}
+  if(ne){ne.textContent=file.name+' ('+Math.round(file.size/1024)+' Ko)';ne.style.color='var(--gold)';}
   if(le) le.style.border='1.5px dashed rgba(201,168,76,.7)';
   _uploadedDocs[type]=file;
 }
