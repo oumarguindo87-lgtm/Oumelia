@@ -7006,7 +7006,7 @@ async function renderAdminRdv(c){
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
 
   // Charger en parallèle
-  var r1=await fetch(SUPABASE_URL+'/rest/v1/profils?status=in.(en_attente_rdv,rdv_planifie)&select=id,prenom,gender,age,ville,telephone,user_id&order=created_at.desc',{headers:H});
+  var r1=await fetch(SUPABASE_URL+'/rest/v1/profils?status=eq.rdv_planifie&select=id,prenom,gender,age,ville,telephone,user_id&order=created_at.desc',{headers:H});
   var r2=await fetch(SUPABASE_URL+'/rest/v1/rdv?select=*&order=rdv_date.asc',{headers:H});
   var profils=await r1.json().catch(function(){return[];});
   var rdvList=await r2.json().catch(function(){return[];});
@@ -7017,9 +7017,17 @@ async function renderAdminRdv(c){
   if(!Array.isArray(profils)) profils=[];
   if(!Array.isArray(rdvList)) rdvList=[];
 
-  // Indexer les RDVs par user_id
+  // Indexer les RDVs par user_id ET par profile id
   var rdvByUid={};
-  rdvList.forEach(function(r){ if(r.user_id) rdvByUid[r.user_id]=r; });
+  rdvList.forEach(function(r){
+    if(r.user_id) rdvByUid[String(r.user_id)]=r;
+  });
+  // Matcher aussi par id numérique du profil (inserts manuels)
+  profils.forEach(function(p){
+    if(!rdvByUid[p.user_id] && rdvByUid[String(p.id)]){
+      rdvByUid[p.user_id]=rdvByUid[String(p.id)];
+    }
+  });
 
   var hommes=profils.filter(function(p){return p.gender==='homme';});
   var femmes=profils.filter(function(p){return p.gender==='femme';});
