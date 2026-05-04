@@ -6554,8 +6554,13 @@ async function loadAdminAudio(audioElId, path){
 }
 
 var audioVerifId=null;
+var _audioVerifProfile=null;
 async function openAudioVerif(id,name){
   audioVerifId=id;
+  // Chercher le profil dans toutes les sources disponibles
+  _audioVerifProfile=(window._adminProfiles||[]).find(function(x){ return x.user_id===id||String(x.id)===String(id); });
+  if(!_audioVerifProfile) _audioVerifProfile=(allProfiles||[]).find(function(x){ return x.user_id===id||String(x.id)===String(id); });
+  console.log('openAudioVerif id:',id,'profile found:',_audioVerifProfile&&_audioVerifProfile.prenom);
   var nameEl=document.getElementById('audio-target-name');
   if(nameEl) nameEl.textContent=name||'—';
   var playerEl=document.getElementById('audio-modal-player');
@@ -6583,23 +6588,31 @@ async function openAudioVerif(id,name){
 }
 
 async function audioValidate(){
-  var p=(window._adminProfiles||allProfiles).find(function(x){return x.id===audioVerifId||String(x.id)===String(audioVerifId)||x.user_id===audioVerifId;});
+  var p=_audioVerifProfile;
+  if(!p) p=(window._adminProfiles||[]).find(function(x){ return x.user_id===audioVerifId||String(x.id)===String(audioVerifId); });
   var pid=p?String(p.id):null;
-  if(!pid){ showToast('❌ Profil introuvable','red'); return; }
+  console.log('audioValidate pid:',pid,'prenom:',p&&p.prenom);
+  if(!pid){ showToast('❌ Profil introuvable — rechargez la page admin','red'); closeModal('modal-audio'); return; }
+  var g=p&&p.gender;
+  var calLink=g==='femme'?'https://cal.com/oumelia-femme/20min':'https://cal.com/oumelia-zawaj/15min';
+  var resp=g==='femme'?'notre administratrice':'notre administrateur';
+  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio ainsi que vos documents ont bien été vérifiés ✅\n\nSi vous n\'avez pas encore planifié votre entretien avec '+resp+', planifiez-le dès maintenant en cliquant sur "Planifier mon RDV" dans votre espace personnel, ou via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
-  // Envoyer un message à l'inscrit
-  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nNous avons bien reçu votre dossier et votre attestation. Notre équipe va maintenant étudier votre profil et reviendra vers vous très prochainement.\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
-  }).then(function(r){ console.log('audioValidate msg:',r.status); }).catch(function(){});
+  }).then(function(r){
+    console.log('audioValidate msg status:',r.status);
+    if(r.ok) showToast('✅ Message envoyé à '+(p.prenom||'l\'inscrit(e)'),'green');
+    else showToast('❌ Erreur envoi message','red');
+  }).catch(function(e){ console.log('audioValidate err:',e); showToast('❌ Erreur réseau','red'); });
   closeModal('modal-audio');
-  showToast('✅ Message envoyé à '+(p&&p.prenom||'l\'inscrit(e)'),'green');
   adminTab(state.activeAdminTab||'pending');
 }
 
 function audioRejectFn(){
-  var p=(window._adminProfiles||allProfiles).find(function(x){return x.id===audioVerifId||String(x.id)===String(audioVerifId)||x.user_id===audioVerifId;});
+  var p=_audioVerifProfile;
+  if(!p) p=(window._adminProfiles||[]).find(function(x){ return x.user_id===audioVerifId||String(x.id)===String(audioVerifId); });
   var pid=p?String(p.id):null;
   if(!pid){ closeModal('modal-audio'); return; }
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
@@ -7495,7 +7508,7 @@ function openCalEmbed(){
   // iframe
   var iframe=document.createElement('iframe');
   var _calGender = state.user && state.user.gender;
-  var _calUrl = _calGender==='femme' ? 'https://cal.eu/oumeliazawaj/femme15min?theme=dark&embed=true' : 'https://cal.com/oumelia-zawaj/15min?theme=dark&embed=true';
+  var _calUrl = _calGender==='femme' ? 'https://cal.com/oumelia-femme/20min?theme=dark&embed=true' : 'https://cal.com/oumelia-zawaj/15min?theme=dark&embed=true';
   iframe.src=_calUrl;
   iframe.style.cssText='flex:1;width:100%;border:none;background:#0d0f14';
   iframe.setAttribute('frameborder','0');
@@ -7680,7 +7693,7 @@ async function submitVerificationDocs(){
 
     // ── Message Calendly ──
     var resp=g==='homme'?'notre administrateur':'notre administratrice';
-    var calLink=g==='femme'?'https://cal.eu/oumeliazawaj/femme15min':'https://cal.com/oumelia-zawaj/15min';
+    var calLink=g==='femme'?'https://cal.com/oumelia-femme/20min':'https://cal.com/oumelia-zawaj/15min';
     var msgTexte='Barak\'Allahu fik.\n\nVos documents ont bien été reçus.\n\nPour accéder aux profils, planifiez votre entretien avec '+resp+' via Cal.com :\n\n'+calLink+'\n\nVous pouvez aussi planifier directement depuis l\'application, dans votre espace personnel.\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
 
     if(pid){
