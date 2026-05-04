@@ -7612,28 +7612,31 @@ function adminAutoRefreshTick(){
 
 function sendPendingReminders(){
   var now=Date.now();
-  var _sent=JSON.parse(localStorage.getItem('_remindersSent')||'{}');
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
-  (window._adminProfiles||[]).forEach(function(p){
-    if(p.status!=='pending') return;
-    if(p.docs_submitted) return;
-    if(!p.created_at) return;
-    var age=now-new Date(p.created_at).getTime();
-    if(age < 48*60*60*1000) return; // moins de 48h
-    if(_sent[p.id]) return; // déjà envoyé
-    // Envoyer le rappel
-    var msg='Barak\'Allahu fik.\n\nNous avons remarqué que votre inscription sur Oumélia n\'est pas encore complète 🌙\n\nIl vous reste une étape : envoyer vos documents (pièce d\'identité) depuis votre espace personnel.\n\nVos documents sont 100% sécurisés et accessibles uniquement à notre équipe.\n\nRejoignez la communauté Oumélia dès maintenant !\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
-    fetch(SUPABASE_URL+'/rest/v1/messages',{
-      method:'POST', headers:H,
-      body:JSON.stringify({from_id:'admin',to_id:String(p.id),from_prenom:'Oumélia',content:msg,lu:false})
-    }).then(function(r){
-      if(r.ok){
-        _sent[p.id]=now;
-        localStorage.setItem('_remindersSent',JSON.stringify(_sent));
-        console.log('Rappel envoyé à',p.prenom);
-      }
-    }).catch(function(){});
-  });
+  // Charger les rappels déjà envoyés depuis la base
+  fetch(SUPABASE_URL+'/rest/v1/messages?from_id=eq.admin&content=like.*inscription*Oumélia*complète*&select=to_id',{
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(sent){
+    var alreadySent={};
+    if(Array.isArray(sent)) sent.forEach(function(m){ alreadySent[m.to_id]=true; });
+    (window._adminProfiles||[]).forEach(function(p){
+      if(p.status!=='pending') return;
+      if(p.docs_submitted) return;
+      if(!p.created_at) return;
+      var age=now-new Date(p.created_at).getTime();
+      if(age < 48*60*60*1000) return;
+      if(alreadySent[String(p.id)]) return; // déjà envoyé en base
+      var msg='Barak\'Allahu fik.\n\nNous avons remarqué que votre inscription sur Oumélia n\'est pas encore complète 🌙\n\nIl vous reste une étape : envoyer vos documents (pièce d\'identité) depuis votre espace personnel.\n\nVos documents sont 100% sécurisés et accessibles uniquement à notre équipe.\n\nRejoignez la communauté Oumélia dès maintenant !\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+      fetch(SUPABASE_URL+'/rest/v1/messages',{
+        method:'POST', headers:H,
+        body:JSON.stringify({from_id:'admin',to_id:String(p.id),from_prenom:'Oumélia',content:msg,lu:false})
+      }).then(function(r){
+        if(r.ok) console.log('Rappel envoyé à',p.prenom);
+      }).catch(function(){});
+    });
+  }).catch(function(){});
 }
 function stopAdminRefresh(){
   if(admTimer){ clearInterval(admTimer); admTimer=null; }
