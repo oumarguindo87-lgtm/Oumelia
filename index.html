@@ -6594,7 +6594,7 @@ async function audioValidate(){
   console.log('audioValidate pid:',pid,'prenom:',p&&p.prenom);
   if(!pid){ showToast('❌ Profil introuvable — rechargez la page admin','red'); closeModal('modal-audio'); return; }
   var g=p&&p.gender;
-  var calLink=g==='femme'?'https://cal.com/oumelia-femme/20min':'https://cal.com/oumelia-zawaj/15min';
+  var calLink=g==='femme'?'https://cal.com/oumelia-femme/20min':'https://cal.com/oumelia-zawaj/25min';
   var resp=g==='femme'?'notre administratrice':'notre administrateur';
   var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio ainsi que vos documents ont bien été vérifiés ✅\n\nSi vous n\'avez pas encore planifié votre entretien avec '+resp+', planifiez-le dès maintenant en cliquant sur "Planifier mon RDV" dans votre espace personnel, ou via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
@@ -7508,7 +7508,7 @@ function openCalEmbed(){
   // iframe
   var iframe=document.createElement('iframe');
   var _calGender = state.user && state.user.gender;
-  var _calUrl = _calGender==='femme' ? 'https://cal.com/oumelia-femme/20min?theme=dark&embed=true' : 'https://cal.com/oumelia-zawaj/15min?theme=dark&embed=true';
+  var _calUrl = _calGender==='femme' ? 'https://cal.com/oumelia-femme/20min?theme=dark&embed=true' : 'https://cal.com/oumelia-zawaj/25min?theme=dark&embed=true';
   iframe.src=_calUrl;
   iframe.style.cssText='flex:1;width:100%;border:none;background:#0d0f14';
   iframe.setAttribute('frameborder','0');
@@ -7693,7 +7693,7 @@ async function submitVerificationDocs(){
 
     // ── Message Calendly ──
     var resp=g==='homme'?'notre administrateur':'notre administratrice';
-    var calLink=g==='femme'?'https://cal.com/oumelia-femme/20min':'https://cal.com/oumelia-zawaj/15min';
+    var calLink=g==='femme'?'https://cal.com/oumelia-femme/20min':'https://cal.com/oumelia-zawaj/25min';
     var msgTexte='Barak\'Allahu fik.\n\nVos documents ont bien été reçus.\n\nPour accéder aux profils, planifiez votre entretien avec '+resp+' via Cal.com :\n\n'+calLink+'\n\nVous pouvez aussi planifier directement depuis l\'application, dans votre espace personnel.\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
 
     if(pid){
