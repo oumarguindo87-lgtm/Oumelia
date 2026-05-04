@@ -6314,7 +6314,7 @@ function notifyHomme(hommePrenom,femmePrenom){
 }
 
 function renderAdminMsgs(c){
-  c.innerHTML='<div style="padding:16px"><div class="section-title">✉️ Messages reçus</div><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
+  c.innerHTML='<div style="padding:16px"><div class="section-title">✉️ Conversations</div><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
   console.log('Admin: chargement messages...');
 
   fetch(SUPABASE_URL+'/rest/v1/messages?select=*&order=created_at.desc', {
@@ -6327,22 +6327,49 @@ function renderAdminMsgs(c){
       return;
     }
     console.log('Admin: '+allMsgs.length+' messages');
-    var msgs = allMsgs.filter(function(m){ return m.to_id==='admin'; });
-    var convos = {};
-    msgs.forEach(function(m){
-      if(!convos[m.from_id]) convos[m.from_id]={prenom:m.from_prenom||'Inconnu',last:m.content,uid:m.from_id};
+    // Regrouper par inscrit (from_id ou to_id qui n'est pas 'admin')
+    var convos={};
+    allMsgs.forEach(function(m){
+      var uid=m.from_id==='admin'?m.to_id:m.from_id;
+      var prenom=m.from_id==='admin'?'':m.from_prenom||'';
+      if(!uid||uid==='admin') return;
+      // Chercher le profil dans _adminProfiles (par id numérique ou user_id)
+      var prof=(window._adminProfiles||[]).find(function(p){
+        return String(p.id)===String(uid)||p.user_id===uid;
+      });
+      var nomFinal=prof?prof.prenom:(prenom||null);
+      if(!convos[uid]){
+        convos[uid]={
+          prenom: nomFinal||'Inscrit',
+          last: m.content,
+          lastTime: m.created_at,
+          unread: m.to_id==='admin'&&!m.lu,
+          uid: uid,
+          gender: prof?prof.gender:'femme'
+        };
+      } else {
+        // Mettre à jour le prénom si on le trouve maintenant
+        if(!convos[uid].prenom||convos[uid].prenom==='Inscrit'){
+          if(nomFinal) convos[uid].prenom=nomFinal;
+        }
+      }
     });
-    var html='<div style="padding:16px"><div class="section-title">✉️ Messages reçus</div>';
+    var html='<div style="padding:16px"><div class="section-title">✉️ Conversations ('+Object.keys(convos).length+')</div>';
     var keys=Object.keys(convos);
     if(!keys.length){
-      html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucun message reçu</p>';
+      html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucune conversation</p>';
     } else {
       keys.forEach(function(uid){
         var conv=convos[uid];
-        html+='<div class="convo-item" onclick="openAdminConvo(&quot;'+uid+'&quot;,&quot;'+conv.prenom+'&quot;)">'+
-          '<div class="convo-avatar">'+svgFemme(36)+'</div>'+
-          '<div class="convo-info"><div class="convo-name">'+conv.prenom+'</div>'+
-          '<div class="convo-preview">'+conv.last+'</div></div></div>';
+        var av=conv.gender==='femme'?svgFemme(36):svgHomme(36);
+        var preview=conv.last?conv.last.slice(0,50)+(conv.last.length>50?'...':''):'';
+        var unreadDot=conv.unread?'<span style="width:8px;height:8px;background:var(--gold);border-radius:50%;display:inline-block;margin-left:6px"></span>':'';
+        html+='<div class="convo-item" onclick="openAdminConvo(\''+uid+'\',\''+conv.prenom+'\')">'+
+          '<div class="convo-avatar">'+av+'</div>'+
+          '<div class="convo-info">'+
+            '<div class="convo-name">'+conv.prenom+unreadDot+'</div>'+
+            '<div class="convo-preview">'+preview+'</div>'+
+          '</div></div>';
       });
     }
     html+='</div>';
@@ -6745,7 +6772,7 @@ function audioRejectFn(){
   var reasonEl=document.getElementById('audio-reject-reason');
   var reason=reasonEl?reasonEl.value.trim():'';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
-  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio n\'a malheureusement pas pu être validée.\n\n'+(reason?'Raison : '+reason+'\n\n':'')+'Merci d\'en enregistrer une nouvelle depuis votre espace personnel (onglet Documents).\n\nVeillez à :\n- Énoncer clairement votre prénom\n- Confirmer que vous êtes musulman(e) sunnite pratiquant(e)\n- Vous engager à respecter les conditions d\'Oumélia\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio n\'a pas pu être validée.'+(reason?'\n\nRaison : '+reason:'')+'\n\nMerci d\'en enregistrer une nouvelle depuis votre espace personnel (onglet Documents).\n\nVeuillez répéter exactement :\n\n« J\'atteste devant Allah de l\'exactitude de mes informations. »\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
