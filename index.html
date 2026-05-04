@@ -721,9 +721,9 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <div style="font-family:'Cinzel Decorative',serif;font-size:.78rem;letter-spacing:3px;color:var(--gold);margin-bottom:6px">OUMÉLIA</div>
     <p style="font-family:'Playfair Display',serif;font-style:italic;color:var(--muted);font-size:.72rem;margin-bottom:16px">✦ Trouver sa moitié dans la voie d'Allah ✦</p>
     <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:14px">
-      <a onclick="showLegal('cgu')" style="color:var(--muted);font-size:.74rem;cursor:pointer;text-decoration:none">CGU</a>
-      <a onclick="showLegal('privacy')" style="color:var(--muted);font-size:.74rem;cursor:pointer;text-decoration:none">Confidentialité</a>
-      <a href="/cdn-cgi/l/email-protection#107f657d757c79713e737f7e64717364787f7d7d7550777d71797c3e737f7d" style="color:var(--muted);font-size:.74rem;text-decoration:none">Contact</a>
+      <a onclick="showLandingLegal('cgu')" style="color:var(--muted);font-size:.74rem;cursor:pointer;text-decoration:none">CGU</a>
+      <a onclick="showLandingLegal('privacy')" style="color:var(--muted);font-size:.74rem;cursor:pointer;text-decoration:none">Confidentialité</a>
+      <a href="mailto:oumelia.contacthomme@gmail.com" style="color:var(--muted);font-size:.74rem;text-decoration:none">Contact</a>
     </div>
     <p style="color:var(--border2);font-size:.68rem">© 2025 Oumélia — Tous droits réservés</p>
   </footer>
@@ -1759,13 +1759,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <!-- Confirmation Valider -->
     <div id="audio-confirm-validate" style="display:none;margin-top:12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:12px">
       <div style="font-size:.78rem;color:#2ecc71;font-weight:700;margin-bottom:6px">📨 Message envoyé à l'inscrit(e) :</div>
-      <div style="font-size:.72rem;color:var(--white2);line-height:1.5;background:rgba(0,0,0,.2);padding:8px;border-radius:6px;margin-bottom:10px;white-space:pre-wrap">Barak'Allahu fik.
-
-Votre attestation audio a bien été validée ✅
-
-Si vous n'avez pas encore planifié votre entretien, faites-le dès maintenant depuis votre espace personnel ou via le lien reçu.
-
-Barak'Allahu fikoum — L'équipe Oumélia</div>
+      <div id="audio-validate-preview" style="font-size:.72rem;color:var(--white2);line-height:1.5;background:rgba(0,0,0,.2);padding:8px;border-radius:6px;margin-bottom:10px;white-space:pre-wrap"></div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-outline btn-sm" style="flex:1;font-size:.75rem" onclick="hideAudioConfirms()">Annuler</button>
         <button class="btn btn-gold btn-sm" style="flex:1;font-size:.75rem" onclick="audioValidate()">✅ Confirmer</button>
@@ -3169,9 +3163,26 @@ var legalContent={
 
 function showLegal(type){
   var content=legalContent[type]; if(!content) return;
+  // Si on est sur la landing (modal-legal n'existe pas), utiliser le modal landing
+  var modalLegal=document.getElementById('modal-legal');
+  if(!modalLegal){
+    showLandingLegal(type);
+    return;
+  }
   document.getElementById('legal-title').textContent=content.title;
   document.getElementById('legal-body').innerHTML=content.body;
   openModal('modal-legal');
+}
+
+function showLandingLegal(type){
+  var content=legalContent[type]; if(!content) return;
+  var m=document.getElementById('modal-landing-legal');
+  var t=document.getElementById('landing-legal-title');
+  var b=document.getElementById('landing-legal-body');
+  if(!m) return;
+  if(t) t.textContent=content.title;
+  if(b) b.innerHTML=content.body;
+  m.style.display='block';
 }
 
 function showLegalPage(type){
@@ -6628,6 +6639,13 @@ async function openAudioVerif(id,name){
 }
 
 function showAudioValidateConfirm(){
+  var p=_audioVerifProfile;
+  if(!p) p=(window._adminProfiles||[]).find(function(x){ return x.user_id===audioVerifId||String(x.id)===String(audioVerifId); });
+  var g=p&&p.gender;
+  var calLink=g==='femme'?'https://cal.com/oumelia-femme/20min':'https://cal.com/oumelia-zawaj/25min';
+  var resp=g==='femme'?'notre administratrice':'notre administrateur';
+  var preview=document.getElementById('audio-validate-preview');
+  if(preview) preview.textContent='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nSi vous n\'avez pas encore planifié votre entretien avec '+resp+', planifiez-le dès maintenant depuis votre espace personnel, ou via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   document.getElementById('audio-confirm-validate').style.display='block';
   document.getElementById('audio-confirm-reject').style.display='none';
   document.getElementById('audio-main-btns').style.opacity='0.4';
@@ -8001,5 +8019,16 @@ async function deleteSignalement(id,btn){
 if(typeof navTo==='function'){var _nO=navTo;navTo=function(t){_nO(t);setTimeout(injectStepBannerIfNeeded,100);};}
 
 </script>
+<!-- Modal légal landing page -->
+<div id="modal-landing-legal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;overflow-y:auto;padding:20px">
+  <div style="max-width:600px;margin:0 auto;background:#1a1005;border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 id="landing-legal-title" style="color:#c9a84c;font-family:'Playfair Display',serif;font-size:1rem;margin:0"></h3>
+      <button onclick="document.getElementById('modal-landing-legal').style.display='none'" style="background:none;border:none;color:#888;font-size:1.4rem;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div id="landing-legal-body" style="font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.7"></div>
+  </div>
+</div>
+
 </body>
 </html>
