@@ -2938,7 +2938,8 @@ function loadUserMessages(){
         if(!exists) userChatHistory[name].push({
           from: m.from_id==='admin'?'admin':'user',
           text: m.content,
-          _id: m.id
+          _id: m.id,
+          lu: m.lu===true
         });
       });
       // Mettre à jour le badge notifs
@@ -3364,7 +3365,9 @@ function loadAllProfilesForAdmin(){
         age_max:              p.age_max||null,
         // Compat anciens champs
         audioAttested:   p.audio_attested===true,
-        pending_verification: p.pending_verification||null
+        pending_verification: p.pending_verification||null,
+        is_online:       p.is_online===true,
+        last_seen:       p.last_seen||null
       };
     });
     console.log('Admin: '+window._adminProfiles.length+' profils chargés');
@@ -5029,7 +5032,11 @@ function openChat(name, type){
     </div>
     <div class="chat-wrap">
       <div class="chat-messages" id="chat-msgs">
-        ${msgs.map(function(m){return '<div class="msg '+(m.from==='admin'?'theirs':'mine')+'">'+(m.text)+'</div>';}).join('')}
+        ${msgs.map(function(m){
+          var isMine=m.from!=='admin';
+          var vuLabel = isMine && m.lu ? '<span style="font-size:.65rem;color:rgba(46,204,113,.8);display:block;text-align:right;margin-top:2px">✓✓ Vu</span>' : (isMine ? '<span style="font-size:.65rem;color:var(--muted);display:block;text-align:right;margin-top:2px">✓ Envoyé</span>' : '');
+          return '<div class="msg '+(isMine?'mine':'theirs')+'">'+m.text+vuLabel+'</div>';
+        }).join('')}
         ${!msgs.length?'<p style="color:var(--muted);text-align:center;padding:20px;font-size:.84rem">Aucun message</p>':''}
       </div>
       <div class="chat-input-bar">
@@ -5933,6 +5940,46 @@ function adminTab(tab){
   }
 }
 
+function renderAdminOnlineView(){
+  var c=document.getElementById('admin-content');
+  if(!c) return;
+  state.activeAdminTab='detail';
+  var now=Date.now();
+  var allP=(window._adminProfiles||[]).slice().sort(function(a,b){
+    var ta=a.last_seen?now-new Date(a.last_seen).getTime():999999999;
+    var tb=b.last_seen?now-new Date(b.last_seen).getTime():999999999;
+    return ta-tb;
+  });
+  var html='<div class="page-header" style="background:var(--dark);position:sticky;top:0;z-index:10">'+
+    '<button class="back-btn" onclick="adminTab(\'dashboard\')">←</button>'+
+    '<h2>🟢 Statut de connexion</h2></div>'+
+    '<div style="padding:12px">';
+  allP.forEach(function(p){
+    var d=p.last_seen?now-new Date(p.last_seen).getTime():null;
+    var isOnline=d!==null&&d<5*60*1000;      // en ligne = vu il y a < 5 min
+    var isRecent=d!==null&&d>=5*60*1000&&d<30*60*1000; // récent = entre 5 et 30 min
+    var dot=isOnline?'🟢':isRecent?'🟡':'⚫';
+    var dotColor=isOnline?'#39ff7a':isRecent?'#f39c12':'#666';
+    var txt=isOnline?'En ligne':d===null?'Jamais connecté':(function(){
+      if(d<60000) return 'il y a < 1 min';
+      if(d<3600000) return 'il y a '+Math.floor(d/60000)+' min';
+      if(d<86400000) return 'il y a '+Math.floor(d/3600000)+'h';
+      if(d<604800000) return 'il y a '+Math.floor(d/86400000)+' j';
+      return new Date(p.last_seen).toLocaleDateString('fr-FR');
+    }());
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border-radius:10px;margin-bottom:8px;cursor:pointer" onclick="openAdminProfileDetail(\''+p.id+'\')">';
+    html+='<span style="font-size:.9rem;color:'+dotColor+'">●</span>';
+    html+='<div style="flex:1">';
+    html+='<div style="font-weight:600;font-size:.86rem">'+p.prenom+', '+p.age+' ans · '+(p.gender==='femme'?'Sœur':'Frère')+'</div>';
+    html+='<div style="font-size:.74rem;color:'+(isOnline?'#39ff7a':isRecent?'#f39c12':'var(--muted)')+'">'+txt+'</div>';
+    html+='</div>';
+    html+='<span style="font-size:.7rem;color:var(--muted)">›</span>';
+    html+='</div>';
+  });
+  html+='</div>';
+  c.innerHTML=html;
+}
+
 function renderAdminDashboard(c){
   var allP=getAllAdminProfiles();
   var active=allP.filter(function(p){return p.status==='active';}).length;
@@ -5942,7 +5989,7 @@ function renderAdminDashboard(c){
   var femmes=allP.filter(function(p){return p.gender==='femme';}).length;
   var hommes=allP.filter(function(p){return p.gender==='homme';}).length;
   var nwali=waliResponses.filter(function(r){return !r.read;}).length;
-  var nOnline=allP.filter(function(p){return onlineStatus[p.id]==='online';}).length;
+  var nOnline=allP.filter(function(p){ return p.last_seen&&(Date.now()-new Date(p.last_seen).getTime())<5*60*1000; }).length;
   var nExchanges=exchangesList.length;
   var total=allP.length;
 
@@ -5957,7 +6004,7 @@ function renderAdminDashboard(c){
     <div class="admin-stats">
       <div class="stat-card"><div class="stat-num gold-text">${active}</div><div class="stat-label">Actifs</div></div>
       <div class="stat-card"><div class="stat-num" style="color:var(--gold)">${pending}</div><div class="stat-label">En attente</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:#39ff7a">${nOnline}</div><div class="stat-label">En ligne</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="renderAdminOnlineView()"><div class="stat-num" style="color:#39ff7a">${nOnline}</div><div class="stat-label">En ligne</div></div>
       <div class="stat-card"><div class="stat-num gold-text">${(paidReal*14.99).toFixed(0)}€</div><div class="stat-label">Revenus</div></div>
     </div>
     <div class="admin-stats">
@@ -6038,6 +6085,8 @@ function renderAdminPending(c){
           &nbsp;${statusLabel}
           ${p.audioAttested||p.audio_attested?' · <span style="color:var(--gold)">🎙️ Audio</span>':''}
           ${!p.paid?' · <span style="color:var(--muted)">Non payé</span>':''}
+          · <span style="color:${p.is_online?'#39ff7a':p.last_seen&&(Date.now()-new Date(p.last_seen).getTime())<30*60*1000?'#27AE60':'var(--muted)'}">●</span>
+          <span style="font-size:.65rem;color:var(--muted)">${p.is_online?'En ligne':p.last_seen?(function(){var d=Date.now()-new Date(p.last_seen).getTime();return d<60000?'il y a < 1 min':d<3600000?'il y a '+Math.floor(d/60000)+' min':d<86400000?'il y a '+Math.floor(d/3600000)+'h':new Date(p.last_seen).toLocaleDateString('fr-FR');}()):'Jamais connecté'}</span>
         </div>
       </div>
       <div class="admin-actions" onclick="event.stopPropagation()">
@@ -6325,7 +6374,8 @@ function openAdminConvo(uid, prenom){
     if(!msgs.length) html+='<p style="color:var(--muted);text-align:center;padding:20px">Aucun message</p>';
     msgs.forEach(function(m){
       var mine = m.from_id==='admin';
-      html+='<div class="msg '+(mine?'mine':'theirs')+'">'+m.content+'</div>';
+      var vuLabel = mine && m.lu ? '<span style="font-size:.65rem;color:rgba(46,204,113,.8);display:block;text-align:right;margin-top:2px">✓✓ Vu</span>' : (mine ? '<span style="font-size:.65rem;color:var(--muted);display:block;text-align:right;margin-top:2px">✓ Envoyé</span>' : '');
+      html+='<div class="msg '+(mine?'mine':'theirs')+'">'+m.content+vuLabel+'</div>';
     });
     html+='</div><div class="chat-input-bar">'+
       '<input type="text" id="admin-chat-input" placeholder="Répondre à '+prenom+'..." onkeydown="if(event.key===\'Enter\')sendAdminReply(\''+uid+'\',\''+prenom+'\')">'+
@@ -6818,6 +6868,11 @@ function openAdminProfileDetail(id){
     +row('Téléphone', p.telephone)
     +row('Email', p.email||'(voir auth.users)')
     +row('Inscrit le', p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'—')
+    +(function(){
+      var dot=p.is_online?'🟢':'🔴';
+      var txt=p.is_online?'En ligne maintenant':p.last_seen?(function(){var d=Date.now()-new Date(p.last_seen).getTime();return d<60000?'Vu il y a < 1 min':d<3600000?'Vu il y a '+Math.floor(d/60000)+' min':d<86400000?'Vu il y a '+Math.floor(d/3600000)+'h':d<604800000?'Vu il y a '+Math.floor(d/86400000)+' j':'Vu le '+new Date(p.last_seen).toLocaleDateString('fr-FR');}()):'Jamais connecté';
+      return row('Statut connexion', dot+' '+txt);
+    }())
     +'</div>'
     +'<div class="profile-section"><h4>🕌 Pratique religieuse</h4>'
     +row('Niveau de pratique', p.pratique)
