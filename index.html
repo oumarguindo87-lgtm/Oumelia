@@ -1769,7 +1769,15 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <!-- Confirmation Valider -->
     <div id="audio-confirm-validate" style="display:none;margin-top:12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:12px">
       <div style="font-size:.78rem;color:#2ecc71;font-weight:700;margin-bottom:6px">📨 Message envoyé à l'inscrit(e) :</div>
-      <div id="audio-validate-preview" style="font-size:.72rem;color:var(--white2);line-height:1.5;background:rgba(0,0,0,.2);padding:8px;border-radius:6px;margin-bottom:10px;white-space:pre-wrap"></div>
+      <div style="font-size:.72rem;color:var(--white2);line-height:1.5;background:rgba(0,0,0,.2);padding:8px;border-radius:6px;margin-bottom:10px;white-space:pre-wrap" id="audio-validate-preview">Barak'Allahu fik.
+
+Votre attestation audio a bien été validée ✅
+
+Si vous n'avez pas encore envoyé vos documents (pièce d'identité), faites-le dès maintenant depuis votre espace personnel.
+
+Ensuite, planifiez votre entretien via le lien qui s'affichera selon votre profil.
+
+Barak'Allahu fikoum — L'équipe Oumélia</div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-outline btn-sm" style="flex:1;font-size:.75rem" onclick="hideAudioConfirms()">Annuler</button>
         <button class="btn btn-gold btn-sm" style="flex:1;font-size:.75rem" onclick="audioValidate()">✅ Confirmer</button>
@@ -6777,7 +6785,7 @@ function audioValidate(){
   var g=p&&p.gender;
   var calLink=g==='femme'?'https://cal.com/oumelia-femme/20min':'https://cal.com/oumelia-zawaj/25min';
   var resp=g==='femme'?'notre administratrice':'notre administrateur';
-  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nSi vous n\'avez pas encore planifié votre entretien avec '+resp+', planifiez-le dès maintenant depuis votre espace personnel, ou via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nSi vous n\'avez pas encore envoyé vos documents (pièce d\'identité), faites-le dès maintenant depuis votre espace personnel.\n\nEnsuite, planifiez votre entretien avec '+resp+' via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
