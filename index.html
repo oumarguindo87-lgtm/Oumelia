@@ -1748,11 +1748,39 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <div id="audio-modal-player" style="margin-bottom:16px">
       <p style="font-size:.8rem;color:var(--muted);text-align:center">Chargement en cours...</p>
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-gold btn-sm" style="flex:1" onclick="audioValidate()">✅ Valider</button>
-      <button class="btn btn-sm" style="flex:1;background:var(--red);color:#fff" onclick="audioRejectFn()">✗ Rejeter</button>
+
+    <!-- Boutons principaux -->
+    <div id="audio-main-btns" style="display:flex;gap:8px">
+      <button class="btn btn-gold btn-sm" style="flex:1" onclick="showAudioValidateConfirm()">✅ Valider</button>
+      <button class="btn btn-sm" style="flex:1;background:var(--red);color:#fff" onclick="showAudioRejectConfirm()">✗ Rejeter</button>
     </div>
     <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px" onclick="closeModal('modal-audio')">Fermer</button>
+
+    <!-- Confirmation Valider -->
+    <div id="audio-confirm-validate" style="display:none;margin-top:12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:12px">
+      <div style="font-size:.78rem;color:#2ecc71;font-weight:700;margin-bottom:6px">📨 Message envoyé à l'inscrit(e) :</div>
+      <div style="font-size:.72rem;color:var(--white2);line-height:1.5;background:rgba(0,0,0,.2);padding:8px;border-radius:6px;margin-bottom:10px;white-space:pre-wrap">Barak'Allahu fik.
+
+Votre attestation audio a bien été validée ✅
+
+Si vous n'avez pas encore planifié votre entretien, faites-le dès maintenant depuis votre espace personnel ou via le lien reçu.
+
+Barak'Allahu fikoum — L'équipe Oumélia</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" style="flex:1;font-size:.75rem" onclick="hideAudioConfirms()">Annuler</button>
+        <button class="btn btn-gold btn-sm" style="flex:1;font-size:.75rem" onclick="audioValidate()">✅ Confirmer</button>
+      </div>
+    </div>
+
+    <!-- Rejection avec raison -->
+    <div id="audio-confirm-reject" style="display:none;margin-top:12px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.25);border-radius:10px;padding:12px">
+      <div style="font-size:.78rem;color:var(--red);font-weight:700;margin-bottom:6px">✗ Raison du refus :</div>
+      <textarea id="audio-reject-reason" rows="3" placeholder="Ex: Audio inaudible, veuillez vous présenter clairement..." style="width:100%;background:var(--dark);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:8px;color:var(--white);font-family:'Cairo',sans-serif;font-size:.78rem;resize:vertical;margin-bottom:8px"></textarea>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" style="flex:1;font-size:.75rem" onclick="hideAudioConfirms()">Annuler</button>
+        <button class="btn btn-sm" style="flex:1;background:var(--red);color:#fff;font-size:.75rem" onclick="audioRejectFn()">✗ Confirmer le refus</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -6599,7 +6627,26 @@ async function openAudioVerif(id,name){
   }
 }
 
-async function audioValidate(){
+function showAudioValidateConfirm(){
+  document.getElementById('audio-confirm-validate').style.display='block';
+  document.getElementById('audio-confirm-reject').style.display='none';
+  document.getElementById('audio-main-btns').style.opacity='0.4';
+  document.getElementById('audio-main-btns').style.pointerEvents='none';
+}
+function showAudioRejectConfirm(){
+  document.getElementById('audio-confirm-reject').style.display='block';
+  document.getElementById('audio-confirm-validate').style.display='none';
+  document.getElementById('audio-main-btns').style.opacity='0.4';
+  document.getElementById('audio-main-btns').style.pointerEvents='none';
+}
+function hideAudioConfirms(){
+  document.getElementById('audio-confirm-validate').style.display='none';
+  document.getElementById('audio-confirm-reject').style.display='none';
+  document.getElementById('audio-main-btns').style.opacity='1';
+  document.getElementById('audio-main-btns').style.pointerEvents='';
+}
+
+function audioValidate(){
   var p=_audioVerifProfile;
   if(!p) p=(window._adminProfiles||[]).find(function(x){ return x.user_id===audioVerifId||String(x.id)===String(audioVerifId); });
   var pid=p?String(p.id):null;
@@ -6608,14 +6655,14 @@ async function audioValidate(){
   var g=p&&p.gender;
   var calLink=g==='femme'?'https://cal.com/oumelia-femme/20min':'https://cal.com/oumelia-zawaj/25min';
   var resp=g==='femme'?'notre administratrice':'notre administrateur';
-  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio ainsi que vos documents ont bien été vérifiés ✅\n\nSi vous n\'avez pas encore planifié votre entretien avec '+resp+', planifiez-le dès maintenant en cliquant sur "Planifier mon RDV" dans votre espace personnel, ou via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nSi vous n\'avez pas encore planifié votre entretien avec '+resp+', planifiez-le dès maintenant depuis votre espace personnel, ou via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
   }).then(function(r){
     console.log('audioValidate msg status:',r.status);
-    if(r.ok) showToast('✅ Message envoyé à '+(p.prenom||'l\'inscrit(e)'),'green');
+    if(r.ok) showToast('✅ Audio validé — message envoyé à '+(p.prenom||'l\'inscrit(e)'),'green');
     else showToast('❌ Erreur envoi message','red');
   }).catch(function(e){ console.log('audioValidate err:',e); showToast('❌ Erreur réseau','red'); });
   closeModal('modal-audio');
@@ -6627,14 +6674,16 @@ function audioRejectFn(){
   if(!p) p=(window._adminProfiles||[]).find(function(x){ return x.user_id===audioVerifId||String(x.id)===String(audioVerifId); });
   var pid=p?String(p.id):null;
   if(!pid){ closeModal('modal-audio'); return; }
+  var reasonEl=document.getElementById('audio-reject-reason');
+  var reason=reasonEl?reasonEl.value.trim():'';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
-  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio n\'a malheureusement pas pu être validée.\n\nMerci d\'en enregistrer une nouvelle depuis votre espace personnel (onglet Documents).\n\nVeillez à :\n- Énoncer clairement votre prénom\n- Confirmer que vous êtes musulman(e) sunnite pratiquant(e)\n- Vous engager à respecter les conditions d\'Oumélia\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio n\'a malheureusement pas pu être validée.\n\n'+(reason?'Raison : '+reason+'\n\n':'')+'Merci d\'en enregistrer une nouvelle depuis votre espace personnel (onglet Documents).\n\nVeillez à :\n- Énoncer clairement votre prénom\n- Confirmer que vous êtes musulman(e) sunnite pratiquant(e)\n- Vous engager à respecter les conditions d\'Oumélia\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
   }).then(function(r){ console.log('audioReject msg:',r.status); }).catch(function(){});
   closeModal('modal-audio');
-  showToast('✗ Message de refus envoyé à '+(p&&p.prenom||'l\'inscrit(e)'),'red');
+  showToast('✗ Refus envoyé à '+(p&&p.prenom||'l\'inscrit(e)'),'red');
   adminTab(state.activeAdminTab||'pending');
 }
 
