@@ -6091,7 +6091,7 @@ function renderAdminDashboard(c){
           </div>
         </div>
         <div class="admin-actions" onclick="event.stopPropagation()">
-          ${(p.audioAttested||p.audio_attested)?('<button class="btn-tiny audio" onclick="openAudioVerif(\''+p.user_id+'\',\''+p.prenom+'\')" >🎙</button>'):''}
+          ${(p.audioAttested||p.audio_attested)?('<button class="btn-tiny audio" onclick="openAudioVerif(\''+p.user_id+'\',\''+p.prenom+'\')" style="'+(p.call_validated?'background:rgba(46,204,113,.2);color:#2ecc71;border-color:rgba(46,204,113,.5)':'')+'" title="'+(p.call_validated?'Audio validé ✅':'Audio à vérifier')+'">🎙</button>'):''}
           <button class="btn-tiny free" onclick="freeActivateFromDash('${p.id}')" title="Activer gratuitement">🎁</button>
           <button class="btn-tiny approve" onclick="approveProfileFromDash('${p.id}')" title="Valider">✓</button>
           <button class="btn-tiny reject" onclick="openRejectModal('${p.id}','${p.prenom}')" title="Refuser">✗</button>
@@ -6142,7 +6142,7 @@ function renderAdminPending(c){
         </div>
       </div>
       <div class="admin-actions" onclick="event.stopPropagation()">
-        ${(p.audioAttested||p.audio_attested)?('<button class="btn-tiny audio" onclick="openAudioVerif(\''+p.user_id+'\',\''+p.prenom+'\')" >🎙</button>'):''}
+        ${(p.audioAttested||p.audio_attested)?('<button class="btn-tiny audio" onclick="openAudioVerif(\''+p.user_id+'\',\''+p.prenom+'\')" style="'+(p.call_validated?'background:rgba(46,204,113,.2);color:#2ecc71;border-color:rgba(46,204,113,.5)':'')+'" title="'+(p.call_validated?'Audio validé ✅':'Audio à vérifier')+'">🎙</button>'):''}
         <button class="btn-tiny approve" onclick="approveProfile('${p.id}')">✓</button>
         <button class="btn-tiny reject"  onclick="openRejectModal('${p.id}','${p.prenom}')">✗</button>
         <button class="btn-tiny msg"     onclick="openAdminMsgModal('${p.id}','${p.prenom}')">✉</button>
@@ -6814,6 +6814,10 @@ function audioValidate(){
   var resp=g==='femme'?'notre administratrice':'notre administrateur';
   var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nSi vous n\'avez pas encore envoyé vos documents (pièce d\'identité), faites-le dès maintenant depuis votre espace personnel.\n\nEnsuite, planifiez votre entretien avec '+resp+' via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  // Marquer call_validated=true pour changer la couleur du bouton audio
+  fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+pid,{method:'PATCH',headers:H,body:JSON.stringify({call_validated:true})}).catch(function(){});
+  if(p) p.call_validated=true;
+  if(window._adminProfiles){var _ap=(window._adminProfiles||[]).find(function(x){return String(x.id)===String(pid);});if(_ap)_ap.call_validated=true;}
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
