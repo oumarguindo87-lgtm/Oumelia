@@ -1501,7 +1501,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       <label>Message d'introduction <span style="color:var(--muted);font-size:.75rem">(optionnel)</span></label>
       <textarea id="demande-msg" rows="3" placeholder="Présentez-vous brièvement..." style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--white);font-family:'Cairo',sans-serif;font-size:.88rem;resize:vertical"></textarea>
     </div>
-    <button class="btn btn-gold" style="width:100%" onclick="sendDemande()">Envoyer</button>
+    <button id="btn-send-demande" class="btn btn-gold" style="width:100%" onclick="sendDemande()">Envoyer</button>
     <button class="btn btn-outline" style="width:100%;margin-top:10px" onclick="closeModal('modal-demande')">Annuler</button>
   </div>
 </div>
@@ -2114,7 +2114,14 @@ function showToast(msg,type){
 }
 
 function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  // Réinitialiser le bouton d'envoi de demande
+  if(id==='modal-demande'){
+    var btn=document.getElementById('btn-send-demande');
+    if(btn){ btn.disabled=false; btn.textContent='Envoyer'; }
+  }
+}
 // Modal click-outside - initialisé après DOM ready dans window.load
 
 // ══════════ AUTH ══════════
@@ -5179,6 +5186,13 @@ function openDemandeModal(prenom){
 }
 
 function sendDemande(){
+  // Empêcher les doubles clics
+  var sendBtn=document.getElementById('btn-send-demande')||document.querySelector('#modal-demande .btn-gold');
+  if(sendBtn){
+    if(sendBtn.disabled) return;
+    sendBtn.disabled=true;
+    sendBtn.textContent='✅ Envoyé !';
+  }
   // Vérifier le nombre de demandes en_attente + acceptées
   var _totalUsed=Object.keys(demandesEnvoyees).filter(function(k){return k.indexOf('_id_')===0;}).length;
   if(_totalUsed>=3){
