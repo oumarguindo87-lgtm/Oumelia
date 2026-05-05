@@ -7349,7 +7349,11 @@ function renderAdminDemandes(c){
 
         html+='<div class="admin-user-row" data-statut="'+d.statut+'" style="flex-direction:column;align-items:flex-start;padding:12px;margin-bottom:8px;border-radius:10px;background:var(--card2);border-left:3px solid '+sc+'">';
         html+='<div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:6px">';
-        html+='<span style="font-weight:600;font-size:.9rem">'+fromIcon+' <strong>'+fromName+'</strong> &#x2192; '+toIcon+' <strong>'+toName+'</strong></span>';
+        html+='<span style="font-weight:600;font-size:.9rem">';
+        html+=fromIcon+' <button onclick="event.stopPropagation();openAdminProfileDetail(\''+d.from_profile_id+'\')" style="background:none;border:none;color:var(--gold);font-weight:700;cursor:pointer;font-size:.9rem;text-decoration:underline">'+fromName+'</button>';
+        html+=' &#x2192; ';
+        html+=toIcon+' <button onclick="event.stopPropagation();openAdminProfileDetail(\''+d.to_profile_id+'\')" style="background:none;border:none;color:var(--gold);font-weight:700;cursor:pointer;font-size:.9rem;text-decoration:underline">'+toName+'</button>';
+        html+='</span>';
         html+='<span style="font-size:.75rem;color:'+sc+';font-weight:700;padding:3px 8px;border-radius:10px;background:rgba(0,0,0,.2)">'+sl+'</span>';
         html+='</div>';
         html+='<div style="font-size:.74rem;color:var(--muted)">&#128197; '+date+'</div>';
