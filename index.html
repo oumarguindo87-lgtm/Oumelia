@@ -6300,9 +6300,15 @@ function renderAdminMatches(c){
         html += '<div><span style="color:var(--green);font-weight:600">💚 '+fNom+' × '+hNom+'</span><br>';
         html += '<span style="font-size:.75rem;color:var(--muted)">'+date+'</span></div>';
         html += '</div>';
-        html += '<div style="display:flex;gap:8px">';
-        if(femme) html += '<button class="btn-tiny msg" data-uid="'+m.femme_profile_id+'" data-nom="'+fNom+'" onclick="openAdminConvoMatch(this.dataset.uid,this.dataset.nom)">✉ '+fNom+'</button>';
-        if(homme) html += '<button class="btn-tiny msg" data-uid="'+m.homme_profile_id+'" data-nom="'+hNom+'" onclick="openAdminConvoMatch(this.dataset.uid,this.dataset.nom)">✉ '+hNom+'</button>';
+        html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+        if(femme){
+          html += '<button class="btn-tiny" style="background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.3)" onclick="openAdminProfileDetail(\''+m.femme_profile_id+'\')">👤 '+fNom+'</button>';
+          html += '<button class="btn-tiny msg" data-uid="'+m.femme_profile_id+'" data-nom="'+fNom+'" onclick="openAdminConvoMatch(this.dataset.uid,this.dataset.nom)">✉ '+fNom+'</button>';
+        }
+        if(homme){
+          html += '<button class="btn-tiny" style="background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.3)" onclick="openAdminProfileDetail(\''+m.homme_profile_id+'\')">👤 '+hNom+'</button>';
+          html += '<button class="btn-tiny msg" data-uid="'+m.homme_profile_id+'" data-nom="'+hNom+'" onclick="openAdminConvoMatch(this.dataset.uid,this.dataset.nom)">✉ '+hNom+'</button>';
+        }
         html += '</div></div>';
       });
     }
