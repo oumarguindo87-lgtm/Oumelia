@@ -6137,8 +6137,8 @@ function renderAdminPending(c){
           &nbsp;${statusLabel}
           ${p.audioAttested||p.audio_attested?' · <span style="color:var(--gold)">🎙️ Audio</span>':''}
           ${!p.paid?' · <span style="color:var(--muted)">Non payé</span>':''}
-          · <span style="color:${p.is_online?'#39ff7a':p.last_seen&&(Date.now()-new Date(p.last_seen).getTime())<30*60*1000?'#27AE60':'var(--muted)'}">●</span>
-          <span style="font-size:.65rem;color:var(--muted)">${p.is_online?'En ligne':p.last_seen?(function(){var d=Date.now()-new Date(p.last_seen).getTime();return d<60000?'il y a < 1 min':d<3600000?'il y a '+Math.floor(d/60000)+' min':d<86400000?'il y a '+Math.floor(d/3600000)+'h':new Date(p.last_seen).toLocaleDateString('fr-FR');}()):'Jamais connecté'}</span>
+          · <span style="color:${p.last_seen&&(Date.now()-new Date(p.last_seen).getTime())<5*60*1000?'#39ff7a':p.last_seen&&(Date.now()-new Date(p.last_seen).getTime())<30*60*1000?'#27AE60':'var(--muted)'}">●</span>
+          <span style="font-size:.65rem;color:var(--muted)">${(function(){if(!p.last_seen) return 'Jamais connecté';var d=Date.now()-new Date(p.last_seen).getTime();return d<5*60*1000?'En ligne':d<60000?'il y a < 1 min':d<3600000?'il y a '+Math.floor(d/60000)+' min':d<86400000?'il y a '+Math.floor(d/3600000)+'h':new Date(p.last_seen).toLocaleDateString('fr-FR');}())}</span>
         </div>
       </div>
       <div class="admin-actions" onclick="event.stopPropagation()">
@@ -6958,8 +6958,10 @@ function openAdminProfileDetail(id){
     +row('Email', p.email||'(voir auth.users)')
     +row('Inscrit le', p.created_at?new Date(p.created_at).toLocaleDateString('fr-FR'):'—')
     +(function(){
-      var dot=p.is_online?'🟢':'🔴';
-      var txt=p.is_online?'En ligne maintenant':p.last_seen?(function(){var d=Date.now()-new Date(p.last_seen).getTime();return d<60000?'Vu il y a < 1 min':d<3600000?'Vu il y a '+Math.floor(d/60000)+' min':d<86400000?'Vu il y a '+Math.floor(d/3600000)+'h':d<604800000?'Vu il y a '+Math.floor(d/86400000)+' j':'Vu le '+new Date(p.last_seen).toLocaleDateString('fr-FR');}()):'Jamais connecté';
+      var _d=p.last_seen?Date.now()-new Date(p.last_seen).getTime():null;
+      var isOnlineReal=_d!==null&&_d<5*60*1000;
+      var dot=isOnlineReal?'🟢':'🔴';
+      var txt=isOnlineReal?'En ligne maintenant':p.last_seen?(function(){var d=_d;return d<60000?'Vu il y a < 1 min':d<3600000?'Vu il y a '+Math.floor(d/60000)+' min':d<86400000?'Vu il y a '+Math.floor(d/3600000)+'h':d<604800000?'Vu il y a '+Math.floor(d/86400000)+' j':'Vu le '+new Date(p.last_seen).toLocaleDateString('fr-FR');}()):'Jamais connecté';
       return row('Statut connexion', dot+' '+txt);
     }())
     +'</div>'
