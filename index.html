@@ -3254,7 +3254,14 @@ async function loadProfilesFromDB(){
     };
   });
   // Mettre à jour statut en ligne
-  (data||[]).forEach(function(p){ if(p.is_online) onlineStatus[p.id]='online'; });
+  var _now=Date.now();
+  (data||[]).forEach(function(p){
+    if(!p.last_seen){ onlineStatus[p.id]='offline'; return; }
+    var d=_now-new Date(p.last_seen).getTime();
+    if(d < 5*60*1000)       onlineStatus[p.id]='online';
+    else if(d < 30*60*1000) onlineStatus[p.id]='recent';
+    else                    onlineStatus[p.id]='offline';
+  });
   console.log('loadProfilesFromDB: '+window._dbProfiles.length+' profils du genre opposé');
   renderTab(state.currentNav);
   // Mettre à jour les prénoms dans demandesEnvoyees maintenant que _dbProfiles est chargé
@@ -7065,7 +7072,6 @@ async function renderAdminRdv(c){
   }
 
   var h='<div style="padding:16px">'
-        +'<div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:10px 13px;margin-bottom:16px;font-size:.76rem;color:var(--muted)">'    +'&#128161; Les RDVs s&apos;affichent ici automatiquement via le webhook Cal.com. Table SQL requise&nbsp;: <code style="color:var(--gold)">rdv</code> avec colonnes user_id, attendee_name, attendee_email, rdv_date, cal_booking_uid.'    +'</div>'
     +'<div class="section-title" style="margin-bottom:8px">📅 RDV Frères ('+hommes.length+')</div>'
     +renderRdvSection(hommes,'frère')
     +'<div class="section-title" style="margin:16px 0 8px">📅 RDV Sœurs ('+femmes.length+')</div>'
