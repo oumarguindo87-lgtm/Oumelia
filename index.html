@@ -6151,6 +6151,14 @@ function renderAdminPending(c){
     var docsEnvoyes=p.docs_submitted===true;
     return hasDocsOrPending||docsEnvoyes;
   });
+  // Appliquer le cache call_validated
+  if(Object.keys(_callValidatedCache).length>0){
+    pending.forEach(function(p){
+      var cached=_callValidatedCache[String(p.id)];
+      if(cached==='true') p.call_validated=true;
+      else if(cached==='false') p.call_validated=false;
+    });
+  }
   var html=`<div style="padding:16px"><div class="section-title">⏳ En attente <span class="sc">${pending.length}</span></div>`;
   if(!pending.length) html+=`<p style="color:var(--muted);text-align:center;padding:28px">Aucun profil en attente ✓</p>`;
   pending.forEach(function(p){
@@ -6190,6 +6198,14 @@ function getAllAdminProfiles(){
   var dbRaw = window._adminProfiles || [];
 
   if(dbRaw.length > 0){
+    // Appliquer le cache call_validated avant tout rendu
+    if(Object.keys(_callValidatedCache).length>0){
+      dbRaw.forEach(function(p){
+        var cached=_callValidatedCache[String(p.id)];
+        if(cached==='true') p.call_validated=true;
+        else if(cached==='false') p.call_validated=false;
+      });
+    }
     // Convertir les données brutes Supabase en format unifié
     return dbRaw.map(function(p){
       return {
