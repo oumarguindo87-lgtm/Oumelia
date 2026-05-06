@@ -3871,8 +3871,17 @@ async function submitEdit(){
 async function pauseProfile(){
   closeModal('modal-pause');
   state.profilePaused=true;
-  if((state.user&&state.user.supabaseId)){
-    await getSB().from('profils').update({status:'paused'}).eq('user_id', state.user.supabaseId);
+  var uid=state.user&&state.user.supabaseId;
+  if(uid){
+    // SDK d'abord
+    var ok=false;
+    try{ var r=await getSB().from('profils').update({status:'paused'}).eq('user_id',uid); if(!r.error) ok=true; }catch(e){}
+    // Fallback fetch
+    if(!ok) fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({status:'paused'})
+    }).catch(function(){});
   }
   renderTab('profil');
   showToast('⏸ Profil mis en pause — vous êtes invisible','blue');
@@ -6836,8 +6845,6 @@ function audioValidate(){
     }
   });
   closeModal('modal-audio');
-  // Rafraîchir la liste pour afficher le bouton en vert
-  setTimeout(function(){ adminTab(state.activeAdminTab||'pending'); }, 1500);
 }
 
 function confirmAudioReject(){
@@ -6869,7 +6876,6 @@ function confirmAudioReject(){
   });
   closeModal('modal-audio');
   showToast('✗ Refus envoyé à '+(p&&p.prenom||'l\'inscrit(e)'),'red');
-  setTimeout(function(){ adminTab(state.activeAdminTab||'pending'); }, 1500);
 }
 
 function buyBoost(){
