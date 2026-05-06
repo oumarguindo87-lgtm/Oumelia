@@ -1990,6 +1990,7 @@ var ADMIN_EMAILS = [
 
 // ══════════ DONNÉES ══════════
 var allProfiles = [];
+var _callValidatedCache = {}; // Cache persistant pour call_validated
 
 var adminConvos = {};
 
@@ -3332,8 +3333,7 @@ function loadAllProfilesForAdmin(){
       window._adminProfiles = [];
       return;
     }
-    window._adminProfiles = data.map(function(p){
-      return {
+    window._adminProfiles = data.map(function(p){      return {
         id:           String(p.id||''),
         prenom:       p.prenom||'',
         gender:       p.gender||'',
@@ -3391,6 +3391,14 @@ function loadAllProfilesForAdmin(){
       };
     });
     console.log('Admin: '+window._adminProfiles.length+' profils chargés');
+    // Réappliquer le cache call_validated local
+    if(Object.keys(_callValidatedCache).length>0){
+      window._adminProfiles.forEach(function(p){
+        var cached=_callValidatedCache[String(p.id)];
+        if(cached==='true') p.call_validated=true;
+        else if(cached==='false') p.call_validated=false;
+      });
+    }
   })
   .catch(function(e){
     console.log('Admin exception:', e.message||e);
@@ -6825,6 +6833,7 @@ function audioValidate(){
   fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+pid,{method:'PATCH',headers:H,body:JSON.stringify({call_validated:true})}).catch(function(){});
   if(p) p.call_validated=true;
   if(window._adminProfiles){var _ap=(window._adminProfiles||[]).find(function(x){return String(x.id)===String(pid);});if(_ap)_ap.call_validated=true;}
+  _callValidatedCache[String(pid)]='true';
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
@@ -6859,6 +6868,7 @@ function confirmAudioReject(){
   fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+pid,{method:'PATCH',headers:H,body:JSON.stringify({call_validated:false})}).catch(function(){});
   if(p) p.call_validated=false;
   if(window._adminProfiles){var _ar=(window._adminProfiles||[]).find(function(x){return String(x.id)===String(pid);});if(_ar)_ar.call_validated=false;}
+  _callValidatedCache[String(pid)]='false';
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
