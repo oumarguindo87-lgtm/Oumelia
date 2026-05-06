@@ -6234,6 +6234,7 @@ function getAllAdminProfiles(){
         age_max: p.age_max || null,
         situation_recherche: p.situation_recherche || '',
         isDB: true,
+        call_validated: p.call_validated===true ? true : p.call_validated===false ? false : null,
       };
     });
   }
