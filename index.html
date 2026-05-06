@@ -3587,7 +3587,7 @@ function renderMyProfile(c){
             ${(state.user&&state.user.photo_url)?'<button onclick="deleteProfilePhoto()" style="flex:1;background:var(--dark);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:9px;font-size:.78rem;color:var(--red);cursor:pointer;font-family:\'Cairo\',sans-serif">🗑 Supprimer</button>':''}
           </div>
         </div>
-      </div>/div>
+      </div>
 
       <!-- Liens utiles -->
       <div class="profile-section" style="margin-top:12px">
@@ -6791,6 +6791,9 @@ function showAudioRejectConfirm(){
   document.getElementById('audio-main-btns').style.opacity='0.4';
   document.getElementById('audio-main-btns').style.pointerEvents='none';
 }
+
+// Alias pour compatibilité bouton HTML
+function audioRejectFn(){ confirmAudioReject(); }
 function hideAudioConfirms(){
   document.getElementById('audio-confirm-validate').style.display='none';
   document.getElementById('audio-confirm-reject').style.display='none';
@@ -6835,6 +6838,9 @@ function audioValidate(){
   closeModal('modal-audio');
   // Rafraîchir la liste pour afficher le bouton en vert
   setTimeout(function(){ adminTab(state.activeAdminTab||'pending'); }, 1500);
+}
+
+function confirmAudioReject(){
   var p=_audioVerifProfile;
   if(!p) p=(window._adminProfiles||[]).find(function(x){ return x.user_id===audioVerifId||String(x.id)===String(audioVerifId); });
   var pid=p?String(p.id):null;
