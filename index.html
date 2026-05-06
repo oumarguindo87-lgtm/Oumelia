@@ -5552,7 +5552,26 @@ function openProfileFromNotifDemande(notifId, profileId){
     if(btnAccept) btnAccept.onclick = function(){ overlay.remove(); acceptDemande(notifId); };
 
     var btnRefuse = document.getElementById('btn-refuser-demande');
-    if(btnRefuse) btnRefuse.onclick = function(){ overlay.remove(); refuseDemande(notifId); };
+    if(btnRefuse) btnRefuse.onclick = function(){
+      // Afficher champ raison (facultatif)
+      var existing=document.getElementById('refuse-reason-block');
+      if(existing){ existing.remove(); return; }
+      var block=document.createElement('div');
+      block.id='refuse-reason-block';
+      block.style.cssText='margin-top:12px;background:rgba(231,76,60,.06);border:1px solid rgba(231,76,60,.2);border-radius:10px;padding:12px';
+      block.innerHTML='<div style="font-size:.78rem;color:var(--red);font-weight:600;margin-bottom:6px">Raison du refus <span style="font-weight:400;color:var(--muted)">(facultatif)</span></div>'+
+        '<textarea id="refuse-reason-text" rows="2" placeholder="Ex: Profil ne correspond pas à mes critères..." style="width:100%;background:var(--dark);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:8px;color:var(--white);font-family:\'Cairo\',sans-serif;font-size:.78rem;resize:vertical;margin-bottom:8px"></textarea>'+
+        '<div style="display:flex;gap:8px">'+
+          '<button onclick="document.getElementById(\'refuse-reason-block\').remove()" style="flex:1;background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px;font-size:.76rem;cursor:pointer">Annuler</button>'+
+          '<button id="btn-confirm-refuse" style="flex:1;background:rgba(231,76,60,.15);color:var(--red);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:7px;font-size:.76rem;font-weight:700;cursor:pointer">✗ Confirmer le refus</button>'+
+        '</div>';
+      btnRefuse.parentElement.appendChild(block);
+      document.getElementById('btn-confirm-refuse').onclick=function(){
+        var reason=document.getElementById('refuse-reason-text').value.trim();
+        overlay.remove();
+        refuseDemande(notifId, reason);
+      };
+    };
 
     var btnAnnuler = document.getElementById('btn-annuler-demande');
     if(btnAnnuler) btnAnnuler.onclick = function(){ overlay.remove(); refuseDemande(notifId); };
@@ -5618,7 +5637,7 @@ function acceptDemandeFromModal(notifId){
   acceptDemande(notifId);
 }
 
-async function refuseDemande(notifId){
+async function refuseDemande(notifId, reason){
   var n=userNotifs.find(function(x){return x.id===notifId;});
   if(!n) return;
   var wasAccepted = n.statut==='acceptee';
@@ -5643,7 +5662,7 @@ async function refuseDemande(notifId){
     // Notifier l'expéditeur
     var msg=wasAccepted
       ?(state.user.prenom||'Quelqu\'un')+' a annul\u00e9 l\'acceptation de votre demande de mise en relation'
-      :(state.user.prenom||'Quelqu\'un')+' a refus\u00e9 votre demande de mise en relation';
+      :(state.user.prenom||'Quelqu\'un')+' a refus\u00e9 votre demande de mise en relation'+(reason?'. '+reason:'');
     fetch(SUPABASE_URL+'/rest/v1/notifications',{
       method:'POST',
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
@@ -6234,6 +6253,14 @@ function filterByStatus(status){
 }
 
 function buildUserList(list){
+  // Réappliquer le cache call_validated avant rendu
+  if(Object.keys(_callValidatedCache).length>0){
+    list.forEach(function(p){
+      var cached=_callValidatedCache[String(p.id)];
+      if(cached==='true') p.call_validated=true;
+      else if(cached==='false') p.call_validated=false;
+    });
+  }
   var filtered=adminStatusFilter&&adminStatusFilter!=='all'?list.filter(function(p){return p.status===adminStatusFilter;}):list;
   if(!filtered.length) return `<div style="text-align:center;color:var(--muted);padding:30px;font-size:.84rem">Aucun profil dans cette catégorie</div>`;
   return filtered.map(function(p){
