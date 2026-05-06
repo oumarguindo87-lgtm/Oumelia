@@ -5155,12 +5155,24 @@ function sendUserMsg(name){
 var currentDemandeTarget='';
 function openDemandeModal(prenom){
   if(!state.profileActive){openModal('modal-paywall');return;}
-  // Vérifier si déjà envoyé une demande (par prénom ou ID)
-
-
-
-
-  // Compter les demandes EN ATTENTE (pas acceptées)
+  // Vérifier si déjà envoyé une demande à ce profil
+  var _alreadySent = prenom && (demandesEnvoyees[prenom]==='en_attente'||demandesEnvoyees[prenom]==='acceptee');
+  if(!_alreadySent){
+    // Chercher aussi par ID dans demandesEnvoyees
+    var _keys=Object.keys(demandesEnvoyees);
+    for(var _ki=0;_ki<_keys.length;_ki++){
+      var _k=_keys[_ki];
+      if(_k.indexOf('_id_')===0 && (demandesEnvoyees[_k]==='en_attente'||demandesEnvoyees[_k]==='acceptee')){
+        var _pid=_k.replace('_id_','');
+        var _p=(getVisibleProfiles()||[]).find(function(pp){return String(pp.id)===_pid&&pp.prenom===prenom;});
+        if(_p){ _alreadySent=true; break; }
+      }
+    }
+  }
+  if(_alreadySent){
+    showToast('⏳ Vous avez déjà envoyé une demande à '+prenom,'red');
+    return;
+  }  // Compter les demandes EN ATTENTE (pas acceptées)
   // Compteur: diminue SEULEMENT si la demande est ACCEPTÉE
   var acceptedCount=Object.keys(demandesEnvoyees).filter(function(k){return k.indexOf('_id_')!==0;}).map(function(k){return demandesEnvoyees[k];}).filter(function(d){return d==='acceptee';}).length;
   var pendingCount=Object.keys(demandesEnvoyees).filter(function(k){return k.indexOf('_id_')!==0;}).map(function(k){return demandesEnvoyees[k];}).filter(function(d){return d==='en_attente';}).length;
@@ -7177,10 +7189,8 @@ async function renderAdminRdv(c){
           +(rdv.attendee_name?'<div style="font-size:.74rem;color:var(--muted);margin-top:2px">👤 '+rdv.attendee_name+'</div>':'')
           +(rdv.attendee_email?'<div style="font-size:.74rem;color:var(--muted)">✉️ '+rdv.attendee_email+'</div>':'')
           +'</div>';
-      } else if(p.status==='rdv_planifie'){
-        rdvBlock='<div style="margin-top:8px;background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.2);border-radius:8px;padding:8px 11px;font-size:.78rem;color:#2ecc71">✅ RDV confirmé (détails non encore reçus)</div>';
       } else {
-        rdvBlock='<button onclick="event.stopPropagation();openCalEmbed()" style="display:block;width:100%;margin-top:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);border-radius:8px;padding:9px;font-size:.8rem;font-weight:700;text-align:center;cursor:pointer">&#128197; Planifier l&#39;entretien</button>';
+        rdvBlock='<div style="margin-top:8px;background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.2);border-radius:8px;padding:8px 11px;font-size:.78rem;color:#2ecc71">✅ RDV confirmé — en attente des détails</div>';
       }
       return '<div class="dossier-card" onclick="openAdminProfileDetail('+p.id+')" style="cursor:pointer">'
         +'<div class="d-name">'+(p.prenom||'—')+', '+(p.age||'—')+' ans</div>'
