@@ -1763,9 +1763,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 
 Votre attestation audio a bien été validée ✅
 
-Si vous n'avez pas encore envoyé vos documents (pièce d'identité), faites-le dès maintenant depuis votre espace personnel.
-
-Ensuite, planifiez votre entretien via le lien qui s'affichera selon votre profil.
+Planifiez maintenant votre entretien via le lien qui s'affichera selon votre profil.
 
 Barak'Allahu fikoum — L'équipe Oumélia</div>
       <div style="display:flex;gap:8px">
@@ -6781,7 +6779,7 @@ function showAudioValidateConfirm(){
   var calLink=g==='femme'?'https://cal.com/oumelia-femme/15min':'https://cal.com/oumelia-zawaj/25min';
   var resp=g==='femme'?'notre administratrice':'notre administrateur';
   var preview=document.getElementById('audio-validate-preview');
-  if(preview) preview.textContent='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nSi vous n\'avez pas encore envoyé vos documents (pièce d\'identité), faites-le dès maintenant depuis votre espace personnel.\n\nEnsuite, planifiez votre entretien avec '+resp+' via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  if(preview) preview.textContent='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nPlanifiez maintenant votre entretien avec '+resp+' via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   document.getElementById('audio-confirm-validate').style.display='block';
   document.getElementById('audio-confirm-reject').style.display='none';
   document.getElementById('audio-main-btns').style.opacity='0.4';
@@ -6809,7 +6807,7 @@ function audioValidate(){
   var g=p&&p.gender;
   var calLink=g==='femme'?'https://cal.com/oumelia-femme/15min':'https://cal.com/oumelia-zawaj/25min';
   var resp=g==='femme'?'notre administratrice':'notre administrateur';
-  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nSi vous n\'avez pas encore envoyé vos documents (pièce d\'identité), faites-le dès maintenant depuis votre espace personnel.\n\nEnsuite, planifiez votre entretien avec '+resp+' via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio a bien été validée ✅\n\nPlanifiez maintenant votre entretien avec '+resp+' via ce lien :\n\n'+calLink+'\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
   // Marquer call_validated=true pour changer la couleur du bouton audio
   fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+pid,{method:'PATCH',headers:H,body:JSON.stringify({call_validated:true})}).catch(function(){});
@@ -6824,10 +6822,8 @@ function audioValidate(){
     else showToast('❌ Erreur envoi message','red');
   }).catch(function(e){ console.log('audioValidate err:',e); showToast('❌ Erreur réseau','red'); });
   closeModal('modal-audio');
-  adminTab(state.activeAdminTab||'pending');
-}
-
-function audioRejectFn(){
+  // Rafraîchir la liste pour afficher le bouton en vert
+  setTimeout(function(){ adminTab(state.activeAdminTab||'pending'); }, 300);
   var p=_audioVerifProfile;
   if(!p) p=(window._adminProfiles||[]).find(function(x){ return x.user_id===audioVerifId||String(x.id)===String(audioVerifId); });
   var pid=p?String(p.id):null;
@@ -6835,7 +6831,7 @@ function audioRejectFn(){
   var reasonEl=document.getElementById('audio-reject-reason');
   var reason=reasonEl?reasonEl.value.trim():'';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
-  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio n\'a pas pu être validée.'+(reason?'\n\nRaison : '+reason:'')+'\n\nMerci d\'en enregistrer une nouvelle depuis votre espace personnel (onglet Documents).\n\nVeuillez répéter exactement :\n\n« J\'atteste devant Allah de l\'exactitude de mes informations. »\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
+  var msgTexte='Barak\'Allahu fik.\n\nVotre attestation audio n\'a pas pu être validée.'+(reason?'\n\nRaison : '+reason:'')+'\n\nMerci d\'en enregistrer une nouvelle depuis votre espace personnel.\n\nVeuillez répéter exactement :\n\n« J\'atteste devant Allah de l\'exactitude de mes informations. »\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+pid,{method:'PATCH',headers:H,body:JSON.stringify({call_validated:false})}).catch(function(){});
   if(p) p.call_validated=false;
   if(window._adminProfiles){var _ar=(window._adminProfiles||[]).find(function(x){return String(x.id)===String(pid);});if(_ar)_ar.call_validated=false;}
