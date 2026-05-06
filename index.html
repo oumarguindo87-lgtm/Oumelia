@@ -2668,7 +2668,7 @@ async function doRegister(){
         boosted: false,
         audio_attested: profileData.audio_attested,
         is_online: true,
-        last_seen: profileData.last_seen,
+        last_seen: new Date().toISOString(),
       };
       var { data: insertData2, error: err2 } = await sb.from('profils').insert(profileDataBasic).select().single();
       if(err2){ showToast('❌ Erreur: '+err2.message,'red'); return; }
