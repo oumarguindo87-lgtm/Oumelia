@@ -1878,7 +1878,7 @@ function loadUserProfile(authUser){
       qamis_recherche:profile.qamis_recherche||'',
       polygamie_recherche:profile.polygamie_recherche||''};
     state.profileActive  = profile.status==='active';
-    state.profilePaused  = profile.status==='paused';
+    state.profilePaused  = profile.status==='paused' || profile.status==='inactive';
     state.profileStatus  = profile.status || 'pending';  // statut brut complet
     state.gender=profile.gender;
     console.log('Profil:',profile.prenom,'id='+profile.id);
@@ -1990,7 +1990,10 @@ var ADMIN_EMAILS = [
 
 // ══════════ DONNÉES ══════════
 var allProfiles = [];
-var _callValidatedCache = {}; // Cache persistant pour call_validated
+// Cache persistant call_validated — chargé depuis localStorage
+var _callValidatedCache = (function(){
+  try{ return JSON.parse(localStorage.getItem('_cvCache')||'{}'); }catch(e){ return {}; }
+}());
 
 var adminConvos = {};
 
@@ -6649,9 +6652,13 @@ async function approveProfileFromDash(id){
 
 async function deactivateProfile(id){
   var p=getAdminProfile(id); if(!p) return;
-  p.status='inactive';
-  if(p.user_id) await getSB().from('profils').update({status:'inactive'}).eq('id',id);
-  showToast(`⏸ ${p.prenom} désactivé`,'red');
+  p.status='paused';
+  if(p.user_id) fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id,{
+    method:'PATCH',
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({status:'paused'})
+  }).catch(function(){});
+  showToast('⏸ '+p.prenom+' mis en pause','red');
   adminTab(state.activeAdminTab);
 }
 
@@ -6878,6 +6885,7 @@ function audioValidate(){
   if(p) p.call_validated=true;
   if(window._adminProfiles){var _ap=(window._adminProfiles||[]).find(function(x){return String(x.id)===String(pid);});if(_ap)_ap.call_validated=true;}
   _callValidatedCache[String(pid)]='true';
+  try{localStorage.setItem('_cvCache',JSON.stringify(_callValidatedCache));}catch(e){}
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
@@ -6913,6 +6921,7 @@ function confirmAudioReject(){
   if(p) p.call_validated=false;
   if(window._adminProfiles){var _ar=(window._adminProfiles||[]).find(function(x){return String(x.id)===String(pid);});if(_ar)_ar.call_validated=false;}
   _callValidatedCache[String(pid)]='false';
+  try{localStorage.setItem('_cvCache',JSON.stringify(_callValidatedCache));}catch(e){}
   fetch(SUPABASE_URL+'/rest/v1/messages',{
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
