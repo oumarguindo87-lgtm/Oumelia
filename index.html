@@ -6821,9 +6821,20 @@ function audioValidate(){
     if(r.ok) showToast('✅ Audio validé — message envoyé à '+(p.prenom||'l\'inscrit(e)'),'green');
     else showToast('❌ Erreur envoi message','red');
   }).catch(function(e){ console.log('audioValidate err:',e); showToast('❌ Erreur réseau','red'); });
+  // Mettre à jour visuellement le bouton audio dans le DOM directement
+  var audioBtns=document.querySelectorAll('.btn-tiny.audio');
+  audioBtns.forEach(function(btn){
+    var onclick=btn.getAttribute('onclick')||'';
+    if(onclick.indexOf(audioVerifId)!==-1||onclick.indexOf(String(pid))!==-1){
+      btn.style.background='rgba(46,204,113,.2)';
+      btn.style.color='#2ecc71';
+      btn.style.borderColor='rgba(46,204,113,.5)';
+      btn.title='Audio validé ✅';
+    }
+  });
   closeModal('modal-audio');
   // Rafraîchir la liste pour afficher le bouton en vert
-  setTimeout(function(){ adminTab(state.activeAdminTab||'pending'); }, 300);
+  setTimeout(function(){ adminTab(state.activeAdminTab||'pending'); }, 1500);
   var p=_audioVerifProfile;
   if(!p) p=(window._adminProfiles||[]).find(function(x){ return x.user_id===audioVerifId||String(x.id)===String(audioVerifId); });
   var pid=p?String(p.id):null;
@@ -6839,9 +6850,20 @@ function audioValidate(){
     method:'POST', headers:H,
     body:JSON.stringify({from_id:'admin',to_id:pid,from_prenom:'Oumélia',content:msgTexte,lu:false})
   }).then(function(r){ console.log('audioReject msg:',r.status); }).catch(function(){});
+  // Mettre à jour visuellement le bouton audio en rouge dans le DOM
+  var audioBtnsR=document.querySelectorAll('.btn-tiny.audio');
+  audioBtnsR.forEach(function(btn){
+    var onclick=btn.getAttribute('onclick')||'';
+    if(onclick.indexOf(audioVerifId)!==-1||onclick.indexOf(String(pid))!==-1){
+      btn.style.background='rgba(231,76,60,.2)';
+      btn.style.color='#e74c3c';
+      btn.style.borderColor='rgba(231,76,60,.5)';
+      btn.title='Audio refusé ✗';
+    }
+  });
   closeModal('modal-audio');
   showToast('✗ Refus envoyé à '+(p&&p.prenom||'l\'inscrit(e)'),'red');
-  adminTab(state.activeAdminTab||'pending');
+  setTimeout(function(){ adminTab(state.activeAdminTab||'pending'); }, 1500);
 }
 
 function buyBoost(){
@@ -7893,11 +7915,22 @@ function toggleRerecordAudio(){
 function submitRerecordAudio(){
   if(!_rerecordBlob){ showToast('⚠ Enregistrez d\'abord votre attestation','red'); return; }
   var uid=state.user&&state.user.supabaseId;
-  if(!uid){ showToast('❌ Session invalide','red'); return; }
+  var pid=state.user&&state.user.id;
+  console.log('submitRerecordAudio uid:',uid,'pid:',pid);
+  if(!uid){ showToast('❌ Session invalide — reconnectez-vous','red'); return; }
   showToast('⏳ Envoi de l\'attestation...','gold');
   var STORAGE_BASE=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1';
-  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'x-upsert':'true','Content-Type':'audio/mp4'};
-  fetch(STORAGE_BASE+'/object/attestations/'+uid+'.mp4',{method:'POST',headers:H,body:_rerecordBlob})
+  var Hup={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'x-upsert':'true','Content-Type':'audio/mp4'};
+  // Essayer PUT (upsert) d'abord, puis POST si échoue
+  fetch(STORAGE_BASE+'/object/attestations/'+uid+'.mp4',{method:'PUT',headers:Hup,body:_rerecordBlob})
+  .then(function(r){
+    console.log('Audio upload PUT:',r.status);
+    if(r.status===404||r.status===405){
+      // Fallback POST
+      return fetch(STORAGE_BASE+'/object/attestations/'+uid+'.mp4',{method:'POST',headers:Hup,body:_rerecordBlob});
+    }
+    return r;
+  })
   .then(function(r){
     if(r.ok){
       var pid=state.user&&state.user.id;
