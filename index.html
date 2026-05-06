@@ -7900,12 +7900,21 @@ function submitRerecordAudio(){
   fetch(STORAGE_BASE+'/object/attestations/'+uid+'.mp4',{method:'POST',headers:H,body:_rerecordBlob})
   .then(function(r){
     if(r.ok){
-      // Marquer audio_attested = true
+      var pid=state.user&&state.user.id;
+      var H2={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+      // Remettre call_validated à null (en attente de nouvelle vérification) + audio_attested = true
       fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
-        method:'PATCH',
-        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
-        body:JSON.stringify({audio_attested:true})
+        method:'PATCH', headers:H2,
+        body:JSON.stringify({audio_attested:true, call_validated:null})
       }).catch(function(){});
+      // Envoyer un message à l'admin pour le prévenir
+      if(pid){
+        var prenom=state.user&&state.user.prenom||'Un inscrit';
+        fetch(SUPABASE_URL+'/rest/v1/messages',{
+          method:'POST', headers:H2,
+          body:JSON.stringify({from_id:String(pid),to_id:'admin',from_prenom:prenom,content:prenom+' a enregistré une nouvelle attestation audio. Merci de la vérifier dans son dossier.',lu:false})
+        }).catch(function(){});
+      }
       showToast('✅ Attestation envoyée — notre équipe va la vérifier','green');
       var btn=document.getElementById('rec-btn-rerecord');
       var preview=document.getElementById('rec-preview-rerecord');
@@ -7914,6 +7923,9 @@ function submitRerecordAudio(){
       if(btn) btn.disabled=true;
       if(preview) preview.style.display='none';
       if(status) status.textContent='✅ En attente de vérification par notre équipe';
+      // Cacher la section re-enregistrement
+      var wrap=document.getElementById('profil-rerecord-audio-wrap');
+      if(wrap) wrap.style.display='none';
     } else { showToast('❌ Erreur envoi audio','red'); }
   }).catch(function(){ showToast('❌ Erreur réseau','red'); });
 }
