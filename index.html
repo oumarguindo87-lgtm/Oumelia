@@ -7773,9 +7773,44 @@ function openCalEmbed(){
   var closeBtn=document.createElement('button');
   closeBtn.textContent='×';
   closeBtn.style.cssText='background:none;border:none;color:#aaa;font-size:1.5rem;cursor:pointer;line-height:1;padding:4px';
-  closeBtn.onclick=function(){ document.getElementById('cal-fullpage').remove(); };
+
+  // Fonction pour marquer le RDV planifié
+  function _markRdvPlanifie(){
+    var uid=state.user&&state.user.supabaseId;
+    var pid=state.user&&state.user.id;
+    if(!uid) return;
+    if(state.user&&state.user.status==='rdv_planifie') return; // déjà fait
+    fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({status:'rdv_planifie'})
+    }).then(function(r){
+      if(r.ok && state.user){ state.user.status='rdv_planifie'; showToast('✅ Entretien planifié !','green'); }
+    }).catch(function(){});
+  }
+
+  closeBtn.onclick=function(){
+    var el=document.getElementById('cal-fullpage');
+    if(el) el.remove();
+    // Marquer RDV planifié à la fermeture si status en_attente_rdv
+    if(state.user&&(state.user.status==='en_attente_rdv'||state.user.status==='pending')){
+      _markRdvPlanifie();
+    }
+  };
   header.appendChild(closeBtn);
   overlay.appendChild(header);
+
+  // Écouter les messages Cal.com (booking.created)
+  function _calListener(e){
+    if(!e.data) return;
+    var d=typeof e.data==='string'?{}:e.data;
+    if(d.type==='booking.created'||d.type==='CAL:booking_created'||(d.payload&&d.payload.type==='booking')){
+      _markRdvPlanifie();
+    }
+  }
+  window.addEventListener('message',_calListener);
+  overlay._calListener=_calListener;
+
   // iframe
   var iframe=document.createElement('iframe');
   var _calGender = state.user && state.user.gender;
