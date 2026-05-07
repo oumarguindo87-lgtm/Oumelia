@@ -3913,6 +3913,18 @@ async function deleteAccount(){
   closeModal('modal-delete');
   showToast('🗑️ Suppression en cours...','red');
   if((state.user&&state.user.supabaseId)){
+    // Sauvegarder les infos avant suppression pour l'admin
+    var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+    fetch(SUPABASE_URL+'/rest/v1/deleted_accounts',{
+      method:'POST', headers:H,
+      body:JSON.stringify({
+        prenom: state.user.prenom||'Inconnu',
+        gender: state.user.gender||'',
+        age: state.user.age||null,
+        email: state.user.email||'',
+        deleted_at: new Date().toISOString()
+      })
+    }).catch(function(){});
     // Supprimer le profil et toutes les données liées
     await getSB().from('demandes').delete().or(`from_profile_id.eq.${state.user.id},to_profile_id.eq.${state.user.id}`);
     await getSB().from('messages').delete().or(`from_id.eq.${state.user.id},to_id.eq.${state.user.id}`);
@@ -8398,7 +8410,45 @@ async function adminValidateAfterCall(id,prenom){
   showToast('✅ '+prenom+' validé — notification envoyée','green');
   adminTab('dossiers');
 }
-function renderAdminBans(c){var bans=_bannedPhones;var h='<div style="padding:16px"><div class="section-title">🚫 Numéros bannis ('+bans.length+')</div><div class="ban-form"><div style="font-weight:700;font-size:.88rem;margin-bottom:12px;color:var(--gold)">Bannir un numéro</div><div style="display:flex;gap:8px"><input type="tel" id="ban-phone-input" placeholder="+33 6 xx" style="flex:1;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--white);font-size:.88rem;font-family:\'Cairo\',sans-serif"><input type="text" id="ban-reason-input" placeholder="Raison" style="flex:1.5;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--white);font-size:.88rem;font-family:\'Cairo\',sans-serif"></div><button onclick="addBan()" style="width:100%;margin-top:10px;background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">🚫 Bannir définitivement</button></div>';if(!bans.length)h+='<p style="text-align:center;color:var(--muted);padding:20px">Aucun numéro banni</p>';else bans.forEach(function(b,i){h+='<div class="ban-row"><div><div style="font-weight:600;font-size:.86rem">'+b.phone+'</div><div style="font-size:.72rem;color:var(--muted)">'+(b.name||'')+(b.reason?' · '+b.reason:'')+(b.date?' · '+b.date:'')+'</div></div><button class="unban-btn" onclick="removeBan('+i+')">Débannir</button></div>';});h+='</div>';c.innerHTML=h;}
+function renderAdminBans(c){
+  var bans=_bannedPhones;
+  var h='<div style="padding:16px"><div class="section-title">🚫 Numéros bannis ('+bans.length+')</div><div class="ban-form"><div style="font-weight:700;font-size:.88rem;margin-bottom:12px;color:var(--gold)">Bannir un numéro</div><div style="display:flex;gap:8px"><input type="tel" id="ban-phone-input" placeholder="+33 6 xx" style="flex:1;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--white);font-size:.88rem;font-family:\'Cairo\',sans-serif"><input type="text" id="ban-reason-input" placeholder="Raison" style="flex:1.5;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--white);font-size:.88rem;font-family:\'Cairo\',sans-serif"></div><button onclick="addBan()" style="width:100%;margin-top:10px;background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">🚫 Bannir définitivement</button></div>';
+  if(!bans.length) h+='<p style="text-align:center;color:var(--muted);padding:20px">Aucun numéro banni</p>';
+  else bans.forEach(function(b,i){ h+='<div class="ban-row"><div><div style="font-weight:600;font-size:.86rem">'+b.phone+'</div><div style="font-size:.72rem;color:var(--muted)">'+(b.name||'')+(b.reason?' · '+b.reason:'')+(b.date?' · '+b.date:'')+'</div></div><button class="unban-btn" onclick="removeBan('+i+')">Débannir</button></div>'; });
+
+  // Comptes supprimés
+  h+='<div class="section-title" style="margin-top:20px">🗑️ Comptes supprimés</div>';
+  h+='<div id="deleted-accounts-list"><p style="color:var(--muted);text-align:center;padding:12px">Chargement...</p></div>';
+  h+='</div>';
+  c.innerHTML=h;
+
+  // Charger les comptes supprimés
+  fetch(SUPABASE_URL+'/rest/v1/deleted_accounts?select=*&order=deleted_at.desc',{
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  }).then(function(r){return r.json();}).then(function(data){
+    var el=document.getElementById('deleted-accounts-list');
+    if(!el) return;
+    if(!Array.isArray(data)||!data.length){
+      el.innerHTML='<p style="color:var(--muted);text-align:center;padding:12px">Aucun compte supprimé</p>';
+      return;
+    }
+    var dh='';
+    data.forEach(function(d){
+      var date=d.deleted_at?new Date(d.deleted_at).toLocaleDateString('fr-FR'):'';
+      dh+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--card);border-radius:10px;margin-bottom:8px">';
+      dh+='<div>';
+      dh+='<div style="font-weight:600;font-size:.86rem">'+(d.prenom||'Inconnu')+(d.age?', '+d.age+' ans':'')+(d.gender?' · '+(d.gender==='femme'?'Sœur':'Frère'):'')+'</div>';
+      dh+='<div style="font-size:.72rem;color:var(--muted)">'+(d.email||'')+(date?' · Supprimé le '+date:'')+'</div>';
+      dh+='</div>';
+      dh+='<span style="font-size:1.2rem">🗑️</span>';
+      dh+='</div>';
+    });
+    el.innerHTML=dh;
+  }).catch(function(){ 
+    var el=document.getElementById('deleted-accounts-list');
+    if(el) el.innerHTML='<p style="color:var(--muted);text-align:center;padding:12px">Table non créée</p>';
+  });
+}
 function addBan(){var phone=((document.getElementById('ban-phone-input')&&document.getElementById('ban-phone-input').value)||'').trim();var reason=((document.getElementById('ban-reason-input')&&document.getElementById('ban-reason-input').value)||'').trim();if(!phone){showToast('⚠ Entrez un numéro','red');return;}if(_bannedPhones.some(function(b){return b.phone===phone;})){showToast('Déjà banni','red');return;}_bannedPhones.push({phone:phone,reason:reason,date:new Date().toLocaleDateString('fr-FR'),name:''});saveBans();showToast('🚫 '+phone+' banni','red');adminTab('bans');}
 function banPhone(phone,name){if(!phone)return;if(_bannedPhones.some(function(b){return b.phone===phone;})){showToast('Déjà banni','red');return;}_bannedPhones.push({phone:phone,reason:'Fraude',date:new Date().toLocaleDateString('fr-FR'),name:name||''});saveBans();showToast('🚫 '+phone+' banni','red');adminTab('dossiers');}
 function removeBan(i){var b=_bannedPhones[i];if(!b)return;if(!confirm('Débannir '+b.phone+' ?'))return;_bannedPhones.splice(i,1);saveBans();adminTab('bans');}
