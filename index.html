@@ -3038,10 +3038,23 @@ function renderExplorerList(){
 function getCompatibilityScore(profile){
   var u=state.user; if(!u) return 0;
   var score=0;
+
+  // ── Critères éliminatoires basés sur ce que JE cherche ──
+  if(u.situation_recherche&&u.situation_recherche!=='Peu importe'){
+    var _sits=u.situation_recherche.split(',').map(function(s){return s.trim();});
+    if(_sits.length&&_sits[0]!==''&&_sits[0]!=='Peu importe'&&_sits.indexOf(profile.situation)<0) return -1;
+  }
+  if(u.age_min&&profile.age&&profile.age<parseInt(u.age_min)) return -1;
+  if(u.age_max&&profile.age&&profile.age>parseInt(u.age_max)) return -1;
+  if(u.origine_recherche&&u.origine_recherche!=='Peu importe'&&profile.origine!==u.origine_recherche) return -1;
+  if(u.pratique_recherche&&u.pratique_recherche!=='Peu importe'&&profile.pratique!==u.pratique_recherche) return -1;
+  if(u.enfants_recherche&&u.enfants_recherche!=='Peu importe'&&profile.veut_enfants!==u.enfants_recherche) return -1;
+  if(u.gender==='femme'&&u.barbe_recherche&&u.barbe_recherche!=='Peu importe'&&profile.barbe!==u.barbe_recherche) return -1;
+
+  // ── Score de compatibilité ──
   if(profile.pratique===u.pratique) score+=30;
   if(profile.madhhab===u.madhhab||profile.madhhab==='Peu importe'||u.madhhab==='Peu importe') score+=20;
   if(profile.veut_enfants===u.veut_enfants) score+=20;
-  // Compatibilité d'origine : même origine = 20pts, même groupe culturel = 10pts
   if(profile.origine===u.origine){
     score+=20;
   } else {
@@ -4390,7 +4403,7 @@ function getVisibleProfiles(){
     });
   } else if(currentSort==='compatible'){
     // Seulement les profils avec un score de compatibilité >= 30
-    list=list.filter(function(p){return getCompatibilityScore(p)>=30;});
+    list=list.filter(function(p){var s=getCompatibilityScore(p);return s>=30;});
     list.sort(function(a,b){return getCompatibilityScore(b)-getCompatibilityScore(a);});
   }
   return list;
@@ -5524,29 +5537,69 @@ function openProfileFromNotifDemande(notifId, profileId){
       statusHtml = '<div style="background:rgba(192,57,43,.1);border-radius:8px;padding:10px;text-align:center;margin-bottom:14px"><p style="color:var(--red)">✗ Demande refusée</p></div>';
     }
 
-    // Infos profil
+    // Infos profil — rendu complet identique au swipe popup
     var infoHtml = '<div style="text-align:center;padding:20px;color:var(--muted)">Profil non disponible</div>';
     if(profile){
+      var p = profile;
+      // En-tête avatar + nom
       infoHtml =
         '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">' +
           av +
-          '<div><div style="font-size:1.1rem;font-weight:600">' + (profile.prenom||'—') + ', ' + (profile.age||'—') + ' ans</div>' +
-          '<div style="color:var(--muted);font-size:.82rem">📍 ' + (profile.ville||'—') + ' · ' + (profile.origine||'—') + '</div></div>' +
+          '<div>' +
+            '<div style="font-size:1.1rem;font-weight:600">' + (p.prenom||'—') + (p.age ? ', ' + p.age + ' ans' : '') + '</div>' +
+            '<div style="color:var(--muted);font-size:.82rem">📍 ' + (p.ville||'—') + (p.origine ? ' · ' + p.origine : '') + '</div>' +
+          '</div>' +
         '</div>' +
+        // Tags pratique
         '<div class="profile-tags" style="margin-bottom:12px">' +
-          '<span class="tag gold">' + (profile.pratique||'—') + '</span>' +
-          (profile.voile ? '<span class="tag">'+profile.voile+'</span>' : '') +
-          (profile.barbe ? '<span class="tag">'+profile.barbe+'</span>' : '') +
-          (profile.madhhab && profile.madhhab!=='Peu importe' ? '<span class="tag">'+profile.madhhab+'</span>' : '') +
+          (p.pratique ? '<span class="tag gold">' + p.pratique + '</span>' : '') +
+          (p.voile ? '<span class="tag">' + p.voile + '</span>' : '') +
+          (p.barbe ? '<span class="tag">' + p.barbe + '</span>' : '') +
+          (p.madhhab && p.madhhab !== 'Peu importe' ? '<span class="tag">' + p.madhhab + '</span>' : '') +
         '</div>' +
-        (profile.bio ? '<p style="font-size:.84rem;color:var(--muted);line-height:1.6;margin-bottom:12px;padding:10px;background:var(--card2);border-radius:8px">' + profile.bio + '</p>' : '') +
-        '<div style="background:var(--card2);border-radius:8px;padding:10px;margin-bottom:12px">' +
-          '<div class="profile-detail-row"><span>Situation</span><span>' + (profile.situation||'—') + '</span></div>' +
-          '<div class="profile-detail-row"><span>Madhhab</span><span>' + (profile.madhhab||'—') + '</span></div>' +
-          '<div class="profile-detail-row"><span>Coran</span><span>' + (profile.coran||'—') + '</span></div>' +
-          '<div class="profile-detail-row"><span>Alimentation</span><span>' + (profile.halal||'—') + '</span></div>' +
-          '<div class="profile-detail-row"><span>Enfants</span><span>' + (profile.enfants==='oui'?'A des enfants':'Sans enfants') + '</span></div>' +
-          '<div class="profile-detail-row"><span>Veut enfants</span><span>' + (profile.veut_enfants||'—') + '</span></div>' +
+        // Section infos générales
+        '<div class="profile-section">' +
+          '<h4>Informations générales</h4>' +
+          (p.age ? '<div class="profile-detail-row"><span>Âge</span><span>' + p.age + ' ans</span></div>' : '') +
+          (p.ville ? '<div class="profile-detail-row"><span>Ville</span><span>' + p.ville + '</span></div>' : '') +
+          (p.pays ? '<div class="profile-detail-row"><span>Pays</span><span>' + p.pays + '</span></div>' : '') +
+          (p.origine ? '<div class="profile-detail-row"><span>Origine</span><span>' + p.origine + '</span></div>' : '') +
+          (p.situation ? '<div class="profile-detail-row"><span>Situation</span><span>' + p.situation + '</span></div>' : '') +
+          (p.enfants ? '<div class="profile-detail-row"><span>A des enfants</span><span>' + p.enfants + '</span></div>' : '') +
+          (p.veut_enfants ? '<div class="profile-detail-row"><span>Veut des enfants</span><span>' + p.veut_enfants + '</span></div>' : '') +
+          (p.profession ? '<div class="profile-detail-row"><span>Profession</span><span>' + p.profession + '</span></div>' : '') +
+          (p.niveau_etudes ? '<div class="profile-detail-row"><span>Études</span><span>' + p.niveau_etudes + '</span></div>' : '') +
+          (p.taille ? '<div class="profile-detail-row"><span>Taille</span><span>' + p.taille + ' cm</span></div>' : '') +
+        '</div>' +
+        // Section pratique religieuse
+        '<div class="profile-section">' +
+          '<h4>Pratique religieuse</h4>' +
+          (p.pratique ? '<div class="profile-detail-row"><span>Niveau</span><span>' + p.pratique + '</span></div>' : '') +
+          (p.voile ? '<div class="profile-detail-row"><span>Voile</span><span>' + p.voile + '</span></div>' : '') +
+          (p.barbe ? '<div class="profile-detail-row"><span>Barbe</span><span>' + p.barbe + '</span></div>' : '') +
+          (p.madhhab ? '<div class="profile-detail-row"><span>École juridique</span><span>' + p.madhhab + '</span></div>' : '') +
+          (p.coran ? '<div class="profile-detail-row"><span>Lecture Coran</span><span>' + p.coran + '</span></div>' : '') +
+          (p.halal ? '<div class="profile-detail-row"><span>Alimentation</span><span>' + p.halal + '</span></div>' : '') +
+          (p.converti ? '<div class="profile-detail-row"><span>Converti(e)</span><span>' + p.converti + '</span></div>' : '') +
+          (p.minhaj ? '<div class="profile-detail-row"><span>Minhaj</span><span>' + p.minhaj + '</span></div>' : '') +
+        '</div>' +
+        // Présentation / bio
+        (p.bio ? '<div class="profile-section"><h4>Présentation</h4><p style="font-size:.86rem;line-height:1.7">' + p.bio + '</p></div>' : '') +
+        // Ce que je recherche
+        '<div class="profile-section" style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:14px;margin-top:4px">' +
+          '<h4 style="color:var(--gold);margin:0 0 12px">🔍 Ce que je recherche</h4>' +
+          (p.situation_recherche && p.situation_recherche !== 'Peu importe' ? '<div class="profile-detail-row"><span>Situation souhaitée</span><span>' + p.situation_recherche + '</span></div>' : '') +
+          (p.origine_recherche && p.origine_recherche !== 'Peu importe' ? '<div class="profile-detail-row"><span>Origine souhaitée</span><span>' + p.origine_recherche + '</span></div>' : '') +
+          ((p.age_min || p.age_max) ? '<div class="profile-detail-row"><span>Tranche d\'âge</span><span>' + (p.age_min||'—') + ' – ' + (p.age_max||'—') + ' ans</span></div>' : '') +
+          (p.pratique_recherche && p.pratique_recherche !== 'Peu importe' ? '<div class="profile-detail-row"><span>Pratique souhaitée</span><span>' + p.pratique_recherche + '</span></div>' : '') +
+          (p.madhhab_recherche && p.madhhab_recherche !== 'Peu importe' ? '<div class="profile-detail-row"><span>Madhhab souhaité</span><span>' + p.madhhab_recherche + '</span></div>' : '') +
+          (p.enfants_recherche && p.enfants_recherche !== 'Peu importe' ? '<div class="profile-detail-row"><span>Enfants</span><span>' + p.enfants_recherche + '</span></div>' : '') +
+          (p.gender === 'homme' && p.voile_recherche && p.voile_recherche !== 'Peu importe' ? '<div class="profile-detail-row"><span>Voile souhaité</span><span>' + p.voile_recherche + '</span></div>' : '') +
+          (p.gender === 'homme' && p.polygamie_recherche && p.polygamie_recherche !== 'Peu importe' ? '<div class="profile-detail-row"><span>Polygamie</span><span>' + p.polygamie_recherche + '</span></div>' : '') +
+          (p.gender === 'femme' && p.barbe_recherche && p.barbe_recherche !== 'Peu importe' ? '<div class="profile-detail-row"><span>Barbe souhaitée</span><span>' + p.barbe_recherche + '</span></div>' : '') +
+          (p.gender === 'femme' && p.qamis_recherche && p.qamis_recherche !== 'Peu importe' ? '<div class="profile-detail-row"><span>Port du qamis</span><span>' + p.qamis_recherche + '</span></div>' : '') +
+          (p.recherche ? '<div style="margin-top:10px;font-size:.84rem;color:var(--white2);line-height:1.6">' + p.recherche + '</div>' : '') +
+          (!p.situation_recherche && !p.origine_recherche && !p.age_min && !p.age_max && !p.pratique_recherche && !p.madhhab_recherche && !p.enfants_recherche && !p.voile_recherche && !p.polygamie_recherche && !p.barbe_recherche && !p.qamis_recherche && !p.recherche ? '<p style="color:var(--muted);font-size:.8rem;margin:0">Non renseigné</p>' : '') +
         '</div>';
     }
 
@@ -5587,12 +5640,12 @@ function openProfileFromNotifDemande(notifId, profileId){
       block.id='refuse-reason-block';
       block.style.cssText='margin-top:12px;background:rgba(231,76,60,.06);border:1px solid rgba(231,76,60,.2);border-radius:10px;padding:12px';
       block.innerHTML='<div style="font-size:.78rem;color:var(--red);font-weight:600;margin-bottom:6px">Raison du refus <span style="font-weight:400;color:var(--muted)">(facultatif)</span></div>'+
-        '<textarea id="refuse-reason-text" rows="2" placeholder="Ex: Profil ne correspond pas à mes critères..." style="width:100%;background:var(--dark);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:8px;color:var(--white);font-family:\'Cairo\',sans-serif;font-size:.78rem;resize:vertical;margin-bottom:8px"></textarea>'+
+        '<textarea id="refuse-reason-text" rows="3" placeholder="Ex: Profil ne correspond pas à mes critères..." style="width:100%;box-sizing:border-box;background:var(--dark);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:10px;color:var(--white);font-family:\'Cairo\',sans-serif;font-size:.82rem;resize:vertical;margin-bottom:10px;display:block"></textarea>'+
         '<div style="display:flex;gap:8px">'+
           '<button onclick="document.getElementById(\'refuse-reason-block\').remove()" style="flex:1;background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px;font-size:.76rem;cursor:pointer">Annuler</button>'+
           '<button id="btn-confirm-refuse" style="flex:1;background:rgba(231,76,60,.15);color:var(--red);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:7px;font-size:.76rem;font-weight:700;cursor:pointer">✗ Confirmer le refus</button>'+
         '</div>';
-      btnRefuse.parentElement.appendChild(block);
+      btnRefuse.parentElement.insertAdjacentElement('afterend', block);
       document.getElementById('btn-confirm-refuse').onclick=function(){
         var reason=document.getElementById('refuse-reason-text').value.trim();
         overlay.remove();
@@ -5683,7 +5736,7 @@ async function refuseDemande(notifId, reason){
       fetch(SUPABASE_URL+'/rest/v1/demandes?id=eq.'+rows[0].id,{
         method:'PATCH',
         headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
-        body:JSON.stringify({statut:'refusee'})
+        body:JSON.stringify({statut:'refusee', refus_raison:reason||null})
       }).catch(function(){});
     }
     // Notifier l'expéditeur
@@ -7499,6 +7552,7 @@ function renderAdminDemandes(c){
         html+='</div>';
         html+='<div style="font-size:.74rem;color:var(--muted)">&#128197; '+date+'</div>';
         if(d.message) html+='<div style="font-size:.78rem;color:var(--white2);margin-top:6px;padding:7px 9px;background:var(--card);border-radius:6px;font-style:italic">&#x201C;'+d.message+'&#x201D;</div>';
+        if(d.refus_raison) html+='<div style="font-size:.75rem;color:var(--red);margin-top:6px;padding:7px 9px;background:rgba(231,76,60,.07);border:1px solid rgba(231,76,60,.2);border-radius:6px">&#x26A0;&#xFE0F; Raison du refus : <span style="font-weight:600">'+d.refus_raison+'</span></div>';
         // Bouton Wali si demande acceptée
         if(d.statut==='acceptee'){
           var soeur=fromGender==='femme'?fromP:(toGender==='femme'?toP:null);
