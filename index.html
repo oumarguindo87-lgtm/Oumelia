@@ -5568,9 +5568,9 @@ function openProfileFromNotifDemande(notifId, profileId){
 
     var btnRefuse = document.getElementById('btn-refuser-demande');
     if(btnRefuse) btnRefuse.onclick = function(){
-      // Afficher champ raison (facultatif)
+      // Afficher champ raison (facultatif) si pas déjà visible
       var existing=document.getElementById('refuse-reason-block');
-      if(existing){ existing.remove(); return; }
+      if(existing) return; // déjà affiché, ne rien faire
       var block=document.createElement('div');
       block.id='refuse-reason-block';
       block.style.cssText='margin-top:12px;background:rgba(231,76,60,.06);border:1px solid rgba(231,76,60,.2);border-radius:10px;padding:12px';
