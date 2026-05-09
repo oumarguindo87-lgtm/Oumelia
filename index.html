@@ -1498,8 +1498,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
     <h3>💌 Demande à <span id="demande-prenom"></span></h3>
     <div class="demand-counter" style="margin:0 0 14px"><span style="font-size:.8rem;color:var(--muted)">Demandes restantes :</span><div class="demand-dots" id="modal-dots"></div></div>
     <div class="form-group">
-      <label>Message <span style="color:var(--muted);font-size:.75rem">(optionnel)</span></label>
-      <textarea id="demande-msg" rows="3" placeholder="Écrivez ici si vous souhaitez ajouter quelque chose..." style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--white);font-family:'Cairo',sans-serif;font-size:.88rem;resize:vertical"></textarea>
+      <label>Message d'introduction <span style="color:var(--muted);font-size:.75rem">(optionnel)</span></label>
+      <textarea id="demande-msg" rows="3" placeholder="Présentez-vous brièvement..." style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--white);font-family:'Cairo',sans-serif;font-size:.88rem;resize:vertical"></textarea>
     </div>
     <button id="btn-send-demande" class="btn btn-gold" style="width:100%" onclick="sendDemande()">Envoyer</button>
     <button class="btn btn-outline" style="width:100%;margin-top:10px" onclick="closeModal('modal-demande')">Annuler</button>
@@ -5381,7 +5381,7 @@ function refreshNotifs(btnEl){
   var p1=fetch(SUPABASE_URL+'/rest/v1/notifications?profile_id=eq.'+uid+'&order=created_at.desc&limit=50',{
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
   }).then(function(r){return r.json();});
-  var p2=fetch(SUPABASE_URL+'/rest/v1/demandes?to_profile_id=eq.'+uid+'&select=id,from_profile_id,statut,message',{
+  var p2=fetch(SUPABASE_URL+'/rest/v1/demandes?to_profile_id=eq.'+uid+'&select=id,from_profile_id,statut',{
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
   }).then(function(r){return r.json();});
   Promise.all([p1,p2]).then(function(res){
@@ -5410,7 +5410,6 @@ function refreshNotifs(btnEl){
           exists.text=dbStatut==='acceptee'?'Vous avez accepté la demande de <strong>'+_p+'</strong>'
                      :dbStatut==='refusee'?'Vous avez refusé la demande de <strong>'+_p+'</strong>'
                      :'<strong>'+_p+'</strong> vous a envoyé une demande de mise en relation';
-          if(dem && dem.message) exists.demandeMessage=dem.message;
         }
         }
         exists.unread=!notif.lu&&exists.unread;
@@ -5418,11 +5417,9 @@ function refreshNotifs(btnEl){
       }
       // Nouvelle notif — l'ajouter
       var realStatut=null;
-      var realMessage=null;
       if(notif.type==='demande_recue'){
         var dem2=demandes.find(function(d){return String(d.from_profile_id)===String(notif.from_profile_id);});
         realStatut=dem2?dem2.statut:'en_attente';
-        realMessage=dem2&&dem2.message?dem2.message:null;
       }
       userNotifs.unshift({
         id:existId, notifDbId:notif.id, dbId:null,
@@ -5435,7 +5432,6 @@ function refreshNotifs(btnEl){
         profileId:notif.from_profile_id||null,
         fromPrenom:notif.from_prenom||'',
         statut:realStatut,
-        demandeMessage:realMessage,
       });
     });
     updateNotifBadge();
@@ -5492,9 +5488,6 @@ function renderNotifs(c){
 
     if(pending){
       html+='<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">';
-      if(n.demandeMessage){
-        html+='<div style="font-size:.82rem;color:var(--white2);padding:9px 11px;background:var(--card2);border-radius:8px;border-left:2px solid var(--gold);font-style:italic">&#x201C;'+n.demandeMessage+'&#x201D;</div>';
-      }
       html+='<button class="btn btn-outline btn-sm" style="width:100%;font-size:.82rem" data-nid="'+nid+'" data-pid="'+(n.profileId||'')+'" onclick="openProfileFromNotifDemande(this.dataset.nid,this.dataset.pid)">&#x1F464; Voir le profil de '+(n.fromPrenom||'ce membre')+'</button>';
       html+='<div style="display:flex;gap:8px">';
       html+='<button class="btn btn-sm" style="flex:1;background:var(--green);color:#fff;font-size:.82rem" data-nid="'+nid+'" onclick="acceptDemande(this.dataset.nid)">&#x2713; Accepter</button>';
@@ -5535,11 +5528,6 @@ function openProfileFromNotifDemande(notifId, profileId){
 
     // Statut
     var statusHtml = '';
-    // Message de la demande (si présent)
-    var msgDemandeHtml = '';
-    if(n && n.demandeMessage){
-      msgDemandeHtml = '<div style="background:var(--card2);border-left:2px solid var(--gold);border-radius:8px;padding:11px 13px;margin-bottom:14px;font-size:.84rem;color:var(--white2);font-style:italic;line-height:1.6">&#x201C;' + n.demandeMessage + '&#x201D;</div>';
-    }
     if(n && n.statut==='acceptee'){
       statusHtml = '<div style="background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:8px;padding:12px;text-align:center;margin-bottom:14px">' +
         '<p style="color:var(--green);font-weight:600;margin-bottom:8px">✅ Vous avez accepté cette demande</p>' +
@@ -5591,7 +5579,7 @@ function openProfileFromNotifDemande(notifId, profileId){
           '<h3 style="margin:0">💌 Demande reçue</h3>' +
           '<button id="btn-close-notif-popup" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1">×</button>' +
         '</div>' +
-        statusHtml + msgDemandeHtml + infoHtml + actionsHtml +
+        statusHtml + infoHtml + actionsHtml +
       '</div>';
 
     document.body.appendChild(overlay);
@@ -5708,7 +5696,7 @@ async function refuseDemande(notifId, reason){
       fetch(SUPABASE_URL+'/rest/v1/demandes?id=eq.'+rows[0].id,{
         method:'PATCH',
         headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
-        body:JSON.stringify({statut:'refusee'})
+        body:JSON.stringify({statut:'refusee', refus_raison:reason||null})
       }).catch(function(){});
     }
     // Notifier l'expéditeur
@@ -7524,6 +7512,7 @@ function renderAdminDemandes(c){
         html+='</div>';
         html+='<div style="font-size:.74rem;color:var(--muted)">&#128197; '+date+'</div>';
         if(d.message) html+='<div style="font-size:.78rem;color:var(--white2);margin-top:6px;padding:7px 9px;background:var(--card);border-radius:6px;font-style:italic">&#x201C;'+d.message+'&#x201D;</div>';
+        if(d.refus_raison) html+='<div style="font-size:.78rem;color:var(--red);margin-top:6px;padding:7px 9px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);border-radius:6px"><span style="font-weight:700">&#x26A0; Raison du refus :</span> '+d.refus_raison+'</div>';
         // Bouton Wali si demande acceptée
         if(d.statut==='acceptee'){
           var soeur=fromGender==='femme'?fromP:(toGender==='femme'?toP:null);
