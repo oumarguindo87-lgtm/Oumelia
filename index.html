@@ -2259,16 +2259,12 @@ function updateProgressBar(step){
     if(i<=step){ dot.style.background='var(--gold)'; dot.style.borderColor='var(--gold)'; dot.style.color='#1a0e00'; }
     else { dot.style.background='var(--dark)'; dot.style.borderColor='var(--border)'; dot.style.color='var(--muted)'; }
   }
-  // Labels : actif=doré gras, passé=gris clair, futur=gris
-  var labelNames=['Mon profil','Ma pratique','Mon compte'];
+  // Labels : actif=doré gras, autres=gris
   for(var j=1;j<=3;j++){
     var lbl=document.getElementById('pstep-label-'+j);
     if(!lbl) continue;
-    if(j===step){
-      lbl.style.color='var(--gold)'; lbl.style.fontWeight='600'; lbl.style.opacity='1';
-    } else {
-      lbl.style.color='var(--muted)'; lbl.style.fontWeight='400'; lbl.style.opacity='1';
-    }
+    if(j===step){ lbl.style.color='var(--gold)'; lbl.style.fontWeight='600'; }
+    else { lbl.style.color='var(--muted)'; lbl.style.fontWeight='400'; }
   }
   // Texte d'étape
   var stepTitles={1:'Étape 1 sur 4 — Mon profil',2:'Étape 2 sur 4 — Ma pratique',3:'Étape 3 sur 4 — Mon compte'};
@@ -2474,8 +2470,10 @@ function startRecording(stream){
     var url = URL.createObjectURL(audioBlob);
     var audioEl = document.getElementById('rec-audio');
     if(audioEl){ audioEl.src = url; audioEl.load(); }
-    document.getElementById('rec-playback').classList.remove('hidden');
-    document.getElementById('rec-done').classList.remove('hidden');
+    var _pb = document.getElementById('rec-playback');
+    if(_pb){ _pb.style.display = 'block'; _pb.classList.remove('hidden'); }
+    var _dn = document.getElementById('rec-done');
+    if(_dn){ _dn.style.display = 'block'; _dn.classList.remove('hidden'); }
     state.audioRecorded = true;
   };
   mediaRecorder.onerror = function(){
@@ -2525,27 +2523,29 @@ function stopRecording(){
 }
 
 function reRecord(){
-  // Réinitialiser pour recommencer
   state.audioRecorded = false;
   audioBlob = null;
+  if(mediaRecorder && mediaRecorder.state !== 'inactive'){ try{ mediaRecorder.stop(); }catch(e){} }
+  clearInterval(recCountdownInterval);
+  state.recording = false;
+
   var btn = document.getElementById('rec-btn');
   var status = document.getElementById('rec-status');
   var playback = document.getElementById('rec-playback');
   var done = document.getElementById('rec-done');
   var countdownWrap = document.getElementById('rec-countdown-wrap');
+  var audioEl = document.getElementById('rec-audio');
 
-  btn.style.display = 'flex';
+  if(audioEl) audioEl.src = '';
+  if(btn){ btn.style.display = 'flex'; btn.classList.remove('recording'); }
   var rIcon = document.getElementById('rec-btn-icon');
   var rLabel = document.getElementById('rec-btn-label');
   if(rIcon) rIcon.textContent = '🎙';
   if(rLabel) rLabel.textContent = "Démarrer l'enregistrement";
-  else btn.textContent = '🎙️';
-  btn.classList.remove('recording');
-  status.style.display = 'block';
-  status.innerHTML = 'Appuyez sur le micro pour recommencer';
-  playback.classList.add('hidden');
-  done.classList.add('hidden');
-  countdownWrap.style.display = 'none';
+  if(playback){ playback.style.display = 'none'; playback.classList.add('hidden'); }
+  if(done){ done.style.display = 'none'; done.classList.add('hidden'); }
+  if(countdownWrap) countdownWrap.style.display = 'none';
+  if(status){ status.style.display = 'block'; status.innerHTML = '🎙 Appuyez sur le micro pour recommencer'; }
 }
 
 async function doRegister(){
@@ -2632,7 +2632,7 @@ async function doRegister(){
   } else if(rechercheEl){
     profileData.recherche=rechercheEl.value.trim()||rechercheLibre;
   }
-  if(!profileData.recherche && rechercheLibre) profileData.recherche=rechercheLibre;
+  if(!profileData.recherche&&rechercheLibre) profileData.recherche=rechercheLibre;
   // Critères recherche structurés — inclus directement dans l'insert
   var gv=function(id){var e=document.getElementById(id);return e?e.value:'';};
   profileData.age_min=parseInt(gv('rech-age-min'))||null;
@@ -8004,9 +8004,19 @@ async function toggleRecordHomme(){
   }catch(e){showToast('⚠ Microphone non accessible','red');}
 }
 function reRecordHomme(){
-  state.audioRecordedHomme=false;state._audioBlobHomme=null;
-  var pb=document.getElementById('rec-playback-homme');if(pb)pb.style.display='none';
-  var done=document.getElementById('rec-done-homme');if(done)done.style.display='none';
+  state.audioRecordedHomme = false; state._audioBlobHomme = null;
+  if(_mediaRecorderHomme && _mediaRecorderHomme.state !== 'inactive'){ try{ _mediaRecorderHomme.stop(); }catch(e){} }
+
+  var pb = document.getElementById('rec-playback-homme'); if(pb) pb.style.display = 'none';
+  var done = document.getElementById('rec-done-homme'); if(done) done.style.display = 'none';
+  var audioEl = document.getElementById('rec-audio-homme'); if(audioEl) audioEl.src = '';
+
+  var btn = document.getElementById('rec-btn-homme');
+  if(btn){ btn.style.display = 'flex'; btn.classList.remove('recording'); }
+  var icon = document.getElementById('rec-btn-icon-homme'); if(icon) icon.textContent = '🎙';
+  var label = document.getElementById('rec-btn-label-homme'); if(label) label.textContent = "Démarrer l'enregistrement";
+  var st = document.getElementById('rec-status-homme');
+  if(st){ st.style.display = 'block'; st.textContent = '🎙 Appuyez sur le micro pour recommencer'; }
 }
 var _uploadedDocs={};
 var _rerecordStream=null;
