@@ -2452,10 +2452,10 @@ function startRecording(stream){
     var url = URL.createObjectURL(audioBlob);
     var audioEl = document.getElementById('rec-audio');
     if(audioEl){ audioEl.src = url; audioEl.load(); }
-    var recPlayback = document.getElementById('rec-playback');
-    if(recPlayback){ recPlayback.style.display='block'; recPlayback.classList.remove('hidden'); }
-    var recDone = document.getElementById('rec-done');
-    if(recDone){ recDone.classList.remove('hidden'); recDone.style.display='block'; }
+    var _pb = document.getElementById('rec-playback');
+    if(_pb){ _pb.style.display = 'block'; _pb.classList.remove('hidden'); }
+    var _dn = document.getElementById('rec-done');
+    if(_dn){ _dn.style.display = 'block'; _dn.classList.remove('hidden'); }
     state.audioRecorded = true;
   };
   mediaRecorder.onerror = function(){
@@ -2505,10 +2505,9 @@ function stopRecording(){
 }
 
 function reRecord(){
-  // Réinitialiser pour recommencer
   state.audioRecorded = false;
   audioBlob = null;
-  // Arrêter tout enregistrement en cours
+  // Arrêter si enregistrement en cours
   if(mediaRecorder && mediaRecorder.state !== 'inactive'){ try{ mediaRecorder.stop(); }catch(e){} }
   clearInterval(recCountdownInterval);
   state.recording = false;
@@ -2520,23 +2519,16 @@ function reRecord(){
   var countdownWrap = document.getElementById('rec-countdown-wrap');
   var audioEl = document.getElementById('rec-audio');
 
-  // Réinitialiser l'audio
-  if(audioEl){ audioEl.src=''; }
-
-  // Remettre le bouton visible
-  if(btn){ btn.style.display='flex'; btn.classList.remove('recording'); }
+  if(audioEl) audioEl.src = '';
+  if(btn){ btn.style.display = 'flex'; btn.classList.remove('recording'); }
   var rIcon = document.getElementById('rec-btn-icon');
   var rLabel = document.getElementById('rec-btn-label');
   if(rIcon) rIcon.textContent = '🎙';
   if(rLabel) rLabel.textContent = "Démarrer l'enregistrement";
-
-  // Cacher playback et done — utiliser style.display de façon cohérente
-  if(playback){ playback.style.display='none'; playback.classList.remove('hidden'); }
-  if(done){ done.classList.add('hidden'); done.style.display=''; }
-  if(countdownWrap){ countdownWrap.style.display='none'; }
-
-  // Message d'invite
-  if(status){ status.style.display='block'; status.innerHTML='Appuyez sur le micro pour recommencer 🎙'; }
+  if(playback){ playback.style.display = 'none'; playback.classList.add('hidden'); }
+  if(done){ done.style.display = 'none'; done.classList.add('hidden'); }
+  if(countdownWrap) countdownWrap.style.display = 'none';
+  if(status){ status.style.display = 'block'; status.innerHTML = '🎙 Appuyez sur le micro pour recommencer'; }
 }
 
 async function doRegister(){
@@ -7992,20 +7984,19 @@ async function toggleRecordHomme(){
   }catch(e){showToast('⚠ Microphone non accessible','red');}
 }
 function reRecordHomme(){
-  state.audioRecordedHomme=false; state._audioBlobHomme=null;
-  // Arrêter tout enregistrement en cours
-  if(_mediaRecorderHomme && _mediaRecorderHomme.state!=='inactive'){ try{ _mediaRecorderHomme.stop(); }catch(e){} }
+  state.audioRecordedHomme = false; state._audioBlobHomme = null;
+  if(_mediaRecorderHomme && _mediaRecorderHomme.state !== 'inactive'){ try{ _mediaRecorderHomme.stop(); }catch(e){} }
 
-  var pb=document.getElementById('rec-playback-homme'); if(pb) pb.style.display='none';
-  var done=document.getElementById('rec-done-homme'); if(done) done.style.display='none';
-  var audioEl=document.getElementById('rec-audio-homme'); if(audioEl) audioEl.src='';
+  var pb = document.getElementById('rec-playback-homme'); if(pb) pb.style.display = 'none';
+  var done = document.getElementById('rec-done-homme'); if(done) done.style.display = 'none';
+  var audioEl = document.getElementById('rec-audio-homme'); if(audioEl) audioEl.src = '';
 
-  // Remettre le bouton et le status visibles
-  var btn=document.getElementById('rec-btn-homme');
-  if(btn){ btn.style.display='flex'; btn.classList.remove('recording'); }
-  var icon=document.getElementById('rec-btn-icon-homme'); if(icon) icon.textContent='🎙';
-  var label=document.getElementById('rec-btn-label-homme'); if(label) label.textContent="Démarrer l'enregistrement";
-  var st=document.getElementById('rec-status-homme'); if(st){ st.style.display='block'; st.textContent='Appuyez sur le micro pour recommencer 🎙'; }
+  var btn = document.getElementById('rec-btn-homme');
+  if(btn){ btn.style.display = 'flex'; btn.classList.remove('recording'); }
+  var icon = document.getElementById('rec-btn-icon-homme'); if(icon) icon.textContent = '🎙';
+  var label = document.getElementById('rec-btn-label-homme'); if(label) label.textContent = "Démarrer l'enregistrement";
+  var st = document.getElementById('rec-status-homme');
+  if(st){ st.style.display = 'block'; st.textContent = '🎙 Appuyez sur le micro pour recommencer'; }
 }
 var _uploadedDocs={};
 var _rerecordStream=null;
