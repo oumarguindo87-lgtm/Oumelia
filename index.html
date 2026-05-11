@@ -802,11 +802,11 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
         <div class="progress-dot" id="pstep-3" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--dark);display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;color:var(--muted);transition:all .3s;flex-shrink:0">3</div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-bottom:14px;max-width:180px;margin-left:auto;margin-right:auto;text-align:center">
-        <span style="color:var(--gold);font-weight:600">Mon profil</span>
-        <span>Ma pratique</span>
-        <span>Mon compte</span>
+        <span id="pstep-label-1" style="color:var(--gold);font-weight:600">Mon profil</span>
+        <span id="pstep-label-2">Ma pratique</span>
+        <span id="pstep-label-3">Mon compte</span>
       </div>
-      <p style="text-align:center;font-size:.72rem;color:var(--muted);margin-bottom:12px">Étape 1 sur 4 — Inscription (compte non encore créé)</p>
+      <p id="reg-step-text" style="text-align:center;font-size:.72rem;color:var(--muted);margin-bottom:12px">Étape 1 sur 4 — Mon profil</p>
 
       <!-- ÉTAPE 1 : Identité -->
       <div id="reg-step1">
@@ -1218,7 +1218,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
         <!-- Texte libre : ce que je recherche -->
         <div class="form-group" style="margin-top:8px">
           <label>En quelques mots, ce que je recherche <span style="color:var(--muted);font-size:.75rem">(optionnel)</span></label>
-          <textarea id="reg-recherche-libre" rows="3" placeholder="Ex : Je cherche une sœur pratiquante, sérieuse, prête à construire un foyer islamique..." style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--white);font-family:'Cairo',sans-serif;font-size:.88rem;resize:vertical"></textarea>
+          <textarea id="reg-recherche-libre" rows="3" placeholder="Ex : Je cherche une personne sérieuse, pratiquante, avec qui construire un mariage basé sur le respect et l'entraide..." style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--white);font-family:'Cairo',sans-serif;font-size:.88rem;resize:vertical"></textarea>
         </div>
 
         <button class="btn btn-gold" style="width:100%" onclick="regStep3()">Suivant →</button>
@@ -2259,6 +2259,21 @@ function updateProgressBar(step){
     if(i<=step){ dot.style.background='var(--gold)'; dot.style.borderColor='var(--gold)'; dot.style.color='#1a0e00'; }
     else { dot.style.background='var(--dark)'; dot.style.borderColor='var(--border)'; dot.style.color='var(--muted)'; }
   }
+  // Labels : actif=doré gras, passé=gris clair, futur=gris
+  var labelNames=['Mon profil','Ma pratique','Mon compte'];
+  for(var j=1;j<=3;j++){
+    var lbl=document.getElementById('pstep-label-'+j);
+    if(!lbl) continue;
+    if(j===step){
+      lbl.style.color='var(--gold)'; lbl.style.fontWeight='600'; lbl.style.opacity='1';
+    } else {
+      lbl.style.color='var(--muted)'; lbl.style.fontWeight='400'; lbl.style.opacity='1';
+    }
+  }
+  // Texte d'étape
+  var stepTitles={1:'Étape 1 sur 4 — Mon profil',2:'Étape 2 sur 4 — Ma pratique',3:'Étape 3 sur 4 — Mon compte'};
+  var txt=document.getElementById('reg-step-text');
+  if(txt) txt.textContent=stepTitles[step]||'Inscription';
 }
 
 function regStep2(){
@@ -2617,7 +2632,6 @@ async function doRegister(){
   } else if(rechercheEl){
     profileData.recherche=rechercheEl.value.trim()||rechercheLibre;
   }
-  // Si seulement le texte libre est rempli (sans select)
   if(!profileData.recherche && rechercheLibre) profileData.recherche=rechercheLibre;
   // Critères recherche structurés — inclus directement dans l'insert
   var gv=function(id){var e=document.getElementById(id);return e?e.value:'';};
