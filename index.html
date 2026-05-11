@@ -6157,7 +6157,7 @@ function renderAdminDashboard(c){
           <div class="admin-user-name" style="font-size:.83rem">${p.prenom||'—'}, ${p.age||'—'} ans · ${p.ville||'—'}</div>
           <div class="admin-user-sub">
             ${p.gender==='femme'?'Sœur':'Frère'} · ${p.origine||'—'} ·
-            ${p.status==='en_attente_rdv'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Docs reçus</span>':p.status==='rdv_planifie'?'<span class="badge" style="background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">📋 Entretien à confirmer</span>':p.status==='valide_a_payer'?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ À payer</span>':'<span class="badge badge-pending">⏳ En attente</span>'}
+            ${p.status==='en_attente_rdv'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Docs reçus</span>':p.status==='rdv_planifie'?(function(){var _r=window._rdvByUid&&(window._rdvByUid[String(p.user_id)]||window._rdvByUid[String(p.id)]);return _r&&_r.rdv_date?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">📅 RDV confirmé</span>':'<span class="badge" style="background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">📋 Entretien à confirmer</span>';})():p.status==='valide_a_payer'?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ À payer</span>':'<span class="badge badge-pending">⏳ En attente</span>'}
             ${date?'· <span style="font-size:.64rem;color:var(--muted)">'+date+'</span>':''}
             ${(p.audioAttested||p.audio_attested)?' · <span style="color:var(--gold);font-size:.64rem">🎙️ Audio</span>':''}
           </div>
@@ -6205,7 +6205,7 @@ function renderAdminPending(c){
     var av=p.gender==='femme'?svgFemme(34):svgHomme(34);
     var statusLabel=
       p.status==='en_attente_rdv'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Docs reçus — RDV à planifier</span>':
-      p.status==='rdv_planifie'?'<span class="badge" style="background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">📋 Entretien à confirmer</span>':
+      p.status==='rdv_planifie'?(function(){var _r=window._rdvByUid&&(window._rdvByUid[String(p.user_id)]||window._rdvByUid[String(p.id)]);return _r&&_r.rdv_date?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">📅 RDV confirmé</span>':'<span class="badge" style="background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">📋 Entretien à confirmer</span>';})():
       p.status==='valide_a_payer'?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ Validé — attend paiement</span>':
       p.status==='pending_verification'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">💳 Ancien flow</span>':
       '<span class="badge badge-pending">⏳ Inscription</span>';
@@ -7010,7 +7010,7 @@ function openAdminProfileDetail(id){
   var stepBadges = {
     pending:        '<span class="badge badge-pending">⏳ Étape 1/4</span>',
     en_attente_rdv: '<span class="badge" style="background:rgba(52,152,219,.12);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Étape 2/4 — Docs reçus</span>',
-    rdv_planifie:   '<span class="badge" style="background:rgba(155,89,182,.12);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">📋 Étape 3/4 — Entretien à confirmer</span>',
+    rdv_planifie:   '<span class="badge" style="background:rgba(155,89,182,.12);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">📅 Étape 3/4 — RDV planifié</span>',
     valide_a_payer: '<span class="badge" style="background:rgba(46,204,113,.12);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ Étape 4/4 — Attente paiement</span>',
     active:  '<span class="badge badge-active">✓ Actif</span>',
     paused:  '<span class="badge badge-paused">⏸ En pause</span>',
@@ -7170,7 +7170,7 @@ async function renderAdminRdv(c){
 
   // Charger en parallèle
   var r1=await fetch(SUPABASE_URL+'/rest/v1/profils?status=eq.rdv_planifie&select=id,prenom,gender,age,ville,telephone,user_id&order=created_at.desc',{headers:H});
-  var r2=await fetch(SUPABASE_URL+'/rest/v1/rdv?select=*&order=rdv_date.asc',{headers:H});
+  var r2=await fetch(SUPABASE_URL+'/rest/v1/rdv?select=*&order=rdv_date.desc',{headers:H});
   var profils=await r1.json().catch(function(){return[];});
   var rdvList=await r2.json().catch(function(){return[];});
 
@@ -7180,10 +7180,11 @@ async function renderAdminRdv(c){
   if(!Array.isArray(profils)) profils=[];
   if(!Array.isArray(rdvList)) rdvList=[];
 
-  // Indexer les RDVs par user_id ET par profile id
+  // Indexer les RDVs par user_id — le plus récent en premier (order=desc)
   var rdvByUid={};
   rdvList.forEach(function(r){
-    if(r.user_id) rdvByUid[String(r.user_id)]=r;
+    // Ne pas écraser : le premier rencontré est le plus récent
+    if(r.user_id && !rdvByUid[String(r.user_id)]) rdvByUid[String(r.user_id)]=r;
   });
   // Matcher aussi par id numérique du profil (inserts manuels)
   profils.forEach(function(p){
@@ -7191,6 +7192,8 @@ async function renderAdminRdv(c){
       rdvByUid[p.user_id]=rdvByUid[String(p.id)];
     }
   });
+  // Stocker globalement pour les autres onglets
+  window._rdvByUid=rdvByUid;
 
   // Garder UNIQUEMENT les profils qui ont une vraie ligne rdv avec rdv_date
   var profilsAvecRdv=profils.filter(function(p){
