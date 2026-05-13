@@ -5163,6 +5163,12 @@ function sendUserMsg(name){
         showToast('⚠ Message non sauvegardé: '+r.error.message,'red');
       } else {
         console.log('✅ Message sauvegardé en DB');
+        // Notifier l'admin par email
+        fetch('https://nmcvyukbyfnhtufbgqqp.supabase.co/functions/v1/swift-endpoint', {
+          method: 'POST',
+          headers: {'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+          body: JSON.stringify({to_email:'oumelia.contacthomme@gmail.com', to_prenom:'Admin', from_prenom:state.user.prenom||'Un membre'})
+        }).catch(function(){});
       }
     }).catch(function(e){ console.log('msg exception:', e.message||e); });
   } else {
@@ -6672,6 +6678,7 @@ async function approveProfile(id){
       from_id:'admin', to_id:String(p.id),
       content:msgPaiement, created_at:new Date().toISOString()
     }).catch(function(){});
+    notifyByEmail(p.id, p.prenom, 'Oumélia');
   }
   updateAdminBadges();
   showToast('✅ '+p.prenom+' validé(e) — lien paiement envoyé','green');
@@ -6699,6 +6706,7 @@ async function freeActivate(id){
     headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),
     body:JSON.stringify({from_id:'admin',to_id:String(id),content:msg,created_at:new Date().toISOString()})
   }).catch(function(){});
+  notifyByEmail(id, p.prenom, 'Oumélia');
   updateAdminBadges();
   showToast('🎁 '+(p.prenom||'Profil')+' activé gratuitement — notification envoyée','gold');
   adminTab(state.activeAdminTab||'dashboard');
@@ -6794,6 +6802,28 @@ function openAdminMsgModal(idOrName, name){
   openModal('modal-admin-msg');
 }
 
+// ── Notification email via Edge Function swift-endpoint ──
+function notifyByEmail(toProfileId, toPrenom, fromPrenom){
+  // Récupérer l'email du destinataire depuis _adminProfiles ou _dbProfiles
+  var profiles = (window._adminProfiles||[]).concat(window._dbProfiles||[]);
+  var p = profiles.find(function(x){ return String(x.id)===String(toProfileId)||String(x.user_id)===String(toProfileId); });
+  var email = p ? (p.email||'') : '';
+  if(!email || email==='EMPTY') return; // pas d'email connu
+  fetch('https://nmcvyukbyfnhtufbgqqp.supabase.co/functions/v1/swift-endpoint', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer ' + SUPABASE_ANON,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      to_email: email,
+      to_prenom: toPrenom||'',
+      from_prenom: fromPrenom||'Oumélia'
+    })
+  }).catch(function(){}); // silencieux
+}
+
 async function sendAdminMsg(){
   var msg = document.getElementById('admin-msg-content').value;
   if(!msg.trim()) return showToast('⚠ Écrivez un message','red');
@@ -6808,6 +6838,7 @@ async function sendAdminMsg(){
     if(!resp.ok) throw new Error('HTTP '+resp.status);
     if(!adminConvos[adminMsgTarget]) adminConvos[adminMsgTarget]=[];
     adminConvos[adminMsgTarget].push({from:'admin', text:msg});
+    notifyByEmail(adminMsgTargetId, adminMsgTarget, 'Oumélia');
     closeModal('modal-admin-msg');
     showToast('✉️ Message envoyé à '+adminMsgTarget,'green');
   } catch(e) {
@@ -7582,6 +7613,7 @@ function sendWaliMessage(profileId, prenom){
     if(res && res.error){ showToast('Erreur: '+res.error.message,'red'); return; }
     if(!adminConvos[prenom]) adminConvos[prenom]=[];
     adminConvos[prenom].push({from:'admin', text:waliMsg});
+    notifyByEmail(profileId, prenom, 'Oumélia');
     showToast('🌸 Message Wali envoyé à '+prenom,'green');
   }).catch(function(e){ showToast('Erreur envoi','red'); });
 }
