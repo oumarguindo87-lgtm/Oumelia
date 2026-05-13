@@ -3348,13 +3348,15 @@ function loadAllProfilesForAdmin(){
     var data = results[0];
     var rdvList = Array.isArray(results[1]) ? results[1] : [];
 
-    // Indexer rdv par user_id ET par email — ne pas écraser (premier = plus récent car DESC)
-    window._rdvByUid = {};
+    // Dans la table rdv, user_id contient l'ID NUMERIQUE du profil (ex: 81, 85...)
+    // On indexe par cet id numérique ET par email — ne pas écraser (DESC = plus récent en premier)
+    window._rdvByProfileId = {};
     window._rdvByEmail = {};
     rdvList.forEach(function(r){
-      if(r.user_id && !window._rdvByUid[String(r.user_id)]) window._rdvByUid[String(r.user_id)] = r;
-      if(r.attendee_email && !window._rdvByEmail[r.attendee_email.toLowerCase()]) window._rdvByEmail[r.attendee_email.toLowerCase()] = r;
+      if(r.user_id && !window._rdvByProfileId[String(r.user_id)]) window._rdvByProfileId[String(r.user_id)] = r;
+      if(r.attendee_email && r.attendee_email !== 'EMPTY' && !window._rdvByEmail[r.attendee_email.toLowerCase()]) window._rdvByEmail[r.attendee_email.toLowerCase()] = r;
     });
+    console.log('RDV chargés:', rdvList.length, 'par id:', Object.keys(window._rdvByProfileId).length);
 
     if(!Array.isArray(data)){
       console.log('Admin loadAllProfilesForAdmin error:', JSON.stringify(data).slice(0,200));
@@ -3431,8 +3433,8 @@ function loadAllProfilesForAdmin(){
   .catch(function(e){
     console.log('Admin exception:', e.message||e);
     window._adminProfiles = [];
-    window._rdvByUid = {};
-    window._rdvByEmail = {};
+    window._rdvByProfileId = window._rdvByProfileId || {};
+    window._rdvByEmail = window._rdvByEmail || {};
   });
 }
 
@@ -6118,15 +6120,15 @@ function renderAdminOnlineView(){
   c.innerHTML=html;
 }
 
-function getRdvData(uid, pid, email){
-  var r = (window._rdvByUid||{})[String(uid)] || (window._rdvByUid||{})[String(pid)];
-  if(!r && email) r = (window._rdvByEmail||{})[email.toLowerCase()];
-  return r || null;
+function getRdvData(profileId, email){
+  // user_id dans rdv = id numérique du profil
+  var r = (window._rdvByProfileId||{})[String(profileId)];
+  if(!r && email && email !== 'EMPTY') r = (window._rdvByEmail||{})[String(email).toLowerCase()];
+  return (r && r.rdv_date) ? r : null;
 }
-
-function getRdvBadge(uid, pid, email){
-  var r = getRdvData(uid, pid, email);
-  if(r && r.rdv_date) return '<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">&#x1F4C5; RDV confirm\u00e9</span>';
+function getRdvBadge(profileId, email){
+  var r = getRdvData(profileId, email);
+  if(r) return '<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">&#x1F4C5; RDV confirm\u00e9</span>';
   return '<span class="badge" style="background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">&#x1F4CB; Entretien \u00e0 confirmer</span>';
 }
 
@@ -6183,7 +6185,7 @@ function renderAdminDashboard(c){
           <div class="admin-user-name" style="font-size:.83rem">${p.prenom||'—'}, ${p.age||'—'} ans · ${p.ville||'—'}</div>
           <div class="admin-user-sub">
             ${p.gender==='femme'?'Sœur':'Frère'} · ${p.origine||'—'} ·
-            ${p.status==='en_attente_rdv'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Docs reçus</span>':p.status==='rdv_planifie'?getRdvBadge(p.user_id,p.id,p.email):p.status==='valide_a_payer'?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ À payer</span>':'<span class="badge badge-pending">⏳ En attente</span>'}
+            ${p.status==='en_attente_rdv'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Docs reçus</span>':p.status==='rdv_planifie'?getRdvBadge(p.id,p.email):p.status==='valide_a_payer'?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ À payer</span>':'<span class="badge badge-pending">⏳ En attente</span>'}
             ${date?'· <span style="font-size:.64rem;color:var(--muted)">'+date+'</span>':''}
             ${(p.audioAttested||p.audio_attested)?' · <span style="color:var(--gold);font-size:.64rem">🎙️ Audio</span>':''}
           </div>
@@ -6231,7 +6233,7 @@ function renderAdminPending(c){
     var av=p.gender==='femme'?svgFemme(34):svgHomme(34);
     var statusLabel=
       p.status==='en_attente_rdv'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">📂 Docs reçus — RDV à planifier</span>':
-      p.status==='rdv_planifie'?getRdvBadge(p.user_id,p.id,p.email):
+      p.status==='rdv_planifie'?getRdvBadge(p.id,p.email):
       p.status==='valide_a_payer'?'<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">✅ Validé — attend paiement</span>':
       p.status==='pending_verification'?'<span class="badge" style="background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.3)">💳 Ancien flow</span>':
       '<span class="badge badge-pending">⏳ Inscription</span>';
@@ -7194,40 +7196,32 @@ async function renderAdminRdv(c){
   c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
 
-  // Charger en parallèle
-  var r1=await fetch(SUPABASE_URL+'/rest/v1/profils?status=eq.rdv_planifie&select=id,prenom,gender,age,ville,telephone,user_id&order=created_at.desc',{headers:H});
-  var r2=await fetch(SUPABASE_URL+'/rest/v1/rdv?select=*&order=rdv_date.asc',{headers:H});
+  var r1=await fetch(SUPABASE_URL+'/rest/v1/profils?status=eq.rdv_planifie&select=id,prenom,gender,age,ville,telephone,user_id,email&order=created_at.desc',{headers:H});
+  var r2=await fetch(SUPABASE_URL+'/rest/v1/rdv?select=*&order=rdv_date.desc',{headers:H});
   var profils=await r1.json().catch(function(){return[];});
   var rdvList=await r2.json().catch(function(){return[];});
-
-  // Debug — afficher brièvement ce qu'on a reçu
-  var debugInfo='Profils en attente : '+(Array.isArray(profils)?profils.length:'ERR('+JSON.stringify(profils).slice(0,80)+')')+' | RDVs table : '+(Array.isArray(rdvList)?rdvList.length:'ERR('+JSON.stringify(rdvList).slice(0,120)+')');
 
   if(!Array.isArray(profils)) profils=[];
   if(!Array.isArray(rdvList)) rdvList=[];
 
-  // Indexer par user_id ET email — ne pas écraser (premier = plus récent car DESC)
-  var rdvByUid={};
+  // user_id dans rdv = id numérique du profil — indexer par cet id
+  var rdvByPid={};
   var rdvByEmail={};
   rdvList.forEach(function(r){
-    if(r.user_id && !rdvByUid[String(r.user_id)]) rdvByUid[String(r.user_id)]=r;
-    if(r.attendee_email && !rdvByEmail[r.attendee_email.toLowerCase()]) rdvByEmail[r.attendee_email.toLowerCase()]=r;
-  });
-  // Matcher par id numérique et par email du profil
-  profils.forEach(function(p){
-    if(!rdvByUid[String(p.user_id)]){
-      if(rdvByUid[String(p.id)]) rdvByUid[String(p.user_id)]=rdvByUid[String(p.id)];
-      else if(p.email && rdvByEmail[p.email.toLowerCase()]) rdvByUid[String(p.user_id)]=rdvByEmail[p.email.toLowerCase()];
-    }
+    if(r.user_id && !rdvByPid[String(r.user_id)]) rdvByPid[String(r.user_id)]=r;
+    if(r.attendee_email && r.attendee_email!=='EMPTY' && !rdvByEmail[r.attendee_email.toLowerCase()]) rdvByEmail[r.attendee_email.toLowerCase()]=r;
   });
   // Mettre à jour le cache global
-  window._rdvByUid=rdvByUid;
+  window._rdvByProfileId=rdvByPid;
   window._rdvByEmail=rdvByEmail;
 
-  // Garder UNIQUEMENT les profils qui ont une vraie ligne rdv avec rdv_date
+  function getRdv(p){
+    return rdvByPid[String(p.id)] || (p.email&&rdvByEmail[p.email.toLowerCase()]) || null;
+  }
+
+  // N'afficher QUE les profils qui ont un vrai rdv avec rdv_date
   var profilsAvecRdv=profils.filter(function(p){
-    var r=rdvByUid[String(p.user_id)]||rdvByUid[String(p.id)]||(p.email&&rdvByEmail[p.email.toLowerCase()])||null;
-    return r && r.rdv_date;
+    var r=getRdv(p); return r && r.rdv_date;
   });
 
   var hommes=profilsAvecRdv.filter(function(p){return p.gender==='homme';});
@@ -7243,7 +7237,7 @@ async function renderAdminRdv(c){
   function renderRdvSection(arr,genre){
     if(!arr.length) return '<p style="color:var(--muted);font-size:.82rem;text-align:center;padding:10px">Aucun RDV confirmé pour les '+genre+'s</p>';
     return arr.map(function(p){
-      var rdv=rdvByUid[String(p.user_id)]||rdvByUid[String(p.id)]||(p.email&&rdvByEmail[p.email.toLowerCase()])||null;
+      var rdv=getRdv(p);
       var rdvBlock='<div style="margin-top:8px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:8px;padding:9px 11px">'
         +'<div style="font-size:.78rem;color:#2ecc71;font-weight:700">📅 RDV confirmé</div>'
         +'<div style="font-size:.84rem;color:var(--white);margin-top:3px;font-weight:600">'+fmtDate(rdv.rdv_date)+'</div>'
