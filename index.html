@@ -5163,11 +5163,10 @@ function sendUserMsg(name){
         showToast('⚠ Message non sauvegardé: '+r.error.message,'red');
       } else {
         console.log('✅ Message sauvegardé en DB');
-        // Notifier l'admin par email
-        fetch('https://nmcvyukbyfnhtufbgqqp.supabase.co/functions/v1/swift-endpoint', {
-          method: 'POST',
-          headers: {'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
-          body: JSON.stringify({to_email:'oumelia.contacthomme@gmail.com', to_prenom:'Admin', from_prenom:state.user.prenom||'Un membre'})
+        fetch('https://nmcvyukbyfnhtufbgqqp.supabase.co/functions/v1/swift-endpoint',{
+          method:'POST',
+          headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+          body:JSON.stringify({to_email:'oumelia.contacthomme@gmail.com',to_prenom:'Admin',from_prenom:state.user.prenom||'Un membre'})
         }).catch(function(){});
       }
     }).catch(function(e){ console.log('msg exception:', e.message||e); });
@@ -6802,26 +6801,16 @@ function openAdminMsgModal(idOrName, name){
   openModal('modal-admin-msg');
 }
 
-// ── Notification email via Edge Function swift-endpoint ──
 function notifyByEmail(toProfileId, toPrenom, fromPrenom){
-  // Récupérer l'email du destinataire depuis _adminProfiles ou _dbProfiles
-  var profiles = (window._adminProfiles||[]).concat(window._dbProfiles||[]);
-  var p = profiles.find(function(x){ return String(x.id)===String(toProfileId)||String(x.user_id)===String(toProfileId); });
-  var email = p ? (p.email||'') : '';
-  if(!email || email==='EMPTY') return; // pas d'email connu
-  fetch('https://nmcvyukbyfnhtufbgqqp.supabase.co/functions/v1/swift-endpoint', {
-    method: 'POST',
-    headers: {
-      'apikey': SUPABASE_ANON,
-      'Authorization': 'Bearer ' + SUPABASE_ANON,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      to_email: email,
-      to_prenom: toPrenom||'',
-      from_prenom: fromPrenom||'Oumélia'
-    })
-  }).catch(function(){}); // silencieux
+  var profiles=(window._adminProfiles||[]).concat(window._dbProfiles||[]);
+  var p=profiles.find(function(x){return String(x.id)===String(toProfileId)||String(x.user_id)===String(toProfileId);});
+  var email=p?(p.email||''):'';
+  if(!email||email==='EMPTY') return;
+  fetch('https://nmcvyukbyfnhtufbgqqp.supabase.co/functions/v1/swift-endpoint',{
+    method:'POST',
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+    body:JSON.stringify({to_email:email,to_prenom:toPrenom||'',from_prenom:fromPrenom||'Oumélia'})
+  }).catch(function(){});
 }
 
 async function sendAdminMsg(){
@@ -7604,11 +7593,8 @@ function sendWaliMessage(profileId, prenom){
   var waliMsg = 'Assalamu Alaykum wa rahmatullahi wa barakatuh '+prenom+',\n\nNous avons reçu une demande de mise en relation vous concernant. Avez-vous un Wali (père, frère ou tuteur légal) pour superviser cette démarche conformément aux prescriptions islamiques ?\n\nMerci de nous répondre afin que nous puissions continuer dans les meilleures conditions.\n\nBarak Allahu fikoum.\nL\'équipe Oumélia';
 
   sb.from('messages').insert({
-    from_id: 'admin',
-    to_id: String(profileId),
-    from_prenom: 'Administratrice',
-    content: waliMsg,
-    lu: false
+    from_id: 'admin', to_id: String(profileId),
+    from_prenom: 'Administratrice', content: waliMsg, lu: false
   }).then(function(res){
     if(res && res.error){ showToast('Erreur: '+res.error.message,'red'); return; }
     if(!adminConvos[prenom]) adminConvos[prenom]=[];
