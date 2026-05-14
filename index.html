@@ -7955,8 +7955,11 @@ function openCalEmbed(){
   // Écouter les messages Cal.com (booking.created)
   function _calListener(e){
     if(!e.data) return;
-    var d=typeof e.data==='string'?{}:e.data;
-    if(d.type==='booking.created'||d.type==='CAL:booking_created'||(d.payload&&d.payload.type==='booking')){
+    var d = typeof e.data === 'string' ? {} : e.data;
+    // Vérifier strictement que c'est bien une réservation confirmée avec un uid
+    var isBooking = (d.type==='booking.created' || d.type==='CAL:booking_created');
+    var hasUid = d.uid || (d.data&&d.data.uid) || (d.payload&&d.payload.uid) || (d.booking&&d.booking.uid);
+    if(isBooking && hasUid){
       _markRdvPlanifie();
     }
   }
