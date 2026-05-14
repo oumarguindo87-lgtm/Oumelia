@@ -1506,21 +1506,6 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   </div>
 </div>
 
-<!-- Modal confirmation demande envoyée -->
-<div class="modal-overlay" id="modal-demande-sent" onclick="if(event.target===this)closeModal('modal-demande-sent')">
-  <div class="modal" style="text-align:center;padding:28px 20px">
-    <div style="font-size:3rem;margin-bottom:10px">💌</div>
-    <h3 style="color:var(--gold);margin-bottom:10px">Demande envoyée !</h3>
-    <p style="color:var(--white2);font-size:.88rem;line-height:1.7;margin-bottom:6px">
-      Votre demande a bien été transmise à <strong id="sent-prenom-confirm" style="color:var(--gold)"></strong>.
-    </p>
-    <p style="color:var(--muted);font-size:.8rem;line-height:1.6;margin-bottom:22px">
-      Vous serez notifié(e) dès qu'il/elle aura répondu.<br>Vous ne pouvez envoyer qu'<strong style="color:var(--white2)">une seule demande</strong> par profil.
-    </p>
-    <button class="btn btn-gold" style="width:100%" onclick="closeModal('modal-demande-sent')">Compris ✓</button>
-  </div>
-</div>
-
 <!-- Modal : pause profil -->
 <div class="modal-overlay" id="modal-pause" onclick="if(event.target===this)closeModal('modal-pause')">
   <div class="modal">
@@ -3575,7 +3560,7 @@ function renderMyProfile(c){
         // Si docs envoyés mais statut pas encore mis à jour (PATCH en cours / lag réseau)
         var _docsOk=u.docs_submitted||_s==='en_attente_rdv'||_s==='rdv_planifie';
         var _d=_s==='valide_a_payer'?'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.':_s==='rdv_planifie'?'Entretien planifié. En attente de validation par notre équipe.':_s==='en_attente_rdv'?'Vos documents ont été reçus. Planifiez votre entretien.':'Envoyez vos documents pour continuer la verification.';
-        var _b=_s==='valide_a_payer'?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (29,90 €) →</button>':_s==='rdv_planifie'?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button><button onclick="confirmRdvPris()" style="background:none;border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer;font-family:\'Cairo\',sans-serif">✅ J\'ai planifié mon entretien</button></div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
+        var _b=_s==='valide_a_payer'?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (29,90 €) →</button>':_s==='rdv_planifie'?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button></div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
         return '<div class="step-banner" style="margin:0 0 14px"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+_l+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:4px;line-height:1.5">'+_d+'</div>'+_b+'</div>';
       })()}
 
@@ -5309,10 +5294,7 @@ function sendDemande(){
 
 
   closeModal('modal-demande');
-  // Afficher la modal de confirmation
-  var sentPrenomEl=document.getElementById('sent-prenom-confirm');
-  if(sentPrenomEl) sentPrenomEl.textContent=currentDemandeTarget||'ce membre';
-  openModal('modal-demande-sent');
+  showToast('&#128140; Demande envoy&#233;e !','gold');
   if(!(state.user&&state.user.id)) return;
   var allP=allProfiles.concat(window._dbProfiles||[]);
   var tp=allP.find(function(p){return p.prenom===currentDemandeTarget;});
@@ -8374,7 +8356,7 @@ function renderStepBanner(status){
   var idx=steps.indexOf(status);if(idx<0) idx=0;
   var dots=steps.map(function(_,i){return '<div class="step-dot '+(i<=idx?'done':'')+'"></div>';}).join('');
   var descs={pending:'Envoyez vos documents.',en_attente_rdv:'Documents reçus. Planifiez votre entretien.',rdv_planifie:'Entretien planifié. En attente de validation.',valide_a_payer:'Dossier validé. Finalisez votre paiement.'};
-  var acts={pending:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>',en_attente_rdv:'<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button><button onclick="confirmRdvPris()" style="background:none;border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:8px;padding:8px;font-size:.78rem;cursor:pointer;font-family:\'Cairo\',sans-serif">✅ J\'ai planifié mon entretien</button></div>',rdv_planifie:'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>',valide_a_payer:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser (29,90 €) →</button>'};
+  var acts={pending:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>',en_attente_rdv:'<div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button></div>',rdv_planifie:'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>',valide_a_payer:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser (29,90 €) →</button>'};
   return '<div class="step-banner"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+info.label+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:3px;line-height:1.5">'+(descs[status]||descs.pending)+'</div><div class="step-progress">'+dots+'</div>'+(acts[status]||acts.pending)+'</div>';
 }
 function injectStepBannerIfNeeded(){
