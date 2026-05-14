@@ -5295,7 +5295,18 @@ function sendDemande(){
 
 
 
-  closeModal('modal-demande');
+  // Afficher un message de confirmation visible dans le modal avant de le fermer
+  var modalBox = document.querySelector('#modal-demande .modal');
+  if(modalBox){
+    modalBox.innerHTML = '<div style="text-align:center;padding:28px 20px">'
+      + '<div style="font-size:2.5rem;margin-bottom:12px">✅</div>'
+      + '<h3 style="color:var(--green);margin-bottom:10px">Demande envoy&#233;e !</h3>'
+      + '<p style="color:var(--white2);font-size:.92rem;line-height:1.6;margin-bottom:20px">Votre demande de mise en relation a bien &#233;t&#233; envoy&#233;e.<br>Vous serez notifi&#233;(e) d&#232;s qu&#8217;elle sera accept&#233;e.</p>'
+      + '<button class="btn btn-outline" style="width:100%" onclick="closeModal(\'modal-demande\')">Fermer</button>'
+      + '</div>';
+  } else {
+    closeModal('modal-demande');
+  }
   showToast('&#128140; Demande envoy&#233;e !','gold');
   if(!(state.user&&state.user.id)) return;
   var allP=allProfiles.concat(window._dbProfiles||[]);
@@ -5399,7 +5410,7 @@ function refreshNotifs(btnEl){
   var p1=fetch(SUPABASE_URL+'/rest/v1/notifications?profile_id=eq.'+uid+'&order=created_at.desc&limit=50',{
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
   }).then(function(r){return r.json();});
-  var p2=fetch(SUPABASE_URL+'/rest/v1/demandes?to_profile_id=eq.'+uid+'&select=id,from_profile_id,statut',{
+  var p2=fetch(SUPABASE_URL+'/rest/v1/demandes?to_profile_id=eq.'+uid+'&select=id,from_profile_id,statut,message',{
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
   }).then(function(r){return r.json();});
   Promise.all([p1,p2]).then(function(res){
@@ -5417,6 +5428,8 @@ function refreshNotifs(btnEl){
         if(notif.type==='demande_recue'){
           var dem=demandes.find(function(d){return String(d.from_profile_id)===String(notif.from_profile_id);});
           var dbStatut=dem?dem.statut:'en_attente';
+          // Récupérer le message si pas encore présent
+          if(dem&&dem.message&&!exists.demandeMessage) exists.demandeMessage=dem.message;
           // Ne mettre à jour que si le statut DB est plus "avancé"
           var order={en_attente:0,acceptee:1,refusee:2};
           var localOrder=order[exists.statut]||0;
@@ -5435,9 +5448,11 @@ function refreshNotifs(btnEl){
       }
       // Nouvelle notif — l'ajouter
       var realStatut=null;
+      var realMessage=null;
       if(notif.type==='demande_recue'){
         var dem2=demandes.find(function(d){return String(d.from_profile_id)===String(notif.from_profile_id);});
         realStatut=dem2?dem2.statut:'en_attente';
+        realMessage=dem2?dem2.message||null:null;
       }
       userNotifs.unshift({
         id:existId, notifDbId:notif.id, dbId:null,
@@ -5450,6 +5465,7 @@ function refreshNotifs(btnEl){
         profileId:notif.from_profile_id||null,
         fromPrenom:notif.from_prenom||'',
         statut:realStatut,
+        demandeMessage:realMessage,
       });
     });
     updateNotifBadge();
