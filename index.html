@@ -5295,13 +5295,13 @@ function sendDemande(){
 
 
 
-  // Afficher un message de confirmation visible dans le modal avant de le fermer
+  // Afficher un ecran de confirmation visible dans le modal
   var modalBox = document.querySelector('#modal-demande .modal');
   if(modalBox){
     modalBox.innerHTML = '<div style="text-align:center;padding:28px 20px">'
-      + '<div style="font-size:2.5rem;margin-bottom:12px">✅</div>'
-      + '<h3 style="color:var(--green);margin-bottom:10px">Demande envoy&#233;e !</h3>'
-      + '<p style="color:var(--white2);font-size:.92rem;line-height:1.6;margin-bottom:20px">Votre demande de mise en relation a bien &#233;t&#233; envoy&#233;e.<br>Vous serez notifi&#233;(e) d&#232;s qu&#8217;elle sera accept&#233;e.</p>'
+      + '<div style="font-size:2.5rem;margin-bottom:12px">&#x2705;</div>'
+      + '<h3 style="color:#2ecc71;margin-bottom:10px">Demande envoy&#233;e !</h3>'
+      + '<p style="color:var(--white2);font-size:.92rem;line-height:1.6;margin-bottom:20px">Votre demande de mise en relation a bien &#233;t&#233; envoy&#233;e.<br>Vous serez notifi&#233;(e) d&#232;s qu\'elle sera accept&#233;e.</p>'
       + '<button class="btn btn-outline" style="width:100%" onclick="closeModal(\'modal-demande\')">Fermer</button>'
       + '</div>';
   } else {
@@ -5428,7 +5428,7 @@ function refreshNotifs(btnEl){
         if(notif.type==='demande_recue'){
           var dem=demandes.find(function(d){return String(d.from_profile_id)===String(notif.from_profile_id);});
           var dbStatut=dem?dem.statut:'en_attente';
-          // Récupérer le message si pas encore présent
+          // Recuperer le message si pas encore present
           if(dem&&dem.message&&!exists.demandeMessage) exists.demandeMessage=dem.message;
           // Ne mettre à jour que si le statut DB est plus "avancé"
           var order={en_attente:0,acceptee:1,refusee:2};
@@ -7968,7 +7968,7 @@ function openCalEmbed(){
     var hasUid = d.uid || (d.data&&d.data.uid) || (d.payload&&d.payload.uid) || (d.booking&&d.booking.uid);
     if(isBooking && hasUid){
       _markRdvPlanifie();
-      // Afficher barre de confirmation
+      // Afficher la barre de confirmation
       var _cb = document.getElementById('cal-confirm-bar');
       if(_cb) _cb.style.display='flex';
     }
@@ -7986,7 +7986,7 @@ function openCalEmbed(){
   iframe.setAttribute('allow','camera;microphone');
   overlay.appendChild(iframe);
 
-  // Barre de confirmation post-RDV (masquee par defaut)
+  // Barre de confirmation post-RDV (masquee jusqu'a reservation effective)
   var confirmBar=document.createElement('div');
   confirmBar.id='cal-confirm-bar';
   confirmBar.style.cssText='display:none;align-items:center;justify-content:center;gap:10px;padding:14px 16px;background:rgba(46,204,113,.12);border-top:1px solid rgba(46,204,113,.35);flex-shrink:0';
