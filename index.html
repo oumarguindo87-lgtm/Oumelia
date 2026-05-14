@@ -7610,7 +7610,7 @@ function filterAdminDemandes(statut){
 
 function sendWaliMessage(profileId, prenom){
   var sb=getSB(); if(!sb) return;
-  var waliMsg = 'Assalamu Alaykum wa rahmatullahi wa barakatuh '+prenom+',\n\nNous avons reçu une demande de mise en relation vous concernant. Avez-vous un Wali (père, frère ou tuteur légal) pour superviser cette démarche conformément aux prescriptions islamiques ?\n\nMerci de nous répondre afin que nous puissions continuer dans les meilleures conditions.\n\nBarak Allahu fikoum.\nL\'équipe Oumélia';
+  var waliMsg = 'Assalamu Alaykum wa rahmatullahi wa barakatuh '+prenom+',\n\nNous avons bien reçu une demande de mise en relation vous concernant.\n\nAfin de continuer dans les meilleures conditions, pouvez-vous nous indiquer si vous avez un Wali (père, frère ou tuteur) qui pourra être présent et impliqué dans cette démarche ?\n\nJazakumullahu khayran.\nL\'équipe Oumélia';
 
   sb.from('messages').insert({
     from_id: 'admin',
