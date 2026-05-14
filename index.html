@@ -1506,6 +1506,21 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   </div>
 </div>
 
+<!-- Modal confirmation demande envoyée -->
+<div class="modal-overlay" id="modal-demande-sent" onclick="if(event.target===this)closeModal('modal-demande-sent')">
+  <div class="modal" style="text-align:center;padding:28px 20px">
+    <div style="font-size:3rem;margin-bottom:10px">💌</div>
+    <h3 style="color:var(--gold);margin-bottom:10px">Demande envoyée !</h3>
+    <p style="color:var(--white2);font-size:.88rem;line-height:1.7;margin-bottom:6px">
+      Votre demande a bien été transmise à <strong id="sent-prenom-confirm" style="color:var(--gold)"></strong>.
+    </p>
+    <p style="color:var(--muted);font-size:.8rem;line-height:1.6;margin-bottom:22px">
+      Vous serez notifié(e) dès qu'il/elle aura répondu.<br>Vous ne pouvez envoyer qu'<strong style="color:var(--white2)">une seule demande</strong> par profil.
+    </p>
+    <button class="btn btn-gold" style="width:100%" onclick="closeModal('modal-demande-sent')">Compris ✓</button>
+  </div>
+</div>
+
 <!-- Modal : pause profil -->
 <div class="modal-overlay" id="modal-pause" onclick="if(event.target===this)closeModal('modal-pause')">
   <div class="modal">
@@ -5294,7 +5309,10 @@ function sendDemande(){
 
 
   closeModal('modal-demande');
-  showToast('&#128140; Demande envoy&#233;e !','gold');
+  // Afficher la modal de confirmation
+  var sentPrenomEl=document.getElementById('sent-prenom-confirm');
+  if(sentPrenomEl) sentPrenomEl.textContent=currentDemandeTarget||'ce membre';
+  openModal('modal-demande-sent');
   if(!(state.user&&state.user.id)) return;
   var allP=allProfiles.concat(window._dbProfiles||[]);
   var tp=allP.find(function(p){return p.prenom===currentDemandeTarget;});
@@ -5369,8 +5387,18 @@ function activateProfile(){
     return;
   }
   closeModal('modal-paywall');
-  // Redirection vers le lien Stripe de paiement
-  window.location.href = 'https://buy.stripe.com/9B69ATbOt9XN0FH5f43F602';
+  openStripePayment('profil', async function(){
+    // Le statut ACTIF sera mis à jour par le webhook Stripe en prod.
+    // En attendant, on le met à jour côté client après confirmation Stripe.
+    if(state.user && state.user.supabaseId){
+      await getSB().from('profils').update({status:'active', paid:true}).eq('user_id', state.user.supabaseId);
+    }
+    if(state.user){ state.user.status='active'; state.profileStatus='active'; }
+    state.profileActive = true;
+    closeModal('modal-paywall');
+    showToast('✅ Paiement confirmé ! Bienvenue sur Oumélia 🌙','green');
+    navTo('explorer');
+  });
 }
 
 
