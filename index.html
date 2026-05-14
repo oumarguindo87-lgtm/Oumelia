@@ -6153,8 +6153,10 @@ function getRdvData(profileId, email){
 }
 function getRdvBadge(profileId, email){
   var r = getRdvData(profileId, email);
+  // Si on a un vrai RDV avec date dans la table rdv
   if(r) return '<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">&#x1F4C5; RDV confirm\u00e9</span>';
-  return '<span class="badge" style="background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid rgba(155,89,182,.3)">&#x1F4CB; Entretien \u00e0 confirmer</span>';
+  // Sinon le statut rdv_planifie suffit — RDV pris mais pas encore dans la table rdv
+  return '<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">&#x2705; RDV planifi\u00e9</span>';
 }
 
 function renderAdminDashboard(c){
@@ -6166,21 +6168,25 @@ function renderAdminDashboard(c){
   var hommes=allP.filter(function(p){return p.gender==='homme';}).length;
   var nwali=waliResponses.filter(function(r){return !r.read;}).length;
   var nOnline=allP.filter(function(p){
-    if(p.is_online===true) return true;
     if(!p.last_seen) return false;
     return (Date.now()-new Date(p.last_seen).getTime())<5*60*1000;
   }).length;
   var nExchanges=exchangesList.length;
   var total=allP.length;
 
-  // Calculer les revenus réels depuis la table paiements
+  // Revenus : profils payants × 29,90€ + packs depuis table paiements
+  var paidProfiles=allP.filter(function(p){return p.paid===true&&!p.free_activated;}).length;
+  var baseRevenu=(paidProfiles*29.90).toFixed(2)+'€';
+  var revEl=document.getElementById('admin-revenu-stat');
+  if(revEl) revEl.textContent=baseRevenu;
   fetch(SUPABASE_URL+'/rest/v1/paiements?select=montant',{
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
   }).then(function(r){return r.json();}).then(function(rows){
-    var totalRevenu=0;
-    if(Array.isArray(rows)) rows.forEach(function(r){totalRevenu+=parseFloat(r.montant)||0;});
-    var revEl=document.getElementById('admin-revenu-stat');
-    if(revEl) revEl.textContent=totalRevenu.toFixed(2)+'€';
+    var packsTotal=0;
+    if(Array.isArray(rows)) rows.forEach(function(r){packsTotal+=parseFloat(r.montant)||0;});
+    var total=(paidProfiles*29.90+packsTotal).toFixed(2)+'€';
+    var el=document.getElementById('admin-revenu-stat');
+    if(el) el.textContent=total;
   }).catch(function(){});
 
   // Tous les non-actifs à traiter (pending + pending_verification)
