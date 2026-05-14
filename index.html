@@ -3309,6 +3309,7 @@ async function loadDemandesRecues(){
       if(exists){
         exists.statut=statut; exists.icon=icon2; exists.text=text2;
         exists.unread=(statut==='en_attente')&&exists.unread;
+        if(d.message) exists.demandeMessage=d.message;
         return;
       }
       userNotifs.unshift({
@@ -3316,7 +3317,8 @@ async function loadDemandesRecues(){
         time:(function(){var _d=new Date(d.created_at);return _d.toLocaleDateString('fr-FR')+' à '+_d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});})(),
         rawDate:d.created_at,
         unread:statut==='en_attente', profileId:d.from_profile_id,
-        fromPrenom:prenom2, statut:statut, dbId:d.id
+        fromPrenom:prenom2, statut:statut, dbId:d.id,
+        demandeMessage:d.message||null
       });
       updateNotifBadge();
       if(!fromP2 && d.from_profile_id){
@@ -5504,6 +5506,9 @@ function renderNotifs(c){
 
     if(pending){
       html+='<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">';
+      if(n.demandeMessage){
+        html+='<div style="font-size:.82rem;color:var(--white2);padding:9px 11px;background:var(--card2);border-radius:8px;border-left:3px solid var(--gold);font-style:italic;line-height:1.6">&#x201C;'+n.demandeMessage+'&#x201D;</div>';
+      }
       html+='<button class="btn btn-outline btn-sm" style="width:100%;font-size:.82rem" data-nid="'+nid+'" data-pid="'+(n.profileId||'')+'" onclick="openProfileFromNotifDemande(this.dataset.nid,this.dataset.pid)">&#x1F464; Voir le profil de '+(n.fromPrenom||'ce membre')+'</button>';
       html+='<div style="display:flex;gap:8px">';
       html+='<button class="btn btn-sm" style="flex:1;background:var(--green);color:#fff;font-size:.82rem" data-nid="'+nid+'" onclick="acceptDemande(this.dataset.nid)">&#x2713; Accepter</button>';
@@ -5544,6 +5549,10 @@ function openProfileFromNotifDemande(notifId, profileId){
 
     // Statut
     var statusHtml = '';
+    var msgDemandeHtml = '';
+    if(n && n.demandeMessage){
+      msgDemandeHtml = '<div style="background:var(--card2);border-left:3px solid var(--gold);border-radius:8px;padding:11px 13px;margin-bottom:14px;font-size:.84rem;color:var(--white2);font-style:italic;line-height:1.6">&#x201C;' + n.demandeMessage + '&#x201D;</div>';
+    }
     if(n && n.statut==='acceptee'){
       statusHtml = '<div style="background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:8px;padding:12px;text-align:center;margin-bottom:14px">' +
         '<p style="color:var(--green);font-weight:600;margin-bottom:8px">✅ Vous avez accepté cette demande</p>' +
@@ -5595,7 +5604,7 @@ function openProfileFromNotifDemande(notifId, profileId){
           '<h3 style="margin:0">💌 Demande reçue</h3>' +
           '<button id="btn-close-notif-popup" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1">×</button>' +
         '</div>' +
-        statusHtml + infoHtml + actionsHtml +
+        statusHtml + msgDemandeHtml + infoHtml + actionsHtml +
       '</div>';
 
     document.body.appendChild(overlay);
