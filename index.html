@@ -7924,23 +7924,6 @@ function canShowPayment(){
 function updateVillesByPays(pays){var e=document.getElementById('err-pays');if(e)e.style.display='none';}
 
 // ── Cal.com embed ──
-async function confirmRdvPris(){
-  if(!state.user||!state.user.supabaseId) return;
-  if(!confirm('Confirmez-vous avoir planifié votre entretien sur Cal.com ?')) return;
-  try{
-    await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+state.user.supabaseId,{
-      method:'PATCH',
-      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({status:'rdv_planifie'})
-    });
-    state.user.status='rdv_planifie';
-    if(state.profileStatus) state.profileStatus='rdv_planifie';
-    showToast('✅ Entretien confirmé !','green');
-    // Rafraîchir l\'affichage
-    if(typeof navTo==='function') navTo('messages');
-  }catch(e){ showToast('❌ Erreur, réessayez','red'); }
-}
-
 function openCalEmbed(){
   var existing=document.getElementById('cal-fullpage');
   if(existing) existing.remove();
@@ -7977,15 +7960,17 @@ function openCalEmbed(){
   header.appendChild(closeBtn);
   overlay.appendChild(header);
 
-  // Écouter les messages Cal.com (booking.created)
+  // Ecouter les messages Cal.com (booking.created)
   function _calListener(e){
     if(!e.data) return;
     var d = typeof e.data === 'string' ? {} : e.data;
-    // Vérifier strictement que c'est bien une réservation confirmée avec un uid
     var isBooking = (d.type==='booking.created' || d.type==='CAL:booking_created');
     var hasUid = d.uid || (d.data&&d.data.uid) || (d.payload&&d.payload.uid) || (d.booking&&d.booking.uid);
     if(isBooking && hasUid){
       _markRdvPlanifie();
+      // Afficher barre de confirmation
+      var _cb = document.getElementById('cal-confirm-bar');
+      if(_cb) _cb.style.display='flex';
     }
   }
   window.addEventListener('message',_calListener);
@@ -8000,6 +7985,14 @@ function openCalEmbed(){
   iframe.setAttribute('frameborder','0');
   iframe.setAttribute('allow','camera;microphone');
   overlay.appendChild(iframe);
+
+  // Barre de confirmation post-RDV (masquee par defaut)
+  var confirmBar=document.createElement('div');
+  confirmBar.id='cal-confirm-bar';
+  confirmBar.style.cssText='display:none;align-items:center;justify-content:center;gap:10px;padding:14px 16px;background:rgba(46,204,113,.12);border-top:1px solid rgba(46,204,113,.35);flex-shrink:0';
+  confirmBar.innerHTML='<span style="font-size:1.1rem">&#x2705;</span><span style="font-size:.88rem;color:#2ecc71;font-weight:600">Votre entretien a bien \u00e9t\u00e9 planifi\u00e9 \u2014 nous vous confirmerons bient\u00f4t.</span>';
+  overlay.appendChild(confirmBar);
+
   document.body.appendChild(overlay);
 }
 
