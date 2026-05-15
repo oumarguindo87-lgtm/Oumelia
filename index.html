@@ -5083,35 +5083,58 @@ function toggleFav(id){
 var userChatHistory={};
 
 function renderMessages(c){
-  // Marquer les messages comme lus
   try{
     var sb=getSB();
     if(sb&&state.user&&state.user.id){
       var uid=String(state.user.id);
       sb.from('messages').update({lu:true}).eq('to_id',uid).eq('lu',false)
-        .then(function(){
-          var b=document.getElementById('msg-badge');
-          if(b){ b.textContent=''; b.style.display='none'; }
-        }).catch(function(){});
+        .then(function(){var b=document.getElementById('msg-badge');if(b){b.textContent='';b.style.display='none';}}).catch(function(){});
     }
   }catch(e){}
   var adminName=state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice';
   var adminMsgs=userChatHistory[adminName]||[];
-  // Logo Oumélia réel (même source que la page d'accueil)
   var iconHtml2='<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:36px;height:36px;object-fit:contain;flex-shrink:0" alt="Oumélia">';
-  var html2='<div class="page-header"><h2>Messages</h2></div><div class="conversations-list">';
+  c.innerHTML='<div class="page-header"><h2>Messages</h2></div><div class="conversations-list" id="convos-list"></div><div id="empty-msgs" style="display:none;text-align:center;padding:48px 20px;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:14px">&#128172;</div><p style="font-size:.88rem">Aucun message pour le moment</p></div>';
+
+  var list=document.getElementById('convos-list');
+
+  // Admin conversation
   if(adminMsgs.length>0){
-    html2+='<div class="convo-item" onclick="openChat(&quot;'+adminName+'&quot;,&quot;admin&quot;)">'+
-      '<div class="convo-avatar">'+iconHtml2+'</div>'+
-      '<div class="convo-info"><div class="convo-name">'+adminName+' Oumélia</div>'+
-      '<div class="convo-preview">'+adminMsgs[adminMsgs.length-1].text.slice(0,40)+'...</div></div></div>';
-  } else {
-    html2+='<div style="text-align:center;padding:48px 20px;color:var(--muted)">'+
-      '<div style="font-size:2.5rem;margin-bottom:14px">&#128172;</div>'+
-      '<p style="font-size:.88rem">Aucun message pour le moment</p></div>';
+    var adminItem=document.createElement('div');
+    adminItem.className='convo-item';
+    adminItem.innerHTML='<div class="convo-avatar">'+iconHtml2+'</div><div class="convo-info"><div class="convo-name">'+adminName+' Oumélia</div><div class="convo-preview">'+adminMsgs[adminMsgs.length-1].text.slice(0,40)+'...</div></div>';
+    adminItem.onclick=(function(n){return function(){openChat(n,'admin');};})(adminName);
+    list.appendChild(adminItem);
   }
-  html2+='</div>';
-  c.innerHTML=html2;
+
+  // Charger les salons
+  var myId=state.user&&state.user.id;
+  if(!myId){if(!adminMsgs.length)document.getElementById('empty-msgs').style.display='block';return;}
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  fetch(SUPABASE_URL+'/rest/v1/salons?or=(frere_id.eq.'+myId+',soeur_id.eq.'+myId+')&order=start_time.desc',{headers:H})
+  .then(function(r){return r.json();}).then(function(salons){
+    if(!Array.isArray(salons)) salons=[];
+    if(!salons.length&&!adminMsgs.length){document.getElementById('empty-msgs').style.display='block';return;}
+    var now=Date.now();
+    salons.forEach(function(s){
+      var start=new Date(s.start_time).getTime(),end=new Date(s.end_time).getTime();
+      var isActif=now>=start&&now<end,isArchive=now>=end;
+      var pad=function(n){return String(n).padStart(2,'0');};
+      var startStr=new Date(s.start_time).toLocaleDateString('fr-FR')+' à '+pad(new Date(s.start_time).getHours())+':'+pad(new Date(s.start_time).getMinutes());
+      var statusColor=isActif?'#2ecc71':isArchive?'var(--muted)':'var(--gold)';
+      var statusTxt=isActif?'En cours':'Archivé';
+      var preview=isActif?'Salon en cours — rejoignez maintenant':isArchive?'Discussion archivée — lecture seule':'Démarre le '+startStr;
+      var item=document.createElement('div');
+      item.className='convo-item';
+      item.style.cssText='border-left:3px solid '+(isActif?'#2ecc71':isArchive?'rgba(255,255,255,.1)':'var(--gold)');
+      item.innerHTML='<div style="width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">&#x1F4AC;</div>'
+        +'<div class="convo-info"><div class="convo-name">Salon supervisé</div>'
+        +'<div style="font-size:.68rem;color:'+statusColor+';margin-top:2px;font-weight:600">'+statusTxt+'</div>'
+        +'<div class="convo-preview">'+preview+'</div></div>';
+      item.onclick=(function(sid){return function(){openSalonUser(sid);};})(s.id);
+      list.insertBefore(item,list.firstChild);
+    });
+  }).catch(function(){if(!adminMsgs.length)document.getElementById('empty-msgs').style.display='block';});
 }
 
 function openChat(name, type){
@@ -6093,6 +6116,7 @@ function adminTab(tab){
     case 'signalements': renderAdminSignalements(c); break;
     case 'paused':    if(typeof renderAdminPause==='function') renderAdminPause(c); break;
     case 'rdv':       if(typeof renderAdminRdv==='function')   renderAdminRdv(c);   break;
+    case 'salons':    if(typeof renderAdminSalons==='function') renderAdminSalons(c); break;
     case 'salons':    if(typeof renderAdminSalons==='function') renderAdminSalons(c); break;
   }
 }
@@ -8312,27 +8336,357 @@ function renderSalonNotifBanner(){
     var startStr=new Date(s.start_time).toLocaleDateString('fr-FR')+' à '+pad(new Date(s.start_time).getHours())+':'+pad(new Date(s.start_time).getMinutes());
     banner.style.cssText='position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:9000;background:'+(isActif?'rgba(46,204,113,.95)':'rgba(201,168,76,.95)')+';color:#000;border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.4);max-width:340px;width:90%';
     banner.innerHTML='<div style="flex:1">'
-      +'<div style="font-weight:700;font-size:.88rem">'+(isActif?'&#x1F4AC; Salon en cours !':'&#x1F4C5; Salon planifié')+' </div>'
+      +'<div style="font-weight:700;font-size:.88rem">'+(isActif?'💬 Salon en cours !':'📅 Salon planifié')+' </div>'
       +'<div style="font-size:.74rem;opacity:.8">'+(isActif?'Cliquez pour rejoindre':'Démarre le '+startStr)+'</div>'
-      +'</div>';
-    if(isActif){
-      var _joinBtn=document.createElement('button');
-      _joinBtn.textContent='Rejoindre';
-      _joinBtn.style.cssText='background:#000;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;font-family:inherit';
-      _joinBtn.onclick=function(){openSalonUser(s.id);};
-      banner.appendChild(_joinBtn);
-    }
-    var _closeBtn=document.createElement('button');
-    _closeBtn.innerHTML='&times;';
-    _closeBtn.style.cssText='background:none;border:none;font-size:1.2rem;cursor:pointer;opacity:.6;margin-left:4px;color:#000';
-    _closeBtn.onclick=function(){var b=document.getElementById('salon-banner');if(b)b.remove();};
-    banner.appendChild(_closeBtn);
+      +'</div>'
+      +(isActif?'<button onclick="openSalonUser(\''+s.id+'\')" style="background:#000;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;font-family:inherit">Rejoindre</button>':'')
+      +'<button onclick="document.getElementById(\'salon-banner\').remove()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;opacity:.6;margin-left:4px">×</button>';
     document.body.appendChild(banner);
   }).catch(function(){});
 }
 
 // Vérifier les salons à chaque navigation
 var _origNavTo = typeof navTo === 'function' ? navTo : null;
+
+
+// ===== SALON DE DISCUSSION SUPERVISÉ =====
+
+var _salonPollingInterval = null;
+var _salonCountdownInterval = null;
+
+(function(){
+  var s = document.createElement('style');
+  s.textContent = '.salon-chat-wrap{display:flex;flex-direction:column;height:100%;background:var(--dark)}.salon-header{padding:12px 16px;background:rgba(201,168,76,.08);border-bottom:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}.salon-countdown{font-size:1.1rem;font-weight:700;color:var(--gold);font-family:monospace}.salon-countdown.urgent{color:#e74c3c;animation:blink 1s infinite}.salon-msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px}.salon-msg{max-width:78%;padding:9px 13px;border-radius:12px;font-size:.88rem;line-height:1.5}.salon-msg.mine{align-self:flex-end;background:rgba(201,168,76,.18);border:1px solid rgba(201,168,76,.3);color:var(--white)}.salon-msg.theirs{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--white2)}.salon-msg.system{align-self:center;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);color:#2ecc71;font-size:.76rem;text-align:center;max-width:90%}.salon-msg-name{font-size:.68rem;font-weight:700;color:var(--gold);margin-bottom:3px}.salon-msg-time{font-size:.62rem;color:var(--muted);margin-top:3px;text-align:right}.salon-input-bar{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:var(--dark2);flex-shrink:0}.salon-input-bar input{flex:1;background:var(--dark);border:1px solid var(--border);border-radius:20px;padding:10px 14px;color:var(--white);font-size:.88rem;font-family:inherit}.salon-input-bar button{background:var(--gold);border:none;color:#000;border-radius:50%;width:38px;height:38px;font-size:1rem;cursor:pointer;flex-shrink:0}.admin-salon-card{background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}.admin-salon-card.actif{border-color:rgba(46,204,113,.4)}.admin-salon-card.archive{border-color:rgba(255,255,255,.1);opacity:.7}@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}';
+  document.head.appendChild(s);
+}());
+
+function openCreateSalonModal(){
+  var allP = getAllAdminProfiles();
+  var freres = allP.filter(function(p){return p.gender==='homme'&&p.status==='active';});
+  var soeurs = allP.filter(function(p){return p.gender==='femme'&&p.status==='active';});
+  var freresOpts = freres.map(function(p){return '<option value="'+p.id+'">'+p.prenom+'</option>';}).join('');
+  var soeursOpts = soeurs.map(function(p){return '<option value="'+p.id+'">'+p.prenom+'</option>';}).join('');
+  var def=new Date(Date.now()+3600000),pad=function(n){return String(n).padStart(2,'0');};
+  var defVal=def.getFullYear()+'-'+pad(def.getMonth()+1)+'-'+pad(def.getDate())+'T'+pad(def.getHours())+':'+pad(def.getMinutes());
+  var modal=document.getElementById('modal-create-salon');
+  if(!modal){modal=document.createElement('div');modal.id='modal-create-salon';modal.className='modal-overlay';modal.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px';document.body.appendChild(modal);}
+  modal.innerHTML='<div class="modal" style="max-width:360px;width:100%"><h3 style="color:var(--gold);margin-bottom:16px">&#x1F4AC; Créer un salon</h3>'
+    +'<label style="font-size:.8rem;color:var(--muted)">Frère</label><select id="salon-frere-sel" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:10px;font-family:inherit">'+freresOpts+'</select>'
+    +'<label style="font-size:.8rem;color:var(--muted)">Soeur</label><select id="salon-soeur-sel" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:10px;font-family:inherit">'+soeursOpts+'</select>'
+    +'<label style="font-size:.8rem;color:var(--muted)">Heure de début</label><input type="datetime-local" id="salon-start-input" value="'+defVal+'" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:16px;font-family:inherit">'
+    +'<div class="modal-footer"><button class="btn btn-outline" id="btn-cancel-salon">Annuler</button><button class="btn btn-gold" onclick="createSalon()">Créer</button></div></div>';
+  modal.style.display='flex';
+  document.getElementById('btn-cancel-salon').onclick=function(){modal.style.display='none';};
+}
+
+async function createSalon(){
+  var frereId=document.getElementById('salon-frere-sel').value;
+  var soeurId=document.getElementById('salon-soeur-sel').value;
+  var startVal=document.getElementById('salon-start-input').value;
+  if(!frereId||!soeurId||!startVal){showToast('Remplis tous les champs','red');return;}
+  if(frereId===soeurId){showToast('Sélectionne deux personnes différentes','red');return;}
+  var startTime=new Date(startVal).toISOString();
+  var endTime=new Date(new Date(startVal).getTime()+60*60*1000).toISOString();
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=representation'};
+  var res=await fetch(SUPABASE_URL+'/rest/v1/salons',{method:'POST',headers:H,body:JSON.stringify({frere_id:String(frereId),soeur_id:String(soeurId),start_time:startTime,end_time:endTime,statut:'planifie'})});
+  var data=await res.json();
+  if(!res.ok){showToast('Erreur création','red');return;}
+  var salonId=Array.isArray(data)?data[0].id:data.id;
+  var nH={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  var msg='Un salon de discussion supervisé vous a été ouvert. Retrouvez-le dans votre onglet Messages !';
+  fetch(SUPABASE_URL+'/rest/v1/notifications',{method:'POST',headers:nH,body:JSON.stringify({profile_id:String(frereId),type:'salon_invite',salon_id:String(salonId),content:msg,lu:false,created_at:new Date().toISOString()})});
+  fetch(SUPABASE_URL+'/rest/v1/notifications',{method:'POST',headers:nH,body:JSON.stringify({profile_id:String(soeurId),type:'salon_invite',salon_id:String(salonId),content:msg,lu:false,created_at:new Date().toISOString()})});
+  var modal=document.getElementById('modal-create-salon');
+  if(modal) modal.style.display='none';
+  showToast('Salon créé !','green');
+  adminTab('salons');
+}
+
+async function renderAdminSalons(c){
+  c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center">Chargement...</p></div>';
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  var res=await fetch(SUPABASE_URL+'/rest/v1/salons?select=*&order=start_time.desc',{headers:H});
+  var salons=await res.json().catch(function(){return[];});
+  if(!Array.isArray(salons)) salons=[];
+  var allP=getAllAdminProfiles();
+  function getP(id){var p=allP.find(function(x){return String(x.id)===String(id);});return p?p.prenom:'#'+id;}
+  var now=Date.now();
+  var html='<div style="padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="section-title">Salons de discussion</div><button class="btn btn-gold btn-sm" onclick="openCreateSalonModal()">+ Nouveau salon</button></div>';
+  if(!salons.length){html+='<p style="color:var(--muted);text-align:center;padding:20px">Aucun salon créé</p>';}
+  else{
+    salons.forEach(function(s){
+      var start=new Date(s.start_time),end=new Date(s.end_time);
+      var isActif=now>=start.getTime()&&now<end.getTime(),isArchive=now>=end.getTime();
+      var statLabel=isArchive?'Archivé':isActif?'En cours':'Planifié';
+      var pad=function(n){return String(n).padStart(2,'0');};
+      var fmtDt=function(d){return d.toLocaleDateString('fr-FR')+' '+pad(d.getHours())+':'+pad(d.getMinutes());};
+      html+='<div class="admin-salon-card '+(isArchive?'archive':isActif?'actif':'')+'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-weight:700;font-size:.9rem">'+getP(s.frere_id)+' × '+getP(s.soeur_id)+'</div><span style="font-size:.72rem;color:var(--muted)">'+statLabel+'</span></div>'
+        +'<div style="font-size:.75rem;color:var(--muted);margin-bottom:8px">'+fmtDt(start)+' → '+fmtDt(end)+'</div>'
+        +'<div style="display:flex;gap:6px" id="salon-btns-'+s.id+'"></div>'
+        +'</div>';
+    });
+  }
+  html+='</div>';
+  c.innerHTML=html;
+  // Add buttons via DOM after render
+  salons.forEach(function(s){
+    var now2=Date.now(),start2=new Date(s.start_time).getTime(),end2=new Date(s.end_time).getTime();
+    var isActif2=now2>=start2&&now2<end2;
+    var btnsEl=document.getElementById('salon-btns-'+s.id);
+    if(!btnsEl) return;
+    var allP2=getAllAdminProfiles();
+    function getP2(id){var p=allP2.find(function(x){return String(x.id)===String(id);});return p?p.prenom:'#'+id;}
+    var supervBtn=document.createElement('button');
+    supervBtn.className='btn btn-sm';
+    supervBtn.style.cssText='background:rgba(52,152,219,.15);color:#3498db;border:1px solid rgba(52,152,219,.3)';
+    supervBtn.textContent='Superviser';
+    supervBtn.onclick=(function(sid,fn,sn){return function(){adminSuperviserSalon(sid,fn,sn);};})(s.id,getP2(s.frere_id),getP2(s.soeur_id));
+    btnsEl.appendChild(supervBtn);
+    if(isActif2){
+      var closeBtn=document.createElement('button');
+      closeBtn.className='btn btn-sm';
+      closeBtn.style.cssText='background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid rgba(231,76,60,.3)';
+      closeBtn.textContent='Fermer';
+      closeBtn.onclick=(function(sid){return function(){closeSalonNow(sid);};})(s.id);
+      btnsEl.appendChild(closeBtn);
+    }
+  });
+}
+
+async function closeSalonNow(salonId){
+  if(!confirm('Fermer ce salon maintenant ?')) return;
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  await fetch(SUPABASE_URL+'/rest/v1/salons?id=eq.'+salonId,{method:'PATCH',headers:H,body:JSON.stringify({statut:'archive',end_time:new Date().toISOString()})});
+  showToast('Salon fermé','green');
+  adminTab('salons');
+}
+
+async function adminSuperviserSalon(salonId,prenomFrere,prenomSoeur){
+  var c=document.getElementById('admin-content');
+  var retBtn=document.createElement('button');
+  retBtn.className='btn btn-outline btn-sm';
+  retBtn.textContent='← Retour';
+  retBtn.onclick=function(){adminTab('salons');};
+  var msgsDiv=document.createElement('div');
+  msgsDiv.id='admin-superv-msgs';
+  msgsDiv.style.marginTop='14px';
+  c.innerHTML='';
+  var wrap=document.createElement('div');
+  wrap.style.padding='16px';
+  wrap.appendChild(retBtn);
+  wrap.appendChild(msgsDiv);
+  c.appendChild(wrap);
+
+  async function loadSuperv(){
+    var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+    var res=await fetch(SUPABASE_URL+'/rest/v1/salon_messages?salon_id=eq.'+salonId+'&order=created_at.asc',{headers:H});
+    var msgs=await res.json().catch(function(){return[];});
+    var el=document.getElementById('admin-superv-msgs');
+    if(!el) return;
+    if(!msgs.length){el.innerHTML='<p style="color:var(--muted);text-align:center">Aucun message</p>';return;}
+    var html='<div style="font-size:.8rem;font-weight:700;color:var(--gold);margin-bottom:10px">'+prenomFrere+' × '+prenomSoeur+' — '+msgs.length+' messages</div>';
+    msgs.forEach(function(m){
+      var isF=m.from_role==='frere',nom=isF?prenomFrere:prenomSoeur;
+      var t=new Date(m.created_at),hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+      html+='<div style="margin-bottom:8px;padding:8px 12px;background:'+(isF?'rgba(52,152,219,.1)':'rgba(155,89,182,.1)')+';border-radius:10px;border-left:3px solid '+(isF?'#3498db':'#9b59b6')+'">'
+        +'<div style="font-size:.7rem;font-weight:700;color:'+(isF?'#3498db':'#9b59b6')+'">'+nom+' · '+hm+'</div>'
+        +'<div style="font-size:.85rem;color:var(--white);margin-top:3px">'+m.content+'</div></div>';
+    });
+    el.innerHTML=html;
+  }
+  loadSuperv();
+  if(_salonPollingInterval) clearInterval(_salonPollingInterval);
+  _salonPollingInterval=setInterval(loadSuperv,5000);
+}
+
+async function openSalonUser(salonId){
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  var res=await fetch(SUPABASE_URL+'/rest/v1/salons?id=eq.'+salonId+'&select=*',{headers:H});
+  var salons=await res.json().catch(function(){return[];});
+  var salon=salons[0];
+  if(!salon){showToast('Salon introuvable','red');return;}
+  var myId=state.user&&state.user.id;
+  var myGender=state.user&&state.user.gender;
+  var myRole=myGender==='homme'?'frere':'soeur';
+  var myPrenom=state.user&&state.user.prenom;
+  if(String(salon.frere_id)!==String(myId)&&String(salon.soeur_id)!==String(myId)){showToast('Accès refusé','red');return;}
+
+  var existing=document.getElementById('salon-fullpage');
+  if(existing) existing.remove();
+  var overlay=document.createElement('div');
+  overlay.id='salon-fullpage';
+  overlay.style.cssText='position:fixed;inset:0;z-index:9998;background:var(--dark);display:flex;flex-direction:column';
+
+  var now=Date.now();
+  var startTime=new Date(salon.start_time).getTime();
+  var endTime=new Date(salon.end_time).getTime();
+  var isArchive=now>=endTime,isActif=now>=startTime&&now<endTime,notYet=now<startTime;
+  var pad=function(n){return String(n).padStart(2,'0');};
+  var startStr=new Date(salon.start_time).toLocaleDateString('fr-FR')+' à '+pad(new Date(salon.start_time).getHours())+':'+pad(new Date(salon.start_time).getMinutes());
+
+  // Build UI with DOM
+  var wrap=document.createElement('div'); wrap.className='salon-chat-wrap';
+
+  var header=document.createElement('div'); header.className='salon-header';
+  var titleDiv=document.createElement('div');
+  titleDiv.innerHTML='<div style="font-weight:700;font-size:.9rem;color:var(--gold)">Salon supervisé</div>'
+    +'<div style="font-size:.72rem;color:var(--muted)">Conversation encadrée par Oumélia</div>';
+  var rightDiv=document.createElement('div'); rightDiv.style.cssText='display:flex;align-items:center;gap:10px';
+  var cdEl=document.createElement('div'); cdEl.id='salon-countdown'; cdEl.className='salon-countdown'; cdEl.textContent='--:--';
+  var closeBtn=document.createElement('button');
+  closeBtn.textContent='×'; closeBtn.style.cssText='background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer';
+  closeBtn.onclick=function(){
+    var fp=document.getElementById('salon-fullpage');if(fp)fp.remove();
+    if(_salonPollingInterval)clearInterval(_salonPollingInterval);
+    if(_salonCountdownInterval)clearInterval(_salonCountdownInterval);
+  };
+  rightDiv.appendChild(cdEl); rightDiv.appendChild(closeBtn);
+  header.appendChild(titleDiv); header.appendChild(rightDiv);
+  wrap.appendChild(header);
+
+  var msgsArea=document.createElement('div'); msgsArea.className='salon-msgs'; msgsArea.id='salon-msgs-list';
+  wrap.appendChild(msgsArea);
+
+  if(isActif){
+    var inputBar=document.createElement('div'); inputBar.className='salon-input-bar';
+    var inp=document.createElement('input');
+    inp.type='text'; inp.id='salon-input'; inp.placeholder='Votre message...';
+    inp.onkeydown=function(e){if(e.key==='Enter')sendSalonMsg(salonId,myRole,myPrenom);};
+    var sendBtn=document.createElement('button');
+    sendBtn.innerHTML='&#x27A4;';
+    sendBtn.onclick=function(){sendSalonMsg(salonId,myRole,myPrenom);};
+    inputBar.appendChild(inp); inputBar.appendChild(sendBtn);
+    wrap.appendChild(inputBar);
+  } else if(notYet){
+    var lockedBar=document.createElement('div');
+    lockedBar.style.cssText='padding:12px 16px;text-align:center;background:rgba(201,168,76,.06);border-top:1px solid rgba(201,168,76,.2);font-size:.8rem;color:var(--gold)';
+    lockedBar.textContent='Le salon ouvrira le '+startStr+'. Revenez à cette heure.';
+    wrap.appendChild(lockedBar);
+  } else {
+    var archBar=document.createElement('div');
+    archBar.style.cssText='padding:12px 16px;text-align:center;background:rgba(255,255,255,.04);border-top:1px solid var(--border);font-size:.8rem;color:var(--muted)';
+    archBar.textContent='Discussion archivée — lecture seule';
+    wrap.appendChild(archBar);
+  }
+
+  overlay.appendChild(wrap);
+  document.body.appendChild(overlay);
+
+  // Countdown
+  if(_salonCountdownInterval) clearInterval(_salonCountdownInterval);
+  function updateCountdown(){
+    var el=document.getElementById('salon-countdown');if(!el) return;
+    if(isArchive){el.textContent='Archivé';return;}
+    if(notYet){
+      var toStart=startTime-Date.now();
+      if(toStart<=0){el.textContent='Démarrage...';return;}
+      var m=Math.floor(toStart/60000),s2=Math.floor((toStart%60000)/1000);
+      el.textContent='Début dans '+String(m).padStart(2,'0')+':'+String(s2).padStart(2,'0');
+      return;
+    }
+    var remaining=endTime-Date.now();
+    if(remaining<=0){
+      el.textContent='Terminé';
+      var ib=overlay.querySelector('.salon-input-bar');if(ib)ib.remove();
+      var ml=document.getElementById('salon-msgs-list');
+      if(ml){var lm=document.createElement('div');lm.className='salon-msg system';lm.textContent='Le salon est maintenant fermé.';ml.appendChild(lm);ml.scrollTop=ml.scrollHeight;}
+      clearInterval(_salonCountdownInterval);return;
+    }
+    var mins=Math.floor(remaining/60000),secs=Math.floor((remaining%60000)/1000);
+    el.textContent=String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
+    el.className=remaining<5*60*1000?'salon-countdown urgent':'salon-countdown';
+  }
+  updateCountdown();
+  _salonCountdownInterval=setInterval(updateCountdown,1000);
+
+  // Load messages
+  async function loadSalonMsgs(){
+    var r=await fetch(SUPABASE_URL+'/rest/v1/salon_messages?salon_id=eq.'+salonId+'&order=created_at.asc',{headers:H});
+    var msgs=await r.json().catch(function(){return[];});
+    var el=document.getElementById('salon-msgs-list');if(!el) return;
+    el.innerHTML='';
+    var sys=document.createElement('div');sys.className='salon-msg system';
+    sys.textContent=isArchive?'Discussion archivée — lecture seule.':'Bienvenue dans le salon supervisé. Durée : 60 minutes.';
+    el.appendChild(sys);
+    msgs.forEach(function(m){
+      var isMine=m.from_role===myRole;
+      var div=document.createElement('div');div.className='salon-msg '+(isMine?'mine':'theirs');
+      var t=new Date(m.created_at),hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+      if(!isMine){var nm=document.createElement('div');nm.className='salon-msg-name';nm.textContent=m.from_role==='frere'?'Lui':'Elle';div.appendChild(nm);}
+      var txt=document.createElement('span');txt.textContent=m.content;div.appendChild(txt);
+      var ts=document.createElement('div');ts.className='salon-msg-time';ts.textContent=hm;div.appendChild(ts);
+      el.appendChild(div);
+    });
+    el.scrollTop=el.scrollHeight;
+  }
+  loadSalonMsgs();
+  if(_salonPollingInterval) clearInterval(_salonPollingInterval);
+  if(isActif) _salonPollingInterval=setInterval(loadSalonMsgs,3000);
+}
+
+async function sendSalonMsg(salonId,myRole,myPrenom){
+  var inp=document.getElementById('salon-input');
+  if(!inp||!inp.value.trim()) return;
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  var sRes=await fetch(SUPABASE_URL+'/rest/v1/salons?id=eq.'+salonId+'&select=end_time',{headers:H});
+  var sData=await sRes.json().catch(function(){return[];});
+  if(!sData.length||Date.now()>=new Date(sData[0].end_time).getTime()){showToast('Le salon est fermé','red');return;}
+  var txt=inp.value.trim(); inp.value='';
+  var H2={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  await fetch(SUPABASE_URL+'/rest/v1/salon_messages',{method:'POST',headers:H2,body:JSON.stringify({salon_id:String(salonId),from_role:myRole,content:txt,created_at:new Date().toISOString()})});
+  // Reload msgs
+  var r=await fetch(SUPABASE_URL+'/rest/v1/salon_messages?salon_id=eq.'+salonId+'&order=created_at.asc',{headers:H});
+  var msgs=await r.json().catch(function(){return[];});
+  var el=document.getElementById('salon-msgs-list');if(!el) return;
+  el.innerHTML='';
+  var sys=document.createElement('div');sys.className='salon-msg system';sys.textContent='Bienvenue dans le salon supervisé. Durée : 60 minutes.';el.appendChild(sys);
+  msgs.forEach(function(m){
+    var isMine=m.from_role===myRole;
+    var div=document.createElement('div');div.className='salon-msg '+(isMine?'mine':'theirs');
+    var t=new Date(m.created_at),hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+    if(!isMine){var nm=document.createElement('div');nm.className='salon-msg-name';nm.textContent=m.from_role==='frere'?'Lui':'Elle';div.appendChild(nm);}
+    var txt2=document.createElement('span');txt2.textContent=m.content;div.appendChild(txt2);
+    var ts=document.createElement('div');ts.className='salon-msg-time';ts.textContent=hm;div.appendChild(ts);
+    el.appendChild(div);
+  });
+  el.scrollTop=el.scrollHeight;
+}
+
+function openSalonFromMessages(salonId){ openSalonUser(salonId); }
+
+function renderSalonNotifBanner(){
+  var myId=state.user&&state.user.id;if(!myId) return;
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  fetch(SUPABASE_URL+'/rest/v1/salons?or=(frere_id.eq.'+myId+',soeur_id.eq.'+myId+')&statut=neq.archive&order=start_time.desc&limit=1',{headers:H})
+  .then(function(r){return r.json();}).then(function(salons){
+    if(!salons||!salons.length) return;
+    var s=salons[0],now=Date.now(),start=new Date(s.start_time).getTime(),end=new Date(s.end_time).getTime();
+    if(now>=end) return;
+    var existing=document.getElementById('salon-banner');if(existing) existing.remove();
+    var banner=document.createElement('div');banner.id='salon-banner';
+    var isActif=now>=start&&now<end;
+    var pad=function(n){return String(n).padStart(2,'0');};
+    var startStr=new Date(s.start_time).toLocaleDateString('fr-FR')+' à '+pad(new Date(s.start_time).getHours())+':'+pad(new Date(s.start_time).getMinutes());
+    banner.style.cssText='position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:9000;background:'+(isActif?'rgba(46,204,113,.95)':'rgba(201,168,76,.95)')+';color:#000;border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.4);max-width:340px;width:90%';
+    var infoDiv=document.createElement('div');infoDiv.style.flex='1';
+    infoDiv.innerHTML='<div style="font-weight:700;font-size:.88rem">'+(isActif?'Salon en cours !':'Salon planifié')+'</div>'
+      +'<div style="font-size:.74rem;opacity:.8">'+(isActif?'Cliquez pour rejoindre':'Démarre le '+startStr)+'</div>';
+    banner.appendChild(infoDiv);
+    if(isActif){
+      var joinBtn=document.createElement('button');
+      joinBtn.textContent='Rejoindre';
+      joinBtn.style.cssText='background:#000;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;font-family:inherit';
+      joinBtn.onclick=function(){openSalonUser(s.id);};
+      banner.appendChild(joinBtn);
+    }
+    var closeBtn2=document.createElement('button');
+    closeBtn2.textContent='×';closeBtn2.style.cssText='background:none;border:none;font-size:1.2rem;cursor:pointer;opacity:.6;margin-left:4px;color:#000';
+    closeBtn2.onclick=function(){var b=document.getElementById('salon-banner');if(b)b.remove();};
+    banner.appendChild(closeBtn2);
+    document.body.appendChild(banner);
+  }).catch(function(){});
+}
 
 // ===== PATCHES =====
 state.audioRecordedHomme = false;
