@@ -8468,19 +8468,46 @@ async function closeSalonNow(salonId){
 }
 
 async function adminSuperviserSalon(salonId,prenomFrere,prenomSoeur){
+  if(_salonPollingInterval) clearInterval(_salonPollingInterval);
   var c=document.getElementById('admin-content');
-  var retBtn=document.createElement('button');
-  retBtn.className='btn btn-outline btn-sm';
-  retBtn.textContent='← Retour';
-  retBtn.onclick=function(){adminTab('salons');};
-  var msgsDiv=document.createElement('div');
-  msgsDiv.id='admin-superv-msgs';
-  msgsDiv.style.marginTop='14px';
   c.innerHTML='';
   var wrap=document.createElement('div');
   wrap.style.padding='16px';
+
+  // Retour
+  var retBtn=document.createElement('button');
+  retBtn.className='btn btn-outline btn-sm';
+  retBtn.textContent='← Retour';
+  retBtn.onclick=function(){if(_salonPollingInterval)clearInterval(_salonPollingInterval);adminTab('salons');};
   wrap.appendChild(retBtn);
+
+  // Titre
+  var titre=document.createElement('div');
+  titre.style.cssText='font-size:.82rem;font-weight:700;color:var(--gold);margin:12px 0 8px';
+  titre.textContent=prenomFrere+' × '+prenomSoeur+' — Supervision en direct';
+  wrap.appendChild(titre);
+
+  // Messages
+  var msgsDiv=document.createElement('div');
+  msgsDiv.id='admin-superv-msgs';
   wrap.appendChild(msgsDiv);
+
+  // Input admin
+  var inputWrap=document.createElement('div');
+  inputWrap.style.cssText='display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)';
+  var adminInp=document.createElement('input');
+  adminInp.type='text'; adminInp.id='admin-salon-input';
+  adminInp.placeholder='Message admin dans le salon...';
+  adminInp.style.cssText='flex:1;background:var(--dark);border:1px solid var(--border);border-radius:20px;padding:9px 14px;color:var(--white);font-size:.85rem;font-family:inherit';
+  adminInp.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();sendAdminSalonMsg(salonId,loadSuperv);}};
+  var adminSendBtn=document.createElement('button');
+  adminSendBtn.innerHTML='&#x27A4;';
+  adminSendBtn.style.cssText='background:var(--gold);border:none;color:#000;border-radius:50%;width:36px;height:36px;cursor:pointer;flex-shrink:0';
+  adminSendBtn.onclick=function(){sendAdminSalonMsg(salonId,loadSuperv);};
+  inputWrap.appendChild(adminInp);
+  inputWrap.appendChild(adminSendBtn);
+  wrap.appendChild(inputWrap);
+
   c.appendChild(wrap);
 
   async function loadSuperv(){
@@ -8488,21 +8515,37 @@ async function adminSuperviserSalon(salonId,prenomFrere,prenomSoeur){
     var res=await fetch(SUPABASE_URL+'/rest/v1/salon_messages?salon_id=eq.'+salonId+'&order=created_at.asc',{headers:H});
     var msgs=await res.json().catch(function(){return[];});
     var el=document.getElementById('admin-superv-msgs');
-    if(!el) return;
-    if(!msgs.length){el.innerHTML='<p style="color:var(--muted);text-align:center">Aucun message</p>';return;}
-    var html='<div style="font-size:.8rem;font-weight:700;color:var(--gold);margin-bottom:10px">'+prenomFrere+' × '+prenomSoeur+' — '+msgs.length+' messages</div>';
+    if(!el){clearInterval(_salonPollingInterval);return;}
+    if(!msgs.length){el.innerHTML='<p style="color:var(--muted);text-align:center;font-size:.82rem">Aucun message pour le moment</p>';return;}
+    var html='';
     msgs.forEach(function(m){
-      var isF=m.from_role==='frere',nom=isF?prenomFrere:prenomSoeur;
+      var isAdmin=m.from_role==='admin';
+      var isF=m.from_role==='frere';
+      var nom=isAdmin?'Admin':isF?prenomFrere:prenomSoeur;
+      var bg=isAdmin?'rgba(201,168,76,.1)':isF?'rgba(52,152,219,.1)':'rgba(155,89,182,.1)';
+      var border=isAdmin?'var(--gold)':isF?'#3498db':'#9b59b6';
+      var color=isAdmin?'var(--gold)':isF?'#3498db':'#9b59b6';
       var t=new Date(m.created_at),hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
-      html+='<div style="margin-bottom:8px;padding:8px 12px;background:'+(isF?'rgba(52,152,219,.1)':'rgba(155,89,182,.1)')+';border-radius:10px;border-left:3px solid '+(isF?'#3498db':'#9b59b6')+'">'
-        +'<div style="font-size:.7rem;font-weight:700;color:'+(isF?'#3498db':'#9b59b6')+'">'+nom+' · '+hm+'</div>'
+      html+='<div style="margin-bottom:8px;padding:8px 12px;background:'+bg+';border-radius:10px;border-left:3px solid '+border+'">'
+        +'<div style="font-size:.7rem;font-weight:700;color:'+color+'">'+nom+' · '+hm+'</div>'
         +'<div style="font-size:.85rem;color:var(--white);margin-top:3px">'+m.content+'</div></div>';
     });
     el.innerHTML=html;
   }
   loadSuperv();
-  if(_salonPollingInterval) clearInterval(_salonPollingInterval);
-  _salonPollingInterval=setInterval(loadSuperv,5000);
+  _salonPollingInterval=setInterval(loadSuperv,4000);
+}
+
+async function sendAdminSalonMsg(salonId, reloadFn){
+  var inp=document.getElementById('admin-salon-input');
+  if(!inp||!inp.value.trim()) return;
+  var txt=inp.value.trim(); inp.value='';
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  await fetch(SUPABASE_URL+'/rest/v1/salon_messages',{
+    method:'POST',headers:H,
+    body:JSON.stringify({salon_id:String(salonId),from_role:'admin',content:txt,created_at:new Date().toISOString()})
+  });
+  if(typeof reloadFn==='function') reloadFn();
 }
 
 async function openSalonUser(salonId){
@@ -8557,7 +8600,7 @@ async function openSalonUser(salonId){
     var inputBar=document.createElement('div'); inputBar.className='salon-input-bar';
     var inp=document.createElement('input');
     inp.type='text'; inp.id='salon-input'; inp.placeholder='Votre message...';
-    inp.onkeydown=function(e){if(e.key==='Enter')sendSalonMsg(salonId,myRole,myPrenom);};
+    inp.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();sendSalonMsg(salonId,myRole,myPrenom);}};
     var sendBtn=document.createElement('button');
     sendBtn.innerHTML='&#x27A4;';
     sendBtn.onclick=function(){sendSalonMsg(salonId,myRole,myPrenom);};
