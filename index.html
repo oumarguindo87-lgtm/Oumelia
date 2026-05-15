@@ -8262,12 +8262,16 @@ async function openSalonUser(salonId){
     el.appendChild(sysMsg);
 
     msgs.forEach(function(m){
-      var isMine = m.from_role===myRole;
-      var div = document.createElement('div');
-      div.className='salon-msg '+(isMine?'mine':'theirs');
-      var t = new Date(m.created_at);
-      var hm = String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
-      div.innerHTML=(isMine?'':'<div class="salon-msg-name">'+(m.from_role==='frere'?'Lui':'Elle')+'</div>')+m.content+'<div class="salon-msg-time">'+hm+'</div>';
+      var isMine=m.from_role===myRole;
+      var isAdmMsg=m.from_role==='admin';
+      var div=document.createElement('div');
+      if(isAdmMsg){div.className='salon-msg system';div.style.cssText='align-self:center;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);max-width:90%;text-align:left';}
+      else{div.className='salon-msg '+(isMine?'mine':'theirs');}
+      var t=new Date(m.created_at),hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+      var nomA=isAdmMsg?'Oumélia':m.from_role==='frere'?(frerePrenom||window._salonFrerePrenom||'Lui'):(soeurPrenom||window._salonSoeurPrenom||'Elle');
+      if(!isMine||isAdmMsg){var nm=document.createElement('div');nm.className='salon-msg-name';nm.style.color=isAdmMsg?'var(--gold)':m.from_role==='frere'?'#3498db':'#9b59b6';nm.textContent=nomA;div.appendChild(nm);}
+      var sp=document.createElement('span');sp.textContent=m.content;div.appendChild(sp);
+      var ts=document.createElement('div');ts.className='salon-msg-time';ts.textContent=hm;div.appendChild(ts);
       el.appendChild(div);
     });
     el.scrollTop=el.scrollHeight;
@@ -8309,9 +8313,15 @@ async function sendSalonMsg(salonId, myRole, myPrenom){
   var sysMsg=document.createElement('div');sysMsg.className='salon-msg system';sysMsg.textContent='🌟 Bienvenue dans le salon supervisé. Durée : 60 minutes. Soyez respectueux.';el.appendChild(sysMsg);
   msgs.forEach(function(m){
     var isMine=m.from_role===myRole;
-    var div=document.createElement('div');div.className='salon-msg '+(isMine?'mine':'theirs');
-    var t=new Date(m.created_at);var hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
-    div.innerHTML=(isMine?'':'<div class="salon-msg-name">'+(m.from_role==='frere'?'Lui':'Elle')+'</div>')+m.content+'<div class="salon-msg-time">'+hm+'</div>';
+    var isAdm3=m.from_role==='admin';
+    var div=document.createElement('div');
+    if(isAdm3){div.className='salon-msg system';div.style.cssText='align-self:center;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);max-width:90%;text-align:left';}
+    else{div.className='salon-msg '+(isMine?'mine':'theirs');}
+    var t=new Date(m.created_at),hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+    var nomB=isAdm3?'Oumélia':m.from_role==='frere'?(window._salonFrerePrenom||'Lui'):(window._salonSoeurPrenom||'Elle');
+    if(!isMine||isAdm3){var nm3=document.createElement('div');nm3.className='salon-msg-name';nm3.style.color=isAdm3?'var(--gold)':m.from_role==='frere'?'#3498db':'#9b59b6';nm3.textContent=nomB;div.appendChild(nm3);}
+    var sp3=document.createElement('span');sp3.textContent=m.content;div.appendChild(sp3);
+    var ts3=document.createElement('div');ts3.className='salon-msg-time';ts3.textContent=hm;div.appendChild(ts3);
     el.appendChild(div);
   });
   el.scrollTop=el.scrollHeight;
@@ -8539,30 +8549,13 @@ async function adminSuperviserSalon(salonId,prenomFrere,prenomSoeur){
 async function sendAdminSalonMsg(salonId, reloadFn){
   var inp=document.getElementById('admin-salon-input');
   if(!inp||!inp.value.trim()) return;
-  var txt=inp.value.trim();
-  inp.value='';
-  inp.disabled=true;
+  var txt=inp.value.trim(); inp.value='';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
-  try{
-    var res=await fetch(SUPABASE_URL+'/rest/v1/salon_messages',{
-      method:'POST',headers:H,
-      body:JSON.stringify({salon_id:String(salonId),from_role:'admin',content:txt,created_at:new Date().toISOString()})
-    });
-    if(!res.ok){
-      var err=await res.text();
-      console.log('sendAdminSalonMsg error:',err);
-      showToast('Erreur envoi','red');
-      inp.value=txt;
-    } else {
-      if(typeof reloadFn==='function') await reloadFn();
-    }
-  }catch(e){
-    console.log('sendAdminSalonMsg exception:',e);
-    showToast('Erreur réseau','red');
-    inp.value=txt;
-  }
-  inp.disabled=false;
-  inp.focus();
+  await fetch(SUPABASE_URL+'/rest/v1/salon_messages',{
+    method:'POST',headers:H,
+    body:JSON.stringify({salon_id:String(salonId),from_role:'admin',content:txt,created_at:new Date().toISOString()})
+  });
+  if(typeof reloadFn==='function') reloadFn();
 }
 
 async function openSalonUser(salonId){
@@ -8576,6 +8569,21 @@ async function openSalonUser(salonId){
   var myRole=myGender==='homme'?'frere':'soeur';
   var myPrenom=state.user&&state.user.prenom;
   if(String(salon.frere_id)!==String(myId)&&String(salon.soeur_id)!==String(myId)){showToast('Accès refusé','red');return;}
+
+  // Récupérer les vrais prénoms du frère et de la sœur
+  var frerePrenom='Lui', soeurPrenom='Elle';
+  try{
+    var pRes=await fetch(SUPABASE_URL+'/rest/v1/profils?id=in.('+salon.frere_id+','+salon.soeur_id+')&select=id,prenom',{headers:H});
+    var pData=await pRes.json();
+    if(Array.isArray(pData)){
+      pData.forEach(function(p){
+        if(String(p.id)===String(salon.frere_id)) frerePrenom=p.prenom||'Lui';
+        if(String(p.id)===String(salon.soeur_id)) soeurPrenom=p.prenom||'Elle';
+      });
+    }
+  }catch(e){}
+  window._salonFrerePrenom=frerePrenom;
+  window._salonSoeurPrenom=soeurPrenom;
 
   var existing=document.getElementById('salon-fullpage');
   if(existing) existing.remove();
@@ -8675,10 +8683,22 @@ async function openSalonUser(salonId){
     sys.textContent=isArchive?'Discussion archivée — lecture seule.':'Bienvenue dans le salon supervisé. Durée : 60 minutes.';
     el.appendChild(sys);
     msgs.forEach(function(m){
+      var isAdmin=m.from_role==='admin';
       var isMine=m.from_role===myRole;
-      var div=document.createElement('div');div.className='salon-msg '+(isMine?'mine':'theirs');
+      var div=document.createElement('div');
+      if(isAdmin){
+        div.className='salon-msg system';
+        div.style.cssText='align-self:center;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);max-width:90%;text-align:left';
+      } else {
+        div.className='salon-msg '+(isMine?'mine':'theirs');
+      }
       var t=new Date(m.created_at),hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
-      if(!isMine){var nm=document.createElement('div');nm.className='salon-msg-name';nm.textContent=m.from_role==='frere'?'Lui':'Elle';div.appendChild(nm);}
+      var nomAffiche=isAdmin?'Oumélia':m.from_role==='frere'?frerePrenom:soeurPrenom;
+      if(!isMine||isAdmin){
+        var nm=document.createElement('div');nm.className='salon-msg-name';
+        nm.style.color=isAdmin?'var(--gold)':m.from_role==='frere'?'#3498db':'#9b59b6';
+        nm.textContent=nomAffiche;div.appendChild(nm);
+      }
       var txt=document.createElement('span');txt.textContent=m.content;div.appendChild(txt);
       var ts=document.createElement('div');ts.className='salon-msg-time';ts.textContent=hm;div.appendChild(ts);
       el.appendChild(div);
@@ -8710,7 +8730,14 @@ async function sendSalonMsg(salonId,myRole,myPrenom){
     var isMine=m.from_role===myRole;
     var div=document.createElement('div');div.className='salon-msg '+(isMine?'mine':'theirs');
     var t=new Date(m.created_at),hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
-    if(!isMine){var nm=document.createElement('div');nm.className='salon-msg-name';nm.textContent=m.from_role==='frere'?'Lui':'Elle';div.appendChild(nm);}
+    var isAdm=m.from_role==='admin';
+    if(!isMine||isAdm){
+      if(isAdm){div.className='salon-msg system';div.style.cssText='align-self:center;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);max-width:90%;text-align:left';}
+      var nm2=document.createElement('div');nm2.className='salon-msg-name';
+      nm2.style.color=isAdm?'var(--gold)':m.from_role==='frere'?'#3498db':'#9b59b6';
+      nm2.textContent=isAdm?'Oumélia':m.from_role==='frere'?(window._salonFrerePrenom||'Lui'):(window._salonSoeurPrenom||'Elle');
+      div.appendChild(nm2);
+    }
     var txt2=document.createElement('span');txt2.textContent=m.content;div.appendChild(txt2);
     var ts=document.createElement('div');ts.className='salon-msg-time';ts.textContent=hm;div.appendChild(ts);
     el.appendChild(div);
