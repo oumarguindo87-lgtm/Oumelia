@@ -8518,10 +8518,14 @@ function openCalEmbed(){
   // Bouton de secours si le message Cal.com n'arrive pas
   var fallbackBar=document.createElement('div');
   fallbackBar.id='cal-fallback-bar';
-  fallbackBar.style.cssText='display:none;align-items:center;justify-content:center;padding:10px 16px;border-top:1px solid rgba(201,168,76,.2);flex-shrink:0';
+  fallbackBar.style.cssText='display:none;align-items:center;justify-content:center;padding:12px 16px;background:rgba(201,168,76,.06);border-top:2px solid rgba(201,168,76,.3);flex-shrink:0;flex-direction:column;gap:6px';
   var fallbackBtn=document.createElement('button');
   fallbackBtn.style.cssText='background:var(--gold);border:none;color:#000;border-radius:8px;padding:9px 20px;font-weight:700;font-size:.82rem;cursor:pointer;font-family:inherit';
-  fallbackBtn.textContent='✅ J\'ai bien pris mon RDV';
+  var fallbackLabel=document.createElement('div');
+  fallbackLabel.style.cssText='font-size:.72rem;color:var(--muted);margin-bottom:4px;text-align:center';
+  fallbackLabel.textContent='Vous avez finalisé votre réservation sur Cal.com ?';
+  fallbackBar.appendChild(fallbackLabel);
+  fallbackBtn.textContent='Oui, j’ai bien pris mon rendez-vous →';
   fallbackBtn.onclick=function(){
     _markRdvPlanifie();
     var cb=document.getElementById('cal-confirm-bar');if(cb)cb.style.display='flex';
@@ -8530,12 +8534,12 @@ function openCalEmbed(){
   fallbackBar.appendChild(fallbackBtn);
   overlay.appendChild(fallbackBar);
 
-  // Afficher le bouton de secours après 45 secondes
+  // Afficher le bouton de secours immédiatement
   setTimeout(function(){
     var fb=document.getElementById('cal-fallback-bar');
     var cb=document.getElementById('cal-confirm-bar');
     if(fb && cb && cb.style.display==='none') fb.style.display='flex';
-  }, 45000);
+  }, 5000);
 
   document.body.appendChild(overlay);
 }
