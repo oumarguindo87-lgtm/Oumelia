@@ -8460,7 +8460,14 @@ function openCalEmbed(){
   header.appendChild(closeBtn);
   overlay.appendChild(header);
 
-  // Ecouter les messages Cal.com (booking.created)
+  // Avertissement absence non signalée
+  var warningBar=document.createElement('div');
+  warningBar.style.cssText='padding:10px 16px;background:rgba(231,76,60,.08);border-bottom:1px solid rgba(231,76,60,.2);display:flex;align-items:flex-start;gap:8px;flex-shrink:0';
+  warningBar.innerHTML='<span style="font-size:.9rem;flex-shrink:0">⚠️</span>'
+    +'<span style="font-size:.76rem;color:#e07070;line-height:1.5">'
+    +'<strong>Important :</strong> Si vous ne vous présentez pas à votre entretien sans nous avoir prévenus au préalable, votre compte sera susceptible d\'être supprimé définitivement.'
+    +'</span>';
+  overlay.appendChild(warningBar);
   function _calListener(e){
     if(!e.data) return;
     var d = typeof e.data === 'string' ? {} : e.data;
