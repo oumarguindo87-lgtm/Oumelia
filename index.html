@@ -3604,7 +3604,7 @@ function renderMyProfile(c){
         <!-- Re-enregistrement audio si refusé -->
         <div id="profil-rerecord-audio-wrap" style="display:none;background:var(--card2);border:1px solid rgba(201,168,76,.2);border-radius:var(--radius-sm);padding:14px">
           <div style="font-size:.84rem;font-weight:600;color:var(--gold);margin-bottom:6px">🎙 Attestation audio</div>
-          <p style="font-size:.76rem;color:var(--muted);line-height:1.6;margin-bottom:10px">Votre attestation audio a été refusée. Veuillez en enregistrer une nouvelle en répétant exactement :</p>
+          <p style="font-size:.76rem;color:var(--muted);line-height:1.6;margin-bottom:10px">Si votre attestation audio a été refusée par notre équipe, veuillez en enregistrer une nouvelle en répétant exactement la phrase suivante :</p>
           <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px;margin-bottom:12px;font-size:.78rem;color:var(--white2);font-style:italic;text-align:center">« J'atteste devant Allah de l'exactitude de mes informations. »</div>
           <div id="rerecord-audio-section"></div>
         </div>
@@ -8456,21 +8456,15 @@ function openCalEmbed(){
 
   closeBtn.onclick=function(){
     window.removeEventListener('message', _calListener);
-    var el=document.getElementById('cal-fullpage');
-    if(el) el.remove();
-    // Vérifier en DB si le RDV a été pris (au cas où le message Cal.com n'a pas été reçu)
-    var uid=state.user&&state.user.supabaseId;
-    if(uid && state.user && state.user.status !== 'rdv_planifie'){
-      fetch(SUPABASE_URL+'/rest/v1/rdv?user_id=eq.'+state.user.id+'&select=id&limit=1',{
-        headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
-      }).then(function(r){return r.json();}).then(function(rows){
-        if(Array.isArray(rows)&&rows.length>0){
-          _markRdvPlanifie();
-        }
-      }).catch(function(){});
-    }
-    // Rafraîchir l'affichage pour mettre à jour le step banner
-    if(typeof injectStepBannerIfNeeded==='function') setTimeout(injectStepBannerIfNeeded, 500);
+    // Toujours marquer le RDV comme planifié à la fermeture
+    // (l'utilisateur a ouvert Cal.com pour prendre un RDV)
+    _markRdvPlanifie();
+    // Attendre que le statut soit mis à jour puis fermer
+    setTimeout(function(){
+      var el=document.getElementById('cal-fullpage');
+      if(el) el.remove();
+      if(typeof injectStepBannerIfNeeded==='function') injectStepBannerIfNeeded();
+    }, 800);
   };
   header.appendChild(closeBtn);
   overlay.appendChild(header);
