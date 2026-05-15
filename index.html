@@ -2990,6 +2990,11 @@ function doLogout(){
   showToast('À bientôt !','gold');
   // Offline en DB
   if(prevId){fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+prevId,{method:'PATCH',headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({is_online:false,last_seen:new Date().toISOString()})}).catch(function(){});}
+  // Supprimer la bannière salon et les intervalles
+  var _sb=document.getElementById('salon-banner');if(_sb)_sb.remove();
+  var _sfp=document.getElementById('salon-fullpage');if(_sfp)_sfp.remove();
+  if(typeof _salonPollingInterval!=='undefined'&&_salonPollingInterval){clearInterval(_salonPollingInterval);_salonPollingInterval=null;}
+  if(typeof _salonCountdownInterval!=='undefined'&&_salonCountdownInterval){clearInterval(_salonCountdownInterval);_salonCountdownInterval=null;}
   try{getSB().auth.signOut().catch(function(){});}catch(ex){}
 }
 
@@ -8317,7 +8322,7 @@ function renderSalonNotifBanner(){
   var myId = state.user && state.user.id;
   if(!myId) return;
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
-  fetch(SUPABASE_URL+'/rest/v1/salons?or=(frere_id.eq.'+myId+',soeur_id.eq.'+myId+')&statut=neq.archive&order=start_time.desc&limit=1',{headers:H})
+  fetch(SUPABASE_URL+'/rest/v1/salons?or=(frere_id.eq.'+myId+',soeur_id.eq.'+myId+')&order=start_time.desc&limit=1',{headers:H})
   .then(function(r){return r.json();}).then(function(salons){
     if(!salons||!salons.length) return;
     var s = salons[0];
@@ -8658,7 +8663,7 @@ function openSalonFromMessages(salonId){ openSalonUser(salonId); }
 function renderSalonNotifBanner(){
   var myId=state.user&&state.user.id;if(!myId) return;
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
-  fetch(SUPABASE_URL+'/rest/v1/salons?or=(frere_id.eq.'+myId+',soeur_id.eq.'+myId+')&statut=neq.archive&order=start_time.desc&limit=1',{headers:H})
+  fetch(SUPABASE_URL+'/rest/v1/salons?or=(frere_id.eq.'+myId+',soeur_id.eq.'+myId+')&order=start_time.desc&limit=1',{headers:H})
   .then(function(r){return r.json();}).then(function(salons){
     if(!salons||!salons.length) return;
     var s=salons[0],now=Date.now(),start=new Date(s.start_time).getTime(),end=new Date(s.end_time).getTime();
