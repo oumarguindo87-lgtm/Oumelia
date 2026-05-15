@@ -8436,19 +8436,19 @@ function openCalEmbed(){
   // Fonction pour marquer le RDV planifié
   function _markRdvPlanifie(){
     var uid=state.user&&state.user.supabaseId;
-    var pid=state.user&&state.user.id;
     if(!uid) return;
-    if(state.user&&state.user.status==='rdv_planifie') return; // déjà fait
+    if(state.user&&state.user.status==='rdv_planifie') return;
+    // Mettre à jour l'état local immédiatement
+    state.user.status='rdv_planifie';
+    state.profileStatus='rdv_planifie';
+    // Mettre à jour en DB
     fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{
       method:'PATCH',
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify({status:'rdv_planifie'})
     }).then(function(r){
-      if(r.ok && state.user){
-        state.user.status='rdv_planifie';
-        state.profileStatus='rdv_planifie';
+      if(r.ok){
         showToast('✅ Entretien planifié !','green');
-        // Rafraîchir le step banner
         if(typeof injectStepBannerIfNeeded==='function') setTimeout(injectStepBannerIfNeeded, 300);
       }
     }).catch(function(){});
@@ -8530,6 +8530,13 @@ function openCalEmbed(){
     _markRdvPlanifie();
     var cb=document.getElementById('cal-confirm-bar');if(cb)cb.style.display='flex';
     fallbackBar.style.display='none';
+    // Fermer l'overlay et rafraichir le banner après 1.5s
+    setTimeout(function(){
+      var el=document.getElementById('cal-fullpage');if(el)el.remove();
+      state.user.status='rdv_planifie';
+      state.profileStatus='rdv_planifie';
+      if(typeof injectStepBannerIfNeeded==='function') injectStepBannerIfNeeded();
+    }, 1500);
   };
   fallbackBar.appendChild(fallbackBtn);
   overlay.appendChild(fallbackBar);
