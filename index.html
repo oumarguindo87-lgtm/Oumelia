@@ -2453,8 +2453,10 @@ function startRecording(stream){
     var url = URL.createObjectURL(audioBlob);
     var audioEl = document.getElementById('rec-audio');
     if(audioEl){ audioEl.src = url; audioEl.load(); }
-    document.getElementById('rec-playback').classList.remove('hidden');
-    document.getElementById('rec-done').classList.remove('hidden');
+    var pb = document.getElementById('rec-playback');
+    if(pb){ pb.classList.remove('hidden'); pb.style.display='block'; }
+    var rdone = document.getElementById('rec-done');
+    if(rdone){ rdone.classList.remove('hidden'); rdone.style.display='block'; }
     state.audioRecorded = true;
   };
   mediaRecorder.onerror = function(){
@@ -2544,7 +2546,9 @@ async function doRegister(){
   if(pwd2 && pwd2!==pwd) return showToast('⚠ Les mots de passe ne correspondent pas','red');
   if(!cgu) return showToast('⚠ Acceptez les conditions d\'utilisation','red');
   if(!telephone){var errTel=document.getElementById('err-telephone');if(errTel)errTel.style.display='block';return showToast('⚠ Le numéro de téléphone est obligatoire','red');}
-  if(!pays){var errPays=document.getElementById('err-pays');if(errPays)errPays.style.display='block';return showToast('⚠ Le pays est obligatoire','red');}
+  // Pays optionnel si le champ n'est pas visible
+  var _paysEl=document.getElementById('reg-pays');
+  if(_paysEl && _paysEl.offsetParent !== null && !pays){var errPays=document.getElementById('err-pays');if(errPays)errPays.style.display='block';return showToast('⚠ Le pays est obligatoire','red');}
   if(state.gender==='femme'&&!state.audioRecorded) return showToast('⚠ Enregistrez votre attestation audio','red');
   if(state.gender==='homme'&&!state.audioRecordedHomme) return showToast('⚠ Enregistrez votre attestation vocale','red');
 
