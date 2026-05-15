@@ -1338,8 +1338,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           </div>
           <div id="rec-playback" style="display:none;margin-top:10px">
             <audio id="rec-audio" controls style="width:100%;margin-bottom:8px"></audio>
-            <button class="btn btn-outline btn-sm" style="width:100%;color:var(--muted);font-family:'Cairo',sans-serif;font-size:.78rem;cursor:pointer" onclick="reRecord()">🔄 Recommencer</button>
           </div>
+          <button id="rec-btn-recom" class="btn btn-outline btn-sm" style="display:none;width:100%;color:var(--muted);font-family:'Cairo',sans-serif;font-size:.78rem;cursor:pointer;margin-top:6px" onclick="reRecord()">🔄 Recommencer</button>
           <p id="rec-done" class="hidden" style="color:var(--green);font-size:.84rem;margin-top:8px;text-align:center">✓ Enregistrement sauvegardé</p>
         </div>
 
@@ -1363,8 +1363,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           <p id="rec-status-homme" style="text-align:center;color:var(--muted);font-size:.8rem"></p>
           <div id="rec-playback-homme" style="display:none;margin-top:10px">
             <audio id="rec-audio-homme" controls style="width:100%;margin-bottom:8px"></audio>
-            <button class="btn btn-outline btn-sm" style="width:100%;color:var(--muted);font-family:'Cairo',sans-serif;font-size:.78rem;cursor:pointer" onclick="reRecordHomme()">🔄 Recommencer</button>
           </div>
+          <button id="rec-btn-recom-homme" class="btn btn-outline btn-sm" style="display:none;width:100%;color:var(--muted);font-family:'Cairo',sans-serif;font-size:.78rem;cursor:pointer;margin-top:6px" onclick="reRecordHomme()">🔄 Recommencer</button>
           <p id="rec-done-homme" style="color:var(--green);font-size:.84rem;margin-top:8px;text-align:center;display:none">✓ Enregistrement sauvegardé</p>
         </div>
 
@@ -2457,6 +2457,8 @@ function startRecording(stream){
     if(pb){ pb.classList.remove('hidden'); pb.style.display='block'; }
     var rdone = document.getElementById('rec-done');
     if(rdone){ rdone.classList.remove('hidden'); rdone.style.display='block'; }
+    var rrecom = document.getElementById('rec-btn-recom');
+    if(rrecom) rrecom.style.display='block';
     state.audioRecorded = true;
   };
   mediaRecorder.onerror = function(){
@@ -2525,7 +2527,11 @@ function reRecord(){
   status.style.display = 'block';
   status.innerHTML = 'Appuyez sur le micro pour recommencer';
   playback.classList.add('hidden');
+  playback.style.display = 'none';
   done.classList.add('hidden');
+  done.style.display = 'none';
+  var rrecom2 = document.getElementById('rec-btn-recom');
+  if(rrecom2) rrecom2.style.display='none';
   countdownWrap.style.display = 'none';
 }
 
@@ -8522,6 +8528,7 @@ async function toggleRecordHomme(){
       document.getElementById('rec-btn-icon-homme').textContent='🎙';
       document.getElementById('rec-btn-label-homme').textContent='Démarrer l\'enregistrement';
       var done=document.getElementById('rec-done-homme');if(done)done.style.display='block';
+      var rrecomH=document.getElementById('rec-btn-recom-homme');if(rrecomH)rrecomH.style.display='block';
       var st=document.getElementById('rec-status-homme');if(st)st.textContent='';
       state.audioRecordedHomme=true;state._audioBlobHomme=blob;
       stream.getTracks().forEach(function(t){t.stop();});
@@ -8536,6 +8543,8 @@ function reRecordHomme(){
   state.audioRecordedHomme=false;state._audioBlobHomme=null;
   var pb=document.getElementById('rec-playback-homme');if(pb)pb.style.display='none';
   var done=document.getElementById('rec-done-homme');if(done)done.style.display='none';
+  var rrecomH2=document.getElementById('rec-btn-recom-homme');if(rrecomH2)rrecomH2.style.display='none';
+  var btnH=document.getElementById('rec-btn-homme');if(btnH)btnH.style.display='flex';
 }
 var _uploadedDocs={};
 var _rerecordStream=null;
