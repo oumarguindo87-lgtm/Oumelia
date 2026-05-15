@@ -8539,13 +8539,30 @@ async function adminSuperviserSalon(salonId,prenomFrere,prenomSoeur){
 async function sendAdminSalonMsg(salonId, reloadFn){
   var inp=document.getElementById('admin-salon-input');
   if(!inp||!inp.value.trim()) return;
-  var txt=inp.value.trim(); inp.value='';
+  var txt=inp.value.trim();
+  inp.value='';
+  inp.disabled=true;
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
-  await fetch(SUPABASE_URL+'/rest/v1/salon_messages',{
-    method:'POST',headers:H,
-    body:JSON.stringify({salon_id:String(salonId),from_role:'admin',content:txt,created_at:new Date().toISOString()})
-  });
-  if(typeof reloadFn==='function') reloadFn();
+  try{
+    var res=await fetch(SUPABASE_URL+'/rest/v1/salon_messages',{
+      method:'POST',headers:H,
+      body:JSON.stringify({salon_id:String(salonId),from_role:'admin',content:txt,created_at:new Date().toISOString()})
+    });
+    if(!res.ok){
+      var err=await res.text();
+      console.log('sendAdminSalonMsg error:',err);
+      showToast('Erreur envoi','red');
+      inp.value=txt;
+    } else {
+      if(typeof reloadFn==='function') await reloadFn();
+    }
+  }catch(e){
+    console.log('sendAdminSalonMsg exception:',e);
+    showToast('Erreur réseau','red');
+    inp.value=txt;
+  }
+  inp.disabled=false;
+  inp.focus();
 }
 
 async function openSalonUser(salonId){
