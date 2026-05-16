@@ -6211,6 +6211,9 @@ function renderAdminDashboard(c){
     return (Date.now()-new Date(p.last_seen).getTime())<5*60*1000;
   }).length;
   var nExchanges=exchangesList.length;
+  // Ajouter les profils en relation via en_relation_avec
+  var nEnRelation=allP.filter(function(p){return p.en_relation_avec;}).length/2;
+  var nEchangesTotal=nExchanges+Math.floor(nEnRelation);
   var total=allP.length;
 
   // Revenus : profils payants × 29,90€ + packs depuis table paiements
@@ -6245,7 +6248,7 @@ function renderAdminDashboard(c){
     <div class="admin-stats">
       <div class="stat-card"><div class="stat-num" style="color:#E91E63">${femmes}</div><div class="stat-label">Sœurs</div></div>
       <div class="stat-card"><div class="stat-num" style="color:#2196F3">${hommes}</div><div class="stat-label">Frères</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--green)">${nExchanges}</div><div class="stat-label">Échanges</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">${nEchangesTotal}</div><div class="stat-label">Échanges</div></div>
       <div class="stat-card"><div class="stat-num" style="color:var(--red)">${notPaid}</div><div class="stat-label">Non payés</div></div>
     </div>
 
@@ -6289,7 +6292,7 @@ function renderAdminDashboard(c){
       <button class="btn btn-gold btn-sm" onclick="adminTab('pending')">⏳ Attentes (${pending})</button>
       <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="adminTab('wali')">🌸 Wali (${nwali})</button>
       <button class="btn btn-sm" style="background:var(--blue);color:#fff" onclick="adminTab('users')">👥 Membres (${total})</button>
-      <button class="btn btn-sm" style="background:var(--card2);color:var(--muted);border:1px solid var(--border)" onclick="adminTab('matches')">💚 Matches (${nExchanges})</button>
+      <button class="btn btn-sm" style="background:var(--card2);color:var(--muted);border:1px solid var(--border)" onclick="adminTab('matches')">💚 Matches (${nEchangesTotal})</button>
     </div>
   </div>`;
   c.innerHTML=html;
