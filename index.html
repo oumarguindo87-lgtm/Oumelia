@@ -1877,7 +1877,8 @@ function loadUserProfile(authUser){
       barbe_recherche:profile.barbe_recherche||'',
       voile_recherche:profile.voile_recherche||'',
       qamis_recherche:profile.qamis_recherche||'',
-      polygamie_recherche:profile.polygamie_recherche||''};
+      polygamie_recherche:profile.polygamie_recherche||'',
+      en_relation_avec:profile.en_relation_avec||null};
     state.profileActive  = profile.status==='active';
     state.profilePaused  = profile.status==='paused' || profile.status==='inactive';
     state.profileStatus  = profile.status || 'pending';  // statut brut complet
@@ -3422,7 +3423,8 @@ function loadAllProfilesForAdmin(){
         audioAttested:   p.audio_attested===true,
         pending_verification: p.pending_verification||null,
         is_online:       p.is_online===true,
-        last_seen:       p.last_seen||null
+        last_seen:       p.last_seen||null,
+        en_relation_avec: p.en_relation_avec||null
       };
     });
     console.log('Admin: '+window._adminProfiles.length+' profils chargés');
@@ -4677,9 +4679,11 @@ function renderExplorer(c){
         var _st=onlineStatus[String(p.id)]||onlineStatus[p.id]||'offline';
         var lastSeen=_st==='online'?'En ligne':_st==='recent'?'Vu récemment':'Hors ligne';
         var inExch=isInExchange(p.id, (state.user&&state.user.id)||0);
-        html+=`<div class="profile-card ${p.boosted?'boosted':''}" onclick="openProfile(${p.id})">
+        var _enRelation = p.en_relation_avec ? true : false;
+        html+=`<div class="profile-card ${p.boosted?'boosted':''}" onclick="openProfile(${p.id})" style="${_enRelation?'opacity:.45;filter:grayscale(.4)':''}">
           ${p.boosted?'<span class="boost-badge">⚡ BOOST</span>':''}
-          ${p.status==='active'?'<span class="verified-badge-card">✦ Vérifié</span>':''}
+          ${_enRelation?'<span style="position:absolute;top:6px;left:6px;z-index:2;background:rgba(0,0,0,.75);color:#aaa;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:20px;border:1px solid rgba(255,255,255,.15)">🤝 En relation</span>':''}
+          ${!_enRelation&&p.status==='active'?'<span class="verified-badge-card">✦ Vérifié</span>':''}
           <div class="profile-avatar-box" style="position:relative">
             ${av}
             ${inExch?'<span class="exchange-badge">↔ Échange</span>':''}
@@ -4979,6 +4983,7 @@ function openProfile(id){
       <div style="display:flex;gap:10px;margin-bottom:14px">
         ${(function(){
           var st=demandesEnvoyees[p.prenom]||demandesEnvoyees['_id_'+String(p.id)];
+          if(p.en_relation_avec) return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>🤝 En relation</button>';
           if(st==='acceptee') return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>✅ Demande acceptée</button>';
           if(st==='en_attente') return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>⏳ En attente</button>';
           return '<button class="btn btn-gold" style="flex:1;font-size:.84rem;padding:10px" onclick="openDemandeModal(\'' + p.prenom + '\')">💌 Demande</button>';
@@ -5731,6 +5736,12 @@ function acceptDemande(notifId){
     fetch(SUPABASE_URL+'/rest/v1/echanges',{method:'POST',
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify({femme_profile_id:femId,homme_profile_id:homId,created_at:new Date().toISOString()})}).catch(function(){});
+    // Marquer les deux profils comme "en relation"
+    var H2={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+myId,{method:'PATCH',headers:H2,body:JSON.stringify({en_relation_avec:fromId})}).catch(function(){});
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+fromId,{method:'PATCH',headers:H2,body:JSON.stringify({en_relation_avec:myId})}).catch(function(){});
+    // Mettre à jour state local
+    if(state.user) state.user.en_relation_avec=fromId;
     var msg=(state.user.prenom||'Quelqu\'un')+' a accept\u00e9 votre demande. Un administrateur vous contactera prochainement.';
     fetch(SUPABASE_URL+'/rest/v1/notifications',{method:'POST',
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
@@ -6457,64 +6468,121 @@ function filterAdminUsers(q){
 }
 
 function renderAdminMatches(c){
-  c.innerHTML='<div style="padding:16px"><div class="section-title">💚 Matches</div><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
+  c.innerHTML='<div style="padding:16px"><div class="section-title">Matches & Relations</div><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
   
-  // Charger échanges ET profils en parallèle
-  var fetchEchanges = fetch(SUPABASE_URL+'/rest/v1/echanges?select=*&order=created_at.desc', {
-    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
-  }).then(function(r){ return r.json(); });
-  
-  var fetchProfils = fetch(SUPABASE_URL+'/rest/v1/profils?select=id,prenom,gender', {
-    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
-  }).then(function(r){ return r.json(); });
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  var fetchEchanges = fetch(SUPABASE_URL+'/rest/v1/echanges?select=*&order=created_at.desc',{headers:H}).then(function(r){return r.json();});
+  var fetchProfils = fetch(SUPABASE_URL+'/rest/v1/profils?select=id,prenom,gender,en_relation_avec',{headers:H}).then(function(r){return r.json();});
 
   Promise.all([fetchEchanges, fetchProfils]).then(function(results){
-    var data = results[0];
-    var profils = Array.isArray(results[1]) ? results[1] : [];
-    // Mettre à jour le cache admin
-    if(profils.length) profils.forEach(function(p){ 
-      var ex = (window._adminProfiles||[]).find(function(x){ return String(x.id)===String(p.id); });
-      if(!ex && window._adminProfiles) window._adminProfiles.push(p);
+    var data = Array.isArray(results[0])?results[0]:[];
+    var profils = Array.isArray(results[1])?results[1]:[];
+
+    // Couples en relation
+    var enRelation=[],seen={};
+    profils.forEach(function(p){
+      if(p.en_relation_avec&&!seen[String(p.id)]&&!seen[String(p.en_relation_avec)]){
+        var partner=profils.find(function(x){return String(x.id)===String(p.en_relation_avec);});
+        if(partner){enRelation.push({p1:p,p2:partner});seen[String(p.id)]=true;seen[String(partner.id)]=true;}
+      }
     });
-    
-    if(!Array.isArray(data)){
-      c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur chargement matches: '+JSON.stringify(data).slice(0,100)+'</p></div>';
-      return;
-    }
-    console.log('Matches chargés:', data.length, '| Profils:', profils.length);
-    // Utiliser les profils frais du fetch
-    var allP = profils.length ? profils : getAllAdminProfiles();
-    var html='<div style="padding:16px"><div class="section-title">💚 Matches ('+data.length+')</div>';
-    if(!data.length){
-      html+='<p style="color:var(--muted);text-align:center;padding:28px">Aucun match pour le moment</p>';
+
+    c.innerHTML='';
+    var wrap=document.createElement('div');wrap.style.padding='16px';
+
+    // === Section En relation ===
+    var h1=document.createElement('div');h1.className='section-title';h1.style.marginBottom='12px';
+    h1.textContent='En relation ('+enRelation.length+')';wrap.appendChild(h1);
+
+    if(!enRelation.length){
+      var em=document.createElement('p');em.style.cssText='color:var(--muted);font-size:.82rem;text-align:center;padding:10px 0 18px';
+      em.textContent='Aucun couple en relation actuellement';wrap.appendChild(em);
     } else {
-      data.forEach(function(m){
-        var femme = allP.find(function(p){ return String(p.id)===String(m.femme_profile_id); });
-        var homme = allP.find(function(p){ return String(p.id)===String(m.homme_profile_id); });
-        var fNom = femme ? femme.prenom : ('F:'+m.femme_profile_id);
-        var hNom = homme ? homme.prenom : ('H:'+m.homme_profile_id);
-        var date = m.created_at ? new Date(m.created_at).toLocaleDateString('fr-FR') : '';
-        html += '<div style="background:var(--card2);border:1px solid rgba(46,204,113,.2);border-radius:12px;padding:14px;margin-bottom:10px">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
-        html += '<div><span style="color:var(--green);font-weight:600">💚 '+fNom+' × '+hNom+'</span><br>';
-        html += '<span style="font-size:.75rem;color:var(--muted)">'+date+'</span></div>';
-        html += '</div>';
-        html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
-        if(femme){
-          html += '<button class="btn-tiny" style="background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.3)" onclick="openAdminProfileDetail(\''+m.femme_profile_id+'\')">👤 '+fNom+'</button>';
-          html += '<button class="btn-tiny msg" data-uid="'+m.femme_profile_id+'" data-nom="'+fNom+'" onclick="openAdminConvoMatch(this.dataset.uid,this.dataset.nom)">✉ '+fNom+'</button>';
-        }
-        if(homme){
-          html += '<button class="btn-tiny" style="background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.3)" onclick="openAdminProfileDetail(\''+m.homme_profile_id+'\')">👤 '+hNom+'</button>';
-          html += '<button class="btn-tiny msg" data-uid="'+m.homme_profile_id+'" data-nom="'+hNom+'" onclick="openAdminConvoMatch(this.dataset.uid,this.dataset.nom)">✉ '+hNom+'</button>';
-        }
-        html += '</div></div>';
+      enRelation.forEach(function(pair){
+        var p1=pair.p1,p2=pair.p2;
+        var femme=p1.gender==='femme'?p1:p2;
+        var homme=p1.gender==='homme'?p1:p2;
+        var card=document.createElement('div');
+        card.style.cssText='background:var(--card2);border:1.5px solid rgba(52,152,219,.35);border-radius:12px;padding:14px;margin-bottom:10px';
+        var top=document.createElement('div');top.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:10px';
+        var lbl=document.createElement('span');lbl.style.cssText='color:#3498db;font-weight:700;font-size:.92rem';
+        lbl.textContent=femme.prenom+' x '+homme.prenom;
+        var badge=document.createElement('span');badge.style.cssText='font-size:.7rem;color:var(--muted)';badge.textContent='En cours';
+        top.appendChild(lbl);top.appendChild(badge);card.appendChild(top);
+        var btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+        var bf=document.createElement('button');bf.className='btn-tiny';
+        bf.style.cssText='background:rgba(52,152,219,.1);color:#3498db;border:1px solid rgba(52,152,219,.3)';
+        bf.textContent='Profil '+femme.prenom;
+        bf.onclick=(function(id){return function(){openAdminProfileDetail(id);};})(femme.id);
+        btns.appendChild(bf);
+        var bh=document.createElement('button');bh.className='btn-tiny';
+        bh.style.cssText='background:rgba(52,152,219,.1);color:#3498db;border:1px solid rgba(52,152,219,.3)';
+        bh.textContent='Profil '+homme.prenom;
+        bh.onclick=(function(id){return function(){openAdminProfileDetail(id);};})(homme.id);
+        btns.appendChild(bh);
+        var bl=document.createElement('button');bl.className='btn-tiny';
+        bl.style.cssText='background:rgba(231,76,60,.1);color:#e74c3c;border:1px solid rgba(231,76,60,.3)';
+        bl.textContent='Liberer';
+        bl.onclick=(function(id1,id2,n1,n2){
+          return function(){
+            if(!confirm('Mettre fin a la relation entre '+n1+' et '+n2+'? Ils pourront a nouveau faire des demandes.')) return;
+            var H2={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+            Promise.all([
+              fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id1,{method:'PATCH',headers:H2,body:JSON.stringify({en_relation_avec:null})}),
+              fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id2,{method:'PATCH',headers:H2,body:JSON.stringify({en_relation_avec:null})})
+            ]).then(function(){
+              showToast(n1+' et '+n2+' sont liberes','green');
+              renderAdminMatches(document.getElementById('admin-content'));
+            }).catch(function(){showToast('Erreur','red');});
+          };
+        })(femme.id,homme.id,femme.prenom,homme.prenom);
+        btns.appendChild(bl);
+        card.appendChild(btns);wrap.appendChild(card);
       });
     }
-    html+='</div>';
-    c.innerHTML=html;
+
+    // Separateur
+    var sep=document.createElement('div');sep.style.cssText='border-top:1px solid var(--border);margin:16px 0';wrap.appendChild(sep);
+
+    // === Section Matches ===
+    var h2=document.createElement('div');h2.className='section-title';h2.style.marginBottom='12px';
+    h2.textContent='Matches ('+data.length+')';wrap.appendChild(h2);
+
+    var allP=profils.length?profils:getAllAdminProfiles();
+    if(!data.length){
+      var em2=document.createElement('p');em2.style.cssText='color:var(--muted);text-align:center;padding:28px';
+      em2.textContent='Aucun match pour le moment';wrap.appendChild(em2);
+    } else {
+      data.forEach(function(m){
+        var femme2=allP.find(function(p){return String(p.id)===String(m.femme_profile_id);});
+        var homme2=allP.find(function(p){return String(p.id)===String(m.homme_profile_id);});
+        var fNom=femme2?femme2.prenom:'F:'+m.femme_profile_id;
+        var hNom=homme2?homme2.prenom:'H:'+m.homme_profile_id;
+        var date=m.created_at?new Date(m.created_at).toLocaleDateString('fr-FR'):'';
+        var card2=document.createElement('div');
+        card2.style.cssText='background:var(--card2);border:1px solid rgba(46,204,113,.2);border-radius:12px;padding:14px;margin-bottom:10px';
+        var top2=document.createElement('div');top2.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px';
+        var lbl2=document.createElement('span');lbl2.style.cssText='color:var(--green);font-weight:600';lbl2.textContent=fNom+' x '+hNom;
+        var dt2=document.createElement('span');dt2.style.cssText='font-size:.72rem;color:var(--muted)';dt2.textContent=date;
+        top2.appendChild(lbl2);top2.appendChild(dt2);card2.appendChild(top2);
+        var btns2=document.createElement('div');btns2.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+        if(femme2){
+          var bf2=document.createElement('button');bf2.className='btn-tiny';bf2.style.cssText='background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.3)';
+          bf2.textContent=fNom;bf2.onclick=(function(id){return function(){openAdminProfileDetail(id);};})(m.femme_profile_id);btns2.appendChild(bf2);
+          var bfm=document.createElement('button');bfm.className='btn-tiny msg';bfm.textContent='Message '+fNom;
+          bfm.onclick=(function(uid,nom){return function(){openAdminConvoMatch(uid,nom);};})(m.femme_profile_id,fNom);btns2.appendChild(bfm);
+        }
+        if(homme2){
+          var bh2=document.createElement('button');bh2.className='btn-tiny';bh2.style.cssText='background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.3)';
+          bh2.textContent=hNom;bh2.onclick=(function(id){return function(){openAdminProfileDetail(id);};})(m.homme_profile_id);btns2.appendChild(bh2);
+          var bhm=document.createElement('button');bhm.className='btn-tiny msg';bhm.textContent='Message '+hNom;
+          bhm.onclick=(function(uid,nom){return function(){openAdminConvoMatch(uid,nom);};})(m.homme_profile_id,hNom);btns2.appendChild(bhm);
+        }
+        card2.appendChild(btns2);wrap.appendChild(card2);
+      });
+    }
+    c.appendChild(wrap);
   }).catch(function(e){
-    console.log('Matches error:', e);
     c.innerHTML='<div style="padding:16px"><p style="color:var(--red)">Erreur: '+String(e)+'</p></div>';
   });
 }
@@ -7178,6 +7246,7 @@ function openAdminProfileDetail(id){
     +'<div style="font-family:\"Playfair Display\",serif;font-size:1.15rem;margin-top:8px">'+(p.prenom||'—')+(p.age?' · '+p.age+' ans':'')+'</div>'
     +'<div style="margin-top:6px">'+stepBadge+'</div>'
     +(p.paid?'<div style="font-size:.74rem;color:var(--green);margin-top:4px">✓ Paiement confirmé</div>':'<div style="font-size:.74rem;color:var(--muted);margin-top:4px">Paiement non encore effectué</div>')
+    +(p.en_relation_avec?'<div style="margin-top:6px"><span class="badge" style="background:rgba(52,152,219,.12);color:#3498db;border:1px solid rgba(52,152,219,.3)">🤝 En relation (id:'+p.en_relation_avec+')</span></div>':'')
     +'</div>'
     +'<div class="profile-section"><h4>📋 Identité</h4>'
     +row('Genre', p.gender==='femme'?'🌸 Sœur':'🕌 Frère')
@@ -7237,6 +7306,7 @@ function openAdminProfileDetail(id){
     +audioSection
     +'<div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">'
     +validateBtn
+    +(p.en_relation_avec?'<button data-pid="'+String(p.id)+'" data-partner="'+String(p.en_relation_avec)+'" onclick="libererProfil(this.dataset.pid,this.dataset.partner)" style="width:100%;background:rgba(52,152,219,.1);border:1px solid rgba(52,152,219,.4);color:#3498db;border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer;font-family:inherit">🔓 Libérer — mettre fin à la relation</button>':'')
     +'<button class="btn btn-outline" data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openAdminConvoFromDetail(this)" style="width:100%">✉️ Envoyer un message</button>'
     +'<button data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openRejectModal(this.dataset.pid,this.dataset.pnom)" style="width:100%;background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer">✗ Refuser le profil</button>'
     +(p.telephone?'<button data-phone="'+p.telephone+'" data-pnom="'+String(p.prenom||'')+'" onclick="banPhone(this.dataset.phone,this.dataset.pnom)" style="width:100%;background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:10px;font-size:.82rem;cursor:pointer">🚫 Bannir ce numéro</button>':'')
@@ -7245,7 +7315,24 @@ function openAdminProfileDetail(id){
 }
 
 
-// ══ Section Pause ══
+// ── Libérer deux profils en relation ──
+async function libererProfil(profileId, partnerId){
+  if(!confirm('Mettre fin à la relation entre ces deux profils ? Ils pourront à nouveau envoyer/recevoir des demandes.')) return;
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  var p1=fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+profileId,{method:'PATCH',headers:H,body:JSON.stringify({en_relation_avec:null})});
+  var p2=fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+partnerId,{method:'PATCH',headers:H,body:JSON.stringify({en_relation_avec:null})});
+  Promise.all([p1,p2]).then(function(){
+    showToast('✅ Profils libérés — ils peuvent à nouveau faire des demandes','green');
+    // Rafraîchir les profils admin
+    window._adminProfiles=null;
+    loadAllProfilesForAdmin().then(function(){
+      var p=getAdminProfile(profileId);
+      if(p) openAdminProfileDetail(profileId);
+    });
+  }).catch(function(){ showToast('Erreur lors de la libération','red'); });
+}
+
+
 async function renderAdminPause(c){
   c.innerHTML='<div style="padding:16px"><p style="color:var(--muted);text-align:center;padding:20px">Chargement...</p></div>';
   var res=await fetch(SUPABASE_URL+'/rest/v1/profils?status=eq.paused&select=id,prenom,gender,age,ville,telephone,user_id,status,created_at&order=created_at.desc',{
