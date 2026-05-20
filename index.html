@@ -8101,7 +8101,8 @@ function openCreateSalonModal(){
   modal.innerHTML='<div class="modal" style="max-width:360px;width:100%"><h3 style="color:var(--gold);margin-bottom:16px">&#x1F4AC; Créer un salon</h3>'
     +'<label style="font-size:.8rem;color:var(--muted)">Frère</label><select id="salon-frere-sel" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:10px;font-family:inherit">'+freresOpts+'</select>'
     +'<label style="font-size:.8rem;color:var(--muted)">Soeur</label><select id="salon-soeur-sel" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:10px;font-family:inherit">'+soeursOpts+'</select>'
-    +'<label style="font-size:.8rem;color:var(--muted)">Heure de début</label><input type="datetime-local" id="salon-start-input" value="'+defVal+'" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:16px;font-family:inherit">'
+    +'<label style="font-size:.8rem;color:var(--muted)">Heure de début</label><input type="datetime-local" id="salon-start-input" value="'+defVal+'" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:10px;font-family:inherit">'
+    +'<label style="font-size:.8rem;color:var(--muted)">Durée</label><select id="salon-duree-sel" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:16px;font-family:inherit"><option value="60">1 heure</option><option value="90">1 heure 30</option></select>'
     +'<div class="modal-footer"><button class="btn btn-outline" id="btn-cancel-salon">Annuler</button><button class="btn btn-gold" onclick="createSalon()">Créer</button></div></div>';
   modal.style.display='flex';
   document.getElementById('btn-cancel-salon').onclick=function(){modal.style.display='none';};
@@ -8113,8 +8114,9 @@ async function createSalon(){
   var startVal=document.getElementById('salon-start-input').value;
   if(!frereId||!soeurId||!startVal){showToast('Remplis tous les champs','red');return;}
   if(frereId===soeurId){showToast('Sélectionne deux personnes différentes','red');return;}
+  var dureeMin=parseInt(document.getElementById('salon-duree-sel').value)||60;
   var startTime=new Date(startVal).toISOString();
-  var endTime=new Date(new Date(startVal).getTime()+60*60*1000).toISOString();
+  var endTime=new Date(new Date(startVal).getTime()+dureeMin*60*1000).toISOString();
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=representation'};
   var res=await fetch(SUPABASE_URL+'/rest/v1/salons',{method:'POST',headers:H,body:JSON.stringify({frere_id:String(frereId),soeur_id:String(soeurId),start_time:startTime,end_time:endTime,statut:'planifie'})});
   var data=await res.json();
