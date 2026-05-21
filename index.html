@@ -3568,7 +3568,7 @@ function renderMyProfile(c){
         // Si docs envoyés mais statut pas encore mis à jour (PATCH en cours / lag réseau)
         var _docsOk=u.docs_submitted||_s==='en_attente_rdv'||_s==='rdv_planifie';
         var _d=_s==='valide_a_payer'?'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.':_s==='rdv_planifie'?'Entretien planifié. En attente de validation par notre équipe.':_s==='en_attente_rdv'?'Vos documents ont été reçus. Planifiez votre entretien.':'Envoyez vos documents pour continuer la verification.';
-        var _b=_s==='valide_a_payer'?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (29,90 €) →</button>':_s==='rdv_planifie'?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<div style="margin-top:10px;margin-top:10px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button></div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
+        var _b=_s==='valide_a_payer'?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (29,90 €) →</button>':_s==='rdv_planifie'?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div><button class=\"btn btn-outline btn-sm\" style=\"margin-top:8px;width:100%;font-size:.78rem;color:var(--muted)\" onclick=\"replanifierRdv()\">&#x1F504; Modifier mon RDV</button>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<div style="margin-top:10px;margin-top:10px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button></div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
         return '<div class="step-banner" style="margin:0 0 14px"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+_l+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:4px;line-height:1.5">'+_d+'</div>'+_b+'</div>';
       })()}
 
@@ -8512,6 +8512,23 @@ function canShowPayment(){
 function updateVillesByPays(pays){var e=document.getElementById('err-pays');if(e)e.style.display='none';}
 
 // ── Cal.com embed ──
+// ── Replanifier RDV ──
+function replanifierRdv(){
+  // Remettre le statut en en_attente_rdv pour permettre de replanifier
+  var uid = state.user && state.user.supabaseId;
+  if(!uid) return;
+  var H = {'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid, {
+    method:'PATCH', headers:H,
+    body:JSON.stringify({status:'en_attente_rdv'})
+  }).then(function(){
+    state.user.status = 'en_attente_rdv';
+    state.profileStatus = 'en_attente_rdv';
+    if(typeof injectStepBannerIfNeeded==='function') injectStepBannerIfNeeded();
+    openCalEmbed();
+  }).catch(function(){ showToast('Erreur','red'); });
+}
+
 function openCalEmbed(){
   var existing=document.getElementById('cal-fullpage');
   if(existing) existing.remove();
@@ -9023,7 +9040,7 @@ function renderStepBanner(status){
   var idx=steps.indexOf(status);if(idx<0) idx=0;
   var dots=steps.map(function(_,i){return '<div class="step-dot '+(i<=idx?'done':'')+'"></div>';}).join('');
   var descs={pending:'Envoyez vos documents.',en_attente_rdv:'Documents reçus. Planifiez votre entretien.',rdv_planifie:'Entretien planifié. En attente de validation.',valide_a_payer:'Dossier validé. Finalisez votre paiement.'};
-  var acts={pending:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>',en_attente_rdv:'<div style="margin-top:10px;margin-top:10px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button></div>',rdv_planifie:'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div>',valide_a_payer:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser (29,90 €) →</button>'};
+  var acts={pending:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>',en_attente_rdv:'<div style="margin-top:10px;margin-top:10px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button></div>',rdv_planifie:'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div><button class=\"btn btn-outline btn-sm\" style=\"margin-top:8px;width:100%;font-size:.78rem;color:var(--muted)\" onclick=\"replanifierRdv()\">&#x1F504; Modifier mon RDV</button>',valide_a_payer:'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser (29,90 €) →</button>'};
   return '<div class="step-banner"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+info.label+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:3px;line-height:1.5">'+(descs[status]||descs.pending)+'</div><div class="step-progress">'+dots+'</div>'+(acts[status]||acts.pending)+'</div>';
 }
 function injectStepBannerIfNeeded(){
