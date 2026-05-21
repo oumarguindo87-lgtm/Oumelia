@@ -8098,43 +8098,14 @@ function openCreateSalonModal(){
   var defVal=def.getFullYear()+'-'+pad(def.getMonth()+1)+'-'+pad(def.getDate())+'T'+pad(def.getHours())+':'+pad(def.getMinutes());
   var modal=document.getElementById('modal-create-salon');
   if(!modal){modal=document.createElement('div');modal.id='modal-create-salon';modal.className='modal-overlay';modal.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px';document.body.appendChild(modal);}
-  modal.innerHTML='';
-  var box=document.createElement('div');
-  box.className='modal';
-  box.style.cssText='max-width:360px;width:100%;max-height:85vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px';
-
-  var title=document.createElement('h3');
-  title.style.cssText='color:var(--gold);margin-bottom:8px;font-size:1rem';
-  title.textContent='Créer un salon';
-  box.appendChild(title);
-
-  function makeLabel(txt){var l=document.createElement('label');l.style.cssText='font-size:.78rem;color:var(--muted)';l.textContent=txt;return l;}
-  function makeSelect(id,opts){
-    var s=document.createElement('select');s.id=id;
-    s.style.cssText='width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);font-family:inherit';
-    opts.forEach(function(o){var op=document.createElement('option');op.value=o.v;op.textContent=o.t;s.appendChild(op);});
-    return s;
-  }
-
-  box.appendChild(makeLabel('Frère'));
-  var selF=makeSelect('salon-frere-sel',freres.map(function(p){return{v:p.id,t:p.prenom};}));box.appendChild(selF);
-  box.appendChild(makeLabel('Sœur'));
-  var selS=makeSelect('salon-soeur-sel',soeurs.map(function(p){return{v:p.id,t:p.prenom};}));box.appendChild(selS);
-  box.appendChild(makeLabel('Heure de début'));
-  var inp=document.createElement('input');inp.type='datetime-local';inp.id='salon-start-input';inp.value=defVal;
-  inp.style.cssText='width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);font-family:inherit';
-  box.appendChild(inp);
-  box.appendChild(makeLabel('Durée'));
-  var selD=makeSelect('salon-duree-sel',[{v:'60',t:'1 heure'},{v:'90',t:'1 heure 30'}]);box.appendChild(selD);
-
-  var footer=document.createElement('div');footer.className='modal-footer';footer.style.marginTop='8px';
-  var btnAnn=document.createElement('button');btnAnn.className='btn btn-outline';btnAnn.textContent='Annuler';
-  btnAnn.onclick=function(){modal.style.display='none';};
-  var btnOk=document.createElement('button');btnOk.className='btn btn-gold';btnOk.textContent='Créer';
-  btnOk.onclick=createSalon;
-  footer.appendChild(btnAnn);footer.appendChild(btnOk);
-  box.appendChild(footer);
-  modal.appendChild(box);
+  modal.innerHTML='<div class="modal" style="max-width:360px;width:100%"><h3 style="color:var(--gold);margin-bottom:16px">&#x1F4AC; Créer un salon</h3>'
+    +'<label style="font-size:.8rem;color:var(--muted)">Frère</label><select id="salon-frere-sel" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:10px;font-family:inherit">'+freresOpts+'</select>'
+    +'<label style="font-size:.8rem;color:var(--muted)">Soeur</label><select id="salon-soeur-sel" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:10px;font-family:inherit">'+soeursOpts+'</select>'
+    +'<label style="font-size:.8rem;color:var(--muted)">Heure de début</label><input type="datetime-local" id="salon-start-input" value="'+defVal+'" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:10px;font-family:inherit">'
+    +'<label style="font-size:.8rem;color:var(--muted)">Durée</label><select id="salon-duree-sel" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--white);margin-bottom:16px;font-family:inherit"><option value="60">1 heure</option><option value="90">1 heure 30</option></select>'
+    +'<div class="modal-footer"><button class="btn btn-outline" id="btn-cancel-salon">Annuler</button><button class="btn btn-gold" onclick="createSalon()">Créer</button></div></div>';
+  modal.style.display='flex';
+  document.getElementById('btn-cancel-salon').onclick=function(){modal.style.display='none';};
 }
 
 async function createSalon(){
@@ -8578,15 +8549,9 @@ function openCalEmbed(){
 
   closeBtn.onclick=function(){
     window.removeEventListener('message', _calListener);
-    // Toujours marquer le RDV comme planifié à la fermeture
-    // (l'utilisateur a ouvert Cal.com pour prendre un RDV)
-    _markRdvPlanifie();
-    // Attendre que le statut soit mis à jour puis fermer
-    setTimeout(function(){
-      var el=document.getElementById('cal-fullpage');
-      if(el) el.remove();
-      if(typeof injectStepBannerIfNeeded==='function') injectStepBannerIfNeeded();
-    }, 800);
+    var el=document.getElementById('cal-fullpage');
+    if(el) el.remove();
+    if(_salonCountdownInterval) clearInterval(_salonCountdownInterval);
   };
   header.appendChild(closeBtn);
   overlay.appendChild(header);
@@ -8639,9 +8604,9 @@ function openCalEmbed(){
   fallbackBtn.style.cssText='background:var(--gold);border:none;color:#000;border-radius:8px;padding:9px 20px;font-weight:700;font-size:.82rem;cursor:pointer;font-family:inherit';
   var fallbackLabel=document.createElement('div');
   fallbackLabel.style.cssText='font-size:.72rem;color:var(--muted);margin-bottom:4px;text-align:center';
-  fallbackLabel.textContent='Vous avez finalisé votre réservation sur Cal.com ?';
+  fallbackLabel.textContent='Vous avez sélectionné un créneau et confirmé votre RDV sur Cal.com ?';
   fallbackBar.appendChild(fallbackLabel);
-  fallbackBtn.textContent='Oui, j’ai bien pris mon rendez-vous →';
+  fallbackBtn.textContent='Oui, mon RDV est confirmé';
   fallbackBtn.onclick=function(){
     _markRdvPlanifie();
     var cb=document.getElementById('cal-confirm-bar');if(cb)cb.style.display='flex';
@@ -8662,11 +8627,10 @@ function openCalEmbed(){
     var fb=document.getElementById('cal-fallback-bar');
     var cb=document.getElementById('cal-confirm-bar');
     if(fb && cb && cb.style.display==='none') fb.style.display='flex';
-  }, 5000);
+    }, 30000);
 
   document.body.appendChild(overlay);
 }
-
 
 function toggleRecordHomme(){
   if(_mediaRecorderHomme&&_mediaRecorderHomme.state==='recording'){_mediaRecorderHomme.stop();return;}
