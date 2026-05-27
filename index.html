@@ -3946,30 +3946,31 @@ async function resumeProfile(){
 
 async function deleteAccount(){
   var val=document.getElementById('delete-confirm-input').value;
-  if(val!=='SUPPRIMER') return showToast('⚠ Tapez exactement "SUPPRIMER"','red');
+  if(val!=='SUPPRIMER') return showToast('\u26A0 Tapez exactement "SUPPRIMER"','red');
   closeModal('modal-delete');
-  showToast('🗑️ Suppression en cours...','red');
-  if((state.user&&state.user.supabaseId)){
-    // Sauvegarder les infos avant suppression pour l'admin
-    var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
-    fetch(SUPABASE_URL+'/rest/v1/deleted_accounts',{
-      method:'POST', headers:H,
-      body:JSON.stringify({
-        prenom: state.user.prenom||'Inconnu',
-        gender: state.user.gender||'',
-        age: state.user.age||null,
-        email: state.user.email||'',
-        deleted_at: new Date().toISOString()
-      })
-    }).catch(function(){});
-    // Supprimer le profil et toutes les données liées
-    await getSB().from('demandes').delete().or(`from_profile_id.eq.${state.user.id},to_profile_id.eq.${state.user.id}`);
-    await getSB().from('messages').delete().or(`from_id.eq.${state.user.id},to_id.eq.${state.user.id}`);
-    await getSB().from('echanges').delete().or(`femme_profile_id.eq.${state.user.id},homme_profile_id.eq.${state.user.id}`);
-    await getSB().from('profils').delete().eq('user_id', state.user.supabaseId);
-    await getSB().auth.signOut();
+  showToast('\uD83D\uDDD1\uFE0F Suppression en cours...','red');
+  if(!(state.user&&state.user.supabaseId)) {
+    state.user=null; state.isAdmin=false; showScreen('screen-landing'); return;
   }
-  setTimeout(function(){ state.user=null; state.isAdmin=false; showScreen('screen-landing'); },1500);
+  var uid = state.user.supabaseId;
+  var pid = state.user.id;
+  var H = {'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+
+  // Sauvegarder les infos pour l'admin
+  fetch(SUPABASE_URL+'/rest/v1/deleted_accounts', {
+    method:'POST', headers:H,
+    body:JSON.stringify({prenom:state.user.prenom||'Inconnu',gender:state.user.gender||'',age:state.user.age||null,email:state.user.email||'',deleted_at:new Date().toISOString()})
+  }).catch(function(){});
+
+  // Supprimer les données liées
+  await fetch(SUPABASE_URL+'/rest/v1/demandes?or=(from_profile_id.eq.'+pid+',to_profile_id.eq.'+pid+')',{method:'DELETE',headers:H}).catch(function(){});
+  await fetch(SUPABASE_URL+'/rest/v1/messages?or=(from_id.eq.'+pid+',to_id.eq.'+pid+')',{method:'DELETE',headers:H}).catch(function(){});
+  await fetch(SUPABASE_URL+'/rest/v1/echanges?or=(femme_profile_id.eq.'+pid+',homme_profile_id.eq.'+pid+')',{method:'DELETE',headers:H}).catch(function(){});
+  await fetch(SUPABASE_URL+'/rest/v1/profils?user_id=eq.'+uid,{method:'DELETE',headers:H}).catch(function(){});
+
+  // Déconnexion
+  try { getSB().auth.signOut(); } catch(e){}
+  setTimeout(function(){ state.user=null; state.isAdmin=false; showScreen('screen-landing'); }, 1000);
 }
 
 // ══════════════════════════════════════════════════
