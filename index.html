@@ -5886,10 +5886,11 @@ async function openStripePayment(type, callbackFn){
 
   // Créer le PaymentIntent via Netlify Function
   try {
-    var res = await fetch('/.netlify/functions/create-payment-intent', {
+    var _fnUrl = 'https://nmcvyukbyfnhtufbgqqp.supabase.co/functions/v1/create-payment-intent';
+    var res = await fetch(_fnUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, email: (state.user&&state.user.email) || '' }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+SUPABASE_ANON },
+      body: JSON.stringify({ type: type, email: (state.user&&state.user.email) || '' }),
     });
     var data = await res.json();
     if(data.error){ showStripeError(data.error); return; }
