@@ -1878,8 +1878,9 @@ function loadUserProfile(authUser){
       voile_recherche:profile.voile_recherche||'',
       qamis_recherche:profile.qamis_recherche||'',
       polygamie_recherche:profile.polygamie_recherche||'',
-      en_relation_avec:profile.en_relation_avec||null};
-    state.profileActive  = profile.status==='active';
+      en_relation_avec:profile.en_relation_avec||null,
+      en_relation:profile.en_relation===true};
+    state.enRelation = profile.en_relation===true;
     state.profilePaused  = profile.status==='paused' || profile.status==='inactive';
     state.profileStatus  = profile.status || 'pending';  // statut brut complet
     state.gender=profile.gender;
@@ -2812,8 +2813,10 @@ async function doRegister(){
     status:              'pending',
     photo_url:           profileData.photo_url||null,
     photo_visible:       false,
+    en_relation:         false,
   };
   state.profileActive = false;
+  state.enRelation    = false;
   state.profilePaused = false;
   state.gender = profileData.gender;
 
@@ -4807,6 +4810,12 @@ function swipeAction(action,prenom,pid){
     else{card.style.transform='translateY(-110%)';card.style.opacity='0';}
   }
   if(action==='ask'){
+    // Bloquer si en relation active
+    if(state.enRelation||(state.user&&state.user.en_relation)){
+      showToast('🤝 Vous êtes actuellement en relation — les nouvelles demandes sont suspendues','red');
+      setTimeout(function(){ var c2=document.getElementById('app-content'); if(c2&&state.viewMode==='swipe') renderExplorer(c2); },400);
+      return;
+    }
     // Vérifier si déjà une demande pour ce profil
     var _alreadySent = prenom && (demandesEnvoyees[prenom]==='en_attente'||demandesEnvoyees[prenom]==='acceptee');
     if(!_alreadySent && pid) _alreadySent = demandesEnvoyees['_id_'+String(pid)]==='en_attente'||demandesEnvoyees['_id_'+String(pid)]==='acceptee';
@@ -5242,6 +5251,10 @@ function sendUserMsg(name){
 var currentDemandeTarget='';
 function openDemandeModal(prenom){
   if(!state.profileActive){openModal('modal-paywall');return;}
+  if(state.enRelation||( state.user&&state.user.en_relation)){
+    showToast('🤝 Vous êtes actuellement en relation — les nouvelles demandes sont suspendues','red');
+    return;
+  }
   // Vérifier si déjà envoyé une demande à ce profil
   var _alreadySent = prenom && (demandesEnvoyees[prenom]==='en_attente'||demandesEnvoyees[prenom]==='acceptee');
   if(!_alreadySent){
@@ -7297,6 +7310,7 @@ function openAdminProfileDetail(id){
     +'<div style="font-family:\"Playfair Display\",serif;font-size:1.15rem;margin-top:8px">'+(p.prenom||'—')+(p.age?' · '+p.age+' ans':'')+'</div>'
     +'<div style="margin-top:6px">'+stepBadge+'</div>'
     +(p.paid?'<div style="font-size:.74rem;color:var(--green);margin-top:4px">✓ Paiement confirmé</div>':'<div style="font-size:.74rem;color:var(--muted);margin-top:4px">Paiement non encore effectué</div>')
+    +(p.en_relation?'<div style="margin-top:6px"><span class="badge" style="background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.3)">🤝 En relation — demandes bloquées</span></div>':'')
     +(p.en_relation_avec?'<div style="margin-top:6px"><span class="badge" style="background:rgba(52,152,219,.12);color:#3498db;border:1px solid rgba(52,152,219,.3)">🤝 En relation (id:'+p.en_relation_avec+')</span></div>':'')
     +'</div>'
     +'<div class="profile-section"><h4>📋 Identité</h4>'
@@ -7357,6 +7371,11 @@ function openAdminProfileDetail(id){
     +audioSection
     +'<div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">'
     +validateBtn
+    // Bouton En relation / Libérer (basé sur en_relation boolean)
+    +(p.en_relation
+      ? '<button data-pid="'+String(p.id)+'" onclick="adminToggleEnRelation(this.dataset.pid,false,this)" style="width:100%;background:rgba(52,152,219,.1);border:1px solid rgba(52,152,219,.4);color:#3498db;border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer;font-family:inherit">🔓 Libérer — autoriser à nouveau les demandes</button>'
+      : '<button data-pid="'+String(p.id)+'" onclick="adminToggleEnRelation(this.dataset.pid,true,this)" style="width:100%;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.4);color:var(--gold);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer;font-family:inherit">🤝 Mettre en relation — bloquer les nouvelles demandes</button>'
+    )
     +(p.en_relation_avec?'<button data-pid="'+String(p.id)+'" data-partner="'+String(p.en_relation_avec)+'" onclick="libererProfil(this.dataset.pid,this.dataset.partner)" style="width:100%;background:rgba(52,152,219,.1);border:1px solid rgba(52,152,219,.4);color:#3498db;border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer;font-family:inherit">🔓 Libérer — mettre fin à la relation</button>':'')
     +'<button class="btn btn-outline" data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openAdminConvoFromDetail(this)" style="width:100%">✉️ Envoyer un message</button>'
     +'<button data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openRejectModal(this.dataset.pid,this.dataset.pnom)" style="width:100%;background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer">✗ Refuser le profil</button>'
@@ -7365,6 +7384,39 @@ function openAdminProfileDetail(id){
     +'</div>';
 }
 
+
+// ── Mettre / libérer un profil en mode "relation" (bloque nouvelles demandes) ──
+function adminToggleEnRelation(profileId, valeur, btnEl){
+  var msg = valeur
+    ? 'Mettre ce profil en relation ? Il ne pourra plus envoyer de nouvelles demandes.'
+    : 'Libérer ce profil ? Il pourra à nouveau envoyer des demandes.';
+  if(!confirm(msg)) return;
+  if(btnEl){ btnEl.disabled=true; btnEl.textContent='...'; }
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+String(profileId),{
+    method:'PATCH', headers:H,
+    body:JSON.stringify({en_relation:valeur})
+  }).then(function(r){
+    if(r.ok||r.status===204){
+      showToast(valeur?'🤝 Profil mis en relation — demandes bloquées':'🔓 Profil libéré — demandes autorisées', valeur?'gold':'green');
+      // Rafraîchir la fiche
+      window._adminProfiles=null;
+      if(typeof loadAllProfilesForAdmin==='function'){
+        loadAllProfilesForAdmin().then(function(){
+          openAdminProfileDetail(profileId);
+        });
+      } else {
+        openAdminProfileDetail(profileId);
+      }
+    } else {
+      showToast('Erreur lors de la mise à jour','red');
+      if(btnEl){ btnEl.disabled=false; }
+    }
+  }).catch(function(){
+    showToast('Erreur réseau','red');
+    if(btnEl){ btnEl.disabled=false; }
+  });
+}
 
 // ── Libérer deux profils en relation ──
 async function libererProfil(profileId, partnerId){
