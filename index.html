@@ -3254,6 +3254,7 @@ async function loadProfilesFromDB(){
     .select('*')
     .eq('gender', oppositeGender)
     .eq('status', 'active')
+    .neq('en_relation', true)
     .neq('user_id', (state.user && state.user.supabaseId)||'');
   if(error){ console.error('Erreur chargement profils:', error); return; }
   // Toujours mettre à jour _dbProfiles (même si vide)
@@ -3282,6 +3283,7 @@ async function loadProfilesFromDB(){
       age_min:             p.age_min||null,
       age_max:             p.age_max||null,
       en_relation_avec:    p.en_relation_avec||null,
+      en_relation:         p.en_relation===true,
     };
   });
   // Mettre à jour statut en ligne
@@ -3439,7 +3441,8 @@ function loadAllProfilesForAdmin(){
         pending_verification: p.pending_verification||null,
         is_online:       p.is_online===true,
         last_seen:       p.last_seen||null,
-        en_relation_avec: p.en_relation_avec||null
+        en_relation_avec: p.en_relation_avec||null,
+        en_relation:     p.en_relation===true
       };
     });
     console.log('Admin: '+window._adminProfiles.length+' profils chargés');
@@ -4377,8 +4380,8 @@ function renderVerificationPage(container){
 function getVisibleProfiles(){
   var opp=state.user.gender==='femme'?'homme':'femme';
   // Fusionner profils locaux (test) + profils réels Supabase
-  var dbProfs = (window._dbProfiles||[]).filter(function(p){ return p.gender===opp && p.status==='active'; });
-  var localProfs = allProfiles.filter(function(p){ return p.gender===opp && p.status==='active'; });
+  var dbProfs = (window._dbProfiles||[]).filter(function(p){ return p.gender===opp && p.status==='active' && !p.en_relation; });
+  var localProfs = allProfiles.filter(function(p){ return p.gender===opp && p.status==='active' && !p.en_relation; });
   // Les profils DB ont priorité sur les locaux (même id = DB gagne)
   var dbIds = dbProfs.map(function(p){ return String(p.id); });
   var localOnly = localProfs.filter(function(p){ return !dbIds.includes(String(p.id)); });
@@ -7399,15 +7402,30 @@ function adminToggleEnRelation(profileId, valeur, btnEl){
   }).then(function(r){
     if(r.ok||r.status===204){
       showToast(valeur?'🤝 Profil mis en relation — demandes bloquées':'🔓 Profil libéré — demandes autorisées', valeur?'gold':'green');
-      // Rafraîchir la fiche
-      window._adminProfiles=null;
-      if(typeof loadAllProfilesForAdmin==='function'){
-        loadAllProfilesForAdmin().then(function(){
-          openAdminProfileDetail(profileId);
-        });
-      } else {
-        openAdminProfileDetail(profileId);
+      // Mettre à jour le cache local immédiatement
+      if(window._adminProfiles){
+        for(var i=0;i<window._adminProfiles.length;i++){
+          if(String(window._adminProfiles[i].id)===String(profileId)){
+            window._adminProfiles[i].en_relation=valeur;
+            break;
+          }
+        }
       }
+      // Recharger la fiche depuis la DB pour être sûr
+      var H2={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+      fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+String(profileId)+'&select=*',{headers:H2})
+      .then(function(r2){return r2.json();}).then(function(rows){
+        if(Array.isArray(rows)&&rows.length&&window._adminProfiles){
+          var fresh=rows[0];
+          for(var j=0;j<window._adminProfiles.length;j++){
+            if(String(window._adminProfiles[j].id)===String(profileId)){
+              window._adminProfiles[j].en_relation=fresh.en_relation===true;
+              break;
+            }
+          }
+        }
+        openAdminProfileDetail(profileId);
+      }).catch(function(){ openAdminProfileDetail(profileId); });
     } else {
       showToast('Erreur lors de la mise à jour','red');
       if(btnEl){ btnEl.disabled=false; }
