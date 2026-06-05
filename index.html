@@ -1881,6 +1881,7 @@ function loadUserProfile(authUser){
       en_relation_avec:profile.en_relation_avec||null,
       en_relation:profile.en_relation===true};
     state.enRelation = profile.en_relation===true;
+    state.profileActive  = profile.status==='active';
     state.profilePaused  = profile.status==='paused' || profile.status==='inactive';
     state.profileStatus  = profile.status || 'pending';  // statut brut complet
     state.gender=profile.gender;
