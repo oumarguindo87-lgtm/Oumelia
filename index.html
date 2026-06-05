@@ -3254,7 +3254,6 @@ async function loadProfilesFromDB(){
     .select('*')
     .eq('gender', oppositeGender)
     .eq('status', 'active')
-    .neq('en_relation', true)
     .neq('user_id', (state.user && state.user.supabaseId)||'');
   if(error){ console.error('Erreur chargement profils:', error); return; }
   // Toujours mettre à jour _dbProfiles (même si vide)
@@ -4380,8 +4379,8 @@ function renderVerificationPage(container){
 function getVisibleProfiles(){
   var opp=state.user.gender==='femme'?'homme':'femme';
   // Fusionner profils locaux (test) + profils réels Supabase
-  var dbProfs = (window._dbProfiles||[]).filter(function(p){ return p.gender===opp && p.status==='active' && !p.en_relation; });
-  var localProfs = allProfiles.filter(function(p){ return p.gender===opp && p.status==='active' && !p.en_relation; });
+  var dbProfs = (window._dbProfiles||[]).filter(function(p){ return p.gender===opp && p.status==='active'; });
+  var localProfs = allProfiles.filter(function(p){ return p.gender===opp && p.status==='active'; });
   // Les profils DB ont priorité sur les locaux (même id = DB gagne)
   var dbIds = dbProfs.map(function(p){ return String(p.id); });
   var localOnly = localProfs.filter(function(p){ return !dbIds.includes(String(p.id)); });
