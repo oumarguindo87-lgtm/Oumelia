@@ -3555,6 +3555,7 @@ function renderMyProfile(c){
       <span class="status-badge ${state.profilePaused?'paused':state.profileActive?'active':'inactive'}">
         ${state.profilePaused?'⏸ Profil en pause':state.profileActive?'✓ Profil actif':'⚠ Profil non activé'}
       </span>
+      ${(state.enRelation||(state.user&&state.user.en_relation))?'<div style="margin-top:10px;display:inline-block;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.4);color:var(--gold);border-radius:20px;padding:6px 16px;font-size:.82rem;font-weight:600">🤝 Vous êtes actuellement en relation</div>':''}
     </div>
     <div style="padding:16px">
 
@@ -3578,8 +3579,15 @@ function renderMyProfile(c){
 })()}
       </div>
 
+      ${(state.enRelation||(state.user&&state.user.en_relation))?`<div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:4px">🤝 Vous êtes en relation</div>
+        <div style="font-size:.8rem;color:var(--muted);line-height:1.5">Vos demandes de mise en relation sont temporairement suspendues. Contactez l'équipe Oumélia si votre situation a changé.</div>
+      </div>`:''}
+
       ${(function(){
         if(state.profileActive) return '';
+        // Si le profil est en pause, il a déjà été validé — ne pas redemander les documents
+        if(state.profilePaused) return '';
         var _s=state.user&&state.user.status||'pending';
         var _l=typeof getStatusInfo==='function'?getStatusInfo(_s).label:'Inscription en cours';
         // Si docs envoyés mais statut pas encore mis à jour (PATCH en cours / lag réseau)
@@ -3954,6 +3962,10 @@ async function resumeProfile(){
   if((state.user&&state.user.supabaseId)){
     await getSB().from('profils').update({status:'active'}).eq('user_id', state.user.supabaseId);
   }
+  // Mettre à jour le state local pour ne pas redemander les documents
+  if(state.user) state.user.status='active';
+  state.profileStatus='active';
+  state.profileActive=true;
   renderTab('profil');
   showToast('▶ Profil réactivé ! Vous êtes à nouveau visible','green');
 }
@@ -4955,7 +4967,7 @@ function initSwipeTouch(){
 }
 
 function openProfile(id){
-  if(!state.profileActive){
+  if(!state.profileActive && !state.profilePaused){
     var _st=state.user&&state.user.status||'pending';
     // Peut payer seulement si valide_a_payer ou active
     if(_st==='valide_a_payer'){
@@ -5023,6 +5035,7 @@ function openProfile(id){
       <div style="display:flex;gap:10px;margin-bottom:14px">
         ${(function(){
           var st=demandesEnvoyees[p.prenom]||demandesEnvoyees['_id_'+String(p.id)];
+          if(state.enRelation||(state.user&&state.user.en_relation)) return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--gold);border:1px solid rgba(201,168,76,.3);cursor:not-allowed" disabled>🤝 Vous êtes en relation</button>';
           if(p.en_relation_avec) return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>🤝 En relation</button>';
           if(st==='acceptee') return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>✅ Demande acceptée</button>';
           if(st==='en_attente') return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>⏳ En attente</button>';
