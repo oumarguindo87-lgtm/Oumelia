@@ -3634,14 +3634,11 @@ function renderMyProfile(c){
           ${(function(){
             var _g=state.user&&state.user.gender;
             var _isPublic=state.user&&state.user.photo_visible===true;
-            if(_g==='homme'){
-              return '<div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">Choisissez qui peut voir votre photo :</div>'
-                +'<div style="display:flex;gap:6px;margin-bottom:10px">'
-                +'<button id="photo-opt-public" onclick="setPhotoVisibility(true)" style="flex:1;padding:7px 6px;border-radius:8px;border:1.5px solid '+(_isPublic?'var(--gold)':'var(--border)')+';background:'+(_isPublic?'rgba(201,168,76,.1)':'transparent')+';color:'+(_isPublic?'var(--gold)':'var(--muted)')+';font-size:.74rem;cursor:pointer;font-family:\'Cairo\',sans-serif">🌐 Visible par toutes</button>'
-                +'<button id="photo-opt-mutual" onclick="setPhotoVisibility(false)" style="flex:1;padding:7px 6px;border-radius:8px;border:1.5px solid '+(!_isPublic?'var(--gold)':'var(--border)')+';background:'+(!_isPublic?'rgba(201,168,76,.1)':'transparent')+';color:'+(!_isPublic?'var(--gold)':'var(--muted)')+';font-size:.74rem;cursor:pointer;font-family:\'Cairo\',sans-serif">🔒 Après acceptation</button>'
-                +'</div>';
-            }
-            return '<div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">Votre photo n\'est visible qu\'après acceptation mutuelle, conformément aux valeurs d\'Oumélia.</div>';
+            return '<div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">Choisissez qui peut voir votre photo :</div>'
+              +'<div style="display:flex;gap:6px;margin-bottom:10px">'
+              +'<button id="photo-opt-public" onclick="setPhotoVisibility(true)" style="flex:1;padding:7px 6px;border-radius:8px;border:1.5px solid '+(_isPublic?'var(--gold)':'var(--border)')+';background:'+(_isPublic?'rgba(201,168,76,.1)':'transparent')+';color:'+(_isPublic?'var(--gold)':'var(--muted)')+';font-size:.74rem;cursor:pointer;font-family:\'Cairo\',sans-serif">🌐 Visible par tous</button>'
+              +'<button id="photo-opt-mutual" onclick="setPhotoVisibility(false)" style="flex:1;padding:7px 6px;border-radius:8px;border:1.5px solid '+(!_isPublic?'var(--gold)':'var(--border)')+';background:'+(!_isPublic?'rgba(201,168,76,.1)':'transparent')+';color:'+(!_isPublic?'var(--gold)':'var(--muted)')+';font-size:.74rem;cursor:pointer;font-family:\'Cairo\',sans-serif">🔒 Après acceptation</button>'
+              +'</div>';
           })()}
           <div style="display:flex;gap:8px">
             <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:9px;font-size:.78rem;color:var(--gold);cursor:pointer;font-family:'Cairo',sans-serif">
@@ -4692,6 +4689,10 @@ function renderExplorer(c){
       html+=`<div class="profiles-list">`;
       profiles.forEach(function(p){ 
         var av=p.gender==='femme'?svgFemme(50):svgHomme(50);
+        var _myId2 = state.user && state.user.id;
+        var _enRelMut = p.en_relation_avec && String(p.en_relation_avec)===String(_myId2);
+        var _canSee = p.photo_url && (p.photo_visible===true || _enRelMut);
+        if(_canSee) av='<img src="'+p.photo_url+'" style="width:50px;height:50px;border-radius:50%;object-fit:cover" alt="" onerror="this.style.display=\'none\'">';
         var isFav=state.favorites.includes(String(p.id))||state.favorites.includes(p.id);
         var dot=onlineDot(p.id,9);
         var _st=onlineStatus[String(p.id)]||onlineStatus[p.id]||'offline';
@@ -4703,7 +4704,9 @@ function renderExplorer(c){
           ${_enRelation?'<span style="position:absolute;top:6px;left:6px;z-index:2;background:rgba(0,0,0,.75);color:#aaa;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:20px;border:1px solid rgba(255,255,255,.15)">🤝 En relation</span>':''}
           ${!_enRelation&&p.status==='active'?'<span class="verified-badge-card">✦ Vérifié</span>':''}
           <div class="profile-avatar-box" style="position:relative">
+            ${_canSee?'':''}
             ${av}
+            ${p.photo_url&&!_canSee?'<span style="position:absolute;bottom:0;right:0;background:rgba(0,0,0,.7);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.6rem" title="Photo visible après acceptation">🔒</span>':''}
             ${inExch?'<span class="exchange-badge">↔ Échange</span>':''}
             <span style="position:absolute;bottom:4px;right:4px">${dot}</span>
           </div>
@@ -4738,6 +4741,10 @@ function renderExplorer(c){
       if(!state.seenProfiles) state.seenProfiles=[];
       if(p && !state.seenProfiles.includes(String(p.id))) state.seenProfiles.push(String(p.id));
       var av=p.gender==='femme'?svgFemme(110):svgHomme(110);
+      var _myId3 = state.user && state.user.id;
+      var _enRelMut3 = p.en_relation_avec && String(p.en_relation_avec)===String(_myId3);
+      var _canSee3 = p.photo_url && (p.photo_visible===true || _enRelMut3);
+      if(_canSee3) av='<img src="'+p.photo_url+'" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid rgba(201,168,76,.4)" alt="" onerror="this.style.display=\'none\'">';
       html+=`<div class="swipe-container">
         <button onclick="setView('liste')" style="position:absolute;top:8px;left:16px;background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:20px;padding:6px 14px;font-size:.8rem;cursor:pointer;z-index:10">← Liste</button>
         <div class="swipe-card" id="swipe-card" onclick="openSwipeProfile(${p.id})">
@@ -4975,7 +4982,15 @@ function openProfile(id){
   var p = allProfiles.find(function(x){ return String(x.id)===String(id); })
        || (window._dbProfiles||[]).find(function(x){ return String(x.id)===String(id); });
   if(!p) return;
-  var av=p.gender==='femme'?svgFemme(80):svgHomme(80);
+  var myId = state.user && state.user.id;
+  // Peut-on voir la photo ?
+  // → photo_visible=true : visible par tous
+  // → photo_visible=false : visible seulement si en relation mutuelle (en_relation_avec = myId)
+  var enRelationMutuel = p.en_relation_avec && String(p.en_relation_avec) === String(myId);
+  var canSeePhoto = p.photo_url && (p.photo_visible === true || enRelationMutuel);
+  var av = canSeePhoto
+    ? '<img src="'+p.photo_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="" onerror="this.style.display=\'none\'">'
+    : (p.gender==='femme'?svgFemme(80):svgHomme(80));
   var isFav=state.favorites.includes(String(p.id))||state.favorites.includes(p.id);
   // Rafraîchir les favoris depuis DB si besoin
   if(state.user&&state.user.id&&typeof loadUserFavoris==='function') loadUserFavoris();
@@ -8615,24 +8630,33 @@ async function openSalonUser(salonId){
   // ── Poll typing dédié (1s) — séparé du poll messages ──
   if(_salonTypingInterval) clearInterval(_salonTypingInterval);
   if(isActif){
+    var oppRole=myRole==='frere'?'soeur':'frere';
+    var oppPrenom=oppRole==='frere'?frerePrenom:soeurPrenom;
     function checkTyping(){
       var tb=document.getElementById('salon-typing-bar');
-      if(!tb){clearInterval(_salonTypingInterval);return;}
-      var oppRole=myRole==='frere'?'soeur':'frere';
-      var oppPrenom=oppRole==='frere'?(window._salonFrerePrenom||'Lui'):(window._salonSoeurPrenom||'Elle');
-      fetch(SUPABASE_URL+'/rest/v1/salon_typing?salon_id=eq.'+salonId+'&role=eq.'+oppRole,{
+      if(!tb){clearInterval(_salonTypingInterval);_salonTypingInterval=null;return;}
+      fetch(SUPABASE_URL+'/rest/v1/salon_typing?salon_id=eq.'+String(salonId)+'&role=eq.'+oppRole,{
         headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
-      }).then(function(r){return r.json();}).then(function(rows){
+      }).then(function(r){
+        if(!r.ok){
+          r.text().then(function(t){console.warn('salon_typing fetch error',r.status,t);});
+          return;
+        }
+        return r.json();
+      }).then(function(rows){
         var tb2=document.getElementById('salon-typing-bar');if(!tb2) return;
-        if(!Array.isArray(rows)||!rows.length){tb2.innerHTML='';return;}
+        if(!rows||!Array.isArray(rows)||!rows.length){tb2.innerHTML='';return;}
         var age=(Date.now()-new Date(rows[0].updated_at).getTime())/1000;
         if(age>5){tb2.innerHTML='';return;}
         tb2.innerHTML='<span>'+oppPrenom+' est en train d\'écrire</span>'
           +'<span class="typing-dots"><span></span><span></span><span></span></span>';
-      }).catch(function(){var tb3=document.getElementById('salon-typing-bar');if(tb3)tb3.innerHTML='';});
+      }).catch(function(err){
+        console.warn('salon_typing erreur réseau:',err);
+        var tb3=document.getElementById('salon-typing-bar');if(tb3)tb3.innerHTML='';
+      });
     }
     _salonTypingInterval=setInterval(checkTyping,1000);
-    checkTyping(); // appel immédiat
+    checkTyping();
   }
 }
 
