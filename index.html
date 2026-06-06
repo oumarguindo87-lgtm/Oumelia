@@ -5037,8 +5037,10 @@ function openProfile(id){
       <div style="display:flex;gap:10px;margin-bottom:14px">
         ${(function(){
           var st=demandesEnvoyees[p.prenom]||demandesEnvoyees['_id_'+String(p.id)];
+          // 1) Le profil consulté est déjà en relation avec quelqu'un → indisponible
+          if(p.en_relation_avec) return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>🤝 Indisponible — en relation</button>';
+          // 2) MOI je suis en relation → je ne peux pas faire de demande
           if(state.enRelation||(state.user&&state.user.en_relation)) return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--gold);border:1px solid rgba(201,168,76,.3);cursor:not-allowed" disabled>🤝 Vous êtes en relation</button>';
-          if(p.en_relation_avec) return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>🤝 En relation</button>';
           if(st==='acceptee') return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>✅ Demande acceptée</button>';
           if(st==='en_attente') return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>⏳ En attente</button>';
           return '<button class="btn btn-gold" style="flex:1;font-size:.84rem;padding:10px" onclick="openDemandeModal(\'' + p.prenom + '\')">💌 Demande</button>';
