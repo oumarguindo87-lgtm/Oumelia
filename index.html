@@ -3284,6 +3284,8 @@ async function loadProfilesFromDB(){
       age_max:             p.age_max||null,
       en_relation_avec:    p.en_relation_avec||null,
       en_relation:         p.en_relation===true,
+      photo_url:           p.photo_url||null,
+      photo_visible:       p.photo_visible===true,
     };
   });
   // Mettre à jour statut en ligne
@@ -5833,6 +5835,15 @@ function acceptDemande(notifId){
     fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+fromId,{method:'PATCH',headers:H2,body:JSON.stringify({en_relation_avec:myId})}).catch(function(){});
     // Mettre à jour state local
     if(state.user) state.user.en_relation_avec=fromId;
+    // Mettre à jour le cache _dbProfiles pour que la photo devienne visible immédiatement
+    if(window._dbProfiles){
+      for(var i=0;i<window._dbProfiles.length;i++){
+        if(String(window._dbProfiles[i].id)===String(fromId)){
+          window._dbProfiles[i].en_relation_avec=myId;
+          break;
+        }
+      }
+    }
     var msg=(state.user.prenom||'Quelqu\'un')+' a accept\u00e9 votre demande. Un administrateur vous contactera prochainement.';
     fetch(SUPABASE_URL+'/rest/v1/notifications',{method:'POST',
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
@@ -7402,12 +7413,15 @@ function openAdminProfileDetail(id){
     +audioSection
     +'<div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">'
     +validateBtn
-    // Bouton En relation / Libérer (basé sur en_relation boolean)
-    +(p.en_relation
-      ? '<button data-pid="'+String(p.id)+'" onclick="adminToggleEnRelation(this.dataset.pid,false,this)" style="width:100%;background:rgba(52,152,219,.1);border:1px solid rgba(52,152,219,.4);color:#3498db;border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer;font-family:inherit">🔓 Libérer — autoriser à nouveau les demandes</button>'
-      : '<button data-pid="'+String(p.id)+'" onclick="adminToggleEnRelation(this.dataset.pid,true,this)" style="width:100%;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.4);color:var(--gold);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer;font-family:inherit">🤝 Mettre en relation — bloquer les nouvelles demandes</button>'
+    // Mettre en relation AVEC un profil (remplit en_relation_avec mutuel + débloque photos)
+    +(p.en_relation_avec
+      ? '<button data-pid="'+String(p.id)+'" data-partner="'+String(p.en_relation_avec)+'" onclick="adminLibererRelation(this.dataset.pid,this.dataset.partner,this)" style="width:100%;background:rgba(52,152,219,.1);border:1px solid rgba(52,152,219,.4);color:#3498db;border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer;font-family:inherit">🔓 Mettre fin à la relation</button>'
+      : '<button data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/[\'"]/g,'')+'" data-gender="'+String(p.gender||'')+'" onclick="openMettreEnRelationModal(this.dataset.pid,this.dataset.pnom,this.dataset.gender)" style="width:100%;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.4);color:var(--gold);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer;font-family:inherit">🤝 Mettre en relation avec…</button>'
     )
-    +(p.en_relation_avec?'<button data-pid="'+String(p.id)+'" data-partner="'+String(p.en_relation_avec)+'" onclick="libererProfil(this.dataset.pid,this.dataset.partner)" style="width:100%;background:rgba(52,152,219,.1);border:1px solid rgba(52,152,219,.4);color:#3498db;border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer;font-family:inherit">🔓 Libérer — mettre fin à la relation</button>':'')
+    // Verrou simple "en relation" (bloque demandes sans lier) — gardé en option secondaire
+    +(p.en_relation && !p.en_relation_avec
+      ? '<button data-pid="'+String(p.id)+'" onclick="adminToggleEnRelation(this.dataset.pid,false,this)" style="width:100%;background:rgba(52,152,219,.06);border:1px solid rgba(52,152,219,.25);color:#3498db;border-radius:8px;padding:9px;font-size:.8rem;cursor:pointer;font-family:inherit">🔓 Débloquer les demandes</button>'
+      : '')
     +'<button class="btn btn-outline" data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openAdminConvoFromDetail(this)" style="width:100%">✉️ Envoyer un message</button>'
     +'<button data-pid="'+String(p.id)+'" data-pnom="'+String(p.prenom||'').replace(/['"]/g,'')+'" onclick="openRejectModal(this.dataset.pid,this.dataset.pnom)" style="width:100%;background:none;border:1px solid rgba(231,76,60,.4);color:var(--red);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer">✗ Refuser le profil</button>'
     +(p.telephone?'<button data-phone="'+p.telephone+'" data-pnom="'+String(p.prenom||'')+'" onclick="banPhone(this.dataset.phone,this.dataset.pnom)" style="width:100%;background:none;border:1px solid rgba(231,76,60,.2);color:var(--muted);border-radius:8px;padding:10px;font-size:.82rem;cursor:pointer">🚫 Bannir ce numéro</button>':'')
@@ -7415,6 +7429,85 @@ function openAdminProfileDetail(id){
     +'</div>';
 }
 
+
+// ── Mettre en relation AVEC un partenaire (lie les deux profils mutuellement) ──
+function openMettreEnRelationModal(profileId, prenom, gender){
+  // Le partenaire doit être du genre opposé
+  var oppGender = gender==='homme'?'femme':'homme';
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  showToast('Chargement des profils…','blue');
+  fetch(SUPABASE_URL+'/rest/v1/profils?gender=eq.'+oppGender+'&select=id,prenom,age,ville&order=prenom.asc',{headers:H})
+  .then(function(r){return r.json();}).then(function(rows){
+    if(!Array.isArray(rows)||!rows.length){ showToast('Aucun profil '+oppGender+' disponible','red'); return; }
+    var ov=document.createElement('div');
+    ov.id='modal-mettre-relation';
+    ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:18px';
+    ov.onclick=function(e){if(e.target===ov)ov.remove();};
+    var opts=rows.map(function(x){
+      return '<button onclick="adminMettreEnRelationAvec(\''+String(profileId)+'\',\''+String(x.id)+'\',\''+String(prenom).replace(/[\'"]/g,'')+'\',\''+String(x.prenom||'').replace(/[\'"]/g,'')+'\')" style="display:block;width:100%;text-align:left;background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:11px 14px;margin-bottom:7px;font-size:.86rem;cursor:pointer;font-family:inherit">'
+        +(x.prenom||'?')+' <span style="color:var(--muted);font-size:.78rem">· '+(x.age||'?')+' ans · '+(x.ville||'?')+'</span></button>';
+    }).join('');
+    ov.innerHTML='<div style="background:#15110a;border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:20px;max-width:380px;width:100%;max-height:80vh;display:flex;flex-direction:column">'
+      +'<div style="font-weight:700;font-size:1rem;color:var(--gold);margin-bottom:4px">🤝 Mettre '+prenom+' en relation avec…</div>'
+      +'<div style="font-size:.78rem;color:var(--muted);margin-bottom:14px">Sélectionnez le partenaire. Les deux photos deviendront visibles entre eux et leurs demandes seront suspendues.</div>'
+      +'<div style="overflow-y:auto;flex:1">'+opts+'</div>'
+      +'<button onclick="document.getElementById(\'modal-mettre-relation\').remove()" style="margin-top:10px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:10px;font-size:.84rem;cursor:pointer">Annuler</button>'
+      +'</div>';
+    document.body.appendChild(ov);
+  }).catch(function(){ showToast('Erreur de chargement','red'); });
+}
+
+function adminMettreEnRelationAvec(idA, idB, prenomA, prenomB){
+  var ov=document.getElementById('modal-mettre-relation'); if(ov) ov.remove();
+  if(!confirm('Mettre '+prenomA+' et '+prenomB+' en relation ?\n\nLeurs photos seront mutuellement visibles et leurs demandes suspendues.')) return;
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  showToast('Mise en relation…','blue');
+  // Lier mutuellement : en_relation_avec + en_relation=true des deux côtés
+  Promise.all([
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+String(idA),{method:'PATCH',headers:H,body:JSON.stringify({en_relation_avec:String(idB),en_relation:true})}),
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+String(idB),{method:'PATCH',headers:H,body:JSON.stringify({en_relation_avec:String(idA),en_relation:true})})
+  ]).then(function(results){
+    var ok = results.every(function(r){return r.ok||r.status===204;});
+    if(ok){
+      showToast('🤝 '+prenomA+' et '+prenomB+' sont en relation','gold');
+      // Mettre à jour le cache local
+      if(window._adminProfiles){
+        window._adminProfiles.forEach(function(pr){
+          if(String(pr.id)===String(idA)){ pr.en_relation_avec=String(idB); pr.en_relation=true; }
+          if(String(pr.id)===String(idB)){ pr.en_relation_avec=String(idA); pr.en_relation=true; }
+        });
+      }
+      openAdminProfileDetail(idA);
+    } else {
+      showToast('Erreur — vérifiez les permissions (RLS)','red');
+    }
+  }).catch(function(){ showToast('Erreur réseau','red'); });
+}
+
+function adminLibererRelation(idA, idB, btnEl){
+  if(!confirm('Mettre fin à la relation entre ces deux profils ?')) return;
+  if(btnEl){ btnEl.disabled=true; btnEl.textContent='...'; }
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
+  Promise.all([
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+String(idA),{method:'PATCH',headers:H,body:JSON.stringify({en_relation_avec:null,en_relation:false})}),
+    fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+String(idB),{method:'PATCH',headers:H,body:JSON.stringify({en_relation_avec:null,en_relation:false})})
+  ]).then(function(results){
+    var ok = results.every(function(r){return r.ok||r.status===204;});
+    if(ok){
+      showToast('🔓 Relation terminée','green');
+      if(window._adminProfiles){
+        window._adminProfiles.forEach(function(pr){
+          if(String(pr.id)===String(idA)){ pr.en_relation_avec=null; pr.en_relation=false; }
+          if(String(pr.id)===String(idB)){ pr.en_relation_avec=null; pr.en_relation=false; }
+        });
+      }
+      openAdminProfileDetail(idA);
+    } else {
+      showToast('Erreur — vérifiez les permissions (RLS)','red');
+      if(btnEl){ btnEl.disabled=false; btnEl.textContent='🔓 Mettre fin à la relation'; }
+    }
+  }).catch(function(){ showToast('Erreur réseau','red'); if(btnEl){btnEl.disabled=false;} });
+}
 
 // ── Mettre / libérer un profil en mode "relation" (bloque nouvelles demandes) ──
 function adminToggleEnRelation(profileId, valeur, btnEl){
