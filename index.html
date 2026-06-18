@@ -691,7 +691,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
       </div>
       <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Combien ça coûte ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
-        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">L'accès à la plateforme coûte 29,90 € en paiement unique (3 demandes incluses). Une fois épuisées, vous pouvez obtenir 3 nouvelles demandes pour 4,99 €, ou 10 demandes pour 12,99 €. Offert pour les 50 premiers inscrits (25 sœurs · 25 frères).</div>
+        <div class="faq-a" style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-top:9px;display:none">L'inscription et la vérification (documents + entretien) sont gratuites pour tout le monde. <strong style="color:var(--gold)">Pour les sœurs, l'accès à la plateforme est entièrement gratuit</strong> : une fois l'entretien validé, le profil est activé sans aucun paiement. Pour les frères, l'accès coûte 29,90 € en paiement unique (3 demandes incluses) ; une fois épuisées, 3 nouvelles demandes pour 4,99 € ou 10 demandes pour 12,99 €.</div>
       </div>
       <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Qu'est-ce qu'une demande de mise en relation ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
@@ -3594,8 +3594,9 @@ function renderMyProfile(c){
         var _l=typeof getStatusInfo==='function'?getStatusInfo(_s).label:'Inscription en cours';
         // Si docs envoyés mais statut pas encore mis à jour (PATCH en cours / lag réseau)
         var _docsOk=u.docs_submitted||_s==='en_attente_rdv'||_s==='rdv_planifie';
-        var _d=_s==='valide_a_payer'?'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.':_s==='rdv_planifie'?'Entretien planifié. En attente de validation par notre équipe.':_s==='en_attente_rdv'?'Vos documents ont été reçus. Planifiez votre entretien.':'Envoyez vos documents pour continuer la verification.';
-        var _b=_s==='valide_a_payer'?'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="openModal(\'modal-paywall\')">💳 Finaliser mon inscription (29,90 €) →</button>':_s==='rdv_planifie'?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div><button class=\"btn btn-outline btn-sm\" style=\"margin-top:8px;width:100%;font-size:.78rem;color:var(--muted)\" onclick=\"replanifierRdv()\">&#x1F504; Modifier mon RDV</button>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<div style="margin-top:10px;margin-top:10px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button></div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
+        var _isFemme=state.gender==='femme';
+        var _d=_s==='valide_a_payer'?(_isFemme?'Votre entretien est en cours de validation. Votre accès gratuit sera activé très bientôt.':'Votre dossier est valide. Finalisez votre paiement pour acceder aux profils.'):_s==='rdv_planifie'?'Entretien planifié. En attente de validation par notre équipe.':_s==='en_attente_rdv'?'Vos documents ont été reçus. Planifiez votre entretien.':'Envoyez vos documents pour continuer la verification.';
+        var _b=_s==='valide_a_payer'?(_isFemme?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">🌸 Accès gratuit — activation après validation de l\'entretien</div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showPaywall()">💳 Finaliser mon inscription (29,90 €) →</button>'):_s==='rdv_planifie'?'<div style="margin-top:10px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:10px;padding:10px 12px;font-size:.8rem;color:#2ecc71;text-align:center">✅ Entretien planifié — notre équipe vous contactera bientôt.</div><button class=\"btn btn-outline btn-sm\" style=\"margin-top:8px;width:100%;font-size:.78rem;color:var(--muted)\" onclick=\"replanifierRdv()\">&#x1F504; Modifier mon RDV</button>':(_s==='en_attente_rdv'||(_s==='pending'&&_docsOk))?'<div style="margin-top:10px;margin-top:10px"><button class="btn btn-gold btn-sm" onclick="openCalEmbed()">📅 Planifier mon entretien →</button></div>':'<button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showScreen(\'screen-verification-docs\')">📂 Envoyer mes documents →</button>';
         return '<div class="step-banner" style="margin:0 0 14px"><div style="font-size:.84rem;font-weight:700;color:var(--gold)">'+_l+'</div><div style="font-size:.77rem;color:var(--muted);margin-top:4px;line-height:1.5">'+_d+'</div>'+_b+'</div>';
       })()}
 
@@ -4973,7 +4974,7 @@ function openProfile(id){
     var _st=state.user&&state.user.status||'pending';
     // Peut payer seulement si valide_a_payer ou active
     if(_st==='valide_a_payer'){
-      openModal('modal-paywall');
+      showPaywall();
     } else {
       // Pas encore validé par admin — message d'info
       (function(){
@@ -5285,7 +5286,7 @@ function sendUserMsg(name){
 // Envoi d'une demande ne diminue pas encore (elle est "en attente")
 var currentDemandeTarget='';
 function openDemandeModal(prenom){
-  if(!state.profileActive){openModal('modal-paywall');return;}
+  if(!state.profileActive){showPaywall();return;}
   if(state.enRelation||( state.user&&state.user.en_relation)){
     showToast('🤝 Vous êtes actuellement en relation — les nouvelles demandes sont suspendues','red');
     return;
@@ -5493,6 +5494,31 @@ function buyDemandes(nb){
     showToast('✅ '+_label+' nouvelles demandes débloquées !','green');
     renderTab(state.currentNav);
   });
+}
+
+// Ouvre le paywall en adaptant le contenu selon le genre.
+// Les sœurs ont un accès gratuit : on leur montre un message d'attente de validation, pas de paiement.
+function showPaywall(){
+  var modal=document.getElementById('modal-paywall');
+  if(!modal){ return; }
+  var inner=modal.querySelector('.modal');
+  if(state.gender==='femme'){
+    if(inner){
+      inner.innerHTML='<h3>🌸 Accès gratuit — Sœurs</h3>'
+        +'<p style="color:var(--muted);font-size:.84rem;margin-bottom:14px;line-height:1.65">L\'accès à Oumélia est <strong style="color:var(--gold)">entièrement gratuit pour les sœurs</strong>. Il vous reste simplement à finaliser votre vérification.</p>'
+        +'<div style="background:var(--gold-soft);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:.78rem;color:var(--white2);line-height:1.7">'
+        +'<div style="font-weight:700;color:var(--gold);margin-bottom:6px">🗺 Votre parcours :</div>'
+        +'<div>① Inscription · ② Documents · ③ Entretien de validation → Accès offert ✨</div>'
+        +'</div>'
+        +'<div style="background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:10px;padding:14px;margin-bottom:12px;text-align:center">'
+        +'<div style="font-size:1.6rem;margin-bottom:6px">⏳</div>'
+        +'<div style="color:#2ecc71;font-size:.84rem;font-weight:700;margin-bottom:4px">Votre accès sera activé après l\'entretien</div>'
+        +'<div style="color:var(--muted);font-size:.78rem;line-height:1.6">Une fois votre entretien validé par notre équipe, votre profil sera activé automatiquement et gratuitement.</div>'
+        +'</div>'
+        +'<button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeModal(\'modal-paywall\')">J\'ai compris</button>';
+    }
+  }
+  openModal('modal-paywall');
 }
 
 function activateProfile(){
@@ -7342,7 +7368,11 @@ function openAdminProfileDetail(id){
   var canValidate = p.status==='en_attente_rdv'||p.status==='rdv_planifie'||p.status==='pending';
   if(canValidate && p.status!=='active'){
     var _pid=String(p.id),_pnom=String(p.prenom||'').replace(/['"]/g,'');
-    validateBtn = '<button class="validate-call-btn" data-id="'+_pid+'" data-name="'+_pnom+'" onclick="adminValidateAfterCall(this.dataset.id,this.dataset.name)">✓ Valider &amp; débloquer le paiement</button>';
+    if(p.gender==='femme'){
+      validateBtn = '<button class="validate-call-btn" data-id="'+_pid+'" data-name="'+_pnom+'" onclick="adminValidateAfterCall(this.dataset.id,this.dataset.name)">✓ Valider l\'entretien &amp; activer (gratuit sœur)</button>';
+    } else {
+      validateBtn = '<button class="validate-call-btn" data-id="'+_pid+'" data-name="'+_pnom+'" onclick="adminValidateAfterCall(this.dataset.id,this.dataset.name)">✓ Valider &amp; débloquer le paiement</button>';
+    }
   }
   c.innerHTML = '<div style="padding:16px">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'
@@ -7705,7 +7735,7 @@ function openSwipeProfile(id){
   if(window._isSwiping) return;
   if(!state.profileActive){
     var _sst=state.user&&state.user.status||'pending';
-    if(_sst==='valide_a_payer'){ openModal('modal-paywall'); }
+    if(_sst==='valide_a_payer'){ showPaywall(); }
     else { (function(){var _m=document.createElement('div');_m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px';_m.onclick=function(e){if(e.target===this)this.remove();};var _i=document.createElement('div');_i.style.cssText='background:#1a1106;border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:24px;max-width:300px;text-align:center';_i.innerHTML='<div style="font-size:1.8rem;margin-bottom:10px">&#9203;</div><div style="font-weight:700;font-size:.94rem;color:#C9A84C;margin-bottom:10px">Acc&#232;s en cours de validation</div><div style="font-size:.82rem;color:#ccc;line-height:1.6;margin-bottom:16px">Vous pourrez acc&#233;der aux profils une fois votre entretien valid&#233; par l&#x27;&#233;quipe Oum&#233;lia.</div><button style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#C9A84C;border-radius:8px;padding:10px 24px;font-size:.84rem;cursor:pointer;font-family:inherit">OK</button>';_i.querySelector('button').onclick=function(){_m.remove();};_m.appendChild(_i);document.body.appendChild(_m);})(); }
     return;
   }
@@ -9474,12 +9504,29 @@ async function renderAdminDossiers(c){
 }
 
 async function adminValidateAfterCall(id,prenom){
-  if(!confirm('Valider le dossier de '+prenom+' et envoyer le lien de paiement ?')) return;
-  if(window._adminProfiles){var f=window._adminProfiles.find(function(x){return String(x.id)===String(id);});if(f)f.status='valide_a_payer';}
+  // Déterminer le genre du profil
+  var prof = window._adminProfiles ? window._adminProfiles.find(function(x){return String(x.id)===String(id);}) : null;
+  var isFemme = prof && prof.gender==='femme';
   var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+
+  if(isFemme){
+    // ── SŒURS : accès gratuit, activation immédiate après validation de l'entretien ──
+    if(!confirm('Valider l\'entretien de '+prenom+' et activer son profil gratuitement ?')) return;
+    if(prof){ prof.status='active'; prof.call_validated=true; prof.free_activated=true; }
+    await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({status:'active',call_validated:true,free_activated:true})}).catch(function(){});
+    var msgF='🎉 Mabrouk '+prenom+' !\n\nVotre entretien a été validé par notre équipe et votre profil est maintenant actif. ✨\n\nL\'accès à Oumélia est entièrement gratuit pour les sœurs. Vous pouvez dès à présent consulter les profils et envoyer vos demandes de mise en relation.\n\nQu\'Allah facilite votre recherche. Barak\'Allahu fikoum — L\'équipe Oumélia';
+    await fetch(SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({from_id:'admin',to_id:String(id),from_prenom:'Oumélia',content:msgF,lu:false,created_at:new Date().toISOString()})}).catch(function(){});
+    showToast('✅ '+prenom+' validée et activée gratuitement','green');
+    adminTab('dossiers');
+    return;
+  }
+
+  // ── FRÈRES : validation puis lien de paiement (29,90 €) ──
+  if(!confirm('Valider le dossier de '+prenom+' et envoyer le lien de paiement ?')) return;
+  if(prof){ prof.status='valide_a_payer'; prof.call_validated=true; }
   await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({status:'valide_a_payer',call_validated:true})}).catch(function(){});
   var msg='🎉 Félicitations '+prenom+'\n\nVotre profil a été validé par notre équipe.\n\nÉtape 4/4 — Finalisez votre paiement (29,90 €) pour accéder aux membres.\n\nConnectez-vous sur oumelia.com → "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
-  await fetch(SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({from_id:'admin',to_id:String(id),content:msg,created_at:new Date().toISOString()})}).catch(function(){});
+  await fetch(SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({from_id:'admin',to_id:String(id),from_prenom:'Oumélia',content:msg,lu:false,created_at:new Date().toISOString()})}).catch(function(){});
   showToast('✅ '+prenom+' validé — notification envoyée','green');
   adminTab('dossiers');
 }
