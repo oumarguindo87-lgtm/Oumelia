@@ -826,11 +826,11 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
         <div class="progress-dot" id="pstep-3" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--dark);display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;color:var(--muted);transition:all .3s;flex-shrink:0">3</div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-bottom:14px;max-width:180px;margin-left:auto;margin-right:auto;text-align:center">
-        <span style="color:var(--gold);font-weight:600">Mon profil</span>
-        <span>Ma pratique</span>
-        <span>Mon compte</span>
+        <span id="plabel-1" style="color:var(--gold);font-weight:600">Mon profil</span>
+        <span id="plabel-2">Ma pratique</span>
+        <span id="plabel-3">Mon compte</span>
       </div>
-      <p style="text-align:center;font-size:.72rem;color:var(--muted);margin-bottom:12px">Étape 1 sur 3 — Vos informations</p>
+      <p id="reg-step-text" style="text-align:center;font-size:.72rem;color:var(--muted);margin-bottom:12px">Étape 1 sur 3 — Vos informations</p>
 
       <!-- ÉTAPE 1 : Identité -->
       <div id="reg-step1">
@@ -2377,12 +2377,25 @@ function checkPwdMatch(){
 
 function updateProgressBar(step){
   var fill=document.getElementById('reg-progress-fill');
-  if(fill) fill.style.width=(step/4*100)+'%';
+  if(fill) fill.style.width=(step/3*100)+'%';
   for(var i=1;i<=4;i++){
     var dot=document.getElementById('pstep-'+i);
     if(!dot) continue;
     if(i<=step){ dot.style.background='var(--gold)'; dot.style.borderColor='var(--gold)'; dot.style.color='#1a0e00'; }
     else { dot.style.background='var(--dark)'; dot.style.borderColor='var(--border)'; dot.style.color='var(--muted)'; }
+  }
+  // Libellés : seul celui de l'étape courante est doré
+  for(var j=1;j<=3;j++){
+    var lbl=document.getElementById('plabel-'+j);
+    if(!lbl) continue;
+    if(j===step){ lbl.style.color='var(--gold)'; lbl.style.fontWeight='600'; }
+    else { lbl.style.color='var(--muted)'; lbl.style.fontWeight='400'; }
+  }
+  // Texte descriptif
+  var txt=document.getElementById('reg-step-text');
+  if(txt){
+    var descs={1:'Étape 1 sur 3 — Vos informations',2:'Étape 2 sur 3 — Votre pratique',3:'Étape 3 sur 3 — Votre compte'};
+    txt.textContent=descs[step]||descs[1];
   }
 }
 
@@ -2690,6 +2703,22 @@ function reRecord(){
 }
 
 async function doRegister(){
+  // Affiche une erreur visible même si l'utilisateur est en bas de page
+  function regError(msg){
+    showToast(msg,'red');
+    var btn=document.querySelector('#reg-step3 .btn-gold');
+    var box=document.getElementById('reg-error-box');
+    if(!box && btn){
+      box=document.createElement('div');
+      box.id='reg-error-box';
+      box.style.cssText='background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.4);border-radius:10px;padding:12px;margin-bottom:10px;font-size:.84rem;color:#ff9a9a;line-height:1.5';
+      btn.parentNode.insertBefore(box,btn);
+    }
+    if(box){ box.textContent=msg; box.scrollIntoView({behavior:'smooth',block:'center'}); }
+    return;
+  }
+  var _oldBox=document.getElementById('reg-error-box'); if(_oldBox) _oldBox.remove();
+
   var email=document.getElementById('reg-email').value.trim();
   var _indicatifEl=document.getElementById('reg-indicatif');
   var _indicatif=_indicatifEl?(_indicatifEl.value||'+33'):'';
@@ -2701,34 +2730,34 @@ async function doRegister(){
   var pwd=document.getElementById('reg-pwd').value;
   var pwd2=(document.getElementById('reg-pwd2')&&document.getElementById('reg-pwd2').value);
   var cgu=(document.getElementById('reg-cgu')&&document.getElementById('reg-cgu').checked);
-  if(!email||!pwd) return showToast('⚠ Remplissez tous les champs','red');
-  if(pwd.length<8) return showToast('⚠ Mot de passe trop court (8 caractères min)','red');
-  if(pwd2 && pwd2!==pwd) return showToast('⚠ Les mots de passe ne correspondent pas','red');
-  if(!cgu) return showToast('⚠ Acceptez les conditions d\'utilisation','red');
+  if(!email||!pwd) return regError('⚠ Remplissez tous les champs');
+  if(pwd.length<8) return regError('⚠ Mot de passe trop court (8 caractères min)');
+  if(pwd2 && pwd2!==pwd) return regError('⚠ Les mots de passe ne correspondent pas');
+  if(!cgu) return regError('⚠ Acceptez les conditions d\'utilisation');
   if(!telephone){var errTel=document.getElementById('err-telephone');if(errTel)errTel.style.display='block';return showToast('⚠ Le numéro de téléphone est obligatoire','red');}
   // Pays optionnel si le champ n'est pas visible
   var _paysEl=document.getElementById('reg-pays');
   if(_paysEl && _paysEl.offsetParent !== null && !pays){var errPays=document.getElementById('err-pays');if(errPays)errPays.style.display='block';return showToast('⚠ Le pays est obligatoire','red');}
-  if(state.gender==='femme'&&!state.audioRecorded) return showToast('⚠ Enregistrez votre attestation audio','red');
-  if(state.gender==='homme'&&!state.audioRecordedHomme) return showToast('⚠ Enregistrez votre attestation vocale','red');
+  if(state.gender==='femme'&&!state.audioRecorded) return regError('⚠ Enregistrez votre attestation audio');
+  if(state.gender==='homme'&&!state.audioRecordedHomme) return regError('⚠ Enregistrez votre attestation vocale');
 
   showToast('⏳ Création du compte...','gold');
 
   var sb = getSB();
-  if(!sb) return showToast('❌ Erreur de connexion, réessayez','red');
+  if(!sb) return regError('❌ Erreur de connexion, réessayez');
 
   // 1. Créer le compte auth Supabase
   var { data, error } = await sb.auth.signUp({ email, password: pwd });
   if(error){
     var errMsg = error.message||'';
     if(errMsg.toLowerCase().includes('already') || errMsg.toLowerCase().includes('registered') || errMsg.toLowerCase().includes('exists') || errMsg.includes('422')){
-      showToast('❌ Cette adresse email est déjà utilisée.','red');
+      regError('❌ Cette adresse email est déjà utilisée.');
     } else {
-      showToast('❌ '+errMsg,'red');
+      regError('❌ '+errMsg);
     }
     return;
   }
-  if(!data || !data.user) { showToast('❌ Erreur création compte','red'); return; }
+  if(!data || !data.user) { regError('❌ Erreur création compte'); return; }
 
   var userId = data.user.id;
 
