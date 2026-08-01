@@ -23,6 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cairo:wght@300;400;600&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- ==============================
      CSS — ordre de chargement obligatoire
@@ -195,6 +196,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 #screen-landing{display:block;text-align:left;padding:0;background:var(--black);position:relative;overflow-y:auto;min-height:100%;}
 #screen-landing::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M48 46v-6h-2v6h-6v2h6v6h2v-6h6v-2h-6zm0-40V0h-2v6h-6v2h6v6h2V8h6V6h-6zM8 46v-6H6v6H0v2h6v6h2v-6h6v-2H8zM8 6V0H6v6H0v2h6v6h2V8h6V6H8z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;z-index:0;pointer-events:none;z-index:0;}
 .landing-bismillah{font-size:1.9rem;background:linear-gradient(135deg,#E0C066 0%,#C9A24B 45%,#9A7B2E 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#C9A24B;margin-bottom:20px;text-shadow:0 0 30px rgba(201,162,75,.3);position:relative;z-index:2;}
+/* Marque du header — Cinzel Decorative, or lumineux du logo */
+.hdr-brand{font-family:'Cinzel Decorative',serif !important;font-size:1.15rem;font-weight:700;letter-spacing:2px;background:linear-gradient(135deg,#F0DA95 0%,#E8C96A 35%,#D4AF56 70%,#C9A24B 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#E8C96A;}
 /* Carrousel landing */
 #landing-carousel::-webkit-scrollbar{display:none;}
 .lc-card{scroll-snap-align:center;flex:0 0 260px;background:linear-gradient(165deg,var(--card),#101f37);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;}
@@ -264,7 +267,9 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .gender-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px;}
 .gender-btn{padding:15px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--dark);color:var(--white2);cursor:pointer;transition:all .2s;text-align:center;font-family:'Cairo',sans-serif;font-size:.86rem;}
-.gender-btn .g-icon{font-size:1.7rem;display:block;margin-bottom:6px;}
+.gender-btn .g-icon{display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.gender-btn .g-icon svg{display:block;transition:transform .2s;}
+.gender-btn.selected .g-icon svg{transform:scale(1.06);}
 .gender-btn.selected{border-color:var(--gold);background:var(--gold-soft);color:var(--gold);box-shadow:0 0 0 1px rgba(201,168,76,.3);}
 .auth-link{text-align:center;margin-top:12px;color:var(--muted);font-size:.81rem;}
 .auth-link a{color:var(--gold);cursor:pointer;}
@@ -593,7 +598,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid rgba(201,162,75,.18);position:relative;z-index:5;background:var(--black)">
     <div style="display:flex;align-items:center;gap:10px">
       <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/oumelia-logo-transparent.png" style="width:34px;height:34px;object-fit:contain" alt="Oumélia">
-      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:1.25rem;letter-spacing:-.3px;font-weight:700;background:linear-gradient(135deg,#E0C066 0%,#C9A24B 40%,#9A7B2E 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#C9A24B">OUMÉLIA</span>
+      <span class="hdr-brand">OUMÉLIA</span>
     </div>
     <button onclick="showScreen('screen-login')" style="font-size:.78rem;color:var(--white);border:1px solid var(--border);background:none;padding:8px 16px;border-radius:100px;cursor:pointer;font-family:'Cairo',sans-serif">Se connecter</button>
   </div>
@@ -821,7 +826,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
         <span>Ma pratique</span>
         <span>Mon compte</span>
       </div>
-      <p style="text-align:center;font-size:.72rem;color:var(--muted);margin-bottom:12px">Étape 1 sur 4 — Inscription (compte non encore créé)</p>
+      <p style="text-align:center;font-size:.72rem;color:var(--muted);margin-bottom:12px">Étape 1 sur 3 — Vos informations</p>
 
       <!-- ÉTAPE 1 : Identité -->
       <div id="reg-step1">
@@ -845,10 +850,37 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           <label>Je suis</label>
           <div style="display:flex;gap:10px">
             <button class="gender-btn" id="gender-btn-femme" type="button" style="flex:1" onclick="selectGender('femme')">
-              <span class="g-icon">🌸</span>Une sœur
+              <span class="g-icon">
+                <svg viewBox="0 0 48 48" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs><linearGradient id="gradF" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#F0DA95"/><stop offset="45%" stop-color="#E8C96A"/><stop offset="100%" stop-color="#C9A24B"/>
+                  </linearGradient></defs>
+                  <!-- voile extérieur -->
+                  <path d="M24 6c-7.2 0-12.5 5.4-12.5 12.6 0 5.6 1 9.6 1 14.4 0 4.6-1.6 6.6-3 8.2 0 0 5 .8 14.5.8s14.5-.8 14.5-.8c-1.4-1.6-3-3.6-3-8.2 0-4.8 1-8.8 1-14.4C36.5 11.4 31.2 6 24 6z" stroke="url(#gradF)" stroke-width="1.8" stroke-linejoin="round"/>
+                  <!-- ouverture visage -->
+                  <ellipse cx="24" cy="20" rx="6.6" ry="8" stroke="url(#gradF)" stroke-width="1.6"/>
+                  <!-- pli du voile -->
+                  <path d="M17 30c2.2 1.6 4.6 2.4 7 2.4s4.8-.8 7-2.4" stroke="url(#gradF)" stroke-width="1.4" stroke-linecap="round" opacity=".75"/>
+                </svg>
+              </span>Une sœur
             </button>
             <button class="gender-btn" id="gender-btn-homme" type="button" style="flex:1" onclick="selectGender('homme')">
-              <span class="g-icon">🕌</span>Un frère
+              <span class="g-icon">
+                <svg viewBox="0 0 48 48" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs><linearGradient id="gradH" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#F0DA95"/><stop offset="45%" stop-color="#E8C96A"/><stop offset="100%" stop-color="#C9A24B"/>
+                  </linearGradient></defs>
+                  <!-- calotte (kufi) -->
+                  <path d="M15.5 15.5c0-4.7 3.8-7.5 8.5-7.5s8.5 2.8 8.5 7.5" stroke="url(#gradH)" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M14 15.5h20" stroke="url(#gradH)" stroke-width="1.8" stroke-linecap="round"/>
+                  <!-- visage -->
+                  <path d="M17 16v6.5c0 3.9 3.1 7 7 7s7-3.1 7-7V16" stroke="url(#gradH)" stroke-width="1.7" stroke-linecap="round"/>
+                  <!-- barbe -->
+                  <path d="M18.4 23c0 4 2.5 7 5.6 7s5.6-3 5.6-7" stroke="url(#gradH)" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
+                  <!-- épaules -->
+                  <path d="M11 41c0-6.2 5.8-10 13-10s13 3.8 13 10" stroke="url(#gradH)" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </span>Un frère
             </button>
           </div>
           <p id="err-gender" style="color:var(--red);font-size:.75rem;margin-top:5px;display:none">Veuillez sélectionner votre genre</p>
