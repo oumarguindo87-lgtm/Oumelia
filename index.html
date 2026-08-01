@@ -5047,6 +5047,12 @@ function swipeAction(action,prenom,pid){
     else{card.style.transform='translateY(-110%)';card.style.opacity='0';}
   }
   if(action==='ask'){
+    // Compte pas encore validé par l'admin
+    if(!state.profileActive && !state.profilePaused){
+      showAccountPendingInfo();
+      setTimeout(function(){ var c3=document.getElementById('app-content'); if(c3&&state.viewMode==='swipe') renderExplorer(c3); },400);
+      return;
+    }
     // Bloquer si en relation active
     if(state.enRelation||(state.user&&state.user.en_relation)){
       showToast('🤝 Vous êtes actuellement en relation — les nouvelles demandes sont suspendues','red');
@@ -5182,30 +5188,8 @@ function initSwipeTouch(){
 }
 
 function openProfile(id){
-  if(!state.profileActive && !state.profilePaused){
-    var _st=state.user&&state.user.status||'pending';
-    // Peut payer seulement si valide_a_payer ou active
-    if(_st==='valide_a_payer'){
-      showPaywall();
-    } else {
-      // Pas encore validé par admin — message d'info
-      (function(){
-      var _infoProfil=document.createElement('div');
-      _infoProfil.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px';
-      _infoProfil.onclick=function(e){if(e.target===this) this.remove();};
-      var _inner=document.createElement('div');
-      _inner.style.cssText='background:#1a1106;border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:24px;max-width:300px;text-align:center';
-      _inner.innerHTML='<div style="font-size:1.8rem;margin-bottom:10px">&#9203;</div>'
-        +'<div style="font-weight:700;font-size:.94rem;color:#C9A84C;margin-bottom:10px">Acc&#232;s en cours de validation</div>'
-        +'<div style="font-size:.82rem;color:#ccc;line-height:1.6;margin-bottom:16px">Vous pourrez acc&#233;der aux profils une fois votre entretien valid&#233; par l&#x27;&#233;quipe Oum&#233;lia.</div>'
-        +'<button style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#C9A84C;border-radius:8px;padding:10px 24px;font-size:.84rem;cursor:pointer;font-family:inherit">OK</button>';
-      _inner.querySelector('button').onclick=function(){_infoProfil.remove();};
-      _infoProfil.appendChild(_inner);
-      document.body.appendChild(_infoProfil);
-    })();
-    }
-    return;
-  }
+  // Les profils sont consultables par tous. Seul l'envoi de demande est bloqué
+  // tant que le compte n'est pas validé (voir le bouton plus bas).
   // Chercher dans les profils locaux ET les vrais profils Supabase
   var p = allProfiles.find(function(x){ return String(x.id)===String(id); })
        || (window._dbProfiles||[]).find(function(x){ return String(x.id)===String(id); });
@@ -5252,6 +5236,8 @@ function openProfile(id){
           var st=demandesEnvoyees[p.prenom]||demandesEnvoyees['_id_'+String(p.id)];
           // 1) Le profil consulté est déjà en relation avec quelqu'un → indisponible
           if(p.en_relation_avec) return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>🤝 Indisponible — en relation</button>';
+          // Compte pas encore validé par l'admin → demande bloquée
+          if(!state.profileActive && !state.profilePaused) return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--gold);border:1px solid rgba(201,162,75,.3);cursor:pointer" onclick="showAccountPendingInfo()">🔒 Validation requise</button>';
           // 2) MOI je suis en relation → je ne peux pas faire de demande
           if(state.enRelation||(state.user&&state.user.en_relation)) return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--gold);border:1px solid rgba(201,168,76,.3);cursor:not-allowed" disabled>🤝 Vous êtes en relation</button>';
           if(st==='acceptee') return '<button class="btn" style="flex:1;font-size:.84rem;padding:10px;background:var(--card2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed" disabled>✅ Demande acceptée</button>';
@@ -5495,10 +5481,50 @@ function sendUserMsg(name){
 
 // ══════════ DEMANDES ══════════
 // Le compteur ne diminue QUE si la demande est ACCEPTÉE
+// Explique pourquoi l'envoi de demande est bloqué tant que le compte n'est pas validé
+function showAccountPendingInfo(){
+  var st = (state.user && state.user.status) || 'pending';
+  var isFemme = state.gender==='femme';
+  var titre, texte, actionBtn='';
+  if(st==='valide_a_payer'){
+    if(isFemme){
+      titre='🌸 Accès gratuit en cours d\'activation';
+      texte='Votre dossier est validé. Votre accès sera activé très prochainement par notre équipe.';
+    } else {
+      titre='💳 Dernière étape';
+      texte='Votre dossier est validé. Finalisez votre paiement pour envoyer des demandes de mise en relation.';
+      actionBtn='<button onclick="document.getElementById(\'acc-pending-modal\').remove();showPaywall()" style="width:100%;margin-top:12px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--black);border:none;border-radius:100px;padding:12px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:\'Cairo\',sans-serif">Finaliser mon inscription →</button>';
+    }
+  } else if(st==='questionnaire_soumis'||st==='rdv_planifie'){
+    titre='⏳ Dossier en cours d\'étude';
+    texte='Vos réponses ont bien été reçues. Notre équipe étudie votre dossier et vous informera très prochainement. Vous pourrez alors envoyer vos demandes.';
+  } else if(st==='en_attente_questionnaire'||st==='en_attente_rdv'){
+    titre='📝 Questionnaire à compléter';
+    texte='Complétez le questionnaire pour finaliser votre dossier. Vous pourrez envoyer des demandes une fois votre profil validé.';
+    actionBtn='<button onclick="document.getElementById(\'acc-pending-modal\').remove();renderQuestionnaire();showScreen(\'screen-questionnaire\')" style="width:100%;margin-top:12px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--black);border:none;border-radius:100px;padding:12px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:\'Cairo\',sans-serif">Remplir le questionnaire →</button>';
+  } else {
+    titre='📂 Dossier à compléter';
+    texte='Envoyez vos documents puis complétez le questionnaire. Vous pourrez envoyer des demandes une fois votre profil validé par notre équipe.';
+    actionBtn='<button onclick="document.getElementById(\'acc-pending-modal\').remove();showScreen(\'screen-verification-docs\')" style="width:100%;margin-top:12px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--black);border:none;border-radius:100px;padding:12px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:\'Cairo\',sans-serif">Envoyer mes documents →</button>';
+  }
+  var ov=document.getElementById('acc-pending-modal'); if(ov) ov.remove();
+  ov=document.createElement('div');
+  ov.id='acc-pending-modal';
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
+  ov.innerHTML='<div style="background:var(--card);border:1px solid rgba(201,162,75,.3);border-radius:16px;padding:24px;max-width:320px;text-align:center">'
+    +'<div style="font-weight:700;font-size:1rem;color:var(--gold);margin-bottom:10px">'+titre+'</div>'
+    +'<div style="font-size:.84rem;color:var(--white2);line-height:1.6">'+texte+'</div>'
+    + actionBtn
+    +'<button onclick="document.getElementById(\'acc-pending-modal\').remove()" style="width:100%;margin-top:8px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:100px;padding:11px;font-size:.84rem;cursor:pointer;font-family:\'Cairo\',sans-serif">Fermer</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+}
+
 // Envoi d'une demande ne diminue pas encore (elle est "en attente")
 var currentDemandeTarget='';
 function openDemandeModal(prenom){
-  if(!state.profileActive){showPaywall();return;}
+  if(!state.profileActive && !state.profilePaused){showAccountPendingInfo();return;}
   if(state.enRelation||( state.user&&state.user.en_relation)){
     showToast('🤝 Vous êtes actuellement en relation — les nouvelles demandes sont suspendues','red');
     return;
@@ -7980,12 +8006,6 @@ function filterBtn(key,val,arr){
 
 function openSwipeProfile(id){
   if(window._isSwiping) return;
-  if(!state.profileActive){
-    var _sst=state.user&&state.user.status||'pending';
-    if(_sst==='valide_a_payer'){ showPaywall(); }
-    else { (function(){var _m=document.createElement('div');_m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px';_m.onclick=function(e){if(e.target===this)this.remove();};var _i=document.createElement('div');_i.style.cssText='background:#1a1106;border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:24px;max-width:300px;text-align:center';_i.innerHTML='<div style="font-size:1.8rem;margin-bottom:10px">&#9203;</div><div style="font-weight:700;font-size:.94rem;color:#C9A84C;margin-bottom:10px">Acc&#232;s en cours de validation</div><div style="font-size:.82rem;color:#ccc;line-height:1.6;margin-bottom:16px">Vous pourrez acc&#233;der aux profils une fois votre entretien valid&#233; par l&#x27;&#233;quipe Oum&#233;lia.</div><button style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#C9A84C;border-radius:8px;padding:10px 24px;font-size:.84rem;cursor:pointer;font-family:inherit">OK</button>';_i.querySelector('button').onclick=function(){_m.remove();};_m.appendChild(_i);document.body.appendChild(_m);})(); }
-    return;
-  }
   var sid = String(id);
   var p = (window._dbProfiles||[]).find(function(x){ return String(x.id)===sid; })
        || allProfiles.find(function(x){ return String(x.id)===sid; });
