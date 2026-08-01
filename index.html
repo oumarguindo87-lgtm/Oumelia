@@ -9690,14 +9690,13 @@ async function submitVerificationDocs(){
 // ══════════ QUESTIONNAIRE DE VALIDATION ══════════
 // Questions communes + spécifiques par genre. Chaque réponse est stockée dans profils.questionnaire (jsonb).
 function getQuestionnaireQuestions(){
-  var g=state.user&&state.user.gender;
   var commun=[
     {id:'motivation', label:'Pourquoi souhaitez-vous vous marier aujourd\'hui ?', type:'textarea', required:true},
     {id:'delai', label:'Dans quel délai envisagez-vous le mariage ?', type:'select', options:['Le plus tôt possible','Dans les 6 mois','Dans l\'année','Pas de délai précis'], required:true},
     {id:'pratique_engagement', label:'Comment décririez-vous votre engagement religieux au quotidien ?', type:'textarea', required:true},
+    {id:'savants', label:'Quels savants écoutez-vous régulièrement ?', type:'textarea', required:true},
+    {id:'temps_libre', label:'Que faites-vous de votre temps libre ?', type:'textarea', required:true},
     {id:'attentes', label:'Qu\'attendez-vous principalement de votre futur(e) époux(se) ?', type:'textarea', required:true},
-    {id:'wali_dispo', label:(g==='femme'?'Avez-vous un wali (tuteur) disponible pour vous accompagner ?':'Êtes-vous prêt(e) à échanger avec le wali de la sœur ?'), type:'select', options:['Oui','Non','Je préfère en discuter avec l\'équipe'], required:true},
-    {id:'serieux', label:'Confirmez-vous que votre démarche est sérieuse et sincère, dans le respect des valeurs islamiques ?', type:'select', options:['Oui, je le confirme','Je souhaite en discuter'], required:true},
     {id:'infos_complementaires', label:'Souhaitez-vous ajouter quelque chose à l\'attention de notre équipe ? (facultatif)', type:'textarea', required:false}
   ];
   return commun;
