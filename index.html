@@ -22,7 +22,7 @@
 <link id="apple-icon" rel="apple-touch-icon" href="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cairo:wght@300;400;600&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 
 <!-- ==============================
      CSS — ordre de chargement obligatoire
@@ -45,11 +45,11 @@
 
 /* ══ VARIABLES ══ */
 :root{
-  --black:#06070a;--dark:#0d0f14;--card:#13161d;--card2:#191d26;
-  --border:#242836;--border2:#2e3447;
-  --gold:#C9A84C;--gold-light:#E8C96A;--gold-shine:#F5E09A;--gold-dim:#8B6914;
-  --gold-soft:rgba(201,168,76,.12);
-  --white:#F0EBE0;--white2:#A8A098;--muted:#6b7280;
+  --black:#0B1A2F;--dark:#0F2038;--card:#132743;--card2:#173050;
+  --border:#24405f;--border2:#2e4d70;
+  --gold:#C9A24B;--gold-light:#E0C066;--gold-shine:#F0DA95;--gold-dim:#9A7B2E;
+  --gold-soft:rgba(201,162,75,.12);
+  --white:#EDE6D6;--white2:#B9B2A3;--muted:#7c869a;
   --red:#e05252;--red-soft:rgba(224,82,82,.12);
   --green:#2ecc71;--green-soft:rgba(46,204,113,.12);
   --blue:#4a9eff;--blue-soft:rgba(74,158,255,.12);
@@ -106,11 +106,11 @@ body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;h
 .btn-success:hover{background:var(--green);color:#fff;}
 
 /* ══ TOAST ══ */
-.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:rgba(19,22,29,.97);border:1px solid rgba(201,168,76,.25);color:var(--white);padding:9px 18px;border-radius:20px;font-size:.82rem;z-index:9999;display:none;white-space:nowrap;animation:fadeIn .25s ease;box-shadow:var(--shadow);}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:rgba(19,39,67,.97);border:1px solid rgba(201,168,76,.25);color:var(--white);padding:9px 18px;border-radius:20px;font-size:.82rem;z-index:9999;display:none;white-space:nowrap;animation:fadeIn .25s ease;box-shadow:var(--shadow);}
 
 /* ══ UTILS ══ */
 .gold-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.25),transparent);margin:15px 0;}
-.page-header{padding:12px 15px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border);background:rgba(13,15,20,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;}
+.page-header{padding:12px 15px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border);background:rgba(15,32,56,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;}
 .page-header h2{font-family:'Playfair Display',serif;font-size:1.02rem;color:var(--white);}
 .back-btn{background:var(--card2);border:1px solid var(--border);border-radius:50%;color:var(--gold);font-size:.95rem;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
 
@@ -194,7 +194,26 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 /* ══ LANDING ══ */
 #screen-landing{display:block;text-align:left;padding:0;background:var(--black);position:relative;overflow-y:auto;min-height:100%;}
 #screen-landing::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M48 46v-6h-2v6h-6v2h6v6h2v-6h6v-2h-6zm0-40V0h-2v6h-6v2h6v6h2V8h6V6h-6zM8 46v-6H6v6H0v2h6v6h2v-6h6v-2H8zM8 6V0H6v6H0v2h6v6h2V8h6V6H8z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;z-index:0;pointer-events:none;z-index:0;}
-.landing-bismillah{font-size:1.9rem;color:var(--gold);margin-bottom:20px;text-shadow:0 0 30px rgba(201,168,76,.4);position:relative;z-index:2;}
+.landing-bismillah{font-size:1.9rem;background:linear-gradient(135deg,#E0C066 0%,#C9A24B 45%,#9A7B2E 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#C9A24B;margin-bottom:20px;text-shadow:0 0 30px rgba(201,162,75,.3);position:relative;z-index:2;}
+/* Carrousel landing */
+#landing-carousel::-webkit-scrollbar{display:none;}
+.lc-card{scroll-snap-align:center;flex:0 0 260px;background:linear-gradient(165deg,var(--card),#101f37);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;}
+.lc-top{padding:16px 16px 13px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(201,162,75,.1);}
+.lc-ava{width:50px;height:50px;border-radius:50%;flex-shrink:0;border:2px solid var(--gold);padding:2px;background:var(--black);}
+.lc-id{flex:1;min-width:0;}
+.lc-name{font-family:'Cinzel Decorative',serif;font-size:.98rem;font-weight:700;color:var(--white);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.lc-verif{display:inline-flex;align-items:center;gap:3px;font-size:.54rem;color:#3ec98a;background:rgba(46,204,113,.14);border:1px solid rgba(46,204,113,.35);padding:2px 6px;border-radius:100px;font-weight:600;font-family:'Cairo',sans-serif;}
+.lc-meta{font-size:.7rem;color:var(--muted);margin-top:3px;}
+.lc-chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px 8px;}
+.lc-chip{font-size:.68rem;color:var(--white);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:5px 10px;border-radius:100px;}
+.lc-locked{position:relative;padding:6px 16px 16px;min-height:120px;}
+.lc-lrow{display:flex;justify-content:space-between;padding:6px 0;font-size:.72rem;gap:10px;}
+.lc-k{color:var(--muted);flex-shrink:0;}
+.lc-v{color:var(--white);filter:blur(5px);user-select:none;font-weight:500;text-align:right;}
+.lc-veil{position:absolute;left:0;right:0;bottom:0;top:0;background:linear-gradient(to bottom,transparent,rgba(15,32,56,.55) 45%,rgba(15,32,56,.94));display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px;}
+.lc-cta{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;color:var(--black);background:linear-gradient(135deg,var(--gold),var(--gold-dim));padding:9px 18px;border-radius:100px;box-shadow:0 4px 16px rgba(201,162,75,.3);cursor:pointer;font-family:'Cairo',sans-serif;}
+.lc-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s;}
+.lc-dot.on{background:var(--gold);width:20px;border-radius:100px;}
 .landing-logo-name{font-family:'Cinzel Decorative',serif;font-size:clamp(1.8rem,7vw,2.6rem);letter-spacing:8px;margin-top:16px;margin-bottom:8px;position:relative;z-index:1;}
 .landing-tagline{font-family:'Playfair Display',serif;font-style:italic;color:var(--white2);font-size:.95rem;margin-bottom:0;position:relative;z-index:1;}
 .landing-divider{width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto 34px;position:relative;z-index:1;}
@@ -228,7 +247,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
    ============================================================ */
 
 /* ══ AUTH ══ */
-.auth-wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;background:radial-gradient(ellipse at 50% -10%,#1c1400 0%,var(--black) 65%);}
+.auth-wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;background:radial-gradient(ellipse at 50% -10%,#16233a 0%,var(--black) 65%);}
 .auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:26px 22px;width:100%;max-width:380px;box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.03);animation:fadeInScale .3s ease;}
 .auth-logo{text-align:center;margin-bottom:18px;}
 .auth-logo-sm{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f5e8a0,#C9A84C 45%,#7a5810 100%);display:inline-flex;align-items:center;justify-content:center;position:relative;margin-bottom:9px;box-shadow:0 0 24px rgba(201,168,76,.35);}
@@ -266,7 +285,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 
 /* ══ APP SHELL ══ */
 .app-shell{display:flex;flex-direction:column;height:100%;}
-.app-header{background:rgba(13,15,20,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:11px 17px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.app-header{background:rgba(15,32,56,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:11px 17px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .app-header .logo-hdr{font-family:'Cinzel Decorative',serif;font-size:.88rem;letter-spacing:3px;}
 .app-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(13,15,20,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom);}
@@ -338,7 +357,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 .demand-dot.used{background:var(--border2);box-shadow:none;}
 
 /* ══ MY PROFILE ══ */
-.my-profile-header{background:linear-gradient(135deg,#110d00,#0d0f14);padding:26px 16px 18px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.my-profile-header{background:linear-gradient(135deg,#110d00,#0F2038);padding:26px 16px 18px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
 .my-profile-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
 .status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:.7rem;font-weight:600;margin-top:9px;}
 .status-badge.active{background:var(--green-soft);color:var(--green);border:1px solid rgba(46,204,113,.25);}
@@ -570,112 +589,106 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 ============================== -->
 <div id="screen-landing" class="screen active" style="display:block;overflow-y:auto;justify-content:flex-start;padding:0;text-align:left;">
 
+  <!-- ══ HEADER ══ -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid rgba(201,162,75,.18);position:relative;z-index:5;background:var(--black)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/oumelia-logo-transparent.png" style="width:34px;height:34px;object-fit:contain" alt="Oumélia">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:1.25rem;letter-spacing:-.3px;font-weight:700;background:linear-gradient(135deg,#E0C066 0%,#C9A24B 40%,#9A7B2E 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#C9A24B">OUMÉLIA</span>
+    </div>
+    <button onclick="showScreen('screen-login')" style="font-size:.78rem;color:var(--white);border:1px solid var(--border);background:none;padding:8px 16px;border-radius:100px;cursor:pointer;font-family:'Cairo',sans-serif">Se connecter</button>
+  </div>
+
   <!-- ══ HERO ══ -->
-  <section id="landing-hero" style="background:radial-gradient(ellipse at 50% -10%,#1c1400 0%,#0d0e12 55%,var(--black) 100%);position:relative;overflow:hidden;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 24px 80px;text-align:center;box-sizing:border-box;">
+  <section id="landing-hero" style="background:radial-gradient(ellipse at 50% -10%,#1a2f47 0%,#102038 55%,var(--black) 100%);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:44px 24px 60px;text-align:center;box-sizing:border-box;">
     <div style="position:absolute;inset:0;background:url(&quot;data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M48 46v-6h-2v6h-6v2h6v6h2v-6h6v-2h-6zm0-40V0h-2v6h-6v2h6v6h2V8h6V6h-6zM8 46v-6H6v6H0v2h6v6h2v-6h6v-2H8zM8 6V0H6v6H0v2h6v6h2V8h6V6H8z'/%3E%3C/g%3E%3C/svg%3E&quot;);pointer-events:none;z-index:0"></div>
     <div style="position:relative;z-index:2;width:100%">
 
-      <!-- Bismillah — police arabe dédiée -->
-      <div class="landing-bismillah" style="font-family:'Scheherazade New','Amiri',serif;">بسم الله الرحمن الرحيم</div>
-
       <!-- Logo -->
-      <div style="margin:16px auto 14px">
-        <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" width="72" height="83" alt="Oumélia" style="mix-blend-mode:lighten;display:block;margin:0 auto;background:transparent;isolation:isolate" />
+      <div style="margin:8px auto 18px">
+        <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/oumelia-logo-transparent.png" width="88" height="88" alt="Oumélia" style="display:block;margin:0 auto;background:transparent;isolation:isolate;filter:drop-shadow(0 6px 24px rgba(201,162,75,.25))" />
       </div>
 
-      <!-- Nom + tagline -->
-      <h1 class="landing-logo-name gold-text" style="margin-bottom:4px">OUMÉLIA</h1>
-      <p class="landing-tagline" style="margin-bottom:24px">Pour un mariage conforme au Coran et à la Sounnah</p>
+      <!-- Bismillah — police arabe dédiée -->
+      <div class="landing-bismillah" style="font-family:'Scheherazade New','Amiri',serif;font-size:1.6rem;margin-bottom:22px">بِسْمِ اللَّهِ</div>
 
-      <!-- Divider -->
-      <div class="landing-divider" style="margin:0 auto 22px"></div>
+      <!-- Titre principal -->
+      <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-size:2.15rem;line-height:1.14;font-weight:600;letter-spacing:-.5px;color:var(--white);max-width:340px;margin:0 auto 14px">Pour un mariage conforme au <span style="color:var(--gold);font-weight:700">Coran</span> et à la <span style="color:var(--gold);font-weight:700">Sounnah</span></h2>
 
-      <!-- Avis membres -->
-      <div style="max-width:310px;margin:0 auto 20px">
-        <!-- Étoiles globales -->
-        <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px">
-          <div style="display:flex;gap:3px">
-            <span style="color:#C9A84C;font-size:1.05rem">★</span>
-            <span style="color:#C9A84C;font-size:1.05rem">★</span>
-            <span style="color:#C9A84C;font-size:1.05rem">★</span>
-            <span style="color:#C9A84C;font-size:1.05rem">★</span>
-            <span style="color:#C9A84C;font-size:1.05rem">★</span>
-          </div>
-          <span style="font-size:.8rem;color:var(--white2);font-weight:600">4,9/5</span>
-          <span style="font-size:.75rem;color:var(--muted)">· Très sérieux</span>
+      <p style="font-size:.9rem;line-height:1.6;color:var(--white2);max-width:330px;margin:0 auto 24px;font-weight:300">Une plateforme de mise en relation matrimoniale sérieuse, encadrée et pudique, pour parfaire la moitié de sa religion.</p>
+
+      <!-- CTA — bouton unique arrondi comme la maquette -->
+      <div style="max-width:300px;margin:0 auto 12px">
+        <button style="width:100%;display:flex;align-items:center;justify-content:center;gap:9px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--black);font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1rem;letter-spacing:0;padding:16px;border:none;border-radius:100px;cursor:pointer;box-shadow:0 8px 28px rgba(201,162,75,.28)" onclick="showScreen('screen-register')">Commencer mon inscription →</button>
+      </div>
+      <div style="font-size:.78rem;color:var(--white2);letter-spacing:.2px;margin-bottom:22px">Gratuit pour les sœurs · <b style="color:var(--gold);font-weight:600">Profils 100% vérifiés</b></div>
+
+      <!-- Preuve sociale -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px">
+        <div style="display:flex">
+          <span style="width:26px;height:26px;border-radius:50%;border:2px solid var(--black);margin-left:0;background:linear-gradient(135deg,#3a2857,#4a2340)"></span>
+          <span style="width:26px;height:26px;border-radius:50%;border:2px solid var(--black);margin-left:-8px;background:linear-gradient(135deg,#23405c,#1c3347)"></span>
+          <span style="width:26px;height:26px;border-radius:50%;border:2px solid var(--black);margin-left:-8px;background:linear-gradient(135deg,#4a2340,#3a2857)"></span>
+          <span style="width:26px;height:26px;border-radius:50%;border:2px solid var(--black);margin-left:-8px;background:linear-gradient(135deg,#1c3347,#23405c)"></span>
         </div>
-        <!-- Témoignages -->
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.12);border-radius:10px;padding:10px 13px;text-align:left">
-            <div style="display:flex;gap:2px;margin-bottom:4px">
-              <span style="color:#C9A84C;font-size:.75rem">★★★★★</span>
-            </div>
-            <p style="font-size:.78rem;color:var(--white2);line-height:1.5;font-style:italic">"La vérification d'identité m'a rassurée. La garantie d'une mise en relation sécurisée avec des profils vérifiés manuellement."</p>
-            <p style="font-size:.7rem;color:var(--muted);margin-top:4px">— Fatima, 27 ans · Paris</p>
-          </div>
-          <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.12);border-radius:10px;padding:10px 13px;text-align:left">
-            <div style="display:flex;gap:2px;margin-bottom:4px">
-              <span style="color:#C9A84C;font-size:.75rem">★★★★★</span>
-            </div>
-            <p style="font-size:.78rem;color:var(--white2);line-height:1.5;font-style:italic">"Enfin une plateforme qui respecte nos valeurs. Le Wali est intégré, c'est parfait."</p>
-            <p style="font-size:.7rem;color:var(--muted);margin-top:4px">— Youssef, 31 ans · Lyon</p>
-          </div>
-        </div>
+        <span id="landing-members-count" style="font-size:.8rem;color:var(--white2);letter-spacing:.2px"><b style="color:var(--gold);font-weight:600">+86 membres</b> nous font confiance</span>
       </div>
-
-      <!-- Compteur membres -->
-      <div style="margin-bottom:22px">
-        <span id="landing-members-count" style="font-family:'Cinzel Decorative',serif;font-size:.92rem;color:var(--gold);letter-spacing:.5px">＋… frères et sœurs inscrits</span>
-      </div>
-
-      <!-- CTA -->
-      <div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto">
-        <button class="btn btn-gold" style="font-size:.95rem;padding:14px" onclick="showScreen('screen-register')">✦ Rejoindre Oumélia</button>
-        <button class="btn btn-outline" style="font-size:.88rem;padding:11px" onclick="showScreen('screen-login')">Se connecter</button>
-      </div>
-
-      <div class="pwa-banner" id="pwa-install-btn" onclick="openPWAModal()" style="margin:16px auto 0;max-width:280px;cursor:pointer">📲 Installer sur mon téléphone</div>
     </div>
-    <div onclick="document.getElementById('landing-how').scrollIntoView({behavior:'smooth'})" style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;z-index:3;animation:heroScrollBounce 2s ease-in-out infinite;">
-      <span style="font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:rgba(201,168,76,.6);font-family:'Cinzel Decorative',serif">Découvrir</span>
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="#C9A84C" stroke-opacity="0.35" stroke-width="1"/><path d="M9 12 L14 17 L19 12" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </section>
+
+  <!-- ══ APERÇU DES MEMBRES (CARROUSEL) ══ -->
+  <section id="landing-preview" style="padding:40px 0 44px;background:rgba(255,255,255,.015);border-top:1px solid rgba(201,162,75,.08);border-bottom:1px solid rgba(201,162,75,.08)">
+    <div style="text-align:center;padding:0 20px;margin-bottom:6px">
+      <div style="display:inline-flex;align-items:center;gap:8px;font-size:.64rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px">
+        <span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>
+        Aperçu des membres
+        <span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>
+      </div>
+      <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:-.3px;color:var(--white);margin-bottom:8px">Ils cherchent à se marier</h2>
+      <p style="font-size:.82rem;color:var(--white2);line-height:1.5;max-width:320px;margin:0 auto;font-weight:300">Un aperçu des profils. Les détails complets sont réservés aux membres inscrits.</p>
     </div>
+
+    <div id="landing-carousel" style="overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:22px 20px 8px;scrollbar-width:none">
+      <div id="landing-carousel-track" style="display:flex;gap:14px;width:max-content">
+        <div style="flex:0 0 260px;padding:40px 0;text-align:center;color:var(--muted);font-size:.82rem">Chargement des profils…</div>
+      </div>
+    </div>
+    <div id="landing-carousel-dots" style="display:flex;justify-content:center;gap:6px;margin-top:14px"></div>
   </section>
 
   <!-- ══ COMMENT ÇA MARCHE ══ -->
-  <section id="landing-how" style="padding:40px 20px;background:var(--card2);border-top:1px solid var(--border)">
-    <h2 style="text-align:center;font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold);margin-bottom:28px">Comment ça marche</h2>
-    <div style="display:flex;flex-direction:column;gap:20px;max-width:360px;margin:0 auto">
-      <div style="display:flex;gap:16px;align-items:flex-start">
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--gold-soft);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;color:var(--gold);font-size:.88rem">1</div>
-        <div><div style="font-weight:600;font-size:.92rem;margin-bottom:4px">Crée ton profil</div><div style="color:var(--muted);font-size:.82rem;line-height:1.6">Remplis tes informations personnelles et ta pratique religieuse en quelques minutes.</div></div>
+  <section id="landing-how" style="padding:38px 24px">
+    <div style="text-align:center;margin-bottom:6px">
+      <div style="display:inline-flex;align-items:center;gap:8px;font-size:.64rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px">
+        <span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>Le parcours<span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>
       </div>
-      <div style="display:flex;gap:16px;align-items:flex-start">
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--gold-soft);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;color:var(--gold);font-size:.88rem">2</div>
-        <div><div style="font-weight:600;font-size:.92rem;margin-bottom:4px">Profil vérifié</div><div style="color:var(--muted);font-size:.82rem;line-height:1.6">Notre équipe valide manuellement chaque compte sous 24–48h pour garantir le sérieux de la plateforme.</div></div>
+      <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:-.3px;color:var(--white);margin-bottom:22px">Comment ça fonctionne</h2>
+    </div>
+    <div style="display:flex;flex-direction:column;max-width:360px;margin:0 auto">
+      <div style="display:flex;gap:15px;padding:15px 0">
+        <div style="flex-shrink:0;width:38px;height:38px;border-radius:50%;border:1px solid var(--gold);color:var(--gold);font-family:'Amiri',serif;font-size:1.15rem;font-weight:700;display:flex;align-items:center;justify-content:center">١</div>
+        <div><div style="font-weight:600;font-size:.92rem;color:var(--white);margin-bottom:3px">Créez votre profil</div><div style="color:var(--white2);font-size:.8rem;line-height:1.5;font-weight:300">Renseignez vos informations et vos critères en toute confidentialité.</div></div>
       </div>
-      <div style="display:flex;gap:16px;align-items:flex-start">
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--gold-soft);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;color:var(--gold);font-size:.88rem">3</div>
-        <div><div style="font-weight:600;font-size:.92rem;margin-bottom:4px">Rencontre ton prétendant(e)</div><div style="color:var(--muted);font-size:.82rem;line-height:1.6">Explore les profils et envoie des demandes de mise en relation, avec le Wali intégré au processus.</div></div>
+      <div style="display:flex;gap:15px;padding:15px 0;border-top:1px solid rgba(201,162,75,.1)">
+        <div style="flex-shrink:0;width:38px;height:38px;border-radius:50%;border:1px solid var(--gold);color:var(--gold);font-family:'Amiri',serif;font-size:1.15rem;font-weight:700;display:flex;align-items:center;justify-content:center">٢</div>
+        <div><div style="font-weight:600;font-size:.92rem;color:var(--white);margin-bottom:3px">Vérification du dossier</div><div style="color:var(--white2);font-size:.8rem;line-height:1.5;font-weight:300">Pièce d'identité, attestation et questionnaire validés manuellement par notre équipe.</div></div>
+      </div>
+      <div style="display:flex;gap:15px;padding:15px 0;border-top:1px solid rgba(201,162,75,.1)">
+        <div style="flex-shrink:0;width:38px;height:38px;border-radius:50%;border:1px solid var(--gold);color:var(--gold);font-family:'Amiri',serif;font-size:1.15rem;font-weight:700;display:flex;align-items:center;justify-content:center">٣</div>
+        <div><div style="font-weight:600;font-size:.92rem;color:var(--white);margin-bottom:3px">Mise en relation encadrée</div><div style="color:var(--white2);font-size:.8rem;line-height:1.5;font-weight:300">Envoyez des demandes ; le Wali est intégré au processus selon la Sunnah.</div></div>
       </div>
     </div>
   </section>
 
-  <!-- ══ POURQUOI OUMÉLIA ══ -->
-  <section style="padding:40px 20px;border-top:1px solid var(--border)">
-    <h2 style="text-align:center;font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold);margin-bottom:24px">Pourquoi Oumélia</h2>
-    <div style="display:flex;flex-direction:column;gap:14px;max-width:360px;margin:0 auto">
-      <div style="display:flex;gap:13px;align-items:center;padding:13px;background:var(--card2);border:1px solid var(--border);border-radius:10px"><span style="font-size:1.3rem">✦</span><div><div style="font-weight:600;font-size:.88rem">Vérification manuelle de chaque profil</div><div style="color:var(--muted);font-size:.78rem;margin-top:2px">Chaque compte est validé par un humain, pas un algorithme.</div></div></div>
-      <div style="display:flex;gap:13px;align-items:center;padding:13px;background:var(--card2);border:1px solid var(--border);border-radius:10px"><span style="font-size:1.3rem">✦</span><div><div style="font-weight:600;font-size:.88rem">Réservé aux pratiquants sunnites</div><div style="color:var(--muted);font-size:.78rem;margin-top:2px">Une communauté sérieuse avec des valeurs communes.</div></div></div>
-      <div style="display:flex;gap:13px;align-items:center;padding:13px;background:var(--card2);border:1px solid var(--border);border-radius:10px"><span style="font-size:1.3rem">✦</span><div><div style="font-weight:600;font-size:.88rem">Rôle du Wali intégré</div><div style="color:var(--muted);font-size:.78rem;margin-top:2px">Le tuteur matrimonial est impliqué dès la mise en relation.</div></div></div>
-      <div style="display:flex;gap:13px;align-items:center;padding:13px;background:var(--card2);border:1px solid var(--border);border-radius:10px"><span style="font-size:1.3rem">✦</span><div><div style="font-weight:600;font-size:.88rem">Aucune photo publique sans accord</div><div style="color:var(--muted);font-size:.78rem;margin-top:2px">La pudeur est préservée : photos uniquement après accord mutuel.</div></div></div>
-      <div style="display:flex;gap:13px;align-items:center;padding:13px;background:var(--card2);border:1px solid var(--border);border-radius:10px"><span style="font-size:1.3rem">✦</span><div><div style="font-weight:600;font-size:.88rem">Paiement sécurisé Stripe</div><div style="color:var(--muted);font-size:.78rem;margin-top:2px">Vos transactions sont protégées par le standard bancaire mondial.</div></div></div>
-    </div>
   </section>
 
   <!-- ══ FAQ ══ -->
-  <section style="padding:40px 20px;background:var(--card2);border-top:1px solid var(--border)">
-    <h2 style="text-align:center;font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold);margin-bottom:24px">Questions fréquentes</h2>
+  <section style="padding:38px 24px;background:rgba(255,255,255,.015);border-top:1px solid rgba(201,162,75,.08)">
+    <div style="text-align:center;margin-bottom:6px">
+      <div style="display:inline-flex;align-items:center;gap:8px;font-size:.64rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px">
+        <span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>Questions fréquentes<span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>
+      </div>
+      <h2 style="font-family:'Cinzel Decorative',serif;font-size:1.3rem;color:var(--white);margin-bottom:22px">Vos questions</h2>
+    </div>
     <div style="max-width:360px;margin:0 auto" id="landing-faq">
       <div class="faq-item" style="border-bottom:1px solid var(--border);padding:14px 0">
         <div class="faq-q" onclick="toggleLandingFaq(this)" style="font-size:.88rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center">Comment sont vérifiés les profils ?<span style="color:var(--gold);font-size:1rem;transition:transform .2s">▾</span></div>
@@ -709,10 +722,12 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   </section>
 
   <!-- ══ CTA FINAL ══ -->
-  <section style="padding:40px 20px;text-align:center;border-top:1px solid var(--border)">
-    <p style="font-family:'Playfair Display',serif;font-style:italic;color:var(--white2);font-size:.95rem;margin-bottom:20px">«&#8239;Et parmi Ses signes&#8239;: Il a créé pour vous, de vous-mêmes, des épouses…&#8239;» — Ar-Rûm, 21</p>
-    <div style="display:flex;flex-direction:column;gap:11px;max-width:280px;margin:0 auto">
-      <button class="btn btn-gold" style="font-size:.95rem;padding:13px" onclick="showScreen('screen-register')">✦ Créer mon profil gratuitement</button>
+  <section style="padding:34px 20px 40px">
+    <div style="max-width:390px;margin:0 auto;padding:34px 24px;text-align:center;background:linear-gradient(160deg,var(--card),#0d1c33);border:1px solid var(--gold);border-radius:22px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-8px;left:0;right:0;font-family:'Amiri',serif;font-size:5rem;color:var(--gold);opacity:.05;pointer-events:none;line-height:1">﷽</div>
+      <h3 style="font-family:'Cinzel Decorative',serif;font-size:1.35rem;color:var(--white);margin-bottom:10px;position:relative">Qu'Allah facilite votre union</h3>
+      <p style="font-size:.82rem;color:var(--white2);margin-bottom:20px;line-height:1.55;font-weight:300;position:relative">Rejoignez une communauté sérieuse qui place la religion et le caractère au cœur de la démarche.</p>
+      <button class="btn btn-gold" style="font-size:.95rem;padding:14px;width:100%;max-width:260px;position:relative" onclick="showScreen('screen-register')">S'inscrire maintenant →</button>
     </div>
   </section>
 
@@ -737,7 +752,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   <div class="auth-wrap">
     <div class="auth-card">
       <div class="auth-logo">
-        <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:52px;height:52px;object-fit:contain;background:none" alt="Oumélia">
+        <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/oumelia-logo-transparent.png" style="width:52px;height:52px;object-fit:contain;background:none" alt="Oumélia">
       </div>
       <h2 class="auth-title">Connexion</h2>
       <div class="form-group">
@@ -951,6 +966,30 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           <select id="reg-situation">
             <option value="">Sélectionnez</option>
             <option>Jamais marié(e)</option><option>Divorcé(e)</option><option>Veuf(ve)</option>
+          </select>
+        </div>
+
+        <!-- ══ WALI / TUTEUR — sœurs uniquement ══ -->
+        <div class="form-group" id="field-wali" style="display:none">
+          <label>🌸 Qui est votre tuteur (Wali) ?</label>
+          <select id="reg-wali" onchange="toggleWaliAware(this.value)">
+            <option value="">Sélectionnez</option>
+            <option value="pere">Mon père</option>
+            <option value="frere">Mon frère</option>
+            <option value="oncle">Mon oncle</option>
+            <option value="autre">Un autre proche / tuteur légal</option>
+            <option value="aucun">Je n'ai pas de tuteur</option>
+          </select>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:6px;line-height:1.5">Le Wali est impliqué dans la démarche conformément à la Sunnah. Si vous n'en avez pas, notre équipe vous accompagnera.</div>
+        </div>
+
+        <div class="form-group" id="field-wali-aware" style="display:none">
+          <label>Votre tuteur est-il au courant de votre démarche ?</label>
+          <select id="reg-wali-aware">
+            <option value="">Sélectionnez</option>
+            <option value="oui">Oui, il est au courant</option>
+            <option value="pas_encore">Pas encore, je vais lui en parler</option>
+            <option value="besoin_aide">Non, j'aurais besoin d'aide pour lui en parler</option>
           </select>
         </div>
         <div class="form-group">
@@ -1385,7 +1424,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 <div id="screen-app" class="screen">
   <!-- Header -->
   <div class="app-header">
-    <div class="logo-hdr" style="display:flex;align-items:center;gap:7px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:24px;height:24px;object-fit:contain;background:none" alt=""><span class="gold-text" style="font-family:'Cinzel Decorative',serif;font-size:.82rem;letter-spacing:2px">OUMÉLIA</span></div>
+    <div class="logo-hdr" style="display:flex;align-items:center;gap:7px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/oumelia-logo-transparent.png" style="width:24px;height:24px;object-fit:contain;background:none" alt=""><span class="gold-text" style="font-family:'Cinzel Decorative',serif;font-size:.82rem;letter-spacing:2px">OUMÉLIA</span></div>
     <div style="display:flex;align-items:center;gap:12px">
       <span id="header-user-name" style="font-size:.82rem;color:var(--white2)"></span>
       <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);font-size:.78rem;cursor:pointer;padding:4px 8px">Déco.</button>
@@ -1412,7 +1451,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 ============================== -->
 <div id="screen-admin" class="screen">
   <div class="admin-topbar">
-    <span class="atitle gold-text" style="display:flex;align-items:center;gap:6px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:20px;height:20px;object-fit:contain" alt=""> OUMÉLIA ADMIN</span>
+    <span class="atitle gold-text" style="display:flex;align-items:center;gap:6px"><img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/oumelia-logo-transparent.png" style="width:20px;height:20px;object-fit:contain" alt=""> OUMÉLIA ADMIN</span>
     <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer">Déconnexion</button>
   </div>
   <div class="admin-tabs">
@@ -1773,7 +1812,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 <div class="modal-overlay" id="modal-audio" onclick="if(event.target===this)closeModal('modal-audio')">
   <div class="modal-card">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:28px;height:28px;object-fit:contain" alt="">
+      <img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/oumelia-logo-transparent.png" style="width:28px;height:28px;object-fit:contain" alt="">
       <h3 style="margin:0;font-size:1rem;color:var(--gold)">Attestation audio</h3>
     </div>
     <p style="font-size:.86rem;color:var(--white2);margin-bottom:14px">Profil : <strong id="audio-target-name" style="color:var(--white)"></strong></p>
@@ -2196,6 +2235,18 @@ var currentLang = localStorage.getItem('oumelia_lang') || 'fr';
 
 
 // ══════════ AUTH ══════════
+// Affiche la sous-question "tuteur au courant ?" seulement si un tuteur est sélectionné
+function toggleWaliAware(val){
+  var wrap=document.getElementById('field-wali-aware');
+  if(!wrap) return;
+  var hasWali = val && val!=='' && val!=='aucun';
+  wrap.style.display = hasWali ? '' : 'none';
+  if(!hasWali){
+    var sel=document.getElementById('reg-wali-aware');
+    if(sel) sel.value='';
+  }
+}
+
 function selectGender(g){
   state.gender=g;
   document.getElementById('gender-btn-femme').classList.toggle('selected',g==='femme');
@@ -2206,6 +2257,15 @@ function selectGender(g){
   // Barbe : frères uniquement
   var barreEl=document.getElementById('field-barbe')||document.getElementById('reg-barbe-wrap');
   if(barreEl) barreEl.style.display=g==='homme'?'':'none';
+  // Wali / tuteur : sœurs uniquement
+  var waliEl=document.getElementById('field-wali');
+  if(waliEl) waliEl.style.display=g==='femme'?'':'none';
+  if(g!=='femme'){
+    var wa=document.getElementById('field-wali-aware');
+    if(wa) wa.style.display='none';
+    var ws=document.getElementById('reg-wali'); if(ws) ws.value='';
+    var was=document.getElementById('reg-wali-aware'); if(was) was.value='';
+  }
   // Critères recherche spécifiques au genre
   var rechSoeur=document.getElementById('rech-genre-soeur');
   var rechFrere=document.getElementById('rech-genre-frere');
@@ -2310,6 +2370,15 @@ function regStep2(){
   if(!document.getElementById('reg-prenom').value.trim()) return showToast('⚠ Entrez votre prénom','red');
   var age=parseInt(document.getElementById('reg-age').value);
   if(!age||age<18) return showToast('⚠ Âge invalide (minimum 18 ans)','red');
+  // Validation Wali pour les sœurs
+  if(state.gender==='femme'){
+    var wv=document.getElementById('reg-wali');
+    if(wv && !wv.value){ showToast('⚠ Merci d\'indiquer qui est votre tuteur (Wali)','red'); wv.focus(); return; }
+    if(wv && wv.value && wv.value!=='aucun'){
+      var wa=document.getElementById('reg-wali-aware');
+      if(wa && !wa.value){ showToast('⚠ Indiquez si votre tuteur est au courant de votre démarche','red'); wa.focus(); return; }
+    }
+  }
   document.getElementById('reg-step1').style.display='none';
   document.getElementById('reg-step2').style.display='block';
   updateProgressBar(2);
@@ -2614,6 +2683,8 @@ async function doRegister(){
     coran: (document.getElementById('reg-coran')&&document.getElementById('reg-coran').value)||'Régulièrement',
     halal: (document.getElementById('reg-halal')&&document.getElementById('reg-halal').value)||'Oui',
     situation: (document.getElementById('reg-situation')&&document.getElementById('reg-situation').value)||'Jamais marié(e)',
+    wali: state.gender==='femme'?((document.getElementById('reg-wali')&&document.getElementById('reg-wali').value)||null):null,
+    wali_au_courant: state.gender==='femme'?((document.getElementById('reg-wali-aware')&&document.getElementById('reg-wali-aware').value)||null):null,
     enfants: (document.getElementById('reg-enfants')&&document.getElementById('reg-enfants').value)||'non',
     nb_enfants: (document.getElementById('reg-nb-enfants')&&document.getElementById('reg-nb-enfants').value)||null,
     veut_enfants: (document.getElementById('reg-veut-enfants')&&document.getElementById('reg-veut-enfants').value)||'Oui',
@@ -3458,6 +3529,8 @@ function loadAllProfilesForAdmin(){
         cni_path:        p.cni_path||null,
         work_path:       p.work_path||null,
         questionnaire:   p.questionnaire||null,
+        wali:            p.wali||null,
+        wali_au_courant: p.wali_au_courant||null,
         questionnaire_submitted_at: p.questionnaire_submitted_at||null,
         // Critères recherche
         profession:           p.profession||null,
@@ -5201,7 +5274,7 @@ function renderMessages(c){
   }catch(e){}
   var adminName=state.user&&state.user.gender==='homme'?'Administrateur':'Administratrice';
   var adminMsgs=userChatHistory[adminName]||[];
-  var iconHtml2='<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:36px;height:36px;object-fit:contain;flex-shrink:0" alt="Oumélia">';
+  var iconHtml2='<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/oumelia-logo-transparent.png" style="width:36px;height:36px;object-fit:contain;flex-shrink:0" alt="Oumélia">';
   c.innerHTML='<div class="page-header"><h2>Messages</h2></div><div class="conversations-list" id="convos-list"></div><div id="empty-msgs" style="display:none;text-align:center;padding:48px 20px;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:14px">&#128172;</div><p style="font-size:.88rem">Aucun message pour le moment</p></div>';
 
   var list=document.getElementById('convos-list');
@@ -5249,7 +5322,7 @@ function openChat(name, type){
   var c=document.getElementById('app-content');
   scrollToTop();
   var msgs=userChatHistory[name]||[];
-  var iconHtml='<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/O_20260411_105129_0000.png" style="mix-blend-mode:lighten;width:30px;height:30px;object-fit:contain;flex-shrink:0" alt="Oumélia">';
+  var iconHtml='<img src="https://nmcvyukbyfnhtufbgqqp.supabase.co/storage/v1/object/public/logo/oumelia-logo-transparent.png" style="width:30px;height:30px;object-fit:contain;flex-shrink:0" alt="Oumélia">';
   c.innerHTML=`
     <div class="page-header">
       <button class="back-btn" onclick="navTo('messages')">←</button>
@@ -7464,6 +7537,14 @@ function openAdminProfileDetail(id){
     +row('Ville', p.ville)
     +row('Origine', p.origine)
     +row('Situation', p.situation)
+    +(p.gender==='femme'?row('🌸 Tuteur (Wali)', (function(){
+        var m={pere:'Son père',frere:'Son frère',oncle:'Son oncle',autre:'Un autre proche / tuteur légal',aucun:'⚠️ Pas de tuteur'};
+        return p.wali?(m[p.wali]||p.wali):'—';
+      })()):'')
+    +(p.gender==='femme'&&p.wali&&p.wali!=='aucun'?row('Tuteur au courant', (function(){
+        var m={oui:'✅ Oui',pas_encore:'⏳ Pas encore',besoin_aide:'🆘 Besoin d\'aide pour lui en parler'};
+        return p.wali_au_courant?(m[p.wali_au_courant]||p.wali_au_courant):'—';
+      })()):'')
     +row('Enfants', p.enfants)
     +(p.enfants==='oui'?row('Nombre d enfants', p.nb_enfants):'')
     +row('Veut des enfants', p.veut_enfants)
@@ -8250,6 +8331,87 @@ function toggleLandingFaq(el){
   }
 }
 
+// ══ CARROUSEL D'APERÇU DES PROFILS (landing) ══
+function svgAvaLanding(gender){
+  var c = gender==='femme' ? '#e0b8c8' : '#8aabcc';
+  return '<svg viewBox="0 0 100 100" width="100%" height="100%">'
+    +'<rect width="100" height="100" rx="50" fill="#0d1c33"/>'
+    +'<circle cx="50" cy="42" r="15" fill="'+c+'" opacity=".85"/>'
+    +'<path d="M30 78 Q30 56 50 56 Q70 56 70 78 Z" fill="'+c+'" opacity=".85"/></svg>';
+}
+
+function loadLandingCarousel(){
+  // On récupère des profils actifs, hommes et femmes, avec les champs utiles
+  fetch(SUPABASE_URL+'/rest/v1/profils?select=id,prenom,age,ville,origine,gender,situation,profession,bio,pratique,recherche&status=eq.active&order=created_at.desc&limit=12',{
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  }).then(function(r){return r.json();}).then(function(data){
+    var track=document.getElementById('landing-carousel-track');
+    var dotsWrap=document.getElementById('landing-carousel-dots');
+    if(!track) return;
+    if(!Array.isArray(data)||!data.length){
+      // Fallback : exemples génériques si aucun profil actif
+      data=[
+        {prenom:'Sœur',age:24,ville:'Île-de-France',origine:'Algérienne',gender:'femme',pratique:'Pratiquante',situation:'Jamais mariée',profession:'—',bio:'—'},
+        {prenom:'Frère',age:29,ville:'Lyon',origine:'Marocaine',gender:'homme',pratique:'Pratiquant',situation:'Jamais marié',profession:'—',bio:'—'}
+      ];
+    }
+    // Mélanger pour varier l'ordre à chaque visite
+    data.sort(function(){return Math.random()-0.5;});
+    // Limiter à 8 cartes
+    data=data.slice(0,8);
+
+    var cards=data.map(function(p){
+      var g=p.gender==='femme'?'femme':'homme';
+      var titre=g==='femme'?'Sœur':'Frère';
+      var pratique=p.pratique||'Pratiquant(e)';
+      var statut=p.situation||'—';
+      // Infos visibles (chips)
+      var chips='<span class="lc-chip">'+pratique+'</span>';
+      if(statut && statut!=='—') chips+='<span class="lc-chip">'+statut+'</span>';
+      // Infos floutées
+      var lockedRows='';
+      var prof=p.profession||'—';
+      var rech=p.recherche||'Premier mariage';
+      var desc=p.bio?(p.bio.length>40?p.bio.slice(0,40)+'…':p.bio):'—';
+      lockedRows+='<div class="lc-lrow"><span class="lc-k">Profession</span><span class="lc-v">'+prof+'</span></div>';
+      lockedRows+='<div class="lc-lrow"><span class="lc-k">Recherche</span><span class="lc-v">'+rech+'</span></div>';
+      lockedRows+='<div class="lc-lrow"><span class="lc-k">Présentation</span><span class="lc-v">'+desc+'</span></div>';
+
+      return '<div class="lc-card">'
+        +'<div class="lc-top"><div class="lc-ava">'+svgAvaLanding(g)+'</div>'
+        +'<div class="lc-id"><div class="lc-name">'+titre+' <span class="lc-verif">✓ Vérifié</span></div>'
+        +'<div class="lc-meta">'+(p.age||'—')+' ans · '+(p.ville||'—')+(p.origine?' · '+p.origine:'')+'</div></div></div>'
+        +'<div class="lc-chips">'+chips+'</div>'
+        +'<div class="lc-locked">'+lockedRows
+        +'<div class="lc-veil"><a onclick="showScreen(\'screen-register\')" class="lc-cta">🔒 S\'inscrire pour voir</a></div></div>'
+        +'</div>';
+    }).join('');
+    track.innerHTML=cards;
+
+    // Dots
+    if(dotsWrap){
+      dotsWrap.innerHTML=data.map(function(_,i){return '<span class="lc-dot'+(i===0?' on':'')+'"></span>';}).join('');
+      var carousel=document.getElementById('landing-carousel');
+      carousel.addEventListener('scroll',function(){
+        var cards=track.children;
+        var center=carousel.scrollLeft+carousel.offsetWidth/2;
+        var closest=0,min=Infinity;
+        for(var i=0;i<cards.length;i++){
+          var cc=cards[i].offsetLeft+cards[i].offsetWidth/2;
+          var d=Math.abs(cc-center);
+          if(d<min){min=d;closest=i;}
+        }
+        var dots=dotsWrap.children;
+        for(var j=0;j<dots.length;j++) dots[j].className='lc-dot'+(j===closest?' on':'');
+      });
+    }
+  }).catch(function(e){
+    console.log('carousel err:',e);
+    var track=document.getElementById('landing-carousel-track');
+    if(track) track.innerHTML='<div style="flex:0 0 260px;padding:20px;text-align:center;color:var(--muted);font-size:.82rem">Rejoignez-nous pour découvrir nos membres</div>';
+  });
+}
+
 function loadLandingMembersCount(){
   fetch(SUPABASE_URL+'/rest/v1/profils?select=id&status=neq.deleted',{
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
@@ -8258,20 +8420,16 @@ function loadLandingMembersCount(){
     if(!el) return;
     var count=Array.isArray(data)?data.length:0;
     if(count>0){
-      el.textContent='+'+count+' frères et sœurs nous font confiance';
-    } else {
-      el.textContent='✦ Une communauté grandissante de musulmans sérieux';
+      el.innerHTML='<b style="color:var(--gold);font-weight:600">+'+count+' membres</b> nous font confiance';
     }
-  }).catch(function(){
-    var el=document.getElementById('landing-members-count');
-    if(el) el.textContent='✦ Une communauté grandissante de musulmans sérieux';
-  });
+  }).catch(function(){});
 }
 
 window.addEventListener('load', function(){
   // Supabase et Stripe déjà dans le head
   setTimeout(function(){ try{ initDB(); }catch(e){ console.log('initDB:',e); } }, 200);
   setTimeout(loadLandingMembersCount, 300);
+  setTimeout(loadLandingCarousel, 350);
 });
 // ═══════════════════════════════════════
 // FONCTIONNALITÉS ADDITIONNELLES
@@ -8300,7 +8458,7 @@ function stopRealtime(){
 function showRTNotif(msg){
   try{
     var d=document.createElement('div');
-    d.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#13161d;border:1px solid #C9A84C;border-radius:12px;padding:10px 18px;font-size:.82rem;color:#F0EBE0;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.6);max-width:300px;text-align:center;pointer-events:none;';
+    d.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#132743;border:1px solid #C9A84C;border-radius:12px;padding:10px 18px;font-size:.82rem;color:#F0EBE0;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.6);max-width:300px;text-align:center;pointer-events:none;';
     d.textContent=msg;
     document.body.appendChild(d);
     setTimeout(function(){
@@ -8984,7 +9142,7 @@ function openCalEmbed(){
   if(existing) existing.remove();
   var overlay=document.createElement('div');
   overlay.id='cal-fullpage';
-  overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:#0d0f14;display:flex;flex-direction:column';
+  overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:#0F2038;display:flex;flex-direction:column';
   // Header
   var header=document.createElement('div');
   header.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(201,168,76,.2);flex-shrink:0';
@@ -9051,7 +9209,7 @@ function openCalEmbed(){
   var _calGender = state.user && state.user.gender;
   var _calUrl = _calGender==='femme' ? 'https://cal.com/oumelia-femme/15min?theme=dark&embed=true' : 'https://cal.com/oumelia-zawaj/25min?theme=dark&embed=true';
   iframe.src=_calUrl;
-  iframe.style.cssText='flex:1;width:100%;border:none;background:#0d0f14';
+  iframe.style.cssText='flex:1;width:100%;border:none;background:#0F2038';
   iframe.setAttribute('frameborder','0');
   iframe.setAttribute('allow','camera;microphone');
   overlay.appendChild(iframe);
