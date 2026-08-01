@@ -196,11 +196,13 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 #screen-landing{display:block;text-align:left;padding:0;background:var(--black);position:relative;overflow-y:auto;min-height:100%;}
 #screen-landing::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M48 46v-6h-2v6h-6v2h6v6h2v-6h6v-2h-6zm0-40V0h-2v6h-6v2h6v6h2V8h6V6h-6zM8 46v-6H6v6H0v2h6v6h2v-6h6v-2H8zM8 6V0H6v6H0v2h6v6h2V8h6V6H8z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;z-index:0;pointer-events:none;z-index:0;}
 .landing-bismillah{font-size:1.9rem;background:linear-gradient(135deg,#E0C066 0%,#C9A24B 45%,#9A7B2E 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#C9A24B;margin-bottom:20px;text-shadow:0 0 30px rgba(201,162,75,.3);position:relative;z-index:2;}
+/* Séparateur doré entre les sections */
+.sec-divider{height:1px;margin:0 auto;max-width:88%;background:linear-gradient(90deg,transparent,rgba(201,162,75,.45) 20%,rgba(201,162,75,.55) 50%,rgba(201,162,75,.45) 80%,transparent);}
 /* Marque du header — Cinzel Decorative, or lumineux du logo */
 .hdr-brand{font-family:'Cinzel Decorative',serif !important;font-size:1.15rem;font-weight:700;letter-spacing:2px;background:linear-gradient(135deg,#F0DA95 0%,#E8C96A 35%,#D4AF56 70%,#C9A24B 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#E8C96A;}
 /* Carrousel landing */
 #landing-carousel::-webkit-scrollbar{display:none;}
-.lc-card{scroll-snap-align:center;flex:0 0 260px;background:linear-gradient(165deg,var(--card),#101f37);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;}
+.lc-card{scroll-snap-align:center;flex:0 0 260px;background:linear-gradient(165deg,var(--card),#101f37);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;display:flex;flex-direction:column;align-self:flex-start;}
 .lc-top{padding:16px 16px 13px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(201,162,75,.1);}
 .lc-ava{width:50px;height:50px;border-radius:50%;flex-shrink:0;border:2px solid var(--gold);padding:2px;background:var(--black);}
 .lc-id{flex:1;min-width:0;}
@@ -209,10 +211,10 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
 .lc-meta{font-size:.7rem;color:var(--muted);margin-top:3px;}
 .lc-chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px 8px;}
 .lc-chip{font-size:.68rem;color:var(--white);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:5px 10px;border-radius:100px;}
-.lc-locked{position:relative;padding:6px 16px 16px;min-height:120px;}
-.lc-lrow{display:flex;justify-content:space-between;padding:6px 0;font-size:.72rem;gap:10px;}
+.lc-lrow{display:flex;justify-content:space-between;padding:6px 0;font-size:.72rem;gap:10px;align-items:center;}
 .lc-k{color:var(--muted);flex-shrink:0;}
-.lc-v{color:var(--white);filter:blur(5px);user-select:none;font-weight:500;text-align:right;}
+.lc-v{color:var(--white);filter:blur(5px);user-select:none;font-weight:500;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%;}
+.lc-locked{position:relative;padding:6px 16px 16px;min-height:120px;max-height:150px;overflow:hidden;}
 .lc-veil{position:absolute;left:0;right:0;bottom:0;top:0;background:linear-gradient(to bottom,transparent,rgba(15,32,56,.55) 45%,rgba(15,32,56,.94));display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px;}
 .lc-cta{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;color:var(--black);background:linear-gradient(135deg,var(--gold),var(--gold-dim));padding:9px 18px;border-radius:100px;box-shadow:0 4px 16px rgba(201,162,75,.3);cursor:pointer;font-family:'Cairo',sans-serif;}
 .lc-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s;}
@@ -641,7 +643,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   </section>
 
   <!-- ══ APERÇU DES MEMBRES (CARROUSEL) ══ -->
-  <section id="landing-preview" style="padding:40px 0 44px;background:transparent">
+  <div class="sec-divider"></div>
+  <section id="landing-preview" style="padding:40px 0 44px;background:rgba(255,255,255,.012)">
     <div style="text-align:center;padding:0 20px;margin-bottom:6px">
       <div style="display:inline-flex;align-items:center;gap:8px;font-size:.64rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px">
         <span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>
@@ -661,7 +664,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   </section>
 
   <!-- ══ COMMENT ÇA MARCHE ══ -->
-  <section id="landing-how" style="padding:38px 24px">
+  <div class="sec-divider"></div>
+  <section id="landing-how" style="padding:38px 24px;background:transparent">
     <div style="text-align:center;margin-bottom:6px">
       <div style="display:inline-flex;align-items:center;gap:8px;font-size:.64rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px">
         <span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>Le parcours<span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>
@@ -687,7 +691,8 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
   </section>
 
   <!-- ══ FAQ ══ -->
-  <section style="padding:38px 24px;background:transparent;border-top:1px solid rgba(201,162,75,.15)">
+  <div class="sec-divider"></div>
+  <section style="padding:38px 24px;background:rgba(255,255,255,.012)">
     <div style="text-align:center;margin-bottom:6px">
       <div style="display:inline-flex;align-items:center;gap:8px;font-size:.64rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px">
         <span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>Questions fréquentes<span style="width:20px;height:1px;background:var(--gold);opacity:.5"></span>
