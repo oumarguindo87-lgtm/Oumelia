@@ -2383,7 +2383,9 @@ function regStep3(){
   document.getElementById('reg-step2').style.display='none';
   document.getElementById('reg-step3').style.display='block';
   var aa=document.getElementById('audio-attestation')||document.getElementById('reg-audio-wrap');
+  var aaH=document.getElementById('reg-audio-homme-wrap');
   if(state.gender==='femme' && aa) aa.style.display='block';
+  if(state.gender==='homme' && aaH) aaH.style.display='block';
   updateProgressBar(3);
   scrollToTop();
 }
@@ -2785,6 +2787,8 @@ async function doRegister(){
         coran: profileData.coran,
         halal: profileData.halal,
         situation: profileData.situation,
+        wali: profileData.wali||null,
+        wali_au_courant: profileData.wali_au_courant||null,
         enfants: profileData.enfants,
         veut_enfants: profileData.veut_enfants,
         bio: profileData.bio,
@@ -2834,6 +2838,13 @@ async function doRegister(){
       profession:          profileData.profession||null,
       telephone:           profileData.telephone||'',
     };
+    // Wali (sœurs uniquement) — garanti même si l'insert initial l'a ignoré
+    if(state.gender==='femme'){
+      var _wsel=document.getElementById('reg-wali');
+      var _wasel=document.getElementById('reg-wali-aware');
+      _rechPatch.wali = (_wsel&&_wsel.value)||null;
+      _rechPatch.wali_au_courant = (_wasel&&_wasel.value)||null;
+    }
     if(state.gender==='femme'){
       _rechPatch.barbe_recherche=profileData.barbe_recherche||'Peu importe';
       _rechPatch.qamis_recherche=profileData.qamis_recherche||'Peu importe';
@@ -2847,6 +2858,20 @@ async function doRegister(){
       headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify(_rechPatch)
     }).then(function(r){ console.log('Recherche PATCH:',r.status); }).catch(function(e){ console.log('Recherche PATCH err:',e); });
+
+    // PATCH dédié Wali — filet de sécurité si le PATCH groupé échoue
+    if(state.gender==='femme'){
+      var _w2=document.getElementById('reg-wali');
+      var _wa2=document.getElementById('reg-wali-aware');
+      var _waliOnly={ wali:(_w2&&_w2.value)||null, wali_au_courant:(_wa2&&_wa2.value)||null };
+      if(_waliOnly.wali){
+        fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+profileData.id,{
+          method:'PATCH',
+          headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+          body:JSON.stringify(_waliOnly)
+        }).then(function(r){ console.log('Wali PATCH:',r.status); }).catch(function(e){ console.log('Wali PATCH err:',e); });
+      }
+    }
   }
   var _uploadAudioBlob = (state.gender==='femme') ? audioBlob : (state._audioBlobHomme || null);
   if(_uploadAudioBlob && userId){
@@ -7590,7 +7615,11 @@ function openAdminProfileDetail(id){
     +avatarHtml
     +'<div style="font-family:\"Playfair Display\",serif;font-size:1.15rem;margin-top:8px">'+(p.prenom||'—')+(p.age?' · '+p.age+' ans':'')+'</div>'
     +'<div style="margin-top:6px">'+stepBadge+'</div>'
-    +(p.paid?'<div style="font-size:.74rem;color:var(--green);margin-top:4px">✓ Paiement confirmé</div>':'<div style="font-size:.74rem;color:var(--muted);margin-top:4px">Paiement non encore effectué</div>')
+    +(p.gender==='femme'
+      ? '<div style="font-size:.74rem;color:var(--gold);margin-top:4px">🌸 Accès gratuit (sœur)</div>'
+      : (p.paid
+          ? '<div style="font-size:.74rem;color:var(--green);margin-top:4px">✓ A payé</div>'
+          : '<div style="font-size:.74rem;color:var(--muted);margin-top:4px">En attente de paiement</div>'))
     +(p.en_relation?'<div style="margin-top:6px"><span class="badge" style="background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.3)">🤝 En relation — demandes bloquées</span></div>':'')
     +(p.en_relation_avec?'<div style="margin-top:6px"><span class="badge" style="background:rgba(52,152,219,.12);color:#3498db;border:1px solid rgba(52,152,219,.3)">🤝 En relation (id:'+p.en_relation_avec+')</span></div>':'')
     +'</div>'
@@ -7600,9 +7629,9 @@ function openAdminProfileDetail(id){
     +row('Ville', p.ville)
     +row('Origine', p.origine)
     +row('Situation', p.situation)
-    +(p.gender==='femme'?row('🌸 Tuteur (Wali)', (function(){
+    +(p.gender==='femme'?row('Tuteur (Wali)', (function(){
         var m={pere:'Son père',frere:'Son frère',oncle:'Son oncle',autre:'Un autre proche / tuteur légal',aucun:'⚠️ Pas de tuteur'};
-        return p.wali?(m[p.wali]||p.wali):'—';
+        return p.wali?(m[p.wali]||p.wali):'<span style="color:var(--muted);font-style:italic">Non renseigné</span>';
       })()):'')
     +(p.gender==='femme'&&p.wali&&p.wali!=='aucun'?row('Tuteur au courant', (function(){
         var m={oui:'✅ Oui',pas_encore:'⏳ Pas encore',besoin_aide:'🆘 Besoin d\'aide pour lui en parler'};
