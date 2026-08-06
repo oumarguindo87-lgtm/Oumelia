@@ -1242,7 +1242,7 @@ html[dir="rtl"] .bottom-nav{direction:rtl;}
           <label>Barbe</label>
           <select id="reg-barbe">
             <option value="">Sélectionnez</option>
-            <option>Oui (sunnah)</option><option>Non</option><option>En progression</option>
+            <option>Oui</option><option>Non</option><option>En progression</option>
           </select>
         </div>
         <div class="form-group">
@@ -3915,7 +3915,7 @@ function renderEditProfile(){
     html+=voileHtml;
   }
   if(!isF){
-    var barbeOpts=['Oui (sunnah)','Non','En progression'];
+    var barbeOpts=['Oui','Non','En progression'];
     var barbeHtml='<div class="form-group"><label>Barbe</label><select id="edit-barbe">';
     if(!u.barbe) barbeHtml+='<option value="">Choisir</option>';
     barbeOpts.forEach(function(v){ barbeHtml+='<option value="'+v+'"'+(u.barbe===v?' selected':'')+'>'+v+'</option>'; });
@@ -4732,7 +4732,7 @@ function openFilterPanel(){
     html+=`<div class="filter-section">
       <div class="filter-section-title">Barbe</div>
       <div class="filter-options">
-        ${['Oui (sunnah)','Non','En progression'].map(function(v){return filterBtn('barbe',v,f.barbe);}).join('')}
+        ${['Oui','Non','En progression'].map(function(v){return filterBtn('barbe',v,f.barbe);}).join('')}
       </div>
     </div>`;
   } else {
