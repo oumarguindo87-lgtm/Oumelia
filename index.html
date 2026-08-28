@@ -3589,6 +3589,7 @@ function loadAllProfilesForAdmin(){
         photo_url:       p.photo_url||null,         // null si colonne absente
         photo_visible:   p.photo_visible===true,
         cni_path:        p.cni_path||null,
+        cni_deleted_at:  p.cni_deleted_at||null,
         work_path:       p.work_path||null,
         questionnaire:   p.questionnaire||null,
         wali:            p.wali||null,
@@ -7549,12 +7550,18 @@ function openAdminProfileDetail(id){
   if(p.user_id){
     var cniPath  = p.cni_path  || (p.user_id+'/cni.jpg');
     var workPath = p.work_path || (p.user_id+'/work.jpg');
-    var cniLinks = p.cni_path
-      ? '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.cni_path+'\')">🪪 CNI</button>'
-      : '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.jpg\')">🪪 JPG</button>'
-        +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.jpeg\')">🪪 JPEG</button>'
-        +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.png\')">🪪 PNG</button>'
-        +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.pdf\')">🪪 PDF</button>';
+    var cniLinks;
+    if(p.cni_deleted_at || (p.call_validated===true && !p.cni_path)){
+      // Document supprimé après vérification — ne pas proposer de liens morts
+      cniLinks = '<span style="font-size:.74rem;color:var(--muted);font-style:italic">🗑️ Pièce d\'identité supprimée après vérification</span>';
+    } else {
+      cniLinks = p.cni_path
+        ? '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.cni_path+'\')">🪪 CNI</button>'
+        : '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.jpg\')">🪪 JPG</button>'
+          +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.jpeg\')">🪪 JPEG</button>'
+          +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.png\')">🪪 PNG</button>'
+          +'<button class="d-doc-btn" onclick="openSignedDoc(\''+p.user_id+'/cni.pdf\')">🪪 PDF</button>';
+    }
     var workLinks = p.gender==='homme'
       ? (p.work_path
         ? '<button class="d-doc-btn" onclick="openSignedDoc(\''+p.work_path+'\')">💼 Justificatif</button>'
@@ -9953,6 +9960,7 @@ async function adminValidateAfterCall(id,prenom){
     if(!confirm('Valider le profil de '+prenom+' et l\'activer gratuitement ?')) return;
     if(prof){ prof.status='active'; prof.call_validated=true; prof.free_activated=true; }
     await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({status:'active',call_validated:true,free_activated:true})}).catch(function(){});
+    deleteCniAfterValidation(prof);
     var msgF='🎉 Mabrouk '+prenom+' !\n\nVotre profil a été validé par notre équipe et il est maintenant actif. ✨\n\nL\'accès à Oumélia est entièrement gratuit pour les sœurs. Vous pouvez dès à présent consulter les profils et envoyer vos demandes de mise en relation.\n\nQu\'Allah facilite votre recherche. Barak\'Allahu fikoum — L\'équipe Oumélia';
     await fetch(SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({from_id:'admin',to_id:String(id),from_prenom:'Oumélia',content:msgF,lu:false,created_at:new Date().toISOString()})}).catch(function(){});
     showToast('✅ '+prenom+' validée et activée gratuitement','green');
@@ -9964,10 +9972,38 @@ async function adminValidateAfterCall(id,prenom){
   if(!confirm('Valider le dossier de '+prenom+' et envoyer le lien de paiement ?')) return;
   if(prof){ prof.status='valide_a_payer'; prof.call_validated=true; }
   await fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({status:'valide_a_payer',call_validated:true})}).catch(function(){});
+  deleteCniAfterValidation(prof);
   var msg='🎉 Félicitations '+prenom+'\n\nVotre profil a été validé par notre équipe.\n\nDernière étape — Finalisez votre paiement (29,90 €) pour accéder aux membres.\n\nConnectez-vous sur oumelia.com → "Activer mon profil".\n\nBarak\'Allahu fikoum — L\'équipe Oumélia';
   await fetch(SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),body:JSON.stringify({from_id:'admin',to_id:String(id),from_prenom:'Oumélia',content:msg,lu:false,created_at:new Date().toISOString()})}).catch(function(){});
   showToast('✅ '+prenom+' validé — notification envoyée','green');
   adminTab('dossiers');
+}
+
+// Supprime le fichier CNI du Storage et efface la référence en base une fois le dossier validé.
+// On ne conserve pas indéfiniment une pièce d'identité une fois la vérification faite.
+async function deleteCniAfterValidation(prof){
+  if(!prof) return;
+  var pid = prof.id;
+  var cniPath = prof.cni_path || (prof.user_id ? (prof.user_id+'/cni.jpg') : null);
+  if(!cniPath) return;
+  var H={'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON};
+  var STORAGE_BASE=SUPABASE_URL.replace('/rest/v1','')+'/storage/v1';
+  try{
+    // Le bucket réel utilisé à l'upload est 'verification-docs'
+    await fetch(STORAGE_BASE+'/object/verification-docs/'+cniPath,{method:'DELETE',headers:H}).catch(function(){});
+  }catch(e){ console.log('Suppression CNI storage:',e); }
+  // Effacer la référence en base — le champ ne doit plus pointer vers un fichier
+  fetch(SUPABASE_URL+'/rest/v1/profils?id=eq.'+pid,{
+    method:'PATCH',
+    headers:Object.assign({'Content-Type':'application/json','Prefer':'return=minimal'},H),
+    body:JSON.stringify({cni_path:null, cni_deleted_at:new Date().toISOString()})
+  }).catch(function(){});
+  prof.cni_path=null;
+  prof.cni_deleted_at=new Date().toISOString();
+  if(window._adminProfiles){
+    var ap=window._adminProfiles.find(function(x){return String(x.id)===String(pid);});
+    if(ap){ ap.cni_path=null; ap.cni_deleted_at=prof.cni_deleted_at; }
+  }
 }
 function renderAdminBans(c){
   var bans=_bannedPhones;
